@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Compass, Film, MessageCircle, User, Activity, Hash, Plus } from 'lucide-react';
+import { Home, Compass, Film, MessageCircle, User, Activity, Hash, Plus, Heart } from 'lucide-react';
+import { useNotifications } from '../../context/NotificationContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
+    const { unreadCount } = useNotifications();
+
     const navItems = [
         { icon: Home, label: 'Home', path: '/' },
         { icon: Compass, label: 'Explore', path: '/explore' },
         { icon: Film, label: 'Reels', path: '/reels' },
+        { icon: Heart, label: 'Notifications', path: '/notifications', badge: unreadCount },
         { icon: MessageCircle, label: 'Messages', path: '/messages' },
         { icon: Hash, label: 'Servers', path: '/servers' },
         { icon: User, label: 'Profile', path: '/profile' },
@@ -27,14 +31,15 @@ const Sidebar = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-group top">
-                    {navItems.slice(0, 3).map((item) => (
+                    {navItems.slice(0, 4).map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${['Notifications'].includes(item.label) ? 'mobile-hide' : ''}`}
+                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                         >
                             <div style={{ position: 'relative' }}>
                                 <item.icon size={24} />
+                                {item.badge > 0 && <span className="nav-badge">{item.badge}</span>}
                             </div>
                             <span className="nav-label">{item.label}</span>
                         </NavLink>
@@ -53,14 +58,15 @@ const Sidebar = () => {
                 </button>
 
                 <div className="nav-group bottom">
-                    {navItems.slice(3).map((item) => (
+                    {navItems.slice(4).map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${['Notifications'].includes(item.label) ? 'mobile-hide' : ''}`}
+                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                         >
                             <div style={{ position: 'relative' }}>
                                 <item.icon size={24} />
+                                {item.badge > 0 && <span className="nav-badge">{item.badge}</span>}
                             </div>
                             <span className="nav-label">{item.label}</span>
                         </NavLink>
