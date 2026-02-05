@@ -1,0 +1,137 @@
+.reels-container {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    background-color: #000;
+}
+
+/* Hide scrollbar for reels implementation to look immersive */
+.reels-container::-webkit-scrollbar {
+    display: none;
+}
+
+.reel-item {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    scroll-snap-align: start;
+    display: flex;
+    justify-content: center;
+}
+
+.reel-video-bg {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.reel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 40%);
+}
+
+.reel-content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 70%;
+    z-index: 10;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.reel-user {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.reel-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.reel-username {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.follow-btn {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.reel-caption {
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+}
+
+.reel-music-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+/* Actions Sidebar */
+.reel-actions {
+    position: absolute;
+    right: 10px;
+    bottom: 80px;
+    /* Account for bottom player height + spacing */
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.reel-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.music-disc-anim {
+    width: 40px;
+    height: 40px;
+    background: #222;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--spacing-md);
+    animation: spin 4s linear infinite;
+}
+
+.disc-inner {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+    border-radius: 50%;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
