@@ -1,0 +1,193 @@
+{
+  "stories": [
+    {
+      "id": "1770319494245",
+      "userId": "user@example.com",
+      "username": "purushotham",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-05T19:24:54.245Z",
+      "likes": [],
+      "viewers": []
+    },
+    {
+      "id": "1770320361076",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "blob:http://localhost:5174/1727a3f8-afd8-48d5-a3e3-0428f8175d81",
+      "type": "image",
+      "timestamp": "2026-02-05T19:39:21.076Z",
+      "likes": [],
+      "viewers": []
+    },
+    {
+      "id": "1770320500966",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "blob:http://localhost:5174/e72cc0b7-ca49-4829-9412-e6b205155a4b",
+      "type": "image",
+      "timestamp": "2026-02-05T19:41:40.966Z",
+      "likes": [],
+      "viewers": []
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1770318215265",
+      "type": "like",
+      "user": {
+        "name": "user",
+        "avatar": ""
+      },
+      "content": "liked your post",
+      "read": true,
+      "timestamp": "2026-02-05T19:03:35.265Z"
+    },
+    {
+      "id": "1770316455099",
+      "type": "like",
+      "user": {
+        "name": "user",
+        "avatar": ""
+      },
+      "content": "liked your post",
+      "read": true,
+      "timestamp": "2026-02-05T18:34:15.099Z"
+    },
+    {
+      "id": "1770316088008",
+      "type": "like",
+      "user": {
+        "name": "user",
+        "avatar": ""
+      },
+      "content": "liked your post",
+      "read": true,
+      "timestamp": "2026-02-05T18:28:08.008Z"
+    }
+  ],
+  "chats": [],
+  "posts": [
+    {
+      "id": "1",
+      "username": "alex_beats",
+      "timestamp": "2026-02-05T12:11:29.058Z",
+      "type": "image",
+      "contentUrl": "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2600&auto=format&fit=crop",
+      "caption": "Studio vibes today. Working on something new! 🎹 #producer #music",
+      "likes": [],
+      "comments": []
+    },
+    {
+      "id": "2",
+      "username": "city_scapes",
+      "timestamp": "2026-02-05T09:11:29.059Z",
+      "type": "image",
+      "contentUrl": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=2000&auto=format&fit=crop",
+      "caption": "Neon lights and late nights.",
+      "likes": [],
+      "comments": []
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "purushotham",
+      "name": "purushotham mallipudi",
+      "email": "user@example.com",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "bio": "Building the future of social music. 🚀",
+      "stats": {
+        "posts": 0,
+        "followers": 0,
+        "following": 1
+      },
+      "following": [
+        "2"
+      ],
+      "followers": []
+    },
+    {
+      "id": "2",
+      "username": "alex_beats",
+      "name": "Alex Beats",
+      "email": "alex@beats.com",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=alex",
+      "bio": "Music Producer 🎹 | LA-Based. Creating vibes daily.",
+      "stats": {
+        "posts": 1,
+        "followers": 1,
+        "following": 0
+      },
+      "following": [],
+      "followers": [
+        "1"
+      ]
+    },
+    {
+      "id": "1770376758256",
+      "username": "purushothammallipudi41",
+      "name": "purushothammallipudi41",
+      "email": "purushothammallipudi41@gmail.com",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushothammallipudi41",
+      "bio": "New to Stride! 🎵",
+      "stats": {
+        "posts": 0,
+        "followers": 0,
+        "following": 0
+      },
+      "followers": [],
+      "following": []
+    }
+  ],
+  "serverMessages": [
+    {
+      "id": "1770317962623",
+      "serverId": 1770317948522,
+      "channelId": "general",
+      "userEmail": "user@example.com",
+      "username": "purushotham",
+      "text": "Hello Metal Headz!",
+      "type": "text",
+      "time": "Just now",
+      "timestamp": "2026-02-05T18:59:22.623Z"
+    }
+  ],
+  "servers": [
+    {
+      "id": 1,
+      "name": "Lo-Fi Lounge",
+      "icon": "🎧",
+      "channels": [
+        "general",
+        "music-sharing",
+        "voice-chat"
+      ],
+      "members": 120
+    },
+    {
+      "id": 2,
+      "name": "Producer's Hub",
+      "icon": "🎹",
+      "channels": [
+        "general",
+        "collabs",
+        "feedback"
+      ],
+      "members": 85
+    },
+    {
+      "id": 1770317948522,
+      "name": "Metal Headz",
+      "icon": "M",
+      "channels": [
+        "general"
+      ],
+      "members": 1
+    }
+  ],
+  "directMessages": []
+}

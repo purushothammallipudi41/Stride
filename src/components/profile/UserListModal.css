@@ -1,0 +1,123 @@
+.user-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(8px);
+}
+
+.user-modal-content {
+    width: 100%;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-modal-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.user-modal-search {
+    padding: var(--spacing-md) var(--spacing-lg);
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-modal-search .search-icon {
+    position: absolute;
+    left: 28px;
+    opacity: 0.5;
+}
+
+.user-modal-search input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 8px 12px 8px 36px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.user-modal-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-sm) 0;
+}
+
+.user-modal-item {
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.user-modal-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-item-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-item-username {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.user-item-name {
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+.user-item-btn {
+    background: var(--color-primary);
+    color: white;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.modal-loading {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-xl);
+}
+
+.no-users {
+    text-align: center;
+    opacity: 0.5;
+    padding: var(--spacing-xl);
+}

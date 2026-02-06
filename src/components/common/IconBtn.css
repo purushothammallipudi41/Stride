@@ -1,0 +1,22 @@
+/* Add to src/index.css or a new file */
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    z-index: 20;
+    /* Ensure on top */
+    position: relative;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}

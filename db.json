@@ -1,0 +1,316 @@
+{
+  "stories": [
+    {
+      "id": "1770353730465",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T04:55:30.465Z",
+      "likes": [],
+      "viewers": [
+        "purushothammallipudi41@gmail.com"
+      ]
+    },
+    {
+      "id": "1770354051106",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T05:00:51.106Z",
+      "likes": [],
+      "viewers": []
+    },
+    {
+      "id": "1770354502365",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T05:08:22.365Z",
+      "likes": [],
+      "viewers": [
+        "purushothammallipudi41@gmail.com"
+      ]
+    },
+    {
+      "id": "1770354810228",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T05:13:30.228Z",
+      "likes": [],
+      "viewers": [
+        "purushothammallipudi41@gmail.com"
+      ]
+    },
+    {
+      "id": "1770355431518",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T05:23:51.518Z",
+      "likes": [],
+      "viewers": [
+        "purushothammallipudi41@gmail.com"
+      ]
+    },
+    {
+      "id": "1770357847975",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "https://images.unsplash.com/photo-1493225255756-d9584f8606e9",
+      "type": "image",
+      "timestamp": "2026-02-06T06:04:07.975Z",
+      "likes": [],
+      "viewers": []
+    },
+    {
+      "id": "1770358078954",
+      "userId": "user@example.com",
+      "username": "purushotham mallipudi",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushotham",
+      "content": "data:,",
+      "type": "image",
+      "timestamp": "2026-02-06T06:07:58.954Z",
+      "likes": [],
+      "viewers": [
+        "purushothammallipudi41@gmail.com"
+      ]
+    },
+    {
+      "id": "1770394715872",
+      "likes": [],
+      "viewers": [],
+      "timestamp": "2026-02-06T16:18:35.872Z",
+      "userId": "purushothammallipudi41@gmail.com",
+      "username": "purushothammallipudi41",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=purushothammallipudi41",
+      "content": "blob:http://localhost:5174/31bede74-cefe-4851-8e87-306c7801f685",
+      "type": "image"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1770397079835",
+      "type": "like",
+      "user": {
+        "name": "purushothammallipudi41",
+        "avatar": ""
+      },
+      "content": "liked your post",
+      "read": true,
+      "timestamp": "2026-02-06T16:57:59.835Z"
+    }
+  ],
+  "serverMessages": [
+    {
+      "id": "1770395541464",
+      "serverId": 1,
+      "channelId": "general",
+      "userEmail": "purushothammallipudi41@gmail.com",
+      "username": "purushothammallipudi41",
+      "text": "Server verification test",
+      "type": "text",
+      "time": "Just now",
+      "timestamp": "2026-02-06T16:32:21.464Z"
+    }
+  ],
+  "servers": [
+    {
+      "id": 1,
+      "name": "Lo-Fi Lounge",
+      "icon": "🎧",
+      "channels": [
+        "general",
+        "music-sharing",
+        "voice-chat",
+        "hiiii",
+        "hiii"
+      ],
+      "members": 120
+    },
+    {
+      "id": 2,
+      "name": "Producer's Hub",
+      "icon": "🎹",
+      "channels": [
+        "general",
+        "collabs",
+        "feedback"
+      ],
+      "members": 85
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "purushotham",
+      "name": "purushotham mallipudi",
+      "email": "user@example.com",
+      "avatar": "http://localhost:3001/uploads/1770398406624-37a8c39f-6b04-4523-bcf3-c2de8572851c.jpeg",
+      "bio": "Building the future of social music. 🚀",
+      "stats": {
+        "posts": 0,
+        "followers": 0,
+        "following": 0
+      },
+      "following": [],
+      "followers": []
+    },
+    {
+      "id": "2",
+      "username": "alex_beats",
+      "name": "Alex Beats",
+      "email": "alex@beats.com",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=alex",
+      "bio": "Music Producer 🎹 | LA-Based. Creating vibes daily.",
+      "stats": {
+        "posts": 1,
+        "followers": 0,
+        "following": 0
+      },
+      "following": [],
+      "followers": []
+    },
+    {
+      "id": "1770394309428",
+      "username": "purushothammallipudi",
+      "name": "Purushotham Updated",
+      "email": "purushothammallipudi41@gmail.com",
+      "avatar": "http://localhost:3001/uploads/1770398369549-83aed10a-efdc-4e64-a6a5-617ddd87a8c4.jpeg",
+      "bio": "Testing the new edit profile modal.",
+      "stats": {
+        "posts": 0,
+        "followers": 0,
+        "following": 0
+      },
+      "followers": [],
+      "following": [],
+      "isPrivate": false
+    },
+    {
+      "id": "1770398831343",
+      "username": "",
+      "name": "",
+      "email": "",
+      "password": "Sai@5969",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=",
+      "bio": "New to Stride! 🎵",
+      "stats": {
+        "posts": 0,
+        "followers": 0,
+        "following": 0
+      },
+      "followers": [],
+      "following": [],
+      "isPrivate": false
+    }
+  ],
+  "directMessages": [
+    {
+      "id": "1770395439240",
+      "from": "purushothammallipudi41@gmail.com",
+      "to": "alex@beats.com",
+      "text": "Hello from verification 1970-01-01T05:30:00+05:30",
+      "sharedContent": null,
+      "timestamp": "2026-02-06T16:30:39.240Z",
+      "time": "10:00 PM"
+    },
+    {
+      "id": "1770399198742",
+      "from": "alice@example.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T17:33:18.742Z",
+      "time": "11:03 PM"
+    },
+    {
+      "id": "1770399536567",
+      "from": "alice@example.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T17:38:56.567Z",
+      "time": "11:08 PM"
+    },
+    {
+      "id": "1770400342738",
+      "from": "test@example.com",
+      "to": "alice@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T17:52:22.738Z",
+      "time": "11:22 PM"
+    },
+    {
+      "id": "1770400619013",
+      "from": "test@example.com",
+      "to": "alex@beats.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T17:56:59.013Z",
+      "time": "11:26 PM"
+    },
+    {
+      "id": "1770400669496",
+      "from": "alex@beats.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T17:57:49.496Z",
+      "time": "11:27 PM"
+    },
+    {
+      "id": "1770400881322",
+      "from": "alex@beats.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T18:01:21.322Z",
+      "time": "11:31 PM"
+    },
+    {
+      "id": "1770401000069",
+      "from": "alex@beats.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T18:03:20.069Z",
+      "time": "11:33 PM"
+    },
+    {
+      "id": "1770401009837",
+      "from": "purushothammallipudi41@gmail.com",
+      "to": "alex@beats.com",
+      "text": "hola",
+      "sharedContent": null,
+      "timestamp": "2026-02-06T18:03:29.837Z",
+      "time": "11:33 PM"
+    },
+    {
+      "id": "1770401471445",
+      "from": "alex@beats.com",
+      "to": "test@example.com",
+      "text": "Hola",
+      "timestamp": "2026-02-06T18:11:11.445Z",
+      "time": "11:41 PM"
+    }
+  ],
+  "posts": [
+    {
+      "id": "1",
+      "username": "alex_beats",
+      "userAvatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=alex",
+      "type": "image",
+      "contentUrl": "https://images.unsplash.com/photo-1514525253361-b83a65c0d27c?w=800",
+      "caption": "New studio setup is finally ready! 🎹✨",
+      "timestamp": "2h ago",
+      "likes": [],
+      "comments": []
+    }
+  ]
+}

@@ -9,11 +9,11 @@ const Servers = () => {
     const [newServerName, setNewServerName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
-    const handleCreateServer = (e) => {
+    const handleCreateServer = async (e) => {
         e.preventDefault();
         if (!newServerName.trim()) return;
 
-        addServer(newServerName);
+        await addServer(newServerName);
         setNewServerName('');
         setIsCreating(false);
     };
@@ -100,52 +100,70 @@ const Servers = () => {
                     <div
                         key={server.id}
                         onClick={() => navigate(`/servers/${server.id}`)}
+                        className="glass-card animate-in"
                         style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
-                            borderRadius: '16px',
-                            padding: '1.5rem',
+                            padding: '2rem',
                             cursor: 'pointer',
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '1rem',
-                            transition: 'all 0.2s ease'
+                            textAlign: 'center',
+                            gap: '1.5rem',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(255, 255, 255, 0.02)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.transform = 'translateY(-10px)';
+                            e.currentTarget.style.borderColor = 'var(--color-primary)';
+                            e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--color-primary-glow)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
                             e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.boxShadow = 'none';
                         }}
                     >
                         <div style={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '50%',
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '24px',
                             background: 'var(--primary-gradient)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            color: 'white'
+                            fontSize: '2rem',
+                            boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)'
                         }}>
                             {server.icon}
                         </div>
                         <div>
-                            <h3 style={{ margin: '0 0 0.2rem 0' }}>{server.name}</h3>
+                            <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', fontWeight: '700' }}>{server.name}</h3>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.4rem',
-                                color: 'var(--text-secondary)',
-                                fontSize: '0.9rem'
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                color: 'var(--color-text-secondary)',
+                                fontSize: '0.95rem'
                             }}>
-                                <Users size={14} />
-                                {server.members} members
+                                <Users size={16} />
+                                <span>{server.members} members</span>
                             </div>
+                        </div>
+                        <div style={{
+                            marginTop: '1rem',
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: 'full',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            fontSize: '0.9rem',
+                            fontWeight: '600'
+                        }}>
+                            Explore Community
                         </div>
                     </div>
                 ))}

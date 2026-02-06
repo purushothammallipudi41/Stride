@@ -1,6 +1,6 @@
 {
-  "appId": "com.vibestream.app",
-  "appName": "Vibestream",
+  "appId": "com.stride.social",
+  "appName": "Stride",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

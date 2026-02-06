@@ -1,0 +1,343 @@
+.story-viewer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.story-viewer-container {
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .story-viewer-container {
+        height: 90vh;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+}
+
+.story-progress-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
+
+.story-progress-bar {
+    flex: 1;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.story-progress-fill {
+    height: 100%;
+    background: white;
+    transition: width 0.05s linear;
+}
+
+.story-header {
+    position: absolute;
+    top: 25px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    color: white;
+}
+
+.story-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.story-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.story-username {
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.story-time {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.story-icon {
+    cursor: pointer;
+    transition: transform 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-icon:hover {
+    transform: scale(1.1);
+}
+
+.story-icon.liked {
+    fill: #ff4d4d;
+    color: #ff4d4d;
+}
+
+.story-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: black;
+    position: relative;
+    cursor: pointer;
+}
+
+.story-media {
+    width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn.prev {
+    left: 10px;
+}
+
+.nav-btn.next {
+    right: 10px;
+}
+
+.story-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
+}
+
+.story-reply-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    padding: 12px 20px;
+    color: white;
+    backdrop-filter: blur(20px);
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.story-reply-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.story-footer-actions {
+    display: flex;
+    gap: 15px;
+    color: white;
+}
+
+.story-footer.owner {
+    justify-content: center;
+    gap: 30px;
+    color: white;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.stats-item:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Vertical Action Rail */
+.story-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.more-options-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 200px;
+    padding: 8px 0;
+    z-index: 100;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: white;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item.danger {
+    color: #ff4d4d;
+}
+
+.dropdown-item.danger:hover {
+    background: rgba(255, 77, 77, 0.15);
+}
+
+/* Users List Overlay */
+.users-list-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(20px);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    height: 60%;
+    z-index: 150;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.users-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.users-list-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    color: white;
+    font-size: 14px;
+}
+
+.user-handle {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}

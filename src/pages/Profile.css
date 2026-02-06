@@ -64,6 +64,18 @@
     gap: 4px;
 }
 
+.stat-item.clickable {
+    cursor: pointer;
+}
+
+.stat-item.clickable:hover .stat-value {
+    color: var(--color-primary);
+}
+
+.stat-item.clickable:hover .stat-label {
+    text-decoration: underline;
+}
+
 .stat-value {
     font-weight: 700;
 }
@@ -122,6 +134,13 @@
     opacity: 0.8;
 }
 
+.grid-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 /* Modal */
 .avatar-modal-overlay {
     position: fixed;
@@ -145,7 +164,8 @@
 }
 
 .full-avatar-img {
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     height: 400px;
     max-width: 100%;
     object-fit: cover;
@@ -166,14 +186,93 @@
     opacity: 1;
 }
 
+.profile-more-container {
+    position: relative;
+}
+
+.more-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xs);
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.more-dropdown button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    border-radius: var(--radius-sm);
+}
+
+.more-dropdown button:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-primary);
+}
+
 @media (max-width: 640px) {
+    .profile-container {
+        padding: 16px;
+        padding-bottom: 120px;
+        /* Space for bottom nav */
+    }
+
     .profile-header {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .profile-top {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-stats {
+        gap: 24px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .stat-item {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
     }
 
     .profile-tabs {
-        gap: 30px;
+        gap: 0;
+        justify-content: space-between;
+    }
+
+    .tab-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Make buttons stack properly if needed */
+    .profile-top button {
+        margin: 4px;
     }
 }

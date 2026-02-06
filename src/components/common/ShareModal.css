@@ -1,0 +1,156 @@
+.share-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.share-modal-content {
+    width: 90%;
+    max-width: 400px;
+    background: #1a1a2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.share-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.share-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.share-preview {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.preview-card-profile,
+.preview-card-music {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preview-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+}
+
+.preview-art {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.preview-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.preview-info p {
+    margin: 4px 0 0 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.share-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.share-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-option-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.dm-section h4 {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.dm-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.dm-user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dm-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.dm-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: #333;
+}
+
+.dm-send-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: none;
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dm-send-btn.sent {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: default;
+}
+
+.dm-send-btn:hover:not(.sent) {
+    transform: scale(1.05);
+}

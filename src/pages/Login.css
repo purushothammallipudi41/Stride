@@ -9,6 +9,7 @@
 
 .login-glass-card {
     width: 100%;
+    width: 100%;
     max-width: 400px;
     padding: var(--spacing-xl);
     background: rgba(255, 255, 255, 0.03);
@@ -91,4 +92,11 @@
 .login-footer a {
     color: var(--color-primary);
     font-weight: 600;
+}
+
+.version-tag {
+    margin-top: var(--spacing-lg);
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-family: monospace;
 }
