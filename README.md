@@ -1,16 +1,51 @@
-# React + Vite
+# Stride
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Stride** is a modern social media platform designed for seamless connection, rich media sharing, and real-time interaction. Built with React, Vite, and Capacitor, it offers a native-like experience on both web and mobile.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   **Social Feed**: Share posts, photos, and updates.
+-   **Stories**: 24-hour temporary status updates with media.
+-   **Real-time Chat**: Instant messaging with emoji support, translations, and media sharing.
+-   **Video & Audio Calls**: High-quality peer-to-peer calling via WebRTC.
+-   **Servers & Channels**: Discord-style communities with multiple channels.
+-   **Music Integration**: Discover and stream music while browsing.
+-   **Profile Customization**: extensive profile editing and settings.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+-   **Frontend**: React, Vite, TailwindCSS (Conceptually), CSS Modules.
+-   **Backend**: Node.js, Express, Socket.io, MongoDB.
+-   **Mobile**: Capacitor (iOS & Android).
+-   **Real-time**: Socket.io, WebRTC (PeerJS/Native).
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1.  **Clone the repository**
+2.  **Install Dependencies**:
+    ```bash
+    npm install
+    cd backend && npm install
+    ```
+3.  **Run the Server**:
+    ```bash
+    cd backend
+    node server.js
+    ```
+4.  **Run the Client**:
+    ```bash
+    npm run dev
+    ```
+
+## Mobile Development
+
+SYNC the web assets to native projects:
+```bash
+npm run build
+npx cap sync
+npx cap open android  # or ios
+```
+
+## License
+
+MIT
