@@ -22,7 +22,7 @@ const Notification = require('./models/Notification');
 connectDB();
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(morgan('dev'));
