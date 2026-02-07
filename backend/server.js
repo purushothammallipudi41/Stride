@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const http = require('http');
 const { Server } = require("socket.io");
 require('dotenv').config();
+const mongoose = require('mongoose');
 
 // Mongoose & Database
 const connectDB = require('./db');
