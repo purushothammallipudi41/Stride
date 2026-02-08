@@ -13,11 +13,14 @@ const connectDB = async () => {
         }
 
         const conn = await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 5000
+            serverSelectionTimeoutMS: 30000, // Increased to 30s for Render/Atlas cold starts
+            socketTimeoutMS: 45000,
         });
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (err) {
         console.error(`Error: ${err.message}`);
+        console.log("Retrying connection in 5 seconds...");
+        setTimeout(connectDB, 5000);
     }
 };
 

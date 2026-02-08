@@ -11,11 +11,15 @@ const Login = () => {
     const [identifier, setIdentifier] = useState(''); // Email or Username
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
     const { login, register } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
         try {
             if (isRegistering) {
                 await register({ name, username, email, password });
@@ -23,8 +27,11 @@ const Login = () => {
                 await login({ identifier, password });
             }
             navigate('/');
-        } catch (error) {
-            alert(error.message || 'Authentication failed. Please check your credentials.');
+        } catch (err) {
+            console.error('Login Error:', err);
+            setError(err.message || 'Authentication failed. Please check your network or credentials.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -37,6 +44,19 @@ const Login = () => {
                     <p>{isRegistering ? 'Join the rhythm' : 'Enter your rhythm'}</p>
                 </div>
 
+                {error && (
+                    <div className="error-message" style={{
+                        color: '#ff4d4d',
+                        background: 'rgba(255, 77, 77, 0.1)',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        marginBottom: '1rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        {error}
+                    </div>
+                )}
+
                 <form className="login-form" onSubmit={handleSubmit}>
                     {isRegistering && (
                         <>
@@ -48,6 +68,7 @@ const Login = () => {
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                     autoComplete="name"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div className="input-group">
@@ -58,6 +79,7 @@ const Login = () => {
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
                                     autoComplete="username"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div className="input-group">
@@ -69,6 +91,7 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     autoComplete="email"
+                                    disabled={isLoading}
                                 />
                             </div>
                         </>
@@ -84,6 +107,7 @@ const Login = () => {
                                 onChange={(e) => setIdentifier(e.target.value)}
                                 required
                                 autoComplete="username"
+                                disabled={isLoading}
                             />
                         </div>
                     )}
@@ -97,10 +121,18 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             autoComplete={isRegistering ? "new-password" : "current-password"}
+                            disabled={isLoading}
                         />
                     </div>
-                    <button type="submit" className="login-btn">
-                        {isRegistering ? 'Sign Up' : 'Sign In'}
+                    <button type="submit" className="login-btn" disabled={isLoading}>
+                        {isLoading ? (
+                            <span className="flex-center gap-2">
+                                <Activity className="animate-spin" size={20} />
+                                {isRegistering ? 'Creating Account...' : 'Signing In...'}
+                            </span>
+                        ) : (
+                            isRegistering ? 'Sign Up' : 'Sign In'
+                        )}
                     </button>
                 </form>
 

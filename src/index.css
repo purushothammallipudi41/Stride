@@ -210,6 +210,10 @@ button:active {
   }
 }
 
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Global Mobile Adjustments */
 @media (max-width: 640px) {
   :root {

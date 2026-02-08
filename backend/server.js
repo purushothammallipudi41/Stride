@@ -158,7 +158,12 @@ app.get('/api/posts', async (req, res) => {
         // Mongoose result objects have .id getter by default, but let's ensure it maps cleanly if needed
         res.json(posts);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error('API Error:', e);
+        res.status(500).json({
+            error: e.message,
+            stack: process.env.NODE_ENV === 'production' ? null : e.stack,
+            dbState: mongoose.connection.readyState // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
+        });
     }
 });
 

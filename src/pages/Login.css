@@ -83,6 +83,12 @@
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
 .login-footer {
     margin-top: var(--spacing-xl);
     font-size: 0.9rem;
