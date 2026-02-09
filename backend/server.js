@@ -580,8 +580,41 @@ app.get('/api/audius/trending', async (req, res) => {
     } catch (e) { res.status(503).json({ error: 'Audius API unavailable' }); }
 });
 
-app.get('/api/audius/stream/:id', (req, res) => {
-    res.redirect(`${audiusNode}/v1/tracks/${req.params.id}/stream?app_name=STRIDE_SOCIAL`);
+const fetch = require('node-fetch');
+
+app.get('/api/audius/stream/:id', async (req, res) => {
+    try {
+        const trackId = req.params.id;
+        // Step 1: Get the stream URL which will redirect
+        const initialUrl = `${audiusNode}/v1/tracks/${trackId}/stream?app_name=STRIDE_SOCIAL`;
+
+        // Fetch with a standard User-Agent to avoid 403 blocks from specific nodes
+        // Removed Referer as it might be triggering hotlink protection
+        const response = await fetch(initialUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': '*/*',
+                'Range': 'bytes=0-'
+            }
+        });
+
+        if (!response.ok) {
+            console.error(`[AUDIUS STREAM] Failed to fetch stream: ${response.status} ${response.statusText}`);
+            return res.status(response.status).send('Stream unavailable');
+        }
+
+        // Forward content headers
+        res.set('Content-Type', response.headers.get('content-type'));
+        res.set('Content-Length', response.headers.get('content-length'));
+        res.set('Accept-Ranges', 'bytes');
+
+        // Pipe the stream to the response
+        response.body.pipe(res);
+
+    } catch (e) {
+        console.error('[AUDIUS STREAM] Error:', e);
+        res.status(500).send("Stream error");
+    }
 });
 
 // Start Server
