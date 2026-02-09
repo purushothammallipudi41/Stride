@@ -12,10 +12,6 @@ const connectDB = async () => {
             console.log(`⚠️  Using local fallback: ${uri}`);
         }
 
-        // Log the URI (masked password) for debugging
-        const maskedURI = uri.replace(/:([^@]+)@/, ':****@');
-        console.log(`Attempting to connect to: ${maskedURI}`);
-
         const conn = await mongoose.connect(uri, {
             serverSelectionTimeoutMS: 30000, // Increased to 30s for Render/Atlas cold starts
             socketTimeoutMS: 45000,
