@@ -424,16 +424,9 @@ app.post('/api/register', async (req, res) => {
 
         let initialFollowing = [];
 
-        // Add targets to new user's following list
+        // Add targets to new user's following list (just IDs first)
         if (targets.length > 0) {
             initialFollowing = targets.map(t => t._id.toString());
-
-            // Update targets' followers list
-            for (const target of targets) {
-                target.followers.push(newUser._id);
-                target.stats.followers += 1;
-                await target.save();
-            }
         }
 
         const newUser = await User.create({
@@ -450,6 +443,15 @@ app.post('/api/register', async (req, res) => {
             following: initialFollowing,
             stats: { posts: 0, followers: 0, following: initialFollowing.length }
         });
+
+        // Update targets' followers list AFTER newUser is created
+        if (targets.length > 0) {
+            for (const target of targets) {
+                target.followers.push(newUser._id);
+                target.stats.followers += 1;
+                await target.save();
+            }
+        }
 
         await sendVerificationEmail(email, verificationCode);
         console.log(`[REGISTER] New user: ${email}, Code: ${verificationCode}, Auto-Followed: ${targets.length}`);
