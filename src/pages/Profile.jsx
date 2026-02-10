@@ -128,8 +128,11 @@ const Profile = () => {
 
     const isFollowing = profileUser.followers?.includes(currentUser?.id || currentUser?.email);
 
+    const userPosts = allPosts.filter(p => (p.username === profileUser.username) && p.type !== 'reel');
+    const userReels = allPosts.filter(p => (p.username === profileUser.username) && p.type === 'reel');
+
     const stats = [
-        { label: 'Posts', value: profileUser.stats.posts || 0, clickable: false },
+        { label: 'Posts', value: userPosts.length, clickable: false },
         {
             label: 'Followers',
             value: (profileUser.followers?.length || 0).toLocaleString(),
@@ -143,8 +146,6 @@ const Profile = () => {
             clickable: true
         }
     ];
-
-    const userPosts = allPosts.filter(p => p.username === profileUser.username);
 
     return (
         <>
@@ -275,10 +276,10 @@ const Profile = () => {
                 </div>
 
                 <div className="profile-grid">
-                    {userPosts.length > 0 ? (
-                        userPosts.map(post => (
+                    {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : []).length > 0 ? (
+                        (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : []).map(post => (
                             <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
-                                {post.type === 'image' || post.contentUrl ? (
+                                {post.type === 'image' || post.type === 'post' || post.type === 'reel' || post.contentUrl ? (
                                     <img src={getImageUrl(post.contentUrl)} alt={post.caption} className="grid-img" />
                                 ) : (
                                     <div className="placeholder-content">Post {post.id}</div>
@@ -286,7 +287,7 @@ const Profile = () => {
                             </div>
                         ))
                     ) : (
-                        <div className="no-posts">No posts yet.</div>
+                        <div className="no-posts">No {activeTab} yet.</div>
                     )}
                 </div>
             </div>

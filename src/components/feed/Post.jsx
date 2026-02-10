@@ -98,7 +98,7 @@ const Post = ({ post }) => {
             </div>
 
             <div className="post-content">
-                {post.type === 'image' && (
+                {(post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
                     <img
                         src={getImageUrl(post.contentUrl)}
                         alt="Post content"
