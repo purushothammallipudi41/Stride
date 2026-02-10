@@ -33,7 +33,8 @@ app.use(cors({
         'http://localhost:3000',
         'https://stride-social.onrender.com',
         'capacitor://localhost',
-        'http://localhost'
+        'http://localhost',
+        'https://localhost'
     ],
     credentials: true
 }));
