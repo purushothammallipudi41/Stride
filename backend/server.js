@@ -612,7 +612,7 @@ app.post('/api/users/:email/update', async (req, res) => {
         const updates = req.body;
 
         if (updates.avatar && updates.avatar.startsWith('data:')) {
-            const fileUrl = saveBase64Image(updates.avatar);
+            const fileUrl = await saveBase64Image(updates.avatar);
             if (fileUrl) {
                 // Save relative path so frontend can construct full URL dynamically
                 updates.avatar = fileUrl;
