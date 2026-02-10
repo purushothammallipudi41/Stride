@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import config from '../../config';
 import { X, Search } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';

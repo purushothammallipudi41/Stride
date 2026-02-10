@@ -267,7 +267,9 @@ async function seedDatabase() {
     }
 }
 // Run seeding slightly after connection
-setTimeout(seedDatabase, 2000);
+// seedDatabase();
+// setTimeout(seedDatabase, 2000); 
+
 
 
 // --- Routes ---

@@ -1,6 +1,7 @@
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
+import { getImageUrl } from '../utils/imageUtils';
 import './Notifications.css';
 
 const Notifications = () => {
@@ -32,8 +33,8 @@ const Notifications = () => {
             <div className="notifications-list">
                 {notifications.length > 0 ? (
                     notifications.map(notification => (
-                        <div key={notification.id} className={`notification-item ${notification.read ? 'read' : 'unread'}`}>
-                            <img src={notification.user?.avatar || 'https://i.pravatar.cc/100'} alt="" className="notif-avatar" />
+                        <div key={notification._id || notification.id} className={`notification-item ${notification.read ? 'read' : 'unread'}`}>
+                            <img src={getImageUrl(notification.user?.avatar) || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + notification.user?.name} alt="" className="notif-avatar" />
                             <div className="notif-content">
                                 <p>
                                     <span className="notif-username">{notification.user?.name}</span>

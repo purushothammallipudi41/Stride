@@ -28,8 +28,8 @@ android {
         applicationId "com.stride.social"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3 // Incremented for new version
-        versionName "1.1.0" // Updated for release
+        versionCode 5 // Incremented for music player fix
+        versionName "1.1.2" // Updated for music player fix
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

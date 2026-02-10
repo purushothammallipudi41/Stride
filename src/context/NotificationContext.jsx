@@ -51,15 +51,29 @@ export const NotificationProvider = ({ children }) => {
             // Backend sync
             const unread = notifications.filter(n => !n.read);
             await Promise.all(unread.map(n =>
-                fetch(`${config.API_URL}/api/notifications/${n.id}/read`, { method: 'POST' })
+                fetch(`${config.API_URL}/api/notifications/${n._id || n.id}/read`, { method: 'POST' })
             ));
         } catch (error) {
             console.error('Failed to mark all read:', error);
         }
     };
 
+    const clearAll = async () => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/notifications/clear`, { method: 'DELETE' });
+            if (res.ok) {
+                setNotifications([]);
+                setUnreadCount(0);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to clear notifications:', error);
+        }
+    };
+
     return (
-        <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, addNotification }}>
+        <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, addNotification, clearAll }}>
             {children}
         </NotificationContext.Provider>
     );

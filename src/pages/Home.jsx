@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
 import { useNotifications } from '../context/NotificationContext';
+import { useContent } from '../context/ContentContext';
 import './Home.css';
 
 const Home = () => {
     const navigate = useNavigate();
     const { unreadCount } = useNotifications();
+    const { fetchPosts } = useContent();
 
     return (
         <div className="home-page">
@@ -44,6 +46,9 @@ const Home = () => {
                 </div>
             </header>
             <div className="home-content">
+                <div className="pull-to-refresh" onClick={() => fetchPosts()} style={{ textAlign: 'center', padding: '10px', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    Pull down or click to refresh feed
+                </div>
                 <StoriesRail />
                 <Feed />
             </div>

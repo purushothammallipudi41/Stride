@@ -12,6 +12,7 @@ import { useContent } from '../context/ContentContext';
 import UserListModal from '../components/profile/UserListModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ShareModal from '../components/common/ShareModal';
+import PostDetailModal from '../components/profile/PostDetailModal';
 
 const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
@@ -27,6 +28,7 @@ const Profile = () => {
     const [modalConfig, setModalConfig] = useState(null); // { title: string, ids: string[] }
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
 
     const isOwnProfile = !identifier || identifier === currentUser?.username || identifier === currentUser?.email || identifier === currentUser?.id;
 
@@ -275,9 +277,9 @@ const Profile = () => {
                 <div className="profile-grid">
                     {userPosts.length > 0 ? (
                         userPosts.map(post => (
-                            <div key={post.id} className="grid-item glass-card">
+                            <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
                                 {post.type === 'image' || post.contentUrl ? (
-                                    <img src={post.contentUrl} alt={post.caption} className="grid-img" />
+                                    <img src={getImageUrl(post.contentUrl)} alt={post.caption} className="grid-img" />
                                 ) : (
                                     <div className="placeholder-content">Post {post.id}</div>
                                 )}
@@ -324,6 +326,13 @@ const Profile = () => {
                         image: getImageUrl(profileUser.avatar),
                         username: profileUser.username
                     }}
+                />
+            )}
+
+            {selectedPost && (
+                <PostDetailModal
+                    post={selectedPost}
+                    onClose={() => setSelectedPost(null)}
                 />
             )}
         </>

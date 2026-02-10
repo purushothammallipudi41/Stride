@@ -209,6 +209,7 @@ export const ContentProvider = ({ children }) => {
             addComment,
             likeComment,
             replyToComment,
+            fetchPosts,
             fetchStories,
             deletePost
         }}>
