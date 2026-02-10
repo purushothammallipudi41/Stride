@@ -40,15 +40,44 @@ export const ContentProvider = ({ children }) => {
         fetchStories();
     }, [user?.id, user?._id]); // Refetch when user changes (login/logout)
 
-    const addPost = (post) => {
-        const newPost = {
-            id: Date.now(),
-            likes: [],
-            comments: [],
-            ...post,
-            timestamp: new Date().toISOString()
-        };
-        setPosts([newPost, ...posts]);
+    const addPost = async (postData) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            });
+
+            if (res.ok) {
+                const savedPost = await res.json();
+                setPosts(prev => [savedPost, ...prev]);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to add post:', error);
+            // Fallback for offline/development if needed, but we want real sync
+            return false;
+        }
+    };
+
+    const addStory = async (storyData) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/stories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(storyData)
+            });
+
+            if (res.ok) {
+                await fetchStories(); // Refresh stories rail
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to add story:', error);
+            return false;
+        }
     };
 
     const toggleLike = async (postId, userEmail) => {
@@ -60,15 +89,19 @@ export const ContentProvider = ({ children }) => {
             });
             if (res.ok) {
                 const { likes } = await res.json();
+                const matchedPost = posts.find(p => (p._id || p.id) === postId);
+
                 setPosts(prev => prev.map(post =>
                     (post._id || post.id) === postId ? { ...post, likes } : post
                 ));
 
-                if (likes.includes(userEmail)) {
+                // Notification Logic: Only alert if NOT liking own post
+                if (likes.includes(userEmail) && matchedPost && matchedPost.userId !== userEmail) {
                     addNotification({
                         type: 'like',
-                        user: { name: userEmail.split('@')[0], avatar: '' },
-                        content: 'liked your post'
+                        user: { name: user.name || user.username, avatar: user.avatar },
+                        content: 'liked your post',
+                        targetId: postId
                     });
                 }
             }
@@ -85,8 +118,9 @@ export const ContentProvider = ({ children }) => {
                 body: JSON.stringify({
                     comment: {
                         text: commentText,
-                        user: 'purushotham', // Default for now
-                        avatar: ''
+                        username: user.username,
+                        userAvatar: user.avatar,
+                        userId: user.email
                     }
                 })
             });

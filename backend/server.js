@@ -313,9 +313,20 @@ app.get('/api/posts', async (req, res) => {
 
 app.post('/api/posts', async (req, res) => {
     try {
-        const post = await Post.create(req.body);
+        const postData = req.body;
+
+        // Offload media to Cloudinary if it's base64
+        if (postData.contentUrl && postData.contentUrl.startsWith('data:')) {
+            const cloudinaryUrl = await saveBase64Image(postData.contentUrl);
+            if (cloudinaryUrl) {
+                postData.contentUrl = cloudinaryUrl;
+            }
+        }
+
+        const post = await Post.create(postData);
         res.status(201).json(post);
     } catch (e) {
+        console.error('[API POST] Error creating post:', e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -382,9 +393,20 @@ app.get('/api/stories', async (req, res) => {
 
 app.post('/api/stories', async (req, res) => {
     try {
-        const story = await Story.create(req.body);
+        const storyData = req.body;
+
+        // Offload media to Cloudinary if it's base64
+        if (storyData.content && storyData.content.startsWith('data:')) {
+            const cloudinaryUrl = await saveBase64Image(storyData.content);
+            if (cloudinaryUrl) {
+                storyData.content = cloudinaryUrl;
+            }
+        }
+
+        const story = await Story.create(storyData);
         res.status(201).json(story);
     } catch (e) {
+        console.error('[API STORY] Error creating story:', e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -445,6 +467,26 @@ app.delete('/api/stories/:id', async (req, res) => {
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find({}, 'username name email avatar');
+        res.json(users);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/users/batch', async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'Invalid IDs' });
+
+        // Find users by ID (ObjectId) OR email OR username to be safe
+        const users = await User.find({
+            $or: [
+                { _id: { $in: ids.filter(id => mongoose.Types.ObjectId.isValid(id)) } },
+                { email: { $in: ids } },
+                { username: { $in: ids } }
+            ]
+        }, 'username name email avatar');
+
         res.json(users);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -680,6 +722,27 @@ app.post('/api/notifications', async (req, res) => {
     try {
         const note = await Notification.create(req.body);
         res.status(201).json(note);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/notifications/:id/read', async (req, res) => {
+    try {
+        await Notification.findByIdAndUpdate(req.params.id, { read: true });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/notifications/clear', async (req, res) => {
+    try {
+        // Option 1: Delete all notifications (Hard reset)
+        await Notification.deleteMany({});
+        // Option 2: Delete only for a specific user (if we had userId context)
+        // For now, global clear since we are in early stage
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

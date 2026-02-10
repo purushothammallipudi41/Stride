@@ -49,16 +49,39 @@ const CreateModal = ({ isOpen, onClose }) => {
     }, [searchQuery, activeSearch]);
 
     const handleShare = async () => {
-        addPost({
+        let mediaUrl = capturedMedia?.url || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
+
+        // Convert blob URL to base64 if needed
+        if (mediaUrl.startsWith('blob:')) {
+            try {
+                const response = await fetch(mediaUrl);
+                const blob = await response.blob();
+                mediaUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error("Failed to convert blob to base64", e);
+            }
+        }
+
+        const success = await addPost({
             userId: user.email,
             username: user.username,
-            content: capturedMedia?.url || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format',
+            userAvatar: user.avatar,
+            contentUrl: mediaUrl,
             caption,
             location: selections.location,
-            music: selections.music,
+            musicTrack: selections.music?.title,
             type: activeTab
         });
-        onClose();
+
+        if (success) {
+            onClose();
+        } else {
+            alert("Failed to share post. Please try again.");
+        }
     };
 
     if (!isOpen) return null;

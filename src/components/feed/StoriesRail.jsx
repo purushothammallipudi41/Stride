@@ -9,7 +9,7 @@ import StoryViewer from './StoryViewer';
 import MediaCapture from '../common/MediaCapture';
 
 const StoriesRail = () => {
-    const { stories, fetchStories } = useContent();
+    const { stories, fetchStories, addStory } = useContent();
     const { user } = useAuth();
     const [viewingStoryId, setViewingStoryId] = useState(null);
     const [isAddingStory, setIsAddingStory] = useState(false);
@@ -19,24 +19,34 @@ const StoriesRail = () => {
     }, []);
 
     const handleAddStory = async (content, type = 'image') => {
-        try {
-            const res = await fetch(`${config.API_URL}/api/stories`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.email,
-                    username: user.name || user.username,
-                    userAvatar: user.avatar,
-                    content: content,
-                    type: type
-                })
-            });
-            if (res.ok) {
-                fetchStories();
-                setIsAddingStory(false);
+        let mediaUrl = content;
+
+        if (mediaUrl.startsWith('blob:')) {
+            try {
+                const response = await fetch(mediaUrl);
+                const blob = await response.blob();
+                mediaUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error("Failed to convert story blob to base64", e);
             }
-        } catch (error) {
-            console.error('Failed to add story:', error);
+        }
+
+        const success = await addStory({
+            userId: user.email,
+            username: user.name || user.username,
+            userAvatar: user.avatar,
+            content: mediaUrl,
+            type: type
+        });
+
+        if (success) {
+            setIsAddingStory(false);
+        } else {
+            alert("Failed to add story.");
         }
     };
 
