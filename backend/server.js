@@ -736,8 +736,16 @@ app.post('/api/users/:id/follow', async (req, res) => {
 
 // Notifications
 app.get('/api/notifications', async (req, res) => {
-    const notes = await Notification.find().sort({ timestamp: -1 });
-    res.json(notes);
+    try {
+        const { email } = req.query;
+        let query = {};
+        if (email) query.targetUserEmail = email;
+
+        const notes = await Notification.find(query).sort({ timestamp: -1 });
+        res.json(notes);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/api/notifications', async (req, res) => {
@@ -760,10 +768,10 @@ app.post('/api/notifications/:id/read', async (req, res) => {
 
 app.delete('/api/notifications/clear', async (req, res) => {
     try {
-        // Option 1: Delete all notifications (Hard reset)
-        await Notification.deleteMany({});
-        // Option 2: Delete only for a specific user (if we had userId context)
-        // For now, global clear since we are in early stage
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: 'Email required to clear notifications' });
+
+        await Notification.deleteMany({ targetUserEmail: email });
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });

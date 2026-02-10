@@ -9,6 +9,7 @@ import './Profile.css';
 
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
+import { useNotifications } from '../context/NotificationContext';
 import UserListModal from '../components/profile/UserListModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ShareModal from '../components/common/ShareModal';
@@ -19,7 +20,7 @@ const Profile = () => {
     const { identifier } = useParams();
     const navigate = useNavigate();
     const { posts: allPosts } = useContent();
-
+    const { addNotification } = useNotifications();
     const [profileUser, setProfileUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
@@ -97,6 +98,14 @@ const Profile = () => {
                 body: JSON.stringify({ followerEmail: currentUser.email })
             });
             if (res.ok) {
+                // Notification Logic
+                addNotification({
+                    type: 'follow',
+                    user: { name: currentUser.name || currentUser.username, avatar: currentUser.avatar, email: currentUser.email },
+                    content: 'started following you',
+                    targetUserEmail: profileUser.id || profileUser.email
+                });
+
                 // Refresh local user and current profile
                 await refreshUser();
                 const updatedRes = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser.email}`);

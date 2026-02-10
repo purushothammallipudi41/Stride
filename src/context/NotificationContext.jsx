@@ -1,17 +1,20 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import config from '../config';
+import { useAuth } from './AuthContext';
 
 const NotificationContext = createContext();
 
 export const useNotifications = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchNotifications = async () => {
+        if (!user?.email) return;
         try {
-            const res = await fetch(`${config.API_URL}/api/notifications`);
+            const res = await fetch(`${config.API_URL}/api/notifications?email=${user.email}`);
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
@@ -23,11 +26,12 @@ export const NotificationProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        fetchNotifications();
-        // Polling for demo purposes, in real app use websockets
-        const interval = setInterval(fetchNotifications, 10000);
-        return () => clearInterval(interval);
-    }, []);
+        if (user?.email) {
+            fetchNotifications();
+            const interval = setInterval(fetchNotifications, 10000);
+            return () => clearInterval(interval);
+        }
+    }, [user?.email]);
 
     const addNotification = async (notification) => {
         try {
@@ -43,6 +47,7 @@ export const NotificationProvider = ({ children }) => {
     };
 
     const markAllRead = async () => {
+        if (!user?.email) return;
         try {
             // Local update for speed
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -59,8 +64,11 @@ export const NotificationProvider = ({ children }) => {
     };
 
     const clearAll = async () => {
+        if (!user?.email) return false;
         try {
-            const res = await fetch(`${config.API_URL}/api/notifications/clear`, { method: 'DELETE' });
+            const res = await fetch(`${config.API_URL}/api/notifications/clear?email=${user.email}`, {
+                method: 'DELETE'
+            });
             if (res.ok) {
                 setNotifications([]);
                 setUnreadCount(0);
@@ -69,6 +77,7 @@ export const NotificationProvider = ({ children }) => {
             return false;
         } catch (error) {
             console.error('Failed to clear notifications:', error);
+            return false;
         }
     };
 

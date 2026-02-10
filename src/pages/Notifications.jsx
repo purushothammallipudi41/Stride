@@ -22,8 +22,11 @@ const Notifications = () => {
                         <CheckCircle size={18} />
                         Mark read
                     </button>
-                    <button className="clear-btn" onClick={() => {
-                        if (window.confirm('Clear all notifications?')) clearAll();
+                    <button className="clear-btn" onClick={async () => {
+                        if (window.confirm('Clear all notifications?')) {
+                            const success = await clearAll();
+                            if (success) alert('Notifications cleared!');
+                        }
                     }} style={{ marginLeft: '12px', color: '#ff4b4b', border: '1px solid rgba(255, 75, 75, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'rgba(255, 75, 75, 0.1)' }}>
                         Clear all
                     </button>
@@ -41,7 +44,7 @@ const Notifications = () => {
                                     {' '}
                                     {notification.content}
                                 </p>
-                                <span className="notif-time">{notification.time || 'now'}</span>
+                                <span className="notif-time">{new Date(notification.timestamp).toLocaleString()}</span>
                             </div>
                             {!notification.read && <div className="unread-dot" />}
                         </div>

@@ -96,12 +96,13 @@ export const ContentProvider = ({ children }) => {
                 ));
 
                 // Notification Logic: Only alert if NOT liking own post
-                if (likes.includes(userEmail) && matchedPost && matchedPost.userId !== userEmail) {
+                if (likes.includes(userEmail) && matchedPost && (matchedPost.userId !== userEmail && matchedPost.userEmail !== userEmail)) {
                     addNotification({
                         type: 'like',
-                        user: { name: user.name || user.username, avatar: user.avatar },
+                        user: { name: user.name || user.username, avatar: user.avatar, email: user.email },
                         content: 'liked your post',
-                        targetId: postId
+                        targetId: postId,
+                        targetUserEmail: matchedPost.userId || matchedPost.userEmail
                     });
                 }
             }
@@ -126,12 +127,25 @@ export const ContentProvider = ({ children }) => {
             });
             if (res.ok) {
                 const newComment = await res.json();
+                const matchedPost = posts.find(p => (p._id || p.id) === postId);
+
                 setPosts(prev => prev.map(post => {
                     if ((post._id || post.id) === postId) {
                         return { ...post, comments: [...(post.comments || []), newComment] };
                     }
                     return post;
                 }));
+
+                // Notification Logic
+                if (matchedPost && (matchedPost.userId !== user.email && matchedPost.userEmail !== user.email)) {
+                    addNotification({
+                        type: 'comment',
+                        user: { name: user.name || user.username, avatar: user.avatar, email: user.email },
+                        content: 'commented on your post',
+                        targetId: postId,
+                        targetUserEmail: matchedPost.userId || matchedPost.userEmail
+                    });
+                }
             }
         } catch (error) {
             console.error('Failed to add comment:', error);
