@@ -164,6 +164,41 @@ async function seedDatabase() {
             console.log('✅ Target users already exist.');
         }
 
+        // --- Mutual Follow Logic for Stride & Developer ---
+        const stride = await User.findOne({ username: 'stride' });
+        const dev = await User.findOne({ username: 'purushotham' });
+
+        if (stride && dev) {
+            let changed = false;
+
+            // Stride follows Dev
+            if (!stride.following.includes(dev._id.toString())) {
+                stride.following.push(dev._id.toString());
+                stride.stats.following += 1;
+                changed = true;
+            }
+            if (!dev.followers.includes(stride._id.toString())) {
+                dev.followers.push(stride._id.toString());
+                dev.stats.followers += 1;
+                await dev.save();
+            }
+
+            // Dev follows Stride
+            if (!dev.following.includes(stride._id.toString())) {
+                dev.following.push(stride._id.toString());
+                dev.stats.following += 1;
+                await dev.save(); // Save dev again if changed
+            }
+            if (!stride.followers.includes(dev._id.toString())) {
+                stride.followers.push(dev._id.toString());
+                stride.stats.followers += 1;
+                changed = true;
+            }
+
+            if (changed) await stride.save();
+            console.log('✅ Mutual follow established between Stride and Developer.');
+        }
+
         const serverCount = await ServerModel.countDocuments();
         if (serverCount === 0) {
             console.log('🌱 Seeding servers...');
