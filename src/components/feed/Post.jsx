@@ -22,6 +22,14 @@ const Post = ({ post }) => {
     const postId = post._id || post.id;
     const isLiked = user && post.likes?.includes(user?.email);
 
+    const isOwner = user && (
+        post.userId === user.id ||
+        post.userId === user._id ||
+        post.userId === user.email ||
+        post.userEmail === user.email ||
+        post.username === user.username
+    );
+
     const handleShareToUser = async (targetUser) => {
         try {
             const res = await fetch(`${config.API_URL}/api/messages/send`, {
@@ -60,9 +68,10 @@ const Post = ({ post }) => {
                         <MoreHorizontal size={20} />
                     </button>
                     {showMore && (
-                        <div className="post-more-dropdown glass-card">
-                            {(post.userId === user?.email || post.userEmail === user?.email || (user?.id && post.userId === user.id)) && (
-                                <button className="delete-btn" onClick={async () => {
+                        <div className="post-more-dropdown glass-card" onClick={e => e.stopPropagation()}>
+                            {isOwner && (
+                                <button className="delete-btn" onClick={async (e) => {
+                                    e.stopPropagation();
                                     if (window.confirm('Are you sure you want to delete this post?')) {
                                         const success = await deletePost(postId);
                                         if (success) setShowMore(false);
@@ -70,8 +79,9 @@ const Post = ({ post }) => {
                                     }
                                 }} style={{ color: '#ff4b4b' }}>Delete Post</button>
                             )}
-                            <button onClick={() => { setShowMore(false); navigate(`/messages?user=${post.userEmail || post.userId || post.username}`); }}>Message User</button>
-                            <button onClick={async () => {
+                            <button onClick={(e) => { e.stopPropagation(); setShowMore(false); navigate(`/messages?user=${post.userEmail || post.userId || post.username}`); }}>Message User</button>
+                            <button onClick={async (e) => {
+                                e.stopPropagation();
                                 setShowMore(false);
                                 if (!user) return alert('Please login to report.');
                                 try {
