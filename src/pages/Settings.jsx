@@ -258,6 +258,24 @@ const Settings = () => {
                 </div>
 
                 <div className="settings-group">
+                    <h3>About & Legal</h3>
+                    <div className="settings-list">
+                        <div className="settings-item" onClick={() => navigate('/legal/terms')}>
+                            <div className="settings-item-left">
+                                <Shield size={20} />
+                                <span>Terms of Service</span>
+                            </div>
+                        </div>
+                        <div className="settings-item" onClick={() => navigate('/legal/privacy')}>
+                            <div className="settings-item-left">
+                                <Shield size={20} />
+                                <span>Privacy Policy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="settings-group">
                     <div className="settings-list">
                         <div className="settings-item" onClick={handleLogout} style={{ color: 'var(--color-danger)' }}>
                             <div className="settings-item-left">

@@ -47,12 +47,16 @@
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
         z-index: 99999 !important;
 
-        /* Grid Layout for Cleanup */
+        /* Grid Layout for Cleanup - Enforcing Mini Player */
         display: grid;
         grid-template-columns: auto 1fr auto;
         align-items: center;
         gap: 12px;
         height: 70px !important;
+        max-height: 70px !important;
+        /* Strictly enforce mini-player height */
+        overflow: hidden;
+        /* Prevent content expansion */
     }
 }
 

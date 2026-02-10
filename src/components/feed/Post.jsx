@@ -62,7 +62,26 @@ const Post = ({ post }) => {
                     {showMore && (
                         <div className="post-more-dropdown glass-card">
                             <button onClick={() => { setShowMore(false); navigate(`/messages?user=${post.userEmail || post.email || post.username}`); }}>Message User</button>
-                            <button onClick={() => { setShowMore(false); alert('Post Reported'); }}>Report Post</button>
+                            <button onClick={async () => {
+                                setShowMore(false);
+                                if (!user) return alert('Please login to report.');
+                                try {
+                                    await fetch(`${config.API_URL}/api/report`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            reporterId: user.id || user._id,
+                                            targetId: postId,
+                                            targetType: 'post',
+                                            reason: 'offensive_content' // Hardcoded for MVP menu
+                                        })
+                                    });
+                                    alert('Post Reported. Thank you for making Stride safer.');
+                                } catch (e) {
+                                    console.error(e);
+                                    alert('Failed to report post.');
+                                }
+                            }}>Report Post</button>
                             <button onClick={() => { setShowMore(false); navigator.clipboard.writeText(`${window.location.origin}/profile/${post.username}`); alert('Link Copied'); }}>Copy Link</button>
                         </div>
                     )}

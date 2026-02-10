@@ -289,6 +289,11 @@ const Login = () => {
                         </button>
                     </div>
                 )}
+                <div className="legal-links" style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                    <a href="/legal/terms" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</a>
+                    <span style={{ margin: '0 8px' }}>•</span>
+                    <a href="/legal/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
+                </div>
                 <div className="version-tag">v1.1.0-verified</div>
             </div>
         </div>

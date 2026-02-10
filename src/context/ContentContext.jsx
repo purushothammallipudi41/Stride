@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import config from '../config';
 import { useNotifications } from './NotificationContext';
+import { useAuth } from './AuthContext';
 
 const ContentContext = createContext();
 
@@ -10,10 +11,13 @@ export const ContentProvider = ({ children }) => {
     const [posts, setPosts] = useState([]);
     const [stories, setStories] = useState([]);
     const { addNotification } = useNotifications();
+    const { user } = useAuth();
 
     const fetchPosts = async () => {
         try {
-            const res = await fetch(`${config.API_URL}/api/posts`);
+            // Pass viewerId if user is logged in to filter blocked content
+            const query = user ? `?viewerId=${user.id || user._id}` : '';
+            const res = await fetch(`${config.API_URL}/api/posts${query}`);
             if (res.ok) setPosts(await res.json());
         } catch (error) {
             console.error('Failed to fetch posts:', error);
@@ -22,7 +26,9 @@ export const ContentProvider = ({ children }) => {
 
     const fetchStories = async () => {
         try {
-            const res = await fetch(`${config.API_URL}/api/stories`);
+            // Similar logic could apply to stories
+            const query = user ? `?viewerId=${user.id || user._id}` : '';
+            const res = await fetch(`${config.API_URL}/api/stories${query}`);
             if (res.ok) setStories(await res.json());
         } catch (error) {
             console.error('Failed to fetch stories:', error);
@@ -32,7 +38,7 @@ export const ContentProvider = ({ children }) => {
     useEffect(() => {
         fetchPosts();
         fetchStories();
-    }, []);
+    }, [user?.id, user?._id]); // Refetch when user changes (login/logout)
 
     const addPost = (post) => {
         const newPost = {

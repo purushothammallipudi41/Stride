@@ -19,6 +19,7 @@ const ServerModel = require('./models/Server'); // Renamed to avoid conflict wit
 const DirectMessage = require('./models/DirectMessage');
 const ServerMessage = require('./models/ServerMessage');
 const Notification = require('./models/Notification');
+const Report = require('./models/Report');
 
 // Connect to MongoDB
 connectDB();
@@ -47,14 +48,14 @@ if (dns.setDefaultResultOrder) {
 
 // Email Transporter
 const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 function generateVerificationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 async function sendVerificationEmail(email, code) {
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
         console.log(`[EMAIL MOCK] Verification code for ${email}: ${code}`);
         return;
     }
@@ -87,15 +88,6 @@ async function sendVerificationEmail(email, code) {
         throw e;
     }
 }
-
-// Serve uploads (Legacy support for old files, though they disappear on Render)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// New Cloudinary Upload Endpoint
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    res.json({ url: req.file.path }); // Cloudinary key is 'path' or 'secure_url'
-});
 
 // Cloudinary Config
 const cloudinary = require('cloudinary').v2;
@@ -137,11 +129,20 @@ async function saveBase64Image(base64String) {
     }
 }
 
+// Serve uploads (Legacy support for old files, though they disappear on Render)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// New Cloudinary Upload Endpoint
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    res.json({ url: req.file.path }); // Cloudinary key is 'path' or 'secure_url'
+});
+
 // --- Seeding Logic ---
 async function seedDatabase() {
     try {
         // Check for specific users needed for Auto-Follow
-        const targetUsernames = ['stride', 'purushotham'];
+        const targetUsernames = ['stride', 'purushotham_mallipudi'];
         const existingTargets = await User.find({ username: { $in: targetUsernames } });
         const existingUsernames = existingTargets.map(u => u.username);
 
@@ -157,7 +158,7 @@ async function seedDatabase() {
                 isVerified: true
             },
             {
-                username: "purushotham",
+                username: "purushotham_mallipudi",
                 name: "Purushotham Mallipudi",
                 email: "user@example.com",
                 password: "password123",
@@ -277,15 +278,34 @@ app.get('/api/health', (req, res) => {
 // Posts
 app.get('/api/posts', async (req, res) => {
     try {
-        const posts = await Post.find().sort({ timestamp: -1 });
-        // Mongoose result objects have .id getter by default, but let's ensure it maps cleanly if needed
+        const { viewerId } = req.query;
+        let filter = {};
+
+        if (viewerId) {
+            const viewer = await User.findById(viewerId);
+            if (viewer && viewer.blockedUsers && viewer.blockedUsers.length > 0) {
+                // Determine the valid user IDs (users not in the blocked list)
+                // However, Post schema relies on `username` not `userId` in some legacy parts?
+                // Checking Post.js schema... it stores `username` and `userAvatar`.
+                // It does NOT strictly store `userId`. This is a tech debt.
+                // We must filter by username if we don't have userId on posts.
+
+                // Strategy: Get usernames of blocked users
+                const blockedUsers = await User.find({ _id: { $in: viewer.blockedUsers } });
+                const blockedUsernames = blockedUsers.map(u => u.username);
+
+                filter = { username: { $nin: blockedUsernames } };
+            }
+        }
+
+        const posts = await Post.find(filter).sort({ timestamp: -1 });
         res.json(posts);
     } catch (e) {
         console.error('API Error:', e);
         res.status(500).json({
             error: e.message,
             stack: process.env.NODE_ENV === 'production' ? null : e.stack,
-            dbState: mongoose.connection.readyState // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
+            dbState: mongoose.connection.readyState
         });
     }
 });
@@ -477,7 +497,7 @@ app.post('/api/register', async (req, res) => {
         const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
         // Auto-Follow Logic
-        const targetUsernames = ['stride', 'purushotham'];
+        const targetUsernames = ['stride', 'purushotham_mallipudi'];
         const targets = await User.find({ username: { $in: targetUsernames } });
 
         let initialFollowing = [];
@@ -656,8 +676,87 @@ app.get('/api/notifications', async (req, res) => {
 });
 
 app.post('/api/notifications', async (req, res) => {
-    const note = await Notification.create(req.body);
-    res.status(201).json(note);
+    try {
+        const note = await Notification.create(req.body);
+        res.status(201).json(note);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// --- Safety & Moderation ---
+
+app.post('/api/users/:id/block', async (req, res) => {
+    try {
+        const { id } = req.params; // User to block
+        const { currentUserId } = req.body; // Me
+
+        const currentUser = await User.findById(currentUserId);
+        const userToBlock = await User.findById(id);
+
+        if (!currentUser || !userToBlock) return res.status(404).json({ error: 'User not found' });
+
+        if (!currentUser.blockedUsers.includes(id)) {
+            currentUser.blockedUsers.push(id);
+
+            // Also Unfollow context
+            const fIdx = currentUser.following.indexOf(id);
+            if (fIdx > -1) {
+                currentUser.following.splice(fIdx, 1);
+                currentUser.stats.following = Math.max(0, currentUser.stats.following - 1);
+            }
+
+            // Remove them from my followers
+            const tIdx = currentUser.followers.indexOf(id);
+            if (tIdx > -1) {
+                currentUser.followers.splice(tIdx, 1);
+                currentUser.stats.followers = Math.max(0, currentUser.stats.followers - 1);
+            }
+
+            await currentUser.save();
+        }
+
+        res.json({ success: true, blockedUsers: currentUser.blockedUsers });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/users/:id/unblock', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { currentUserId } = req.body;
+
+        const currentUser = await User.findById(currentUserId);
+        if (!currentUser) return res.status(404).json({ error: 'User not found' });
+
+        const index = currentUser.blockedUsers.indexOf(id);
+        if (index > -1) {
+            currentUser.blockedUsers.splice(index, 1);
+            await currentUser.save();
+        }
+
+        res.json({ success: true, blockedUsers: currentUser.blockedUsers });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/report', async (req, res) => {
+    try {
+        const { reporterId, targetId, targetType, reason } = req.body;
+
+        await Report.create({
+            reporterId,
+            targetId,
+            targetType,
+            reason
+        });
+
+        res.json({ success: true, message: 'Report submitted' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Servers

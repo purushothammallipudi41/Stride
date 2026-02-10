@@ -199,7 +199,39 @@ const Profile = () => {
                                         </button>
                                         {showMoreMenu && (
                                             <div className="more-dropdown glass-card">
-                                                <button onClick={() => { setShowMoreMenu(false); alert('User Reported'); }}>Report</button>
+                                                <button onClick={async () => {
+                                                    setShowMoreMenu(false);
+                                                    if (!currentUser) return alert('Login required');
+                                                    if (confirm(`Are you sure you want to block ${profileUser.username}? Their content will be hidden.`)) {
+                                                        try {
+                                                            const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser._id}/block`, {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ currentUserId: currentUser.id || currentUser._id })
+                                                            });
+                                                            if (res.ok) {
+                                                                alert('User blocked');
+                                                                await refreshUser(); // Update local blocked list
+                                                                navigate('/'); // Return home
+                                                            }
+                                                        } catch (e) { alert('Failed to block user'); }
+                                                    }
+                                                }}>Block User</button>
+                                                <button onClick={async () => {
+                                                    setShowMoreMenu(false);
+                                                    if (!currentUser) return alert('Login required');
+                                                    await fetch(`${config.API_URL}/api/report`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            reporterId: currentUser.id || currentUser._id,
+                                                            targetId: profileUser.id || profileUser._id,
+                                                            targetType: 'user',
+                                                            reason: 'spam_or_abuse'
+                                                        })
+                                                    });
+                                                    alert('User reported');
+                                                }}>Report User</button>
                                                 <button onClick={() => { setShowMoreMenu(false); navigator.clipboard.writeText(window.location.href); alert('Link Copied'); }}>Copy Link</button>
                                             </div>
                                         )}

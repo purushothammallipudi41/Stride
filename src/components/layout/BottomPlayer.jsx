@@ -63,7 +63,7 @@ const BottomPlayer = () => {
                     </button>
 
                     {/* Mobile Close Button */}
-                    <button className="expand-btn" onClick={(e) => { e.stopPropagation(); closePlayer(); }}>
+                    <button className="close-player-btn" onClick={(e) => { e.stopPropagation(); closePlayer(); }}>
                         <X size={20} />
                     </button>
                 </div>

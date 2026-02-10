@@ -44,6 +44,8 @@ const Login = lazy(() => import('./pages/Login'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Search = lazy(() => import('./pages/Search'));
+const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 
 const LoadingFallback = () => (
   <div className="flex-center" style={{ height: '100%', width: '100%' }}>
@@ -113,6 +115,10 @@ function App() {
                                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                                 <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+
+                                <Route path="/legal/terms" element={<TermsOfService />} />
+                                <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+
                                 <Route path="*" element={<Navigate to="/" replace />} />
                               </Routes>
                             </Suspense>
