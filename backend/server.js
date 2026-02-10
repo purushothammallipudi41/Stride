@@ -8,7 +8,7 @@ const http = require('http');
 const { Server } = require("socket.io");
 require('dotenv').config();
 const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer'); // Removed in favor of Resend
 
 // Mongoose & Database
 const connectDB = require('./db');
@@ -46,46 +46,46 @@ if (dns.setDefaultResultOrder) {
 }
 
 // Email Transporter
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Use SSL
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    family: 4 // Force IPv4 to avoid ENETUNREACH
-});
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function generateVerificationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 async function sendVerificationEmail(email, code) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    if (!process.env.RESEND_API_KEY) {
         console.log(`[EMAIL MOCK] Verification code for ${email}: ${code}`);
         return;
     }
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Verify your Stride Account',
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #333;">Welcome to Stride! 🎵</h2>
-                <p>Please use the following code to verify your account:</p>
-                <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px; font-size: 24px; letter-spacing: 5px; font-weight: bold;">
-                    ${code}
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Stride <onboarding@resend.dev>',
+            to: [email],
+            subject: 'Verify your Stride Account',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333;">Welcome to Stride! 🎵</h2>
+                    <p>Please use the following code to verify your account:</p>
+                    <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px; font-size: 24px; letter-spacing: 5px; font-weight: bold;">
+                        ${code}
+                    </div>
+                    <p>This code will expire in 15 minutes.</p>
                 </div>
-                <p>This code will expire in 15 minutes.</p>
-            </div>
-        `
-    };
+            `
+        });
 
-    // Let the caller handle the error so we can return a 500 if it fails
-    await transporter.sendMail(mailOptions);
-    console.log(`[EMAIL SENT] Verification code sent to ${email}`);
+        if (error) {
+            console.error('[RESEND ERROR]', error);
+            throw new Error(error.message);
+        }
+
+        console.log(`[EMAIL SENT] Verification code sent to ${email} (ID: ${data.id})`);
+    } catch (e) {
+        console.error('[EMAIL SEND FAILURE]', e);
+        throw e;
+    }
 }
 
 // Serve uploads
