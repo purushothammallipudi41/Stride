@@ -117,44 +117,51 @@ function saveBase64Image(base64String) {
 // --- Seeding Logic ---
 async function seedDatabase() {
     try {
-        const userCount = await User.countDocuments();
-        if (userCount === 0) {
-            console.log('🌱 Seeding specific initial users...');
+        // Check for specific users needed for Auto-Follow
+        const targetUsernames = ['stride', 'purushotham'];
+        const existingTargets = await User.find({ username: { $in: targetUsernames } });
+        const existingUsernames = existingTargets.map(u => u.username);
 
-            // Create these users with specific _ids if possible, or just let Mongoose generate them
-            // Since frontend might stick to hardcoded IDs? No, usually not for users except specific follow logic.
-            // The register endpoint auto-follows 'purushotham' and 'stride'. We need them to exist.
+        const newUsers = [
+            {
+                username: "stride",
+                name: "Stride Official",
+                email: "thestrideapp@gmail.com",
+                password: "password123", // Dummy pass
+                avatar: "logo.png",
+                bio: "The official beat of Stride. 🎵 #KeepStriding",
+                stats: { posts: 999, followers: 12500, following: 0 },
+                isVerified: true
+            },
+            {
+                username: "purushotham",
+                name: "Purushotham Mallipudi",
+                email: "user@example.com",
+                password: "password123",
+                avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=purushotham",
+                bio: "Building the future of social music. 🚀",
+                stats: { posts: 12, followers: 12500, following: 450 },
+                isVerified: true
+            },
+            {
+                username: "alex_beats",
+                name: "Alex Beats",
+                email: "alex@beats.com",
+                password: "password123",
+                avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=alex",
+                bio: "Music Producer 🎹 | LA-Based. Creating vibes daily.",
+                stats: { posts: 42, followers: 8900, following: 120 },
+                isVerified: true
+            }
+        ];
 
-            await User.create([
-                {
-                    username: "stride",
-                    name: "Stride Official",
-                    email: "thestrideapp@gmail.com",
-                    password: "password123", // Dummy pass
-                    avatar: "logo.png",
-                    bio: "The official beat of Stride. 🎵 #KeepStriding",
-                    stats: { posts: 999, followers: 12500, following: 0 }
-                },
-                {
-                    username: "purushotham",
-                    name: "purushotham mallipudi",
-                    email: "user@example.com",
-                    password: "password123",
-                    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=purushotham",
-                    bio: "Building the future of social music. 🚀",
-                    stats: { posts: 12, followers: 12500, following: 450 }
-                },
-                {
-                    username: "alex_beats",
-                    name: "Alex Beats",
-                    email: "alex@beats.com",
-                    password: "password123",
-                    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=alex",
-                    bio: "Music Producer 🎹 | LA-Based. Creating vibes daily.",
-                    stats: { posts: 42, followers: 8900, following: 120 }
-                }
-            ]);
-            console.log('✅ Users seeded');
+        const usersToCreate = newUsers.filter(u => !existingUsernames.includes(u.username));
+
+        if (usersToCreate.length > 0) {
+            await User.create(usersToCreate);
+            console.log(`✅ Seeded ${usersToCreate.length} new users.`);
+        } else {
+            console.log('✅ Target users already exist.');
         }
 
         const serverCount = await ServerModel.countDocuments();
@@ -411,6 +418,24 @@ app.post('/api/register', async (req, res) => {
         const verificationCode = generateVerificationCode();
         const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
+        // Auto-Follow Logic
+        const targetUsernames = ['stride', 'purushotham'];
+        const targets = await User.find({ username: { $in: targetUsernames } });
+
+        let initialFollowing = [];
+
+        // Add targets to new user's following list
+        if (targets.length > 0) {
+            initialFollowing = targets.map(t => t._id.toString());
+
+            // Update targets' followers list
+            for (const target of targets) {
+                target.followers.push(newUser._id);
+                target.stats.followers += 1;
+                await target.save();
+            }
+        }
+
         const newUser = await User.create({
             username,
             name: name || username,
@@ -421,11 +446,13 @@ app.post('/api/register', async (req, res) => {
             isVerified: false,
             verificationRequired: true, // Enforce verification for new users
             verificationCode,
-            verificationCodeExpires
+            verificationCodeExpires,
+            following: initialFollowing,
+            stats: { posts: 0, followers: 0, following: initialFollowing.length }
         });
 
         await sendVerificationEmail(email, verificationCode);
-        console.log(`[REGISTER] New user: ${email}, Code: ${verificationCode}`);
+        console.log(`[REGISTER] New user: ${email}, Code: ${verificationCode}, Auto-Followed: ${targets.length}`);
 
         res.json({ success: true, email: newUser.email, message: 'Verification code sent' });
     } catch (e) {
