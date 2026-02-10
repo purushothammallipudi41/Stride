@@ -81,12 +81,9 @@ async function sendVerificationEmail(email, code) {
         `
     };
 
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`[EMAIL SENT] Verification code sent to ${email}`);
-    } catch (error) {
-        console.error('[EMAIL ERROR]', error);
-    }
+    // Let the caller handle the error so we can return a 500 if it fails
+    await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL SENT] Verification code sent to ${email}`);
 }
 
 // Serve uploads
