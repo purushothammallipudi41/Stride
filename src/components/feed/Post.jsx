@@ -64,25 +64,32 @@ const Post = ({ post }) => {
                     </div>
                 </div>
                 <div className="post-more-container">
-                    <button className="more-btn" onClick={() => setShowMore(!showMore)}>
+                    <button className="more-btn" onClick={(e) => { e.stopPropagation(); setShowMore(!showMore); }}>
                         <MoreHorizontal size={20} />
                     </button>
                     {showMore && (
-                        <div className="post-more-dropdown glass-card" onClick={e => e.stopPropagation()}>
+                        <div className="post-more-dropdown glass-card animate-in" onClick={e => e.stopPropagation()}>
                             {isOwner && (
                                 <button className="delete-btn" onClick={async (e) => {
                                     e.stopPropagation();
-                                    if (window.confirm('Are you sure you want to delete this post?')) {
+                                    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
+                                    if (confirmDelete) {
                                         const success = await deletePost(postId);
-                                        if (success) setShowMore(false);
-                                        else alert('Failed to delete post');
+                                        if (success) {
+                                            setShowMore(false);
+                                        } else {
+                                            alert('Failed to delete post');
+                                        }
                                     }
                                 }} style={{ color: '#ff4b4b' }}>Delete Post</button>
                             )}
-                            <button onClick={(e) => { e.stopPropagation(); setShowMore(false); navigate(`/messages?user=${post.userEmail || post.userId || post.username}`); }}>Message User</button>
+                            <button onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/messages?user=${post.userEmail || post.userId || post.username}`);
+                                setShowMore(false);
+                            }}>Message User</button>
                             <button onClick={async (e) => {
                                 e.stopPropagation();
-                                setShowMore(false);
                                 if (!user) return alert('Please login to report.');
                                 try {
                                     await fetch(`${config.API_URL}/api/report`, {
@@ -92,16 +99,22 @@ const Post = ({ post }) => {
                                             reporterId: user.id || user._id,
                                             targetId: postId,
                                             targetType: 'post',
-                                            reason: 'offensive_content' // Hardcoded for MVP menu
+                                            reason: 'offensive_content'
                                         })
                                     });
                                     alert('Post Reported. Thank you for making Stride safer.');
-                                } catch (e) {
-                                    console.error(e);
+                                    setShowMore(false);
+                                } catch (err) {
+                                    console.error(err);
                                     alert('Failed to report post.');
                                 }
                             }}>Report Post</button>
-                            <button onClick={() => { setShowMore(false); navigator.clipboard.writeText(`${window.location.origin}/profile/${post.username}`); alert('Link Copied'); }}>Copy Link</button>
+                            <button onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(`${window.location.origin}/profile/${post.username}`);
+                                alert('Link Copied');
+                                setShowMore(false);
+                            }}>Copy Link</button>
                         </div>
                     )}
                 </div>
