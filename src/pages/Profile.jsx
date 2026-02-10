@@ -45,9 +45,9 @@ const Profile = () => {
 
             setLoading(true);
             try {
-                const targetUrl = `${config.API_URL} /api/users / ${id} `;
+                const targetUrl = `${config.API_URL}/api/users/${id}`;
                 // TEMPORARY DEBUGGING
-                console.log(`[Profile] Fetching: ${targetUrl} `);
+                console.log(`[Profile] Fetching: ${targetUrl}`);
 
                 // If checking own profile, assume success with current data first to speed up UI
                 if ((!identifier || identifier === currentUser?.email || identifier === currentUser?.username) && currentUser) {
@@ -69,7 +69,6 @@ const Profile = () => {
                 }
             } catch (error) {
                 console.error('Failed to fetch profile:', error);
-                alert(`Debug Error: ${error.message} \nURL: ${config.API_URL} /api/users / ${id} `);
 
                 // Fallback to local user if it's me
                 if (currentUser && (!identifier || identifier === currentUser.email)) {
@@ -90,7 +89,7 @@ const Profile = () => {
     const handleFollow = async () => {
         if (!currentUser || !profileUser) return;
         try {
-            const res = await fetch(`${config.API_URL} /api/users / ${profileUser.id || profileUser.email}/follow`, {
+            const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser.email}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ followerEmail: currentUser.email })
@@ -152,7 +151,15 @@ const Profile = () => {
                 <div className="profile-header">
                     <div className="profile-avatar-container" onClick={() => setIsAvatarOpen(true)}>
                         {profileUser.avatar ? (
-                            <img src={getImageUrl(profileUser.avatar)} alt={profileUser.username} className="profile-avatar" />
+                            <img
+                                src={getImageUrl(profileUser.avatar)}
+                                alt={profileUser.username}
+                                className="profile-avatar-large"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${profileUser.username}`;
+                                }}
+                            />
                         ) : (
                             <div className="profile-avatar-placeholder" style={{ backgroundColor: '#333' }}>
                                 {profileUser.username[0].toUpperCase()}
@@ -163,7 +170,7 @@ const Profile = () => {
                         <div className="profile-top">
                             <h2 className="profile-username">{profileUser.username}</h2>
                             {isOwnProfile ? (
-                                <>
+                                <div className="profile-actions">
                                     <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
                                         Edit Profile
                                     </button>
@@ -173,9 +180,9 @@ const Profile = () => {
                                     <button className="settings-btn" onClick={() => setShareModalOpen(true)}>
                                         <Share2 size={20} />
                                     </button>
-                                </>
+                                </div>
                             ) : (
-                                <>
+                                <div className="profile-actions">
                                     <button
                                         className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
                                         onClick={handleFollow}
@@ -197,7 +204,7 @@ const Profile = () => {
                                             </div>
                                         )}
                                     </div>
-                                </>
+                                </div>
                             )}
                         </div>
                         <div className="profile-stats">

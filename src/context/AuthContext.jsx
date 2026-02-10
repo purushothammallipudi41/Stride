@@ -10,10 +10,21 @@ export const AuthProvider = ({ children }) => {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const [storageType, setStorageType] = useState('session'); // 'local' or 'session'
+
     useEffect(() => {
         const checkAuth = async () => {
-            const savedAccounts = localStorage.getItem('accounts');
-            const activeId = localStorage.getItem('activeAccountId');
+            let savedAccounts = localStorage.getItem('accounts');
+            let activeId = localStorage.getItem('activeAccountId');
+            let type = 'local';
+
+            if (!savedAccounts) {
+                savedAccounts = sessionStorage.getItem('accounts');
+                activeId = sessionStorage.getItem('activeAccountId');
+                type = 'session';
+            }
+
+            setStorageType(type);
 
             if (savedAccounts) {
                 const parsedAccounts = JSON.parse(savedAccounts);
@@ -30,7 +41,12 @@ export const AuthProvider = ({ children }) => {
                             const updatedAccounts = parsedAccounts.map(a => (a.id === full.id || a.email === full.email) ? full : a);
                             setAccounts(updatedAccounts);
                             setUser(full);
-                            localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+
+                            if (type === 'local') {
+                                localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                            } else {
+                                sessionStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                            }
                         }
                     } catch (e) { }
                 }
@@ -40,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-    const login = async (credentials) => {
+    const login = async (credentials, rememberMe = false) => {
         try {
             const res = await fetch(`${config.API_URL}/api/login`, {
                 method: 'POST',
@@ -63,11 +79,27 @@ export const AuthProvider = ({ children }) => {
 
                 setAccounts(updatedAccounts);
                 setUser(fullData);
-                localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
-                localStorage.setItem('activeAccountId', fullData.id || fullData.email);
+
+                if (rememberMe) {
+                    localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                    localStorage.setItem('activeAccountId', fullData.id || fullData.email);
+                    setStorageType('local');
+                    // Clear session to avoid confusion
+                    sessionStorage.removeItem('accounts');
+                    sessionStorage.removeItem('activeAccountId');
+                } else {
+                    sessionStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                    sessionStorage.setItem('activeAccountId', fullData.id || fullData.email);
+                    setStorageType('session');
+                    // Clear local
+                    localStorage.removeItem('accounts');
+                    localStorage.removeItem('activeAccountId');
+                }
+
                 return true;
             } else {
-                throw new Error('Invalid credentials');
+                const err = await res.json();
+                throw new Error(err.error || 'Invalid credentials');
             }
         } catch (e) {
             console.error("Login failed", e);
@@ -85,8 +117,8 @@ export const AuthProvider = ({ children }) => {
 
             if (res.ok) {
                 const data = await res.json();
-                await login({ identifier: data.user.email, password: userData.password });
-                return true;
+                // Do NOT auto-login. Return success so UI can show verification.
+                return { success: true, email: data.email };
             } else {
                 const err = await res.json();
                 throw new Error(err.error || 'Registration failed');
@@ -101,21 +133,38 @@ export const AuthProvider = ({ children }) => {
         const target = accounts.find(a => a.id === accountId || a.email === accountId);
         if (target) {
             setUser(target);
-            localStorage.setItem('activeAccountId', accountId);
+            setUser(target);
+            if (storageType === 'local') {
+                localStorage.setItem('activeAccountId', accountId);
+            } else {
+                sessionStorage.setItem('activeAccountId', accountId);
+            }
         }
     };
 
     const logout = () => {
         const remaining = accounts.filter(a => a.id !== user?.id && a.email !== user?.email);
         setAccounts(remaining);
+
+        // Remove from both to be safe, or check storageType
+        localStorage.removeItem('accounts');
+        localStorage.removeItem('activeAccountId');
+        sessionStorage.removeItem('accounts');
+        sessionStorage.removeItem('activeAccountId');
+
         if (remaining.length > 0) {
             setUser(remaining[0]);
-            localStorage.setItem('activeAccountId', remaining[0].id || remaining[0].email);
-            localStorage.setItem('accounts', JSON.stringify(remaining));
+            // If there are other accounts, we need to decide where to keep them. 
+            // For simplicity, if we were in local, keep local. If session, keep session.
+            if (storageType === 'local') {
+                localStorage.setItem('activeAccountId', remaining[0].id || remaining[0].email);
+                localStorage.setItem('accounts', JSON.stringify(remaining));
+            } else {
+                sessionStorage.setItem('activeAccountId', remaining[0].id || remaining[0].email);
+                sessionStorage.setItem('accounts', JSON.stringify(remaining));
+            }
         } else {
             setUser(null);
-            localStorage.removeItem('accounts');
-            localStorage.removeItem('activeAccountId');
         }
     };
 
@@ -128,7 +177,13 @@ export const AuthProvider = ({ children }) => {
                 const updatedAccounts = accounts.map(a => (a.id === refreshed.id || a.email === refreshed.email) ? refreshed : a);
                 setAccounts(updatedAccounts);
                 setUser(refreshed);
-                localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+
+
+                if (storageType === 'local') {
+                    localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                } else {
+                    sessionStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                }
             }
         } catch (e) {
             console.error("Refresh failed", e);
@@ -169,7 +224,12 @@ export const AuthProvider = ({ children }) => {
                 const updatedAccounts = accounts.map(a => (a.id === refreshed.id || a.email === refreshed.email) ? refreshed : a);
                 setAccounts(updatedAccounts);
                 setUser(refreshed);
-                localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+
+                if (storageType === 'local') {
+                    localStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                } else {
+                    sessionStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+                }
                 return refreshed;
             }
         } catch (e) {

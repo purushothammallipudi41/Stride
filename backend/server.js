@@ -8,6 +8,7 @@ const http = require('http');
 const { Server } = require("socket.io");
 require('dotenv').config();
 const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
 
 // Mongoose & Database
 const connectDB = require('./db');
@@ -38,6 +39,49 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
+
+// Email Transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+function generateVerificationCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function sendVerificationEmail(email, code) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.log(`[EMAIL MOCK] Verification code for ${email}: ${code}`);
+        return;
+    }
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Verify your Stride Account',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Welcome to Stride! 🎵</h2>
+                <p>Please use the following code to verify your account:</p>
+                <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px; font-size: 24px; letter-spacing: 5px; font-weight: bold;">
+                    ${code}
+                </div>
+                <p>This code will expire in 15 minutes.</p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`[EMAIL SENT] Verification code sent to ${email}`);
+    } catch (error) {
+        console.error('[EMAIL ERROR]', error);
+    }
+}
 
 // Serve uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -359,17 +403,69 @@ app.post('/api/register', async (req, res) => {
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) return res.status(409).json({ error: 'User already exists' });
 
+        const verificationCode = generateVerificationCode();
+        const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
         const newUser = await User.create({
             username,
             name: name || username,
             email,
             password,
             avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${username}`,
-            bio: "New to Stride! 🎵"
+            bio: "New to Stride! 🎵",
+            isVerified: false,
+            verificationRequired: true, // Enforce verification for new users
+            verificationCode,
+            verificationCodeExpires
         });
 
-        console.log(`[REGISTER] New user: ${email}`);
-        res.json({ success: true, user: newUser });
+        await sendVerificationEmail(email, verificationCode);
+        console.log(`[REGISTER] New user: ${email}, Code: ${verificationCode}`);
+
+        res.json({ success: true, email: newUser.email, message: 'Verification code sent' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/verify', async (req, res) => {
+    try {
+        const { email, code } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.isVerified) return res.json({ success: true, message: 'Already verified' });
+
+        if (user.verificationCode !== code || user.verificationCodeExpires < Date.now()) {
+            return res.status(400).json({ error: 'Invalid or expired code' });
+        }
+
+        user.isVerified = true;
+        user.verificationCode = undefined;
+        user.verificationCodeExpires = undefined;
+        await user.save();
+
+        res.json({ success: true, user });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/resend-verification', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.isVerified) return res.status(400).json({ error: 'Account already verified' });
+
+        const verificationCode = generateVerificationCode();
+        user.verificationCode = verificationCode;
+        user.verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
+        await user.save();
+
+        await sendVerificationEmail(email, verificationCode);
+        res.json({ success: true, message: 'Verification code resent' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -383,6 +479,10 @@ app.post('/api/login', async (req, res) => {
         });
 
         if (user && user.password === password) {
+            // Only block if verification is explicitly required AND they are not verified
+            if (user.verificationRequired && user.isVerified === false) {
+                return res.status(403).json({ error: 'Email not verified', email: user.email });
+            }
             console.log(`[LOGIN] User logged in: ${user.email}`);
             res.json({ success: true, user });
         } else {

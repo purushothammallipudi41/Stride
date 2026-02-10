@@ -1,7 +1,8 @@
 const config = {
-    // Falls back to localhost for development if VITE_API_URL is not set
-    // For Mobile Testing: Using Hardcoded Local IP
+    // Production API URL
+    // Production API URL
     API_URL: 'https://stride-backend-7ax9.onrender.com'
+    // API_URL: 'http://localhost:3001'
 };
 
 export default config;

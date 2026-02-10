@@ -21,8 +21,8 @@ const Messages = () => {
         const fetchData = async () => {
             try {
                 const [usersRes, messagesRes] = await Promise.all([
-                    fetch('/api/users'),
-                    fetch(`/api/messages/${user.email}`)
+                    fetch(`${config.API_URL}/api/users`),
+                    fetch(`${config.API_URL}/api/messages/${user.email}`)
                 ]);
 
                 if (usersRes.ok && messagesRes.ok) {

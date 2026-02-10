@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import config from '../config';
 import './Settings.css';
 
 const Settings = () => {
@@ -11,6 +12,12 @@ const Settings = () => {
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [isPrivate, setIsPrivate] = useState(user?.isPrivate || false);
     const [language, setLanguage] = useState('English');
+
+    // Verification State
+    const [verificationCode, setVerificationCode] = useState('');
+    const [showVerificationInput, setShowVerificationInput] = useState(false);
+    const [verificationStatus, setVerificationStatus] = useState(''); // 'sending', 'sent', 'verifying', 'success', 'error'
+    const [verificationMsg, setVerificationMsg] = useState('');
 
     const handleLogout = () => {
         logout();
@@ -58,6 +65,63 @@ const Settings = () => {
         setLanguage(nextLang);
     };
 
+    const requestVerification = async () => {
+        if (!user || user.isVerified) return;
+        setVerificationStatus('sending');
+        setVerificationMsg('Sending code...');
+        try {
+            const res = await fetch(`${config.API_URL}/api/resend-verification`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email })
+            });
+            if (res.ok) {
+                setVerificationStatus('sent');
+                setVerificationMsg('Code sent! Check your email.');
+                setShowVerificationInput(true);
+            } else {
+                throw new Error('Failed to send code');
+            }
+        } catch (e) {
+            setVerificationStatus('error');
+            setVerificationMsg(e.message || 'Error sending code');
+        }
+    };
+
+    const submitVerification = async () => {
+        if (!verificationCode) return;
+        setVerificationStatus('verifying');
+        setVerificationMsg('Verifying...');
+        try {
+            const res = await fetch(`${config.API_URL}/api/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, code: verificationCode })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setVerificationStatus('success');
+                setVerificationMsg('Email verified successfully!');
+                setTimeout(() => {
+                    setShowVerificationInput(false);
+                    // Update local user state via context
+                    if (user) {
+                        const updatedUser = { ...user, isVerified: true };
+                        // We need a way to update the user in context without full login
+                        // But refreshUser should handle it if we call it
+                        // For now, let's try to force a refresh
+                        window.location.reload();
+                    }
+                }, 1500);
+            } else {
+                throw new Error(data.error || 'Verification failed');
+            }
+        } catch (e) {
+            setVerificationStatus('error');
+            setVerificationMsg(e.message || 'Invalid code');
+        }
+    };
+
     return (
         <div className="settings-container">
             <header className="settings-header">
@@ -99,6 +163,63 @@ const Settings = () => {
                 <div className="settings-group">
                     <h3>Account Security</h3>
                     <div className="settings-list">
+                        {/* Email Verification Section */}
+                        {!user?.isVerified && (
+                            <div className="settings-item-column">
+                                <div className="settings-item" onClick={requestVerification}>
+                                    <div className="settings-item-left">
+                                        <Mail size={20} color="var(--color-warning)" />
+                                        <span>Verify Email</span>
+                                    </div>
+                                    <div className="settings-item-right">
+                                        {verificationStatus === 'success' ? <Check size={18} color="var(--color-success)" /> : <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)' }}>Verify Now</span>}
+                                    </div>
+                                </div>
+                                {showVerificationInput && (
+                                    <div className="verification-input-container" style={{ padding: '0 1rem 1rem 1rem', display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                                            {verificationMsg}
+                                        </p>
+                                        {verificationStatus !== 'success' && (
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="123456"
+                                                    value={verificationCode}
+                                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                                    maxLength={6}
+                                                    style={{
+                                                        flex: 1,
+                                                        background: 'var(--color-bg)',
+                                                        border: '1px solid var(--color-border)',
+                                                        borderRadius: '8px',
+                                                        padding: '8px',
+                                                        color: 'var(--color-text)',
+                                                        textAlign: 'center',
+                                                        letterSpacing: '2px'
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={submitVerification}
+                                                    disabled={verificationStatus === 'verifying'}
+                                                    style={{
+                                                        background: 'var(--color-primary)',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        padding: '0 15px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    <Check size={18} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         <div className="settings-item" onClick={togglePrivate}>
                             <div className="settings-item-left">
                                 <Shield size={20} />

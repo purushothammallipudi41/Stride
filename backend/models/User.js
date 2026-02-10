@@ -14,7 +14,11 @@ const userSchema = new mongoose.Schema({
     },
     followers: [String], // Array of emails or IDs
     following: [String],
-    isPrivate: { type: Boolean, default: false }
+    isPrivate: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
+    verificationRequired: { type: Boolean, default: false }, // New users: true, Existing: false
+    verificationCode: String,
+    verificationCodeExpires: Date
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

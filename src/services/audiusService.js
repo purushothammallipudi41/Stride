@@ -30,7 +30,7 @@ export const audiusService = {
                 cover: track.artwork?.['480x480'] ||
                     track.artwork?.['150x150'] ||
                     'https://images.unsplash.com/photo-1514525253344-99a429994c41?q=80&w=600&auto=format',
-                streamUrl: `https://api.audius.co/v1/tracks/${track.id}/stream?app_name=STRIDE_SOCIAL`,
+                streamUrl: `${config.API_URL}/api/audius/stream/${track.id}`,
                 duration: track.duration,
                 trackId: track.id
             };
