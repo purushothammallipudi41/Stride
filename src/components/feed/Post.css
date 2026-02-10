@@ -71,31 +71,39 @@
     line-height: 1.4;
 }
 
-.post-actions {
-    padding: var(--spacing-sm) var(--spacing-md);
+.post-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md);
     border-top: 1px solid var(--color-border);
 }
 
-.action-buttons {
-    display: flex;
-    gap: var(--spacing-xl);
-}
-
-.action-btn {
+.post-action {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    background: none;
+    border: none;
     color: var(--color-text-primary);
     opacity: 0.8;
-    transition: opacity 0.2s;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
 }
 
-.action-btn:hover {
+.post-action:hover {
     opacity: 1;
-    color: var(--color-accent);
+    background-color: var(--color-surface-hover);
 }
 
-.action-count {
+.post-action.liked {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+.post-action span {
     font-size: 0.9rem;
     font-weight: 500;
 }

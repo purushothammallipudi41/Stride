@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import CommentsModal from '../common/CommentsModal';
 
 const Post = ({ post }) => {
-    const { toggleLike } = useContent();
+    const { toggleLike, deletePost } = useContent();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
