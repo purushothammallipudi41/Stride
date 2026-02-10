@@ -5,7 +5,7 @@ import './Notifications.css';
 
 const Notifications = () => {
     const navigate = useNavigate();
-    const { notifications, markAllRead } = useNotifications();
+    const { notifications, markAllRead, clearAll } = useNotifications();
 
     return (
         <div className="notifications-page">
@@ -16,10 +16,17 @@ const Notifications = () => {
                     </button>
                     <h1>Notifications</h1>
                 </div>
-                <button className="mark-read-btn" onClick={markAllRead}>
-                    <CheckCircle size={18} />
-                    Mark all read
-                </button>
+                <div className="header-actions">
+                    <button className="mark-read-btn" onClick={markAllRead}>
+                        <CheckCircle size={18} />
+                        Mark read
+                    </button>
+                    <button className="clear-btn" onClick={() => {
+                        if (window.confirm('Clear all notifications?')) clearAll();
+                    }} style={{ marginLeft: '12px', color: '#ff4b4b', border: '1px solid rgba(255, 75, 75, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'rgba(255, 75, 75, 0.1)' }}>
+                        Clear all
+                    </button>
+                </div>
             </header>
 
             <div className="notifications-list">
@@ -44,7 +51,7 @@ const Notifications = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

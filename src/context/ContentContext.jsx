@@ -182,6 +182,24 @@ export const ContentProvider = ({ children }) => {
         }));
     };
 
+    const deletePost = async (postId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user?.email })
+            });
+            if (res.ok) {
+                setPosts(prev => prev.filter(p => (p._id || p.id) !== postId));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to delete post:', error);
+            return false;
+        }
+    };
+
     return (
         <ContentContext.Provider value={{
             posts,
@@ -191,7 +209,8 @@ export const ContentProvider = ({ children }) => {
             addComment,
             likeComment,
             replyToComment,
-            fetchStories
+            fetchStories,
+            deletePost
         }}>
             {children}
         </ContentContext.Provider>

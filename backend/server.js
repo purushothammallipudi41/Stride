@@ -331,6 +331,26 @@ app.post('/api/posts', async (req, res) => {
     }
 });
 
+app.delete('/api/posts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId } = req.body; // Requester's email
+
+        const post = await Post.findById(id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        // Basic auth check: only owner can delete
+        if (post.userId !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to delete this post' });
+        }
+
+        await Post.findByIdAndDelete(id);
+        res.json({ success: true, message: 'Post deleted' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/posts/:id/like', async (req, res) => {
     try {
         const { id } = req.params;

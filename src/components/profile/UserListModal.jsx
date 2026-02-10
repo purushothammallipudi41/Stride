@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import config from '../../config';
 import { X, Search } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import { getImageUrl } from '../../utils/imageUtils';
 import './UserListModal.css';
 
 const UserListModal = ({ title, userIds, onClose }) => {
@@ -63,8 +63,16 @@ const UserListModal = ({ title, userIds, onClose }) => {
                         <div className="modal-loading"><div className="spinner small"></div></div>
                     ) : filteredUsers.length > 0 ? (
                         filteredUsers.map(u => (
-                            <div key={u.id || u.email} className="user-modal-item">
-                                <img src={u.avatar} alt={u.name} className="user-item-avatar" />
+                            <div key={u.id || u._id || u.email} className="user-modal-item">
+                                <img
+                                    src={getImageUrl(u.avatar)}
+                                    alt={u.name}
+                                    className="user-item-avatar"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${u.username}`;
+                                    }}
+                                />
                                 <div className="user-item-info">
                                     <span className="user-item-username">{u.username}</span>
                                     <span className="user-item-name">{u.name}</span>

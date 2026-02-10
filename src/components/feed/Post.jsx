@@ -61,6 +61,15 @@ const Post = ({ post }) => {
                     </button>
                     {showMore && (
                         <div className="post-more-dropdown glass-card">
+                            {post.userId === user?.email && (
+                                <button className="delete-btn" onClick={async () => {
+                                    if (window.confirm('Are you sure you want to delete this post?')) {
+                                        const success = await deletePost(postId);
+                                        if (success) setShowMore(false);
+                                        else alert('Failed to delete post');
+                                    }
+                                }} style={{ color: '#ff4b4b' }}>Delete Post</button>
+                            )}
                             <button onClick={() => { setShowMore(false); navigate(`/messages?user=${post.userEmail || post.email || post.username}`); }}>Message User</button>
                             <button onClick={async () => {
                                 setShowMore(false);
@@ -90,7 +99,15 @@ const Post = ({ post }) => {
 
             <div className="post-content">
                 {post.type === 'image' && (
-                    <img src={post.contentUrl} alt="Post content" className="post-image" />
+                    <img
+                        src={getImageUrl(post.contentUrl)}
+                        alt="Post content"
+                        className="post-image"
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
+                        }}
+                    />
                 )}
                 {post.caption && <div className="post-text">{post.caption}</div>}
             </div>
