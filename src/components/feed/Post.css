@@ -121,7 +121,8 @@
     display: flex;
     flex-direction: column;
     padding: var(--spacing-xs);
-    z-index: 10;
+    z-index: 50;
+    /* Below modal close-btn (1001) but above card content */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 

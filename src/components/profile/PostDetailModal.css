@@ -30,7 +30,8 @@
     border: none;
     color: white;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 2000;
+    /* Ensure it stays above everything, including post-more-dropdown (50) */
     width: 32px;
     height: 32px;
     border-radius: 50%;
