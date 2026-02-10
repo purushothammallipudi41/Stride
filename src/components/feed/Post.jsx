@@ -17,6 +17,9 @@ const Post = ({ post }) => {
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [showMore, setShowMore] = useState(false);
+
+    // MongoDB uses _id, local new posts might use id
+    const postId = post._id || post.id;
     const isLiked = user && post.likes?.includes(user?.email);
 
     const handleShareToUser = async (targetUser) => {
@@ -30,7 +33,7 @@ const Post = ({ post }) => {
                     text: `Shared a post by ${post.username}`,
                     sharedContent: {
                         type: 'post',
-                        id: post.id,
+                        id: postId,
                         thumbnail: post.contentUrl,
                         title: `${post.username}'s Post`
                     }
@@ -76,7 +79,7 @@ const Post = ({ post }) => {
             <div className="post-footer">
                 <button
                     className={`post-action ${isLiked ? 'liked' : ''}`}
-                    onClick={() => toggleLike(post.id, user?.email)}
+                    onClick={() => toggleLike(postId, user?.email)}
                 >
                     <Heart size={22} fill={isLiked ? "currentColor" : "none"} />
                     <span>{post.likes?.length || 0}</span>
@@ -93,7 +96,7 @@ const Post = ({ post }) => {
             <CommentsModal
                 isOpen={isCommentsOpen}
                 onClose={() => setIsCommentsOpen(false)}
-                postId={post.id}
+                postId={postId}
                 comments={post.comments}
                 username={post.username}
             />

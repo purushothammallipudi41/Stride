@@ -88,28 +88,51 @@ async function sendVerificationEmail(email, code) {
     }
 }
 
-// Serve uploads
+// Serve uploads (Legacy support for old files, though they disappear on Render)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// New Cloudinary Upload Endpoint
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    res.json({ url: req.file.path }); // Cloudinary key is 'path' or 'secure_url'
+});
+
+// Cloudinary Config
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'stride_uploads',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'mp4', 'mov'],
+        resource_type: 'auto', // Auto-detect image or video
+    },
+});
+
+const upload = multer({ storage: storage });
+
 // --- Helper Functions ---
-function saveBase64Image(base64String) {
-    const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-    if (!matches || matches.length !== 3) return null;
-    const type = matches[1];
-    const buffer = Buffer.from(matches[2], 'base64');
-    const extension = type.split('/')[1] || 'jpg';
-    const fileName = `${Date.now()}-${uuidv4()}.${extension}`;
-    const filePath = path.join(__dirname, 'uploads', fileName);
+async function saveBase64Image(base64String) {
+    // For base64, we need to upload directly via SDK
+    if (!base64String.startsWith('data:')) return null;
 
     try {
-        if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-            fs.mkdirSync(path.join(__dirname, 'uploads'));
-        }
-        fs.writeFileSync(filePath, buffer);
-        console.log(`[FILE UPLOAD] Saved ${fileName} (${buffer.length} bytes)`);
-        return `/uploads/${fileName}`;
+        const result = await cloudinary.uploader.upload(base64String, {
+            folder: 'stride_uploads',
+            resource_type: 'auto'
+        });
+        console.log(`[CLOUDINARY] Upload success: ${result.secure_url}`);
+        return result.secure_url;
     } catch (err) {
-        console.error('[FILE UPLOAD] Error saving file:', err);
+        console.error('[CLOUDINARY] Base64 upload failed:', err);
         return null;
     }
 }

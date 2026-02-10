@@ -55,7 +55,7 @@ export const ContentProvider = ({ children }) => {
             if (res.ok) {
                 const { likes } = await res.json();
                 setPosts(prev => prev.map(post =>
-                    post.id === postId ? { ...post, likes } : post
+                    (post._id || post.id) === postId ? { ...post, likes } : post
                 ));
 
                 if (likes.includes(userEmail)) {
@@ -87,7 +87,7 @@ export const ContentProvider = ({ children }) => {
             if (res.ok) {
                 const newComment = await res.json();
                 setPosts(prev => prev.map(post => {
-                    if (post.id === postId) {
+                    if ((post._id || post.id) === postId) {
                         return { ...post, comments: [...(post.comments || []), newComment] };
                     }
                     return post;
@@ -109,7 +109,7 @@ export const ContentProvider = ({ children }) => {
         });
 
         setPosts(posts.map(post => {
-            if (post.id === postId) {
+            if ((post._id || post.id) === postId) {
                 return { ...post, comments: updateLikes(post.comments) };
             }
             return post;
@@ -135,7 +135,7 @@ export const ContentProvider = ({ children }) => {
         });
 
         setPosts(posts.map(post => {
-            if (post.id === postId) {
+            if ((post._id || post.id) === postId) {
                 return { ...post, comments: addReply(post.comments) };
             }
             return post;
