@@ -336,7 +336,8 @@ app.post('/api/posts', async (req, res) => {
 app.delete('/api/posts/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId: requesterId } = req.body; // Requester's email or ID
+        const { userId: rawRequesterId } = req.body; // Requester's email or ID
+        const requesterId = typeof rawRequesterId === 'string' ? rawRequesterId.trim() : rawRequesterId;
 
         const post = await Post.findById(id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
@@ -785,8 +786,9 @@ app.delete('/api/notifications/clear', async (req, res) => {
     try {
         const { email } = req.query;
         if (!email) return res.status(400).json({ error: 'Email required to clear notifications' });
+        const targetEmail = decodeURIComponent(email).trim();
 
-        await Notification.deleteMany({ targetUserEmail: email });
+        await Notification.deleteMany({ targetUserEmail: targetEmail });
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });

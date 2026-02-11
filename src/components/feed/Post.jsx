@@ -8,11 +8,13 @@ import ShareModal from '../common/ShareModal';
 
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import CommentsModal from '../common/CommentsModal';
 
 const Post = ({ post }) => {
     const { toggleLike, deletePost } = useContent();
     const { user } = useAuth();
+    const { showToast } = useToast();
     const navigate = useNavigate();
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -23,11 +25,10 @@ const Post = ({ post }) => {
     const isLiked = user && post.likes?.includes(user?.email);
 
     const isOwner = user && (
-        post.userId === user.id ||
-        post.userId === user._id ||
-        post.userId === user.email ||
-        post.userEmail === user.email ||
-        post.username === user.username
+        String(post.userId) === String(user.id || user._id) ||
+        String(post.userEmail) === String(user.email) ||
+        String(post.userId) === String(user.email) ||
+        String(post.username) === String(user.username)
     );
 
     const handleShareToUser = async (targetUser) => {
@@ -47,7 +48,7 @@ const Post = ({ post }) => {
                     }
                 })
             });
-            if (res.ok) alert(`Post shared with ${targetUser.name}!`);
+            if (res.ok) showToast(`Post shared with ${targetUser.name}!`, 'success');
         } catch (error) {
             console.error('Failed to share post:', error);
         }
@@ -77,8 +78,9 @@ const Post = ({ post }) => {
                                         const success = await deletePost(postId);
                                         if (success) {
                                             setShowMore(false);
+                                            showToast('Post deleted', 'success');
                                         } else {
-                                            alert('Failed to delete post');
+                                            showToast('Failed to delete post', 'error');
                                         }
                                     }
                                 }} style={{ color: '#ff4b4b' }}>Delete Post</button>
@@ -90,7 +92,7 @@ const Post = ({ post }) => {
                             }}>Message User</button>
                             <button onClick={async (e) => {
                                 e.stopPropagation();
-                                if (!user) return alert('Please login to report.');
+                                if (!user) return showToast('Please login to report.', 'error');
                                 try {
                                     const res = await fetch(`${config.API_URL}/api/report`, {
                                         method: 'POST',
@@ -103,15 +105,15 @@ const Post = ({ post }) => {
                                         })
                                     });
                                     if (res.ok) {
-                                        alert('Post Reported. Thank you for making Stride safer.');
+                                        showToast('Post Reported. Thank you for making Stride safer.', 'success');
                                         setShowMore(false);
                                     } else {
                                         const errData = await res.json();
-                                        alert(`Failed to report: ${errData.error || 'Server error'}`);
+                                        showToast(`Failed to report: ${errData.error || 'Server error'}`, 'error');
                                     }
                                 } catch (err) {
                                     console.error(err);
-                                    alert('Failed to report post. Please check your connection.');
+                                    showToast('Failed to report post. Please check your connection.', 'error');
                                 }
                             }}>Report Post</button>
                             <button onClick={(e) => {
@@ -119,8 +121,8 @@ const Post = ({ post }) => {
                                 const shareUrl = `${window.location.origin}/profile/${post.username || post.userId}`;
                                 if (navigator.clipboard && navigator.clipboard.writeText) {
                                     navigator.clipboard.writeText(shareUrl)
-                                        .then(() => alert('Link Copied'))
-                                        .catch(() => alert('Copy failed. Manual URL: ' + shareUrl));
+                                        .then(() => showToast('Link Copied', 'success'))
+                                        .catch(() => showToast('Copy failed. Manual URL: ' + shareUrl, 'error'));
                                 } else {
                                     // Fallback for older browsers
                                     const textArea = document.createElement("textarea");
@@ -129,9 +131,9 @@ const Post = ({ post }) => {
                                     textArea.select();
                                     try {
                                         document.execCommand('copy');
-                                        alert('Link Copied');
+                                        showToast('Link Copied', 'success');
                                     } catch (err) {
-                                        alert('Copy failed. Manual URL: ' + shareUrl);
+                                        showToast('Copy failed. Manual URL: ' + shareUrl, 'error');
                                     }
                                     document.body.removeChild(textArea);
                                 }

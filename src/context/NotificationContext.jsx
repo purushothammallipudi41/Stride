@@ -14,7 +14,7 @@ export const NotificationProvider = ({ children }) => {
     const fetchNotifications = async () => {
         if (!user?.email) return;
         try {
-            const res = await fetch(`${config.API_URL}/api/notifications?email=${user.email}`);
+            const res = await fetch(`${config.API_URL}/api/notifications?email=${encodeURIComponent(user.email)}`);
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
@@ -66,7 +66,7 @@ export const NotificationProvider = ({ children }) => {
     const clearAll = async () => {
         if (!user?.email) return false;
         try {
-            const res = await fetch(`${config.API_URL}/api/notifications/clear?email=${user.email}`, {
+            const res = await fetch(`${config.API_URL}/api/notifications/clear?email=${encodeURIComponent(user.email)}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
