@@ -336,13 +336,28 @@ app.post('/api/posts', async (req, res) => {
 app.delete('/api/posts/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId } = req.body; // Requester's email
+        const { userId: requesterId } = req.body; // Requester's email or ID
 
         const post = await Post.findById(id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
 
-        // Basic auth check: only owner can delete
-        if (post.userId !== userId) {
+        // Robust auth check: match against email, ID, or username
+        let requester = null;
+        if (requesterId) {
+            requester = await User.findOne({
+                $or: [
+                    { email: requesterId },
+                    { username: requesterId },
+                    { _id: mongoose.Types.ObjectId.isValid(requesterId) ? requesterId : new mongoose.Types.ObjectId() }
+                ]
+            });
+        }
+
+        const isOwner = post.userId === requesterId ||
+            post.userEmail === requesterId ||
+            (requester && (post.userId === requester._id.toString() || post.username === requester.username));
+
+        if (!isOwner) {
             return res.status(403).json({ error: 'Unauthorized to delete this post' });
         }
 

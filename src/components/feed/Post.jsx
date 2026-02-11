@@ -92,27 +92,49 @@ const Post = ({ post }) => {
                                 e.stopPropagation();
                                 if (!user) return alert('Please login to report.');
                                 try {
-                                    await fetch(`${config.API_URL}/api/report`, {
+                                    const res = await fetch(`${config.API_URL}/api/report`, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
-                                            reporterId: user.id || user._id,
+                                            reporterId: user.id || user._id || user.email,
                                             targetId: postId,
                                             targetType: 'post',
                                             reason: 'offensive_content'
                                         })
                                     });
-                                    alert('Post Reported. Thank you for making Stride safer.');
-                                    setShowMore(false);
+                                    if (res.ok) {
+                                        alert('Post Reported. Thank you for making Stride safer.');
+                                        setShowMore(false);
+                                    } else {
+                                        const errData = await res.json();
+                                        alert(`Failed to report: ${errData.error || 'Server error'}`);
+                                    }
                                 } catch (err) {
                                     console.error(err);
-                                    alert('Failed to report post.');
+                                    alert('Failed to report post. Please check your connection.');
                                 }
                             }}>Report Post</button>
                             <button onClick={(e) => {
                                 e.stopPropagation();
-                                navigator.clipboard.writeText(`${window.location.origin}/profile/${post.username}`);
-                                alert('Link Copied');
+                                const shareUrl = `${window.location.origin}/profile/${post.username || post.userId}`;
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(shareUrl)
+                                        .then(() => alert('Link Copied'))
+                                        .catch(() => alert('Copy failed. Manual URL: ' + shareUrl));
+                                } else {
+                                    // Fallback for older browsers
+                                    const textArea = document.createElement("textarea");
+                                    textArea.value = shareUrl;
+                                    document.body.appendChild(textArea);
+                                    textArea.select();
+                                    try {
+                                        document.execCommand('copy');
+                                        alert('Link Copied');
+                                    } catch (err) {
+                                        alert('Copy failed. Manual URL: ' + shareUrl);
+                                    }
+                                    document.body.removeChild(textArea);
+                                }
                                 setShowMore(false);
                             }}>Copy Link</button>
                         </div>

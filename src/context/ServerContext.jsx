@@ -120,7 +120,6 @@ export const ServerProvider = ({ children }) => {
         addServer,
         fetchMessages,
         sendServerMessage,
-        sendServerMessage,
         createChannel,
         leaveServer,
         deleteServer,

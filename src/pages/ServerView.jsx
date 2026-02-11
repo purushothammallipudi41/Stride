@@ -190,8 +190,6 @@ const ServerView = () => {
                     display: 'flex',
                     alignItems: 'center',
                     padding: '0 1.5rem',
-                    alignItems: 'center',
-                    padding: '0 1.5rem',
                     justifyContent: 'space-between',
                     background: 'rgba(0, 0, 0, 0.2)',
                     position: 'relative',

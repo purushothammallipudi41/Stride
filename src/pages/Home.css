@@ -247,3 +247,29 @@
         padding: 16px 0;
     } */
 }
+
+/* Pull to Refresh */
+.pull-to-refresh-indicator {
+    background: rgba(var(--accent-primary-rgb, 99, 102, 241), 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%;
+}
+
+.pull-to-refresh-indicator.refreshing {
+    height: 60px !important;
+    opacity: 1 !important;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pull-to-refresh-indicator .spin {
+    animation: spin 1s linear infinite;
+}

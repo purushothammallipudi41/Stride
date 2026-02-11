@@ -1,4 +1,5 @@
-import { Heart, Search } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Heart, Search, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
@@ -11,8 +12,51 @@ const Home = () => {
     const { unreadCount } = useNotifications();
     const { fetchPosts } = useContent();
 
+    // Pull to Refresh Logic
+    const [startY, setStartY] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
+    const [pullDistance, setPullDistance] = useState(0);
+    const containerRef = useRef(null);
+
+    const handleTouchStart = (e) => {
+        if (window.scrollY === 0) {
+            setStartY(e.touches[0].pageY);
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (startY === 0 || window.scrollY > 0) return;
+        const currentY = e.touches[0].pageY;
+        const distance = currentY - startY;
+
+        if (distance > 0 && distance < 150) {
+            setPullDistance(distance);
+            if (distance > 100) e.preventDefault();
+        }
+    };
+
+    const handleTouchEnd = async () => {
+        if (pullDistance > 100) {
+            setRefreshing(true);
+            await fetchPosts();
+            setTimeout(() => {
+                setRefreshing(false);
+                setPullDistance(0);
+            }, 500);
+        } else {
+            setPullDistance(0);
+        }
+        setStartY(0);
+    };
+
     return (
-        <div className="home-page">
+        <div
+            className="home-page"
+            ref={containerRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             <header className="home-header glass-blur">
                 <h1 className="home-title text-gradient">Stride</h1>
 
@@ -46,8 +90,20 @@ const Home = () => {
                 </div>
             </header>
             <div className="home-content">
-                <div className="pull-to-refresh" onClick={() => fetchPosts()} style={{ textAlign: 'center', padding: '10px', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    Pull down or click to refresh feed
+                <div
+                    className={`pull-to-refresh-indicator ${refreshing ? 'refreshing' : ''}`}
+                    style={{
+                        height: `${pullDistance}px`,
+                        opacity: pullDistance / 100,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        transition: refreshing ? 'height 0.3s' : 'none',
+                        color: 'var(--accent-primary)'
+                    }}
+                >
+                    <RefreshCw size={24} className={refreshing ? 'spin' : ''} style={{ transform: `rotate(${pullDistance * 2}deg)` }} />
                 </div>
                 <StoriesRail />
                 <Feed />
