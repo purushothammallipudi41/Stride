@@ -204,9 +204,11 @@ export const ContentProvider = ({ children }) => {
                 body: JSON.stringify({ userId: user?.email })
             });
             if (res.ok) {
-                setPosts(prev => prev.filter(p => (p._id || p.id) !== postId));
+                console.log('Post deleted successfully, updating state for ID:', postId);
+                setPosts(prev => prev.filter(p => String(p._id || p.id) !== String(postId)));
                 return true;
             }
+            console.warn('Deletion failed on server for ID:', postId);
             return false;
         } catch (error) {
             console.error('Failed to delete post:', error);

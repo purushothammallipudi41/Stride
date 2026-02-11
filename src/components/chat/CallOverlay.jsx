@@ -76,15 +76,15 @@ const CallOverlay = ({ username, type, onEndCall }) => {
 
     // Handle Incoming Call Answer
     const handleAnswer = async () => {
-        answerCall(); // Update state to CONNECTED
-
         const peer = new RTCPeerConnection({
             iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
         });
 
         connectionRef.current = peer;
 
-        stream.getTracks().forEach(track => peer.addTrack(track, stream));
+        if (stream) {
+            stream.getTracks().forEach(track => peer.addTrack(track, stream));
+        }
 
         peer.onicecandidate = (event) => {
             if (event.candidate) {
@@ -96,17 +96,24 @@ const CallOverlay = ({ username, type, onEndCall }) => {
         };
 
         peer.ontrack = (event) => {
+            console.log("[CALL] Received remote track");
             if (userVideo.current) userVideo.current.srcObject = event.streams[0];
         };
 
-        await peer.setRemoteDescription(new RTCSessionDescription(incomingSignal));
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
+        try {
+            await peer.setRemoteDescription(new RTCSessionDescription(incomingSignal));
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
 
-        socketRef.current.emit("answer-call", {
-            signal: answer,
-            to: caller.id
-        });
+            socketRef.current.emit("answer-call", {
+                signal: answer,
+                to: caller.id
+            });
+
+            answerCall(); // Update state to CONNECTED
+        } catch (err) {
+            console.error("[CALL] Answer error:", err);
+        }
     };
 
     // Listen for ICE candidates (needs to be attached to socket in effect, but we have socketRef)

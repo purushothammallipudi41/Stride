@@ -1,17 +1,33 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl } from '../utils/imageUtils';
+import ConfirmModal from '../components/common/ConfirmModal';
 import './Notifications.css';
 
 const Notifications = () => {
     const navigate = useNavigate();
     const { notifications, markAllRead, clearAll } = useNotifications();
     const { showToast } = useToast();
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     return (
         <div className="notifications-page">
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={async () => {
+                    const success = await clearAll();
+                    if (success) showToast('Notifications cleared!', 'success');
+                    else showToast('Failed to clear notifications', 'error');
+                }}
+                title="Clear All Notifications"
+                message="Are you sure you want to permanently clear all notifications? This cannot be undone."
+                confirmText="Clear All"
+                type="danger"
+            />
             <header className="notifications-header">
                 <div className="header-left">
                     <button className="back-btn" onClick={() => navigate(-1)}>
@@ -24,13 +40,7 @@ const Notifications = () => {
                         <CheckCircle size={18} />
                         Mark read
                     </button>
-                    <button className="clear-btn" onClick={async () => {
-                        if (window.confirm('Clear all notifications?')) {
-                            const success = await clearAll();
-                            if (success) showToast('Notifications cleared!', 'success');
-                            else showToast('Failed to clear notifications', 'error');
-                        }
-                    }} style={{ marginLeft: '12px', color: '#ff4b4b', border: '1px solid rgba(255, 75, 75, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'rgba(255, 75, 75, 0.1)' }}>
+                    <button className="clear-btn" onClick={() => setIsConfirmOpen(true)} style={{ marginLeft: '12px', color: '#ff4b4b', border: '1px solid rgba(255, 75, 75, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'rgba(255, 75, 75, 0.1)' }}>
                         Clear all
                     </button>
                 </div>

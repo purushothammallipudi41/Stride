@@ -37,15 +37,21 @@ export const CallProvider = ({ children }) => {
             socket.on('call-user', ({ from, name: callerName, signal }) => {
                 console.log("[CALL] Incoming call from", callerName);
                 setCallState('INCOMING');
-                setCaller({ id: from, username: callerName }); // In a real app, 'from' is ID, we might need lookup or pass username
+                setCaller({ id: from, username: callerName });
                 setIncomingSignal(signal);
-                setCallType('video'); // Default or pass in signal metadata
+                setCallType('video');
             });
 
-            socket.on('call-accepted', (signal) => {
-                console.log("[CALL] Call accepted!");
-                setCallState('CONNECTED');
-                connectionRef.current.signal(signal);
+            socket.on('call-accepted', async (signal) => {
+                console.log("[CALL] Call accepted signal received");
+                if (connectionRef.current) {
+                    try {
+                        await connectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+                        setCallState('CONNECTED');
+                    } catch (err) {
+                        console.error("[CALL] Error setting remote description:", err);
+                    }
+                }
             });
         }
     }, [socket]);

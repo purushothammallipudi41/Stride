@@ -158,6 +158,61 @@
     color: #6366f1;
 }
 
+.sensitivity-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+    padding: 16px 0;
+}
+
+.toggle-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toggle-label span {
+    font-weight: 600;
+    color: white;
+}
+
+.toggle-label p {
+    font-size: 12px;
+    color: #888;
+}
+
+.toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle-switch.active {
+    background: #ff4b4b;
+}
+
+.toggle-switch .knob {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active .knob {
+    left: 23px;
+}
+
 .search-layer {
     display: flex;
     flex-direction: column;

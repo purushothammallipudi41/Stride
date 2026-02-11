@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Image, Music, MapPin, Users, Share2, Film, Search, ChevronRight } from 'lucide-react';
+import { X, Camera, Image, Music, MapPin, Users, Share2, Film, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import './CreateModal.css';
 import { audiusService } from '../../services/audiusService';
 import { useContent } from '../../context/ContentContext';
@@ -23,6 +23,7 @@ const CreateModal = ({ isOpen, onClose }) => {
         music: null,
         people: []
     });
+    const [isSensitive, setIsSensitive] = useState(false);
 
     useEffect(() => {
         if (!searchQuery) {
@@ -74,7 +75,8 @@ const CreateModal = ({ isOpen, onClose }) => {
             caption,
             location: selections.location,
             musicTrack: selections.music?.title,
-            type: activeTab
+            type: activeTab,
+            isSensitive
         });
 
         if (success) {
@@ -135,6 +137,16 @@ const CreateModal = ({ isOpen, onClose }) => {
                                             </div>
                                             <div className="option-item" onClick={() => setActiveSearch('music')}>
                                                 <Music size={20} /> <span>{selections.music?.title || 'Add Music'}</span>
+                                            </div>
+                                            <div className="option-item sensitivity-toggle" onClick={() => setIsSensitive(!isSensitive)}>
+                                                <AlertCircle size={20} style={{ color: isSensitive ? '#ff4b4b' : '#888' }} />
+                                                <div className="toggle-label">
+                                                    <span>Mark as Sensitive</span>
+                                                    <p>Hide content behind a warning for others</p>
+                                                </div>
+                                                <div className={`toggle-switch ${isSensitive ? 'active' : ''}`}>
+                                                    <div className="knob" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

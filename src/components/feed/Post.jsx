@@ -10,6 +10,8 @@ import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import CommentsModal from '../common/CommentsModal';
+import ConfirmModal from '../common/ConfirmModal';
+import { ShieldAlert } from 'lucide-react';
 
 const Post = ({ post }) => {
     const { toggleLike, deletePost } = useContent();
@@ -19,6 +21,8 @@ const Post = ({ post }) => {
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [showMore, setShowMore] = useState(false);
+    const [showSensitive, setShowSensitive] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // MongoDB uses _id, local new posts might use id
     const postId = post._id || post.id;
@@ -56,12 +60,36 @@ const Post = ({ post }) => {
 
     return (
         <article className="post-card">
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={async () => {
+                    const success = await deletePost(postId);
+                    if (success) {
+                        showToast('Post deleted', 'success');
+                    } else {
+                        showToast('Failed to delete post', 'error');
+                    }
+                }}
+                title="Delete Post"
+                message="Are you sure you want to permanently delete this post? This action cannot be undone."
+                confirmText="Delete"
+                type="danger"
+            />
             <div className="post-header">
                 <div className="post-user">
                     <img src={getImageUrl(post.userAvatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.username}`} alt={post.username} />
                     <div className="user-details" onClick={() => navigate(`/profile/${post.username}`)} style={{ cursor: 'pointer' }}>
                         <h4>{post.username}</h4>
-                        <p>{post.timestamp}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <p>{post.timestamp}</p>
+                            {post.isSensitive && (
+                                <span className="sensitive-badge">
+                                    <ShieldAlert size={12} />
+                                    Sensitive
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className="post-more-container">
@@ -71,18 +99,10 @@ const Post = ({ post }) => {
                     {showMore && (
                         <div className="post-more-dropdown glass-card animate-in" onClick={e => e.stopPropagation()}>
                             {isOwner && (
-                                <button className="delete-btn" onClick={async (e) => {
+                                <button className="delete-btn" onClick={(e) => {
                                     e.stopPropagation();
-                                    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
-                                    if (confirmDelete) {
-                                        const success = await deletePost(postId);
-                                        if (success) {
-                                            setShowMore(false);
-                                            showToast('Post deleted', 'success');
-                                        } else {
-                                            showToast('Failed to delete post', 'error');
-                                        }
-                                    }
+                                    setShowMore(false);
+                                    setIsConfirmOpen(true);
                                 }} style={{ color: '#ff4b4b' }}>Delete Post</button>
                             )}
                             <button onClick={(e) => {
@@ -146,17 +166,31 @@ const Post = ({ post }) => {
 
             <div className="post-content">
                 {(post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
-                    <img
-                        src={getImageUrl(post.contentUrl)}
-                        alt="Post content"
-                        className="post-image"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
-                        }}
-                    />
+                    <div className="post-image-container">
+                        <img
+                            src={getImageUrl(post.contentUrl)}
+                            alt="Post content"
+                            className={`post-image ${post.isSensitive && !showSensitive ? 'blur-active' : ''}`}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
+                            }}
+                        />
+                        {post.isSensitive && !showSensitive && (
+                            <div className="sensitive-content-overlay animate-in" onClick={(e) => e.stopPropagation()}>
+                                <ShieldAlert size={40} color="#ff4b4b" />
+                                <p>This post is marked as sensitive</p>
+                                <button className="show-sensitive-btn" onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowSensitive(true);
+                                }}>
+                                    Show Content
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 )}
-                {post.caption && <div className="post-text">{post.caption}</div>}
+                {post.caption && <div className="post-caption">{post.caption}</div>}
             </div>
 
             <div className="post-footer">

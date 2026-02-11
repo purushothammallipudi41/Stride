@@ -8,6 +8,8 @@ const postSchema = new mongoose.Schema({
     contentUrl: String,
     caption: String,
     musicTrack: String,
+    isSensitive: { type: Boolean, default: false },
+    moderationStatus: { type: String, enum: ['none', 'flagged', 'reviewed'], default: 'none' },
     likes: [String],
     comments: [{
         id: String,

@@ -21,6 +21,19 @@ const ServerMessage = require('./models/ServerMessage');
 const Notification = require('./models/Notification');
 const Report = require('./models/Report');
 
+function checkContentSafety(text, mediaUrl) {
+    const sensitiveKeywords = [
+        'nude', 'naked', 'sexual', 'porn', 'xxx',
+        'violence', 'blood', 'gore', 'kill', 'death',
+        'weapon', 'gun', 'drug', 'cocaine', 'heroin'
+    ];
+
+    if (!text) return false;
+
+    const lowerText = text.toLowerCase();
+    return sensitiveKeywords.some(keyword => lowerText.includes(keyword));
+}
+
 // Connect to MongoDB
 connectDB();
 
@@ -316,6 +329,12 @@ app.get('/api/posts', async (req, res) => {
 app.post('/api/posts', async (req, res) => {
     try {
         const postData = req.body;
+
+        // Auto-check for sensitive content in caption
+        if (postData.caption && checkContentSafety(postData.caption)) {
+            postData.isSensitive = true;
+            postData.moderationStatus = 'flagged';
+        }
 
         // Offload media to Cloudinary if it's base64
         if (postData.contentUrl && postData.contentUrl.startsWith('data:')) {
@@ -1028,17 +1047,56 @@ app.get('/api/audius/stream/:id', async (req, res) => {
     }
 });
 
+// Safety Policy Route
+app.get('/safety', (req, res) => {
+    res.send(`
+        <html>
+            <head>
+                <title>Child Safety Standards | Stride</title>
+                <style>body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }</style>
+            </head>
+            <body>
+                <h1>Child Safety Standards</h1>
+                <p>Stride is committed to maintaining a safe environment for all users, especially minors. We have a zero-tolerance policy for Child Sexual Abuse Material (CSAM).</p>
+                <h2>Reporting Mechanisms</h2>
+                <p>Users can report inappropriate content directly within the app using the "Report" button on any post or profile.</p>
+                <h2>Compliance</h2>
+                <p>We cooperate with law enforcement and report all confirmed CSAM to the relevant authorities, including NCMEC.</p>
+                <p>Contact: purushothammallipudi41@gmail.com</p>
+            </body>
+        </html>
+    `);
+});
+
 // Start Server
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
 io.on("connection", (socket) => {
-    socket.on("join-room", (userId) => socket.join(userId));
-    socket.on("call-user", ({ userToCall, signalData, from }) => {
-        io.to(userToCall).emit("call-user", { signal: signalData, from });
+    socket.on("join-room", (userId) => {
+        socket.join(userId);
+        console.log(`[SOCKET] User joined room: ${userId}`);
     });
-    socket.on("answer-call", (data) => io.to(data.to).emit("call-accepted", data.signal));
-    socket.on("disconnect", () => socket.broadcast.emit("call-ended"));
+
+    socket.on("call-user", ({ userToCall, signalData, from, name }) => {
+        console.log(`[SOCKET] Call from ${from} (${name}) to ${userToCall}`);
+        io.to(userToCall).emit("call-user", { signal: signalData, from, name });
+    });
+
+    socket.on("answer-call", (data) => {
+        console.log(`[SOCKET] Call answered by ${socket.id} to ${data.to}`);
+        io.to(data.to).emit("call-accepted", data.signal);
+    });
+
+    socket.on("ice-candidate", (data) => {
+        console.log(`[SOCKET] ICE Candidate from ${socket.id} to ${data.target}`);
+        io.to(data.target).emit("ice-candidate", data.candidate);
+    });
+
+    socket.on("disconnect", () => {
+        console.log(`[SOCKET] Disconnected: ${socket.id}`);
+        socket.broadcast.emit("call-ended");
+    });
 });
 
 httpServer.listen(port, () => {
