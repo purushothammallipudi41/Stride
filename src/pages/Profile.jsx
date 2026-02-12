@@ -92,7 +92,8 @@ const Profile = () => {
     const handleFollow = async () => {
         if (!currentUser || !profileUser) return;
         try {
-            const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser.email}/follow`, {
+            const targetId = profileUser._id || profileUser.id || profileUser.email;
+            const res = await fetch(`${config.API_URL}/api/users/${targetId}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ followerEmail: currentUser.email })
@@ -101,14 +102,18 @@ const Profile = () => {
                 // Notification Logic
                 addNotification({
                     type: 'follow',
-                    user: { name: currentUser.name || currentUser.username, avatar: currentUser.avatar, email: currentUser.email },
+                    user: {
+                        name: currentUser.name || currentUser.username,
+                        avatar: currentUser.avatar,
+                        email: currentUser.email
+                    },
                     content: 'started following you',
-                    targetUserEmail: profileUser.id || profileUser.email
+                    targetUserEmail: profileUser.email
                 });
 
                 // Refresh local user and current profile
                 await refreshUser();
-                const updatedRes = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser.email}`);
+                const updatedRes = await fetch(`${config.API_URL}/api/users/${targetId}`);
                 if (updatedRes.ok) {
                     const updatedData = await updatedRes.json();
                     setProfileUser(updatedData);
@@ -135,7 +140,9 @@ const Profile = () => {
         </div>
     );
 
-    const isFollowing = profileUser.followers?.includes(currentUser?.id || currentUser?.email);
+    // UNIFY ID CHECK: Backend stores _id strings in followers array
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const isFollowing = profileUser.followers?.includes(currentUserId);
 
     const userPosts = allPosts.filter(p => (p.username === profileUser.username) && p.type !== 'reel');
     const userReels = allPosts.filter(p => (p.username === profileUser.username) && p.type === 'reel');

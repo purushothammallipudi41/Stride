@@ -747,16 +747,19 @@ app.post('/api/users/:email/update', async (req, res) => {
 
 app.post('/api/users/:id/follow', async (req, res) => {
     try {
-        const { id } = req.params; // Target ID
+        const { id } = req.params; // Target ID or Email
         const { followerEmail } = req.body; // Me
 
         const currentUser = await User.findOne({ email: followerEmail });
-        // Handling if id is ObjectId or legacy Int. 
-        // User.findById might fail if id is not ObjectId.
-        let targetUser = mongoose.Types.ObjectId.isValid(id) ? await User.findById(id) : null;
-        if (!targetUser) {
-            // Fallback find if seeded without specific objectId
-            targetUser = await User.findOne({ _id: id }); // unlikely to match if not ObjectId, but maybe
+
+        let targetUser;
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            targetUser = await User.findById(id);
+        } else {
+            // If not a valid ObjectId, try finding by email or username
+            targetUser = await User.findOne({
+                $or: [{ email: id }, { username: id }]
+            });
         }
 
         if (currentUser && targetUser) {
