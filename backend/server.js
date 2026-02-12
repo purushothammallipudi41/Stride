@@ -441,7 +441,7 @@ app.post('/api/posts/:id/comment', async (req, res) => {
 // Stories
 app.get('/api/stories', async (req, res) => {
     try {
-        const stories = await Story.find().sort({ timestamp: 1 });
+        const stories = await Story.find().sort({ timestamp: -1 });
         res.json(stories);
     } catch (e) {
         res.status(500).json({ error: e.message });
