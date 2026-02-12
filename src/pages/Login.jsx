@@ -294,7 +294,7 @@ const Login = () => {
                     <span style={{ margin: '0 8px' }}>•</span>
                     <a href="/legal/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
                 </div>
-                <div className="version-tag">v1.1.5-verified</div>
+                <div className="version-tag">v1.1.6-verified</div>
             </div>
         </div>
     );

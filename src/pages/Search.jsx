@@ -1,29 +1,39 @@
 import { useState, useEffect } from 'react';
 import { Search, User, Hash, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
+import { getImageUrl } from '../utils/imageUtils';
 
 const SearchPage = () => {
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // all, users, channels
-    const [mockUsers, setMockUsers] = useState([]);
+    const [userResults, setUserResults] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        // Mock data fetch
-        const users = [
-            { id: 1, name: 'alex_beats', username: '@alex_beats', avatar: 'https://i.pravatar.cc/150?u=alex_beats', status: 'online' },
-            { id: 2, name: 'sarah_j', username: '@sarah_j', avatar: 'https://i.pravatar.cc/150?u=sarah_j', status: 'idle' },
-            { id: 3, name: 'lofi_lover', username: '@lofi_lover', avatar: 'https://i.pravatar.cc/150?u=lofi', status: 'dnd' },
-            { id: 4, name: 'mike_drop', username: '@mike_drop', avatar: 'https://i.pravatar.cc/150?u=mike', status: 'offline' },
-            { id: 5, name: 'beat_maker', username: '@beat_maker', avatar: 'https://i.pravatar.cc/150?u=beat', status: 'offline' }
-        ];
-        setMockUsers(users);
-    }, []);
+        if (!query.trim()) {
+            setUserResults([]);
+            return;
+        }
 
-    const filteredUsers = mockUsers.filter(u =>
-        u.name.toLowerCase().includes(query.toLowerCase()) ||
-        u.username.toLowerCase().includes(query.toLowerCase())
-    );
+        const debounce = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`${config.API_URL}/api/users/search?q=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setUserResults(data || []);
+                }
+            } catch (error) {
+                console.error('Search failed:', error);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(debounce);
+    }, [query]);
 
     return (
         <div className="page-container" style={{ padding: 0 }}>
@@ -92,14 +102,14 @@ const SearchPage = () => {
             {/* Results */}
             <div style={{ padding: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
                 <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>
-                    {query ? 'Search Results' : 'Suggested'}
+                    {loading ? 'Searching...' : (query ? 'Search Results' : 'Suggested')}
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {filteredUsers.map(user => (
+                    {(activeTab === 'all' || activeTab === 'users') && userResults.map(user => (
                         <div
-                            key={user.id}
-                            onClick={() => navigate(`/profile/${user.username.replace('@', '')}`)}
+                            key={user._id || user.id}
+                            onClick={() => navigate(`/profile/${user.username}`)}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -113,34 +123,35 @@ const SearchPage = () => {
                             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                         >
-                            <div style={{ position: 'relative' }}>
-                                <div style={{
+                            <img
+                                src={getImageUrl(user.avatar)}
+                                alt={user.username}
+                                style={{
                                     width: '48px',
                                     height: '48px',
                                     borderRadius: '50%',
-                                    backgroundImage: `url(${user.avatar})`,
-                                    backgroundSize: 'cover'
-                                }} />
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: '0',
-                                    right: '0',
-                                    width: '12px',
-                                    height: '12px',
-                                    borderRadius: '50%',
-                                    border: '2px solid #1e1e2f',
-                                    background: user.status === 'online' ? '#10b981' : user.status === 'idle' ? '#f59e0b' : '#6b7280'
-                                }} />
-                            </div>
+                                    objectFit: 'cover'
+                                }}
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+                                }}
+                            />
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 600, fontSize: '1rem' }}>{user.name}</div>
-                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{user.username}</div>
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@{user.username}</div>
                             </div>
                             <button className="icon-btn">
                                 <User size={18} />
                             </button>
                         </div>
                     ))}
+
+                    {!loading && query && userResults.length === 0 && (
+                        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>
+                            No users found for "{query}"
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
