@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Music, Play, TrendingUp, Share2 } from 'lucide-react';
+import { Search, Music, Play, TrendingUp, Share2, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { audiusService } from '../services/audiusService';
 import { useMusic } from '../context/MusicContext';
 import ShareModal from '../components/common/ShareModal';
@@ -9,6 +10,7 @@ import './Explore.css';
 
 const Explore = () => {
     const { playTrack, currentTrack, isPlaying } = useMusic();
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [userResults, setUserResults] = useState([]);
@@ -94,7 +96,7 @@ const Explore = () => {
                                 </div>
                                 <div className="users-grid">
                                     {userResults.map(user => (
-                                        <div key={user._id || user.id} className="user-result-card" onClick={() => window.location.href = `/profile/${user.username}`}>
+                                        <div key={user._id || user.id} className="user-result-card" onClick={() => navigate(`/profile/${user.username}`)}>
                                             <img
                                                 src={getImageUrl(user.avatar)}
                                                 alt={user.username}

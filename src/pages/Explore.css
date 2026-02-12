@@ -218,3 +218,66 @@
         gap: 12px;
     }
 }
+
+/* User Search Results Styles */
+.users-results-section {
+    margin-bottom: 40px;
+    animation: fadeIn 0.8s ease-out backwards;
+}
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.user-result-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.user-result-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-primary);
+    transform: translateX(8px);
+}
+
+.user-result-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    border: 2px solid var(--glass-border);
+}
+
+.user-result-card .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-result-card .username {
+    font-weight: 700;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.user-result-card .name {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}

@@ -341,8 +341,8 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                 <ShareModal
                     isOpen={isShareModalOpen}
                     onClose={() => setIsShareModalOpen(false)}
-                    onShare={handleShareToUser}
-                    contentTitle={`${currentStory.username}'s Story`}
+                    data={currentStory}
+                    type="story"
                 />
             </div>
         </div>,
