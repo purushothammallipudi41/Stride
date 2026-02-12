@@ -3,12 +3,15 @@ import { Search, Music, Play, TrendingUp, Share2 } from 'lucide-react';
 import { audiusService } from '../services/audiusService';
 import { useMusic } from '../context/MusicContext';
 import ShareModal from '../components/common/ShareModal';
+import config from '../config';
+import { getImageUrl } from '../utils/imageUtils';
 import './Explore.css';
 
 const Explore = () => {
     const { playTrack, currentTrack, isPlaying } = useMusic();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [userResults, setUserResults] = useState([]);
     const [trending, setTrending] = useState([]);
     const [loadingTrending, setLoadingTrending] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -41,14 +44,21 @@ const Explore = () => {
     useEffect(() => {
         if (!searchQuery.trim()) {
             setSearchResults([]);
+            setUserResults([]);
             return;
         }
 
         const debounce = setTimeout(async () => {
             setLoading(true);
             try {
-                const results = await audiusService.search(searchQuery);
-                setSearchResults(results);
+                // Parallel search: Music + Users
+                const [audioResults, userRes] = await Promise.all([
+                    audiusService.search(searchQuery),
+                    fetch(`${config.API_URL}/api/users/search?q=${encodeURIComponent(searchQuery)}`).then(res => res.json())
+                ]);
+
+                setSearchResults(audioResults);
+                setUserResults(userRes || []);
             } catch (error) {
                 console.error('Search failed:', error);
             } finally {
@@ -76,9 +86,37 @@ const Explore = () => {
             <main className="explore-content">
                 {searchQuery ? (
                     <section className="results-section">
+                        {/* Users Search Results */}
+                        {userResults.length > 0 && (
+                            <div className="users-results-section">
+                                <div className="section-header">
+                                    <h3>Users</h3>
+                                </div>
+                                <div className="users-grid">
+                                    {userResults.map(user => (
+                                        <div key={user._id || user.id} className="user-result-card" onClick={() => window.location.href = `/profile/${user.username}`}>
+                                            <img
+                                                src={getImageUrl(user.avatar)}
+                                                alt={user.username}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+                                                }}
+                                            />
+                                            <div className="user-info">
+                                                <span className="username">@{user.username}</span>
+                                                <span className="name">{user.name}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Music Results */}
                         <div className="section-header">
                             <Music size={24} />
-                            <h3>{loading ? 'Searching...' : `Results for "${searchQuery}"`}</h3>
+                            <h3>{loading ? 'Searching...' : `Tracks for "${searchQuery}"`}</h3>
                         </div>
                         {loading ? (
                             <div className="flex-center" style={{ padding: '40px' }}>
@@ -96,6 +134,10 @@ const Explore = () => {
                                     />
                                 ))}
                             </div>
+                        )}
+
+                        {!loading && searchResults.length === 0 && userResults.length === 0 && (
+                            <p className="no-results">No results found.</p>
                         )}
                     </section>
                 ) : (

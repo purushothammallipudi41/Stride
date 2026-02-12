@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import { X, Search } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
@@ -9,6 +10,7 @@ const UserListModal = ({ title, userIds, onClose }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -41,6 +43,11 @@ const UserListModal = ({ title, userIds, onClose }) => {
         user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleUserClick = (username) => {
+        navigate(`/profile/${username}`);
+        onClose();
+    };
+
     return createPortal(
         <div className="user-modal-overlay" onClick={onClose}>
             <div className="user-modal-content glass-card" onClick={e => e.stopPropagation()}>
@@ -64,7 +71,12 @@ const UserListModal = ({ title, userIds, onClose }) => {
                         <div className="modal-loading"><div className="spinner small"></div></div>
                     ) : filteredUsers.length > 0 ? (
                         filteredUsers.map(u => (
-                            <div key={u.id || u._id || u.email} className="user-modal-item">
+                            <div
+                                key={u.id || u._id || u.email}
+                                className="user-modal-item"
+                                onClick={() => handleUserClick(u.username)}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <img
                                     src={getImageUrl(u.avatar)}
                                     alt={u.name}
@@ -78,7 +90,10 @@ const UserListModal = ({ title, userIds, onClose }) => {
                                     <span className="user-item-username">{u.username}</span>
                                     <span className="user-item-name">{u.name}</span>
                                 </div>
-                                <button className="user-item-btn">View</button>
+                                <button className="user-item-btn" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUserClick(u.username);
+                                }}>View</button>
                             </div>
                         ))
                     ) : (

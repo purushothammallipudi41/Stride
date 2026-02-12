@@ -153,14 +153,20 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
         };
 
         try {
-            if (navigator.share) {
+            if (navigator.share && navigator.canShare(shareData)) {
                 await navigator.share(shareData);
             } else {
+                // Fallback to clipboard if native share isn't available
                 await navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                alert('Link copied to clipboard! (Native sharing not supported)');
             }
         } catch (err) {
             console.error('Error sharing:', err);
+            // Don't show alert for user abort
+            if (err.name !== 'AbortError') {
+                alert('Failed to share. Link copied to clipboard.');
+                navigator.clipboard.writeText(window.location.href);
+            }
         }
         setShowMoreMenu(false);
     };

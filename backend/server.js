@@ -550,6 +550,24 @@ app.post('/api/users/batch', async (req, res) => {
     }
 });
 
+app.get('/api/users/search', async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json([]);
+
+        const users = await User.find({
+            $or: [
+                { username: { $regex: q, $options: 'i' } },
+                { name: { $regex: q, $options: 'i' } }
+            ]
+        }, 'username name email avatar').limit(10);
+
+        res.json(users);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/api/users/:identifier', async (req, res) => {
     try {
         const { identifier } = req.params;
