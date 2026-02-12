@@ -614,16 +614,11 @@ app.post('/api/register', async (req, res) => {
         const verificationCode = generateVerificationCode();
         const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
-        // Auto-Follow Logic
+        // Auto-Follow Logic (Robust)
         const targetUsernames = ['stride', 'purushotham_mallipudi'];
         const targets = await User.find({ username: { $in: targetUsernames } });
 
-        let initialFollowing = [];
-
-        // Add targets to new user's following list (just IDs first)
-        if (targets.length > 0) {
-            initialFollowing = targets.map(t => t._id.toString());
-        }
+        const initialFollowing = targets.map(t => t._id.toString());
 
         const newUser = await User.create({
             username,
@@ -633,18 +628,22 @@ app.post('/api/register', async (req, res) => {
             avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${username}`,
             bio: "New to Stride! 🎵",
             isVerified: false,
-            verificationRequired: true, // Enforce verification for new users
+            verificationRequired: true,
             verificationCode,
             verificationCodeExpires,
             following: initialFollowing,
-            stats: { posts: 0, followers: 0, following: initialFollowing.length }
+            stats: {
+                posts: 0,
+                followers: 0,
+                following: initialFollowing.length
+            }
         });
 
-        // Update targets' followers list AFTER newUser is created
-        if (targets.length > 0) {
-            for (const target of targets) {
-                target.followers.push(newUser._id);
-                target.stats.followers += 1;
+        // Update targets' followers list
+        for (const target of targets) {
+            if (!target.followers.includes(newUser._id.toString())) {
+                target.followers.push(newUser._id.toString());
+                target.stats.followers = target.followers.length;
                 await target.save();
             }
         }
@@ -1120,6 +1119,41 @@ io.on("connection", (socket) => {
     });
 });
 
+// Final Official Account Relationships Sync
+async function syncOfficialRelationships() {
+    try {
+        const stride = await User.findOne({ username: 'stride' });
+        const puru = await User.findOne({ username: 'purushotham_mallipudi' });
+
+        if (stride && puru) {
+            const strideId = stride._id.toString();
+            const puruId = puru._id.toString();
+
+            let changed = false;
+            // Stride follows Purushotham
+            if (!stride.following.includes(puruId)) {
+                stride.following.push(puruId);
+                stride.stats.following = stride.following.length;
+                changed = true;
+            }
+            if (!puru.followers.includes(strideId)) {
+                puru.followers.push(strideId);
+                puru.stats.followers = puru.followers.length;
+                changed = true;
+            }
+
+            if (changed) {
+                await stride.save();
+                await puru.save();
+                console.log('[INIT] Official relationship synced: Stride now follows purushotham_mallipudi');
+            }
+        }
+    } catch (e) {
+        console.error('[INIT] Error syncing official relationships:', e);
+    }
+}
+
 httpServer.listen(port, () => {
     console.log(`Backend server running at http://localhost:${port}`);
+    syncOfficialRelationships();
 });
