@@ -1,7 +1,7 @@
 .profile-container {
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl);
-    max-width: 900px;
-    margin: 0 auto;
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-xl);
+    max-width: 1000px;
+    margin-left: 0;
 }
 
 .profile-header {
@@ -302,7 +302,7 @@
 
 @media (max-width: 640px) {
     .profile-container {
-        padding: 0 16px 40px 16px;
+        padding: 0 16px 40px 8px;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -312,12 +312,12 @@
         display: grid;
         grid-template-columns: 86px 1fr;
         grid-template-areas:
-            "avatar username"
+            "username username"
             "avatar actions"
             "avatar stats"
             "bio bio";
         column-gap: 16px;
-        row-gap: 2px;
+        row-gap: 4px;
         margin-bottom: 12px;
         align-items: center;
         margin-top: 0;
