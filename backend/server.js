@@ -369,6 +369,52 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
+// --- Diagnostics ---
+app.get('/api/diag/email', (req, res) => {
+    res.json({
+        EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}...` : 'MISSING',
+        EMAIL_PASS: process.env.EMAIL_PASS ? 'SET' : 'MISSING',
+        RESEND_API_KEY: process.env.RESEND_API_KEY ? 'SET' : 'MISSING',
+        transporter_initialized: !!transporter,
+        resend_initialized: !!resend,
+        node_env: process.env.NODE_ENV,
+        timestamp: new Date()
+    });
+});
+
+app.post('/api/diag/send-test', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Target email required' });
+
+    console.log(`[DIAG] Attempting manual test email to: ${email}`);
+    
+    try {
+        if (transporter) {
+            const info = await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Stride Diagnostic Test',
+                text: 'This is a manual diagnostic test email from the Stride backend.'
+            });
+            return res.json({ success: true, via: 'Nodemailer', info });
+        } else if (resend) {
+            const { data, error } = await resend.emails.send({
+                from: 'Stride <onboarding@resend.dev>',
+                to: [email],
+                subject: 'Stride Diagnostic Test',
+                text: 'This is a manual diagnostic test email from the Stride backend.'
+            });
+            if (error) throw error;
+            return res.json({ success: true, via: 'Resend', data });
+        } else {
+            return res.status(500).json({ error: 'No email service configured' });
+        }
+    } catch (err) {
+        console.error('[DIAG ERROR]', err);
+        res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    }
+});
+
 // Posts
 app.get('/api/posts', async (req, res) => {
     try {
