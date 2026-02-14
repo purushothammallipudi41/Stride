@@ -64,13 +64,23 @@ const nodemailer = require('nodemailer');
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const transporter = (process.env.EMAIL_USER && process.env.EMAIL_PASS) ? nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    try {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+        console.log('[EMAIL] Nodemailer configured with ' + process.env.EMAIL_USER);
+    } catch (e) {
+        console.error('[EMAIL] Failed to configure Nodemailer:', e.message);
     }
-}) : null;
+} else {
+    console.log('[EMAIL] No credentials found. Using Mock Mode (Codes will be logged).');
+}
 
 function generateVerificationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
