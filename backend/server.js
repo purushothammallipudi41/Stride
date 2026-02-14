@@ -1083,8 +1083,22 @@ app.post('/api/report', async (req, res) => {
 
 // Servers
 app.get('/api/servers', async (req, res) => {
-    const servers = await ServerModel.find().sort({ id: 1 });
-    res.json(servers);
+    try {
+        const servers = await ServerModel.find().sort({ id: 1 }).lean();
+
+        // Calculate dynamic member counts for each server
+        const serversWithMemberCounts = await Promise.all(servers.map(async (server) => {
+            const memberCount = await User.countDocuments({ "serverProfiles.serverId": server.id });
+            return {
+                ...server,
+                members: memberCount // Override static count with dynamic count
+            };
+        }));
+
+        res.json(serversWithMemberCounts);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.post('/api/servers', async (req, res) => {
