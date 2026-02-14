@@ -110,7 +110,7 @@ async function sendVerificationEmail(email, code) {
     if (resend) {
         try {
             const { data, error } = await resend.emails.send({
-                from: 'Stride <onboarding@resend.dev>',
+                from: 'Stride <noreply@thestrideapp.in>',
                 to: [email],
                 subject: 'Verify your Stride Account',
                 html: emailHtml
@@ -396,7 +396,7 @@ app.post('/api/diag/send-test', async (req, res) => {
         try {
             console.log(`[DIAG] Testing Resend to: ${email}`);
             const { data, error } = await resend.emails.send({
-                from: 'Stride <onboarding@resend.dev>',
+                from: 'Stride <noreply@thestrideapp.in>',
                 to: [email],
                 subject: 'Stride Resend Test',
                 text: 'Testing Resend from Render.'
