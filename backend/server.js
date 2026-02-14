@@ -1213,6 +1213,7 @@ app.post('/api/servers/:serverId/messages/:channelId', async (req, res) => {
             channelId,
             userEmail: req.body.userEmail,
             username: req.body.username,
+            userAvatar: req.body.userAvatar,
             text: req.body.text,
             type: req.body.type || 'text',
             time: "Just now"

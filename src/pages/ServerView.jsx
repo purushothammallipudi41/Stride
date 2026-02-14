@@ -73,6 +73,7 @@ const ServerView = () => {
         const msgData = {
             userEmail: user.email,
             username: user.username,
+            userAvatar: user.avatar,
             text,
             type
         };
@@ -87,6 +88,8 @@ const ServerView = () => {
         messages: messages.map(m => ({
             ...m,
             isMe: m.userEmail === user?.email,
+            senderName: m.username,
+            senderAvatar: m.userAvatar,
             gif: m.type === 'gif' ? m.text : null
         }))
     };

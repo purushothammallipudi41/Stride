@@ -5,6 +5,7 @@ const serverMessageSchema = new mongoose.Schema({
     channelId: String,
     userEmail: String,
     username: String,
+    userAvatar: String,
     text: String,
     type: { type: String, default: 'text' },
     timestamp: { type: Date, default: Date.now },

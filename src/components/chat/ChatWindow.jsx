@@ -140,6 +140,15 @@ const ChatWindow = ({ activeChat, onSendMessage, onBack, showHeader = true }) =>
             <div className="chat-messages premium-scrollbar">
                 {activeChat.messages.map((msg, index) => (
                     <div key={index} className={`message ${msg.isMe ? 'me' : 'them'} animate-in`}>
+                        {!msg.isMe && (
+                            <div className="message-sender-info">
+                                <div
+                                    className="message-sender-avatar"
+                                    style={{ backgroundImage: `url(${getImageUrl(msg.senderAvatar) || `https://i.pravatar.cc/100?u=${msg.senderName}`})` }}
+                                />
+                                <span className="message-sender-name">{msg.senderName}</span>
+                            </div>
+                        )}
                         <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''}`}>
                             {msg.sharedContent ? (
                                 <div className="shared-content-card">

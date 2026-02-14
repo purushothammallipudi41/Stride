@@ -302,7 +302,10 @@
 
 @media (max-width: 640px) {
     .profile-container {
-        padding: 20px 16px 100px 16px;
+        padding: 20px 16px 40px 16px;
+        min-height: calc(100vh - 60px - env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
     }
 
     .profile-header {
