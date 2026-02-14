@@ -54,48 +54,88 @@ export const ServerMenu = ({ isOpen, onClose, onInvite, onSettings, onCreateChan
     );
 };
 
-// --- Members List Component ---
-export const MembersList = ({ isOpen, onClose }) => {
+// --- MembersList Component ---
+import { useServer } from '../../context/ServerContext';
+import { useSocket } from '../../context/SocketContext';
+
+export const MembersList = ({ isOpen, onClose, serverId }) => {
+    const { fetchMembers } = useServer();
+    const { socket } = useSocket();
+    const [members, setMembers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (isOpen && serverId) {
+            setLoading(true);
+            fetchMembers(serverId).then(data => {
+                setMembers(data);
+                setLoading(false);
+            });
+        }
+    }, [isOpen, serverId]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleStatusChange = ({ userId, status }) => {
+            setMembers(prev => prev.map(m =>
+                m.id === userId ? { ...m, status } : m
+            ));
+        };
+
+        socket.on('user-status-change', handleStatusChange);
+        return () => socket.off('user-status-change', handleStatusChange);
+    }, [socket]);
+
     if (!isOpen) return null;
 
-    const onlineMembers = [];
-    const offlineMembers = [];
+    const onlineMembers = members.filter(m => m.status === 'online');
+    const offlineMembers = members.filter(m => m.status === 'offline');
 
     return (
         <div className="members-sidebar">
             <div className="members-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Members - {onlineMembers.length + offlineMembers.length}</span>
+                <span>Members - {members.length}</span>
                 <button className="icon-btn" onClick={onClose} title="Close Members List">
                     <X size={18} />
                 </button>
             </div>
-            <div className="members-list premium-scrollbar">
-                <div className="member-category">
-                    <h4>Online — {onlineMembers.length}</h4>
-                    {onlineMembers.map(m => (
-                        <div key={m.name} className="member-item">
-                            <div className="member-avatar" style={{ backgroundImage: `url(${m.avatar})` }}>
-                                <div className={`status-dot ${m.status}`} />
-                            </div>
-                            <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {m.name}
-                                {m.isOfficial && <BadgeCheck size={12} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                            </span>
-                        </div>
-                    ))}
+            {loading ? (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <div className="loading-spinner" style={{ width: '24px', height: '24px', margin: '0 auto' }}></div>
                 </div>
-                <div className="member-category" style={{ marginTop: '1.5rem' }}>
-                    <h4>Offline — {offlineMembers.length}</h4>
-                    {offlineMembers.map(m => (
-                        <div key={m.name} className="member-item" style={{ opacity: 0.5 }}>
-                            <div className="member-avatar" style={{ backgroundImage: `url(${m.avatar})` }}>
-                                <div className={`status-dot ${m.status}`} />
+            ) : (
+                <div className="members-list premium-scrollbar">
+                    <div className="member-category">
+                        <h4>Online — {onlineMembers.length}</h4>
+                        {onlineMembers.map(m => (
+                            <div key={m.id} className="member-item">
+                                <div className="member-avatar" style={{ backgroundImage: `url(${m.avatar || '/default-avatar.png'})` }}>
+                                    <div className="status-dot online" />
+                                </div>
+                                <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {m.nickname || m.username}
+                                    {m.isOfficial && <BadgeCheck size={12} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                                </span>
                             </div>
-                            <span>{m.name}</span>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+                    <div className="member-category" style={{ marginTop: '1.5rem' }}>
+                        <h4>Offline — {offlineMembers.length}</h4>
+                        {offlineMembers.map(m => (
+                            <div key={m.id} className="member-item" style={{ opacity: 0.5 }}>
+                                <div className="member-avatar" style={{ backgroundImage: `url(${m.avatar || '/default-avatar.png'})` }}>
+                                    <div className="status-dot offline" />
+                                </div>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {m.nickname || m.username}
+                                    {m.isOfficial && <BadgeCheck size={12} color="var(--text-secondary)" />}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

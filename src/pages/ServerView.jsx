@@ -279,6 +279,7 @@ const ServerView = () => {
             <MembersList
                 isOpen={showMembers}
                 onClose={() => setShowMembers(false)}
+                serverId={serverId}
             />
             <SearchModal
                 isOpen={showSearch}

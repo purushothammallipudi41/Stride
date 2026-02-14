@@ -1436,10 +1436,29 @@ app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
+// Track online users
+const onlineUsers = new Map(); // userId -> { socketId, username, email }
+
 io.on("connection", (socket) => {
-    socket.on("join-room", (userId) => {
+    socket.on("join-room", async (userId) => {
         socket.join(userId);
         console.log(`[SOCKET] User joined room: ${userId}`);
+
+        // Try to find user to track online status
+        try {
+            const user = await User.findById(userId);
+            if (user) {
+                onlineUsers.set(userId, {
+                    socketId: socket.id,
+                    username: user.username,
+                    email: user.email,
+                    avatar: user.avatar
+                });
+                io.emit("user-status-change", { userId, status: 'online' });
+            }
+        } catch (e) {
+            console.error('[SOCKET] Error in join-room:', e);
+        }
     });
 
     socket.on("call-user", ({ userToCall, signalData, from, name }) => {
@@ -1459,8 +1478,55 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log(`[SOCKET] Disconnected: ${socket.id}`);
+
+        let disconnectedUserId = null;
+        for (const [userId, data] of onlineUsers.entries()) {
+            if (data.socketId === socket.id) {
+                disconnectedUserId = userId;
+                break;
+            }
+        }
+
+        if (disconnectedUserId) {
+            onlineUsers.delete(disconnectedUserId);
+            io.emit("user-status-change", { userId: disconnectedUserId, status: 'offline' });
+        }
+
         socket.broadcast.emit("call-ended");
     });
+});
+
+// Server Members Endpoint
+app.get('/api/servers/:serverId/members', async (req, res) => {
+    try {
+        const { serverId } = req.params;
+        const sId = parseInt(serverId);
+
+        // Find users who have this server in their serverProfiles
+        const members = await User.find({ "serverProfiles.serverId": sId })
+            .select('username email avatar serverProfiles isOfficial');
+
+        const formattedMembers = members.map(m => {
+            const profile = m.serverProfiles.find(p => p.serverId === sId);
+            return {
+                id: m._id,
+                username: m.username,
+                email: m.email,
+                avatar: profile?.avatar || m.avatar,
+                nickname: profile?.nickname || m.username,
+                isOfficial: m.isOfficial,
+                status: onlineUsers.has(m._id.toString()) ? 'online' : 'offline'
+            };
+        });
+
+        res.json(formattedMembers);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/online-users', (req, res) => {
+    res.json(Array.from(onlineUsers.keys()));
 });
 
 // Final Official Account Relationships Sync
@@ -1507,84 +1573,8 @@ async function syncOfficialRelationships() {
     }
 }
 
+// Start server on single port correctly
 httpServer.listen(port, () => {
     console.log(`Backend server running at http://localhost:${port}`);
     syncOfficialRelationships();
-});
-app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
-    try {
-        const { userId, serverId } = req.params;
-        const { nickname, avatar } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-
-        if (!user.serverProfiles) user.serverProfiles = [];
-
-        const profileIndex = user.serverProfiles.findIndex(p => p.serverId === parseInt(serverId));
-
-        const profileData = {
-            serverId: parseInt(serverId),
-            nickname,
-            avatar
-        };
-
-        if (profileIndex > -1) {
-            user.serverProfiles[profileIndex] = profileData;
-        } else {
-            user.serverProfiles.push(profileData);
-        }
-
-        await user.save();
-        res.json({ success: true, user });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Verification Request
-app.post('/api/users/request-verification', async (req, res) => {
-    try {
-        const { userId, documentUrl } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-
-        user.verificationRequest = {
-            status: 'pending',
-            documentUrl,
-            timestamp: new Date()
-        };
-        await user.save();
-
-        res.json({ success: true, message: 'Verification request submitted' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Verification Request
-app.post('/api/users/request-verification', async (req, res) => {
-    try {
-        const { userId, documentUrl } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-
-        user.verificationRequest = {
-            status: 'pending',
-            documentUrl,
-            timestamp: new Date()
-        };
-        await user.save();
-
-        res.json({ success: true, message: 'Verification request submitted' });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });

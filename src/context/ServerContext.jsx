@@ -151,6 +151,16 @@ export const ServerProvider = ({ children }) => {
         }
     };
 
+    const fetchMembers = async (serverId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/members`);
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to fetch members:", err);
+            return [];
+        }
+    };
+
     const value = {
         servers,
         addServer,
@@ -161,6 +171,7 @@ export const ServerProvider = ({ children }) => {
         deleteServer,
         updateServer,
         updateServerProfile,
+        fetchMembers,
         loading
     };
 
