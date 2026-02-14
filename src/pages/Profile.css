@@ -1,5 +1,5 @@
 .profile-container {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl);
     max-width: 900px;
     margin: 0 auto;
 }
@@ -302,8 +302,8 @@
 
 @media (max-width: 640px) {
     .profile-container {
-        padding: 20px 16px 40px 16px;
-        min-height: calc(100vh - 60px - env(safe-area-inset-bottom));
+        padding: 8px 16px 40px 16px;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
     }
