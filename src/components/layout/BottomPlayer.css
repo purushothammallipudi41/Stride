@@ -6,11 +6,11 @@
     right: 0 !important;
     height: 70px !important;
     /* Standardize height */
-    background: rgba(10, 10, 10, 0.95);
+    background: var(--player-bg);
     /* Slightly darker for better contrast */
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--player-border);
     z-index: 10000;
     transition: all 0.3s ease;
     cursor: default;
@@ -55,7 +55,7 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--player-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -64,7 +64,7 @@
 .track-artist {
     margin: 0;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--player-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -88,21 +88,21 @@
 .control-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--player-text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .control-btn:hover {
-    color: #fff;
+    color: var(--player-text);
     transform: scale(1.1);
 }
 
 .play-btn {
     width: 38px;
     height: 38px;
-    background: #fff;
-    color: #000;
+    background: var(--player-text);
+    color: var(--player-bg);
     border: none;
     border-radius: 50%;
     display: flex;
@@ -114,14 +114,14 @@
 
 .play-btn:hover {
     transform: scale(1.05);
-    background: #f0f0f0;
+    background: var(--color-text-primary);
 }
 
 .progress-container {
     width: 100%;
     max-width: 600px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--progress-bg);
     border-radius: 2px;
     cursor: pointer;
     position: relative;
@@ -135,7 +135,7 @@
 
 .progress-fill {
     height: 100%;
-    background: #fff;
+    background: var(--player-text);
     border-radius: 2px;
     position: absolute;
     left: 0;
@@ -159,29 +159,29 @@
 .volume-slider {
     width: 100px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--progress-bg);
     border-radius: 2px;
     cursor: pointer;
 }
 
 .volume-fill {
     height: 100%;
-    background: #fff;
+    background: var(--player-text);
     border-radius: 2px;
 }
 
 .close-player-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--player-text-secondary);
     cursor: pointer;
     padding: 4px;
     transition: all 0.2s;
 }
 
 .close-player-btn:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--player-text);
+    background: var(--nav-hover-bg);
     border-radius: 50%;
 }
 
@@ -197,9 +197,9 @@
         height: 70px !important;
         max-height: 70px !important;
         padding: 0 12px;
-        background: rgba(15, 15, 20, 0.98);
+        background: var(--player-bg);
         border: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid var(--player-border);
         z-index: 99999 !important;
         display: flex !important;
         /* Override layout for mobile */

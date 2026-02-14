@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     padding: var(--spacing-lg);
-    background: linear-gradient(to bottom, #050505, #000);
+    background: var(--sidebar-bg);
     position: sticky;
     top: 0;
 }
@@ -26,7 +26,7 @@
     font-size: 1.8rem;
     font-weight: 900;
     letter-spacing: -0.06em;
-    background: linear-gradient(to right, #fff, #888);
+    background: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -53,14 +53,14 @@
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--nav-hover-bg);
+    color: var(--color-text-primary);
     transform: translateX(8px);
 }
 
 .nav-item.active {
     background: var(--color-primary-glow);
-    color: #fff;
+    color: var(--color-text-primary);
     border-color: rgba(130, 87, 229, 0.2);
 }
 
@@ -97,16 +97,16 @@
         top: auto;
         flex-direction: row;
         border: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        border-top: 1px solid var(--color-border);
         border-radius: 0;
         padding: 0 0 env(safe-area-inset-bottom) 0;
-        background: rgba(8, 8, 8, 0.85);
+        background: var(--sidebar-mobile-bg);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         justify-content: space-around;
         align-items: center;
         z-index: 1000;
-        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
     }
 
     .sidebar-header,
@@ -170,7 +170,7 @@
     .nav-item svg {
         width: 26px;
         height: 26px;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--color-text-secondary);
     }
 
     /* Central Create Button - Floating Action Button Look if desired, or integrated */
@@ -192,7 +192,7 @@
         box-shadow: 0 4px 15px var(--color-primary-glow);
         transform: translateY(-12px);
         /* Float it slightly above */
-        border: 4px solid #000;
+        border: 4px solid var(--create-btn-border);
         /* Cutout effect from bar */
     }
 }

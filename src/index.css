@@ -50,6 +50,18 @@
   /* Transitions */
   --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.2s ease;
+
+  /* Component Specific */
+  --sidebar-bg: linear-gradient(to bottom, #050505, #000);
+  --sidebar-mobile-bg: rgba(8, 8, 8, 0.85);
+  --nav-hover-bg: rgba(255, 255, 255, 0.05);
+  --create-btn-border: #000;
+
+  --player-bg: rgba(10, 10, 10, 0.95);
+  --player-border: rgba(255, 255, 255, 0.1);
+  --player-text: #ffffff;
+  --player-text-secondary: rgba(255, 255, 255, 0.6);
+  --progress-bg: rgba(255, 255, 255, 0.1);
 }
 
 /* Light Theme Overrides */
@@ -65,6 +77,18 @@
 
   --glass-bg: rgba(0, 0, 0, 0.05);
   --glass-border: rgba(0, 0, 0, 0.1);
+
+  /* Light Theme Component Specific */
+  --sidebar-bg: #fff;
+  --sidebar-mobile-bg: rgba(255, 255, 255, 0.85);
+  --nav-hover-bg: rgba(0, 0, 0, 0.05);
+  --create-btn-border: #fff;
+
+  --player-bg: rgba(255, 255, 255, 0.95);
+  --player-border: rgba(0, 0, 0, 0.1);
+  --player-text: #111111;
+  --player-text-secondary: rgba(0, 0, 0, 0.6);
+  --progress-bg: rgba(0, 0, 0, 0.1);
 }
 
 * {
