@@ -17,6 +17,8 @@ const ServerView = () => {
     const { showToast } = useToast();
     const [activeChannel, setActiveChannel] = useState(() => {
         const s = servers.find(s => s.id === parseInt(serverId));
+        // On mobile, don't auto-select a channel so the list is shown first
+        if (window.innerWidth <= 640) return null;
         return s?.channels[0] || null;
     });
     const [messages, setMessages] = useState([]);
@@ -218,7 +220,11 @@ const ServerView = () => {
             <div className={`server-chat-area ${!activeChannel ? 'mobile-hidden' : ''}`}>
                 <div className="server-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <button className="icon-btn mobile-only" onClick={() => navigate('/servers')} style={{ marginRight: '8px' }}>
+                        <button
+                            className="icon-btn mobile-only"
+                            onClick={() => setActiveChannel(null)}
+                            style={{ marginRight: '8px' }}
+                        >
                             <ArrowLeft size={20} />
                         </button>
                         <button className="icon-btn mobile-only" onClick={() => setShowMenu(!showMenu)} style={{ marginRight: '4px' }}>
