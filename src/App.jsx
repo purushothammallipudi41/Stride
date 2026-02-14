@@ -78,10 +78,12 @@ const ProtectedRoute = ({ children }) => {
 
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) return <LoadingFallback />;
 
-  if (user) {
+  // Allow access if "Add Account" flow is active
+  if (user && !location.state?.addAccount) {
     return <Navigate to="/" replace />;
   }
 

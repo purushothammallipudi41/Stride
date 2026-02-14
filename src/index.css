@@ -52,6 +52,21 @@
   --transition-fast: all 0.2s ease;
 }
 
+/* Light Theme Overrides */
+.light-theme {
+  --color-bg: #ffffff;
+  --color-surface: #f3f3f3;
+  --color-surface-hover: #e5e5e5;
+  --color-border: rgba(0, 0, 0, 0.1);
+
+  --color-text-primary: #111111;
+  --color-text-secondary: rgba(0, 0, 0, 0.6);
+  --color-text-muted: rgba(0, 0, 0, 0.4);
+
+  --glass-bg: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.1);
+}
+
 * {
   margin: 0;
   padding: 0;

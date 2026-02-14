@@ -42,8 +42,15 @@ const Settings = () => {
     const toggleDarkMode = () => {
         const newMode = !isDarkMode;
         setIsDarkMode(newMode);
-        document.body.classList.toggle('dark-theme', newMode);
-        localStorage.setItem('theme', newMode ? 'dark' : 'light');
+        if (newMode) {
+            document.body.classList.add('dark-theme');
+            document.body.classList.remove('light-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-theme');
+            document.body.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+        }
     };
 
     const toggleNotifications = () => {
@@ -155,7 +162,7 @@ const Settings = () => {
                                 {(acc.id === user?.id || acc.email === user?.email) && <Check size={18} className="active-check" />}
                             </div>
                         ))}
-                        <div className="settings-item add-account-item" onClick={() => navigate('/login')}>
+                        <div className="settings-item add-account-item" onClick={() => navigate('/login', { state: { addAccount: true } })}>
                             <div className="settings-item-left">
                                 <UserPlus size={20} color="var(--color-primary)" />
                                 <span>Add Account</span>
