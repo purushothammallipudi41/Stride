@@ -372,64 +372,6 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
-// --- Diagnostics ---
-app.get('/api/diag/email', (req, res) => {
-    res.json({
-        EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}...` : 'MISSING',
-        EMAIL_PASS: process.env.EMAIL_PASS ? 'SET' : 'MISSING',
-        RESEND_API_KEY: process.env.RESEND_API_KEY ? 'SET' : 'MISSING',
-        transporter_initialized: !!transporter,
-        resend_initialized: !!resend,
-        node_env: process.env.NODE_ENV,
-        timestamp: new Date()
-    });
-});
-
-app.post('/api/diag/send-test', async (req, res) => {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Target email required' });
-
-    const results = {};
-
-    // 1. Test Resend
-    if (resend) {
-        try {
-            console.log(`[DIAG] Testing Resend to: ${email}`);
-            const { data, error } = await resend.emails.send({
-                from: 'Stride <noreply@thestrideapp.in>',
-                to: [email],
-                subject: 'Stride Resend Test',
-                text: 'Testing Resend from Render.'
-            });
-            results.resend = error ? { success: false, error } : { success: true, data };
-        } catch (err) {
-            results.resend = { success: false, error: err.message };
-        }
-    } else {
-        results.resend = { success: false, error: 'Resend not initialized' };
-    }
-
-    // 2. Test Nodemailer
-    if (transporter) {
-        try {
-            console.log(`[DIAG] Testing Nodemailer to: ${email}`);
-            const info = await transporter.sendMail({
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Stride Nodemailer Test',
-                text: 'Testing Nodemailer from Render.'
-            });
-            results.nodemailer = { success: true, info };
-        } catch (err) {
-            results.nodemailer = { success: false, error: err.message, code: err.code };
-        }
-    } else {
-        results.nodemailer = { success: false, error: 'Nodemailer not initialized' };
-    }
-
-    res.json({ success: results.resend.success || results.nodemailer.success, results });
-});
-
 // Posts
 app.get('/api/posts', async (req, res) => {
     try {
