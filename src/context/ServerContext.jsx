@@ -115,6 +115,42 @@ export const ServerProvider = ({ children }) => {
         }
     };
 
+    const updateServer = async (serverId, updates) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            if (res.ok) {
+                const updatedServer = await res.json();
+                setServers(prev => prev.map(s => s.id === parseInt(serverId) ? updatedServer : s));
+                return true;
+            }
+            return false;
+        } catch (err) {
+            console.error("Failed to update server:", err);
+            return false;
+        }
+    };
+
+    const updateServerProfile = async (serverId, userId, profileData) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/users/${userId}/server-profile/${serverId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profileData)
+            });
+            if (res.ok) {
+                return await res.json();
+            }
+            return false;
+        } catch (err) {
+            console.error("Failed to update server profile:", err);
+            return false;
+        }
+    };
+
     const value = {
         servers,
         addServer,
@@ -123,6 +159,8 @@ export const ServerProvider = ({ children }) => {
         createChannel,
         leaveServer,
         deleteServer,
+        updateServer,
+        updateServerProfile,
         loading
     };
 

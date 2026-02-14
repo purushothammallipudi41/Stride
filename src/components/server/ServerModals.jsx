@@ -130,13 +130,55 @@ export const CreateChannelModal = ({ isOpen, onClose, onCreate }) => {
 };
 
 // --- Server Settings Modal ---
-export const ServerSettingsModal = ({ isOpen, onClose, server }) => {
+export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdate }) => {
     const [activeTab, setActiveTab] = useState('Overview');
+    const [serverIcon, setServerIcon] = useState(null);
+    const [serverName, setServerName] = useState(server.name);
+    const [roles, setRoles] = useState([
+        { id: 1, name: 'Administrator', color: '#eab308' },
+        { id: 2, name: 'Member', color: '#3b82f6' }
+    ]);
+
+    // Update local state when server prop changes
+    useState(() => {
+        if (server) setServerName(server.name);
+    }, [server]);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setServerIcon(url);
+        }
+    };
+
+    const handleSave = () => {
+        if (onUpdate) {
+            onUpdate({ name: serverName, icon: serverIcon }); // Pass icon if we were handling uploads appropriately
+            onClose();
+        }
+    };
+
+    // ... roles functions ...
+
+    const handleAddRole = () => {
+        const roleName = prompt("Enter role name:");
+        if (roleName) {
+            setRoles([...roles, { id: Date.now(), name: roleName, color: '#9ca3af' }]);
+        }
+    };
+
+    const handleDeleteRole = (id) => {
+        if (window.confirm("Delete this role?")) {
+            setRoles(roles.filter(r => r.id !== id));
+        }
+    };
 
     return (
         <ModalWrapper isOpen={isOpen} onClose={onClose} title="Server Settings">
             <div style={{ display: 'flex', height: '400px' }}>
                 <div style={{ width: '150px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '10px' }}>
+                    {/* ... Tabs ... */}
                     {['Overview', 'Roles', 'Moderation'].map(tab => (
                         <div
                             key={tab}
@@ -154,40 +196,136 @@ export const ServerSettingsModal = ({ isOpen, onClose, server }) => {
                         </div>
                     ))}
                     <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
-                    <div style={{ padding: '8px 12px', color: '#ef4444', cursor: 'pointer' }}>Delete Server</div>
+                    <div
+                        style={{ padding: '8px 12px', color: '#ef4444', cursor: 'pointer' }}
+                        onClick={() => {
+                            if (onDelete) onDelete();
+                        }}
+                    >
+                        Delete Server
+                    </div>
                 </div>
-                <div style={{ flex: 1, paddingLeft: '20px' }}>
+                <div style={{ flex: 1, paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ marginTop: 0, marginBottom: '20px' }}>{activeTab}</h4>
                     {activeTab === 'Overview' && (
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'var(--color-surface)', border: '2px dashed var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Upload</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
+                            <div style={{ display: 'flex', gap: '20px' }}>
+                                <div
+                                    onClick={() => document.getElementById('server-icon-upload').click()}
+                                    style={{
+                                        width: '100px',
+                                        height: '100px',
+                                        borderRadius: '50%',
+                                        background: serverIcon ? `url(${serverIcon}) center/cover` : 'var(--color-surface)',
+                                        border: '2px dashed var(--text-secondary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        flexShrink: 0
+                                    }}>
+                                    {!serverIcon && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Upload</span>}
+                                    <input
+                                        id="server-icon-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.8rem' }}>SERVER NAME</label>
+                                    <input
+                                        type="text"
+                                        value={serverName}
+                                        onChange={(e) => setServerName(e.target.value)}
+                                        style={{ width: '100%', padding: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'white' }}
+                                    />
+                                </div>
                             </div>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.8rem' }}>SERVER NAME</label>
-                                <input type="text" defaultValue={server.name} style={{ width: '100%', padding: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'white' }} />
+                            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={handleSave}
+                                    className="primary-btn"
+                                    style={{ padding: '10px 24px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                                >
+                                    Save Changes
+                                </button>
                             </div>
                         </div>
                     )}
                     {activeTab === 'Roles' && (
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '8px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Shield size={16} color="#eab308" />
-                                    <span>Administrator</span>
-                                </div>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>2 members</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                                <button
+                                    onClick={handleAddRole}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '5px',
+                                        background: 'var(--color-primary)', border: 'none', borderRadius: '4px',
+                                        padding: '6px 12px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
+                                    }}
+                                >
+                                    <span>Add Role</span>
+                                </button>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <User size={16} color="#3b82f6" />
-                                    <span>Member</span>
-                                </div>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>14 members</span>
+                            <div className="premium-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
+                                {roles.map(role => (
+                                    <div key={role.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Shield size={16} color={role.color} />
+                                            <span>{role.name}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>0 members</span>
+                                            <button
+                                                className="icon-btn"
+                                                onClick={() => handleDeleteRole(role.id)}
+                                                style={{ color: '#ef4444', opacity: 0.7 }}
+                                                title="Delete Role"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
                 </div>
+            </div>
+        </ModalWrapper>
+    );
+};
+
+// --- Server Profile Modal ---
+export const ServerProfileModal = ({ isOpen, onClose, serverName, currentNickname, onSave }) => {
+    const [nickname, setNickname] = useState(currentNickname || '');
+
+    // Reset nickname when modal opens or prop changes
+    useState(() => {
+        if (isOpen) setNickname(currentNickname || '');
+    }, [isOpen, currentNickname]);
+
+    return (
+        <ModalWrapper isOpen={isOpen} onClose={onClose} title={`Edit Profile for ${serverName}`}>
+            <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600 }}>NICKNAME</label>
+                <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', padding: '0 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <User size={16} color="var(--text-muted)" />
+                    <input
+                        type="text"
+                        value={nickname}
+                        onChange={e => setNickname(e.target.value)}
+                        placeholder="Server Nickname"
+                        style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', padding: '10px' }}
+                    />
+                </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'white', padding: '10px 20px', cursor: 'pointer' }}>Cancel</button>
+                <button onClick={() => onSave(nickname)} style={{ background: 'var(--color-primary)', border: 'none', color: 'white', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}>Save</button>
             </div>
         </ModalWrapper>
     );

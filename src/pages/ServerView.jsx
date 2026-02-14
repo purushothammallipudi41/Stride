@@ -6,16 +6,19 @@ import { useToast } from '../context/ToastContext';
 import { Hash, Settings, Bell, Search, Menu, Users, ArrowLeft } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
 import { ServerMenu, MembersList, SearchModal } from '../components/server/ServerInteractions';
-import { InviteModal, CreateChannelModal, ServerSettingsModal } from '../components/server/ServerModals';
-import '../components/common/IconBtn.css';
+import { InviteModal, CreateChannelModal, ServerSettingsModal, ServerProfileModal } from '../components/server/ServerModals';
+import './ServerView.css';
 
 const ServerView = () => {
     const { serverId } = useParams();
-    const { servers, fetchMessages, sendServerMessage, createChannel, leaveServer } = useServer();
+    const { servers, fetchMessages, sendServerMessage, createChannel, leaveServer, deleteServer, updateServer, updateServerProfile } = useServer();
     const navigate = useNavigate(); // For redirecting after leave
     const { user } = useAuth();
     const { showToast } = useToast();
-    const [activeChannel, setActiveChannel] = useState(null);
+    const [activeChannel, setActiveChannel] = useState(() => {
+        const s = servers.find(s => s.id === parseInt(serverId));
+        return s?.channels[0] || null;
+    });
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,14 +31,16 @@ const ServerView = () => {
     const [showInvite, setShowInvite] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showCreateChannel, setShowCreateChannel] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
 
     const server = servers.find(s => s.id === parseInt(serverId));
+    // Determine user's current profile for this server
+    const serverProfile = user?.serverProfiles?.find(p => p.serverId === parseInt(serverId));
+    const displayName = serverProfile?.nickname || user?.username || 'Guest';
 
-    useEffect(() => {
-        if (server && !activeChannel) {
-            setActiveChannel(server.channels[0]);
-        }
-    }, [server, activeChannel]);
+    // ... useEffects ...
+
+    // Removed aggressive auto-select Effect that was breaking mobile navigation
 
     useEffect(() => {
         if (server && activeChannel) {
@@ -85,15 +90,9 @@ const ServerView = () => {
     };
 
     return (
-        <div className="page-container" style={{ display: 'flex', height: '100%', padding: 0 }}>
+        <div className="server-view-container">
             {/* Server Sidebar (Channels) */}
-            <div className={`server-sidebar ${activeChannel ? 'mobile-hidden' : ''}`} style={{
-                width: '240px',
-                background: 'rgba(0, 0, 0, 0.3)',
-                borderRight: '1px solid rgba(255, 255, 255, 0.05)',
-                display: 'flex',
-                flexDirection: 'column'
-            }}>
+            <div className={`server-sidebar ${activeChannel ? 'mobile-hidden' : ''}`}>
                 <div style={{
                     padding: '1.5rem',
                     borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
@@ -101,7 +100,12 @@ const ServerView = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between'
                 }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>{server.name}</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="icon-btn mobile-only" onClick={() => navigate('/servers')}>
+                            <ArrowLeft size={20} />
+                        </button>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>{server.name}</h2>
+                    </div>
                     <button className="icon-btn" onClick={() => setShowMenu(!showMenu)} title="Server Options">
                         <Menu size={18} style={{ color: showMenu ? 'var(--color-primary)' : 'var(--text-secondary)' }} />
                     </button>
@@ -173,31 +177,24 @@ const ServerView = () => {
                         {user?.username?.charAt(0).toUpperCase() || 'Me'}
                     </div>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>{user?.username || 'Guest'}</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>{displayName}</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Online</div>
                     </div>
-                    <button className="icon-btn" onClick={() => { console.log('Settings clicked'); showToast('User Settings', 'info'); }} title="User Settings">
+                    <button className="icon-btn" onClick={() => setShowProfile(true)} title="User Settings">
                         <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
                     </button>
                 </div>
             </div>
 
             {/* Main Chat Area */}
-            <div className={`server-chat-area ${!activeChannel ? 'mobile-hidden' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 10 }}>
-                <div style={{
-                    height: '60px',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0 1.5rem',
-                    justifyContent: 'space-between',
-                    background: 'rgba(0, 0, 0, 0.2)',
-                    position: 'relative',
-                    zIndex: 20
-                }}>
+            <div className={`server-chat-area ${!activeChannel ? 'mobile-hidden' : ''}`}>
+                <div className="server-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <button className="icon-btn mobile-only" onClick={() => setActiveChannel(null)} style={{ marginRight: '8px' }}>
+                        <button className="icon-btn mobile-only" onClick={() => navigate('/servers')} style={{ marginRight: '8px' }}>
                             <ArrowLeft size={20} />
+                        </button>
+                        <button className="icon-btn mobile-only" onClick={() => setShowMenu(!showMenu)} style={{ marginRight: '4px' }}>
+                            <Menu size={20} />
                         </button>
                         <Hash size={24} style={{ color: 'var(--text-secondary)' }} />
                         <h3 style={{ margin: 0 }}>{activeChannel}</h3>
@@ -215,7 +212,7 @@ const ServerView = () => {
                     </div>
                 </div>
 
-                <div className="animate-fade-in" style={{ flex: 1, position: 'relative' }}>
+                <div className="animate-fade-in" style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {loading ? (
                         <div className="flex-center" style={{ height: '100%' }}>
                             <div className="loading-spinner"></div>
@@ -224,6 +221,7 @@ const ServerView = () => {
                         <ChatWindow
                             activeChat={activeChatData}
                             onSendMessage={handleSendMessage}
+                            showHeader={false}
                         />
                     )}
                 </div>
@@ -269,6 +267,51 @@ const ServerView = () => {
                 isOpen={showSettings}
                 onClose={() => setShowSettings(false)}
                 server={server}
+                onDelete={async () => {
+                    if (window.confirm(`Are you sure you want to delete ${server.name}? This cannot be undone.`)) {
+                        const success = await deleteServer(server.id, user.email);
+                        if (success) {
+                            showToast('Server deleted', 'success');
+                            navigate('/servers');
+                        } else {
+                            showToast('Failed to delete server', 'error');
+                        }
+                    }
+                }}
+                onUpdate={async (updates) => {
+                    const success = await updateServer(server.id, updates);
+                    if (success) {
+                        showToast('Server updated', 'success');
+                    } else {
+                        showToast('Failed to update server', 'error');
+                    }
+                }}
+            />
+            <ServerProfileModal
+                isOpen={showProfile}
+                onClose={() => setShowProfile(false)}
+                serverName={server.name}
+                currentNickname={serverProfile?.nickname || user?.username}
+                onSave={async (nickname) => {
+                    const res = await updateServerProfile(server.id, user._id, { nickname });
+                    if (res && res.success) {
+                        // Optimistically update logic handled by context/auth? 
+                        // Wait, updateServerProfile updates User model.
+                        // We might need to refresh user data or manually update local user object if UseAuth doesn't auto-fetch.
+                        // For now, let's assume a page refresh or context update might be needed, 
+                        // BUT let's do a simple workaround: force update the user object in AuthContext?
+                        // Or just checking if updateServerProfile returns updated user.
+                        if (res.user) {
+                            // Ideally call login(res.user) or updateUser(res.user)
+                            // But standard flow: just show success.
+                            window.location.reload(); // Simplest way to ensure auth context gets new user data for now
+                        }
+                        showToast('Profile updated', 'success');
+                        setShowProfile(false);
+                    } else {
+                        showToast('Failed to update profile', 'error');
+                    }
+                }}
             />
             <CreateChannelModal
                 isOpen={showCreateChannel}

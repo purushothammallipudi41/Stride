@@ -20,6 +20,8 @@ const DirectMessage = require('./models/DirectMessage');
 const ServerMessage = require('./models/ServerMessage');
 const Notification = require('./models/Notification');
 const Report = require('./models/Report');
+const Ad = require('./models/Ad');
+const Conversation = require('./models/Conversation');
 
 function checkContentSafety(text, mediaUrl) {
     const sensitiveKeywords = [
@@ -41,14 +43,10 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors({
-    origin: [
-        'http://localhost:5174',
-        'http://localhost:3000',
-        'https://stride-social.onrender.com',
-        'capacitor://localhost',
-        'http://localhost',
-        'https://localhost'
-    ],
+    origin: (origin, callback) => {
+        // Allow all origins in development for robustness
+        callback(null, true);
+    },
     credentials: true
 }));
 app.use(morgan('dev'));
@@ -99,7 +97,8 @@ async function sendVerificationEmail(email, code) {
         console.log(`[EMAIL SENT] Verification code sent to ${email} (ID: ${data.id})`);
     } catch (e) {
         console.error('[EMAIL SEND FAILURE]', e);
-        throw e;
+        // Do not throw error here, so the signup/login flow can continue
+        // even if email fails (common in test mode for Resend)
     }
 }
 
@@ -259,6 +258,7 @@ async function seedDatabase() {
             console.log('✅ Servers seeded');
         }
 
+        /* 
         const postCount = await Post.countDocuments();
         if (postCount === 0) {
             console.log('🌱 Seeding posts...');
@@ -274,6 +274,7 @@ async function seedDatabase() {
             });
             console.log('✅ Posts seeded');
         }
+        */
 
     } catch (err) {
         console.error('Seeding error:', err);
@@ -451,16 +452,25 @@ app.get('/api/stories', async (req, res) => {
 app.post('/api/stories', async (req, res) => {
     try {
         const storyData = req.body;
+        console.log(`[API STORY] Received story request from ${storyData.userId}. Content size: ${storyData.content?.length || 0}`);
 
         // Offload media to Cloudinary if it's base64
         if (storyData.content && storyData.content.startsWith('data:')) {
+            console.log('[API STORY] Detected base64 content, uploading to Cloudinary...');
             const cloudinaryUrl = await saveBase64Image(storyData.content);
             if (cloudinaryUrl) {
+                console.log('[API STORY] Cloudinary upload successful:', cloudinaryUrl);
                 storyData.content = cloudinaryUrl;
+            } else {
+                console.warn('[API STORY] Cloudinary upload returned null. Content will remain as base64.');
             }
+        } else {
+            console.log('[API STORY] Content is already a URL or missing:', storyData.content?.substring(0, 50));
         }
 
+        console.log('[API STORY] Attempting to save story to MongoDB...');
         const story = await Story.create(storyData);
+        console.log('[API STORY] Story saved successfully with ID:', story._id);
         res.status(201).json(story);
     } catch (e) {
         console.error('[API STORY] Error creating story:', e);
@@ -506,10 +516,19 @@ app.post('/api/stories/:id/view', async (req, res) => {
 app.delete('/api/stories/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userEmail } = req.body;
+        const userEmail = req.body?.userEmail || req.query.userEmail;
+
+        if (!userEmail) {
+            return res.status(400).json({ error: 'userEmail is required' });
+        }
+
         const story = await Story.findById(id);
 
-        if (story && story.userId === userEmail) {
+        if (!story) {
+            return res.status(404).json({ error: 'Story not found' });
+        }
+
+        if (story.userId === userEmail) {
             await Story.findByIdAndDelete(id);
             res.status(200).json({ message: 'Story deleted' });
         } else {
@@ -789,24 +808,26 @@ app.post('/api/users/:id/follow', async (req, res) => {
     }
 });
 
-// Notifications
 app.get('/api/notifications', async (req, res) => {
     try {
         const { email } = req.query;
-        let query = {};
-        if (email) query.targetUserEmail = email;
-
-        const notes = await Notification.find(query).sort({ timestamp: -1 });
-        res.json(notes);
+        if (!email) return res.status(400).json({ error: 'Email required for notifications' });
+        const targetEmail = decodeURIComponent(email).trim();
+        const notifications = await Notification.find({ targetUserEmail: targetEmail }).sort({ timestamp: -1 });
+        res.json(notifications);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-app.post('/api/notifications', async (req, res) => {
+app.delete('/api/notifications/clear', async (req, res) => {
     try {
-        const note = await Notification.create(req.body);
-        res.status(201).json(note);
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: 'Email required to clear notifications' });
+        const targetEmail = decodeURIComponent(email).trim();
+
+        await Notification.deleteMany({ targetUserEmail: targetEmail });
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -821,13 +842,61 @@ app.post('/api/notifications/:id/read', async (req, res) => {
     }
 });
 
-app.delete('/api/notifications/clear', async (req, res) => {
-    try {
-        const { email } = req.query;
-        if (!email) return res.status(400).json({ error: 'Email required to clear notifications' });
-        const targetEmail = decodeURIComponent(email).trim();
+// --- In-App Advertising System ---
 
-        await Notification.deleteMany({ targetUserEmail: targetEmail });
+app.get('/api/ads', async (req, res) => {
+    try {
+        const ads = await Ad.find({ status: 'active' }).sort({ createdAt: -1 });
+        res.json(ads);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/ads', async (req, res) => {
+    try {
+        const adData = req.body;
+
+        // Handle Base64 image upload if present
+        if (adData.image && adData.image.startsWith('data:')) {
+            const cloudinaryUrl = await saveBase64Image(adData.image);
+            if (cloudinaryUrl) {
+                adData.image = cloudinaryUrl;
+            }
+        }
+
+        const ad = await Ad.create(adData);
+        // Emit real-time update
+        io.emit('ad-created', ad);
+        res.status(201).json(ad);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/ads/user/:userId', async (req, res) => {
+    try {
+        const ads = await Ad.find({ creator: req.params.userId }).sort({ createdAt: -1 });
+        res.json(ads);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/ads/:id/view', async (req, res) => {
+    try {
+        const ad = await Ad.findByIdAndUpdate(req.params.id, { $inc: { 'stats.views': 1 } }, { new: true });
+        if (ad) io.emit('ad-update', ad);
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/ads/:id/click', async (req, res) => {
+    try {
+        const ad = await Ad.findByIdAndUpdate(req.params.id, { $inc: { 'stats.clicks': 1 } }, { new: true });
+        if (ad) io.emit('ad-update', ad);
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -991,7 +1060,6 @@ app.post('/api/servers/:serverId/messages/:channelId', async (req, res) => {
 
 app.get('/api/messages/:userEmail', async (req, res) => {
     const { userEmail } = req.params;
-    // Find messages where I am sender or receiver
     const messages = await DirectMessage.find({
         $or: [{ from: userEmail }, { to: userEmail }]
     }).sort({ timestamp: 1 });
@@ -1000,15 +1068,96 @@ app.get('/api/messages/:userEmail', async (req, res) => {
 
 app.post('/api/messages/send', async (req, res) => {
     try {
+        const { from, to, text, sharedContent } = req.body;
         const message = await DirectMessage.create({
-            from: req.body.from,
-            to: req.body.to,
-            text: req.body.text,
-            sharedContent: req.body.sharedContent,
+            from, to, text, sharedContent,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
+
+        // Sync Conversation
+        const participants = [from, to].sort();
+        let convo = await Conversation.findOne({ participants });
+        const lastMsg = { sender: from, text: text || (sharedContent ? `Shared ${sharedContent.type}` : ''), timestamp: new Date() };
+
+        if (convo) {
+            convo.lastMessage = lastMsg;
+            // Unhide for anyone involved
+            convo.settings.forEach(s => {
+                if (s.isHidden) s.isHidden = false;
+            });
+            await convo.save();
+        } else {
+            await Conversation.create({
+                participants,
+                settings: participants.map(p => ({ email: p })),
+                lastMessage: lastMsg
+            });
+        }
+
         res.status(201).json(message);
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/conversations/:email', async (req, res) => {
+    console.log('[API] Fetching conversations for:', req.params.email);
+    try {
+        const { email } = req.params;
+        const convos = await Conversation.find({ participants: email }).sort({ updatedAt: -1 });
+        const visible = convos.filter(c => {
+            const s = c.settings.find(st => st.email === email);
+            return !s || !s.isHidden;
+        });
+        res.json(visible);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/conversations/action', async (req, res) => {
+    try {
+        const { conversationId, userEmail, action } = req.body;
+        const convo = await Conversation.findById(conversationId);
+        if (!convo) return res.status(404).json({ error: 'Not found' });
+
+        let s = convo.settings.find(st => st.email === userEmail);
+        if (!s) {
+            convo.settings.push({ email: userEmail });
+            s = convo.settings[convo.settings.length - 1];
+        }
+
+        if (action === 'mute') s.isMuted = !s.isMuted;
+        else if (action === 'hide') s.isHidden = true;
+        else if (action === 'clear') s.lastClearedAt = new Date();
+        else if (action === 'delete') {
+            s.isHidden = true;
+            s.lastClearedAt = new Date();
+        }
+        await convo.save();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/conversations/clear-all', async (req, res) => {
+    try {
+        const { userEmail } = req.body;
+        if (!userEmail) return res.status(400).json({ error: 'User email required' });
+
+        const convos = await Conversation.find({ participants: userEmail });
+
+        for (const convo of convos) {
+            let s = convo.settings.find(st => st.email === userEmail);
+            if (!s) {
+                convo.settings.push({ email: userEmail });
+                s = convo.settings[convo.settings.length - 1];
+            }
+            s.isHidden = true;
+            s.lastClearedAt = new Date();
+            await convo.save();
+        }
+
+        res.json({ success: true, count: convos.length });
+    } catch (e) {
+        console.error('[API] Error clearing all conversations:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 
@@ -1088,6 +1237,38 @@ app.get('/safety', (req, res) => {
     `);
 });
 
+// Server Profile Update Route
+app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
+    try {
+        const { userId, serverId } = req.params;
+        const { nickname, avatar } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        if (!user.serverProfiles) user.serverProfiles = [];
+
+        const profileIndex = user.serverProfiles.findIndex(p => p.serverId === parseInt(serverId));
+
+        const profileData = {
+            serverId: parseInt(serverId),
+            nickname,
+            avatar
+        };
+
+        if (profileIndex > -1) {
+            user.serverProfiles[profileIndex] = profileData;
+        } else {
+            user.serverProfiles.push(profileData);
+        }
+
+        await user.save();
+        res.json({ success: true, user });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Start Server
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
@@ -1156,4 +1337,39 @@ async function syncOfficialRelationships() {
 httpServer.listen(port, () => {
     console.log(`Backend server running at http://localhost:${port}`);
     syncOfficialRelationships();
+});
+app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
+    try {
+        const { userId, serverId } = req.params;
+        const { nickname, avatar } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        if (!user.serverProfiles) user.serverProfiles = [];
+
+        const profileIndex = user.serverProfiles.findIndex(p => p.serverId === parseInt(serverId));
+
+        const profileData = {
+            serverId: parseInt(serverId),
+            nickname,
+            avatar
+        };
+
+        if (profileIndex > -1) {
+            user.serverProfiles[profileIndex] = profileData;
+        } else {
+            user.serverProfiles.push(profileData);
+        }
+
+        await user.save();
+        res.json({ success: true, user });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

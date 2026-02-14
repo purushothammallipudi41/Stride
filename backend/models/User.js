@@ -19,7 +19,12 @@ const userSchema = new mongoose.Schema({
     verificationRequired: { type: Boolean, default: false }, // For legacy/optional support
     verificationCode: String,
     verificationCodeExpires: Date,
-    blockedUsers: [{ type: String }] // Array of user IDs or emails blocked by this user
+    blockedUsers: [{ type: String }], // Array of user IDs or emails blocked by this user
+    serverProfiles: [{
+        serverId: Number,
+        nickname: String,
+        avatar: String
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
