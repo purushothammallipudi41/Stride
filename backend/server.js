@@ -386,33 +386,45 @@ app.post('/api/diag/send-test', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Target email required' });
 
-    console.log(`[DIAG] Attempting manual test email to: ${email}`);
-    
-    try {
-        if (transporter) {
-            const info = await transporter.sendMail({
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Stride Diagnostic Test',
-                text: 'This is a manual diagnostic test email from the Stride backend.'
-            });
-            return res.json({ success: true, via: 'Nodemailer', info });
-        } else if (resend) {
+    const results = {};
+
+    // 1. Test Resend
+    if (resend) {
+        try {
+            console.log(`[DIAG] Testing Resend to: ${email}`);
             const { data, error } = await resend.emails.send({
                 from: 'Stride <onboarding@resend.dev>',
                 to: [email],
-                subject: 'Stride Diagnostic Test',
-                text: 'This is a manual diagnostic test email from the Stride backend.'
+                subject: 'Stride Resend Test',
+                text: 'Testing Resend from Render.'
             });
-            if (error) throw error;
-            return res.json({ success: true, via: 'Resend', data });
-        } else {
-            return res.status(500).json({ error: 'No email service configured' });
+            results.resend = error ? { success: false, error } : { success: true, data };
+        } catch (err) {
+            results.resend = { success: false, error: err.message };
         }
-    } catch (err) {
-        console.error('[DIAG ERROR]', err);
-        res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    } else {
+        results.resend = { success: false, error: 'Resend not initialized' };
     }
+
+    // 2. Test Nodemailer
+    if (transporter) {
+        try {
+            console.log(`[DIAG] Testing Nodemailer to: ${email}`);
+            const info = await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Stride Nodemailer Test',
+                text: 'Testing Nodemailer from Render.'
+            });
+            results.nodemailer = { success: true, info };
+        } catch (err) {
+            results.nodemailer = { success: false, error: err.message, code: err.code };
+        }
+    } else {
+        results.nodemailer = { success: false, error: 'Nodemailer not initialized' };
+    }
+
+    res.json({ success: results.resend.success || results.nodemailer.success, results });
 });
 
 // Posts
