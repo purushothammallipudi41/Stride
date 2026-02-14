@@ -1001,6 +1001,17 @@ app.post('/api/servers', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get('/api/servers/:serverId', async (req, res) => {
+    try {
+        const { serverId } = req.params;
+        const server = await ServerModel.findOne({ id: parseInt(serverId) });
+        if (server) res.json(server);
+        else res.status(404).json({ error: 'Server not found' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/servers/:serverId/channels', async (req, res) => {
     try {
         const { serverId } = req.params;
