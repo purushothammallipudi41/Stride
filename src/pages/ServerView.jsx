@@ -100,10 +100,38 @@ const ServerView = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button className="icon-btn mobile-only" onClick={() => navigate('/servers')}>
                             <ArrowLeft size={20} />
                         </button>
+
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '12px',
+                            background: 'var(--primary-gradient)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.2rem',
+                            overflow: 'hidden',
+                            flexShrink: 0
+                        }}>
+                            {server.icon && (server.icon.startsWith('http') || server.icon.startsWith('/')) ? (
+                                <img
+                                    src={server.icon}
+                                    alt={server.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.parentElement.innerText = server.name[0];
+                                    }}
+                                />
+                            ) : (
+                                server.icon || server.name[0]
+                            )}
+                        </div>
+
                         <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>{server.name}</h2>
                     </div>
                     <button className="icon-btn" onClick={() => setShowMenu(!showMenu)} title="Server Options">

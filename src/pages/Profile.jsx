@@ -53,13 +53,22 @@ const Profile = () => {
                 console.log(`[Profile] Fetching: ${targetUrl}`);
 
                 // If checking own profile, assume success with current data first to speed up UI
+                // If checking own profile, assume success with current data first for speed
                 if ((!identifier || identifier === currentUser?.email || identifier === currentUser?.username) && currentUser) {
                     setProfileUser(currentUser);
-                    // Still fetch fresh data in background
-                    const res = await fetch(targetUrl);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setProfileUser(data);
+
+                    // Fetch fresh data in background to ensure badges etc are up to date
+                    try {
+                        const res = await fetch(targetUrl);
+                        if (res.ok) {
+                            const data = await res.json();
+                            // Only update if data is different/newer to avoid flicker (optional, but good)
+                            // For now, just set it to ensure we get the badge
+                            console.log('[Profile] Refreshed user data:', data);
+                            setProfileUser(data);
+                        }
+                    } catch (e) {
+                        console.error('[Profile] Background fetch failed', e);
                     }
                 } else {
                     const res = await fetch(targetUrl);
