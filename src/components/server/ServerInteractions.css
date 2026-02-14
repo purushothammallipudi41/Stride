@@ -39,6 +39,22 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    /* Desktop Default Positioning */
+    position: fixed;
+    top: 70px;
+    left: 260px;
+}
+
+@media (max-width: 640px) {
+    .server-menu-dropdown {
+        top: 60px;
+        left: 10px;
+        /* Pin to left */
+        transform: none;
+        /* Remove centering */
+        width: 240px;
+        /* Fixed width like desktop */
+    }
 }
 
 .menu-item {

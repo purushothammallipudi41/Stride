@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, Video, Smile, Gift, Search, X, Globe } from 'lucide-react';
+import { Send, Phone, Video, Smile, Gift, Search, X, Globe, BadgeCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useCall } from '../../context/CallContext';
 import { getImageUrl } from '../../utils/imageUtils';
@@ -22,15 +22,24 @@ const EMOJI_CATEGORIES = {
 
 import { ArrowLeft } from 'lucide-react';
 
-const ChatWindow = ({ activeChat, onSendMessage, onBack }) => {
+const ChatWindow = ({ activeChat, onSendMessage, onBack, showHeader = true }) => {
     const [inputText, setInputText] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showGifPicker, setShowGifPicker] = useState(false);
     const [activeEmojiCategory, setActiveEmojiCategory] = useState('Smileys');
 
     const [translatedMessages, setTranslatedMessages] = useState({});
     const messagesEndRef = useRef(null);
     const { showToast } = useToast();
     const { startCall } = useCall(); // Use global call context
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [activeChat?.messages]);
 
     if (!activeChat) {
         return (
@@ -42,14 +51,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onBack }) => {
             </div>
         );
     }
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [activeChat?.messages]);
 
     const handleSendMsg = () => {
         if (!inputText.trim()) return;
@@ -64,10 +65,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onBack }) => {
     const handleEmojiClick = (emoji) => {
         setInputText(prev => prev + emoji);
     };
-
-
-
-
 
     const handleTranslate = (index, text) => {
         if (translatedMessages[index]) {
@@ -111,27 +108,32 @@ const ChatWindow = ({ activeChat, onSendMessage, onBack }) => {
 
     return (
         <div className="chat-window glass-panel">
-            <div className="chat-header glass-card">
-                <div className="chat-user-info">
-                    {onBack && (
-                        <button className="icon-btn mobile-only" onClick={onBack} style={{ marginRight: '8px' }}>
-                            <ArrowLeft size={20} />
-                        </button>
-                    )}
-                    <div className="chat-avatar-ring">
-                        <div className="chat-avatar small" style={{ backgroundImage: `url(${getImageUrl(activeChat.avatar) || `https://i.pravatar.cc/100?u=${activeChat.username}`})` }} />
-                        <div className="online-indicator" />
+            {showHeader && (
+                <div className="chat-header glass-card">
+                    <div className="chat-user-info">
+                        {onBack && (
+                            <button className="icon-btn mobile-only" onClick={onBack} style={{ marginRight: '8px' }}>
+                                <ArrowLeft size={20} />
+                            </button>
+                        )}
+                        <div className="chat-avatar-ring">
+                            <div className="chat-avatar small" style={{ backgroundImage: `url(${getImageUrl(activeChat.avatar) || `https://i.pravatar.cc/100?u=${activeChat.username}`})` }} />
+                            <div className="online-indicator" />
+                        </div>
+                        <div className="chat-user-meta">
+                            <span className="chat-username" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {activeChat.username}
+                                {activeChat.isOfficial && <BadgeCheck size={14} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                            </span>
+                            <span className="user-status">Online</span>
+                        </div>
                     </div>
-                    <div className="chat-user-meta">
-                        <span className="chat-username">{activeChat.username}</span>
-                        <span className="user-status">Online</span>
+                    <div className="chat-actions" style={{ zIndex: 100, position: 'relative', display: 'flex', gap: '8px' }}>
+                        <button className="icon-btn" onClick={() => handleCall('audio')} title="Start Audio Call"><Phone size={20} /></button>
+                        <button className="icon-btn" onClick={() => handleCall('video')} title="Start Video Call"><Video size={20} /></button>
                     </div>
                 </div>
-                <div className="chat-actions" style={{ zIndex: 100, position: 'relative', display: 'flex', gap: '8px' }}>
-                    <button className="icon-btn" onClick={() => handleCall('audio')} title="Start Audio Call"><Phone size={20} /></button>
-                    <button className="icon-btn" onClick={() => handleCall('video')} title="Start Video Call"><Video size={20} /></button>
-                </div>
-            </div>
+            )}
 
             {/* CallOverlay is now handled globally in App.jsx */}
 

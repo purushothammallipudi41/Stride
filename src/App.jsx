@@ -13,6 +13,7 @@ import { ToastProvider } from './context/ToastContext';
 
 import { CallProvider, useCall } from './context/CallContext';
 import CallOverlay from './components/chat/CallOverlay';
+import NativePermissions from './components/NativePermissions';
 
 // Global Call UI Wrapper
 const GlobalCallUI = () => {
@@ -44,6 +45,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Search = lazy(() => import('./pages/Search'));
+const AdsManager = lazy(() => import('./pages/AdsManager'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 
@@ -89,6 +91,7 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <ErrorBoundary>
+      <NativePermissions />
       <AuthProvider>
         <SocketProvider>
           <CallProvider>
@@ -115,6 +118,7 @@ function App() {
                                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                                 <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+                                <Route path="/ads" element={<ProtectedRoute><AdsManager /></ProtectedRoute>} />
 
                                 <Route path="/legal/terms" element={<TermsOfService />} />
                                 <Route path="/legal/privacy" element={<PrivacyPolicy />} />

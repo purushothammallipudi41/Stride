@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Compass, Film, MessageCircle, User, Activity, Hash, Plus, Heart } from 'lucide-react';
+import { Home, Music, Film, MessageCircle, User, Activity, Hash, Plus, Heart, Globe } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import CreateModal from '../create/CreateModal';
 import './Sidebar.css';
@@ -11,11 +11,9 @@ const Sidebar = () => {
 
     const navItems = [
         { icon: Home, label: 'Home', path: '/' },
-        { icon: Compass, label: 'Explore', path: '/explore' },
+        { icon: Music, label: 'Explore', path: '/explore' },
         { icon: Film, label: 'Reels', path: '/reels' },
-        { icon: Heart, label: 'Notifications', path: '/notifications', badge: unreadCount },
-        { icon: MessageCircle, label: 'Messages', path: '/messages' },
-        { icon: Hash, label: 'Servers', path: '/servers' },
+        { icon: Globe, label: 'Servers', path: '/servers' },
         { icon: User, label: 'Profile', path: '/profile' },
     ];
 
@@ -32,7 +30,7 @@ const Sidebar = () => {
 
                 <nav className="sidebar-nav">
                     <div className="nav-group top">
-                        {navItems.slice(0, 4).map((item) => (
+                        {navItems.slice(0, 3).map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
@@ -59,7 +57,7 @@ const Sidebar = () => {
                     </button>
 
                     <div className="nav-group bottom">
-                        {navItems.slice(4).map((item) => (
+                        {navItems.slice(3).map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}

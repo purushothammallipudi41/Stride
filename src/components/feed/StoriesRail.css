@@ -68,13 +68,40 @@
 }
 
 .story-username {
-    font-size: 0.75rem;
-    color: var(--color-text-primary);
-    max-width: 70px;
+    font-size: 0.8rem;
+    color: #fff;
+    font-weight: 500;
+    max-width: 72px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+    margin-top: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.swipe-hint {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin-top: 2px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 .story-input-overlay {
@@ -122,9 +149,10 @@
     width: 100%;
     width: 100%;
     max-width: 450px;
-    height: 80vh;
+    height: 85vh;
     border-radius: 24px;
-    overflow: hidden;
+    padding-bottom: 0;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);

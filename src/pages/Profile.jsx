@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -19,7 +19,7 @@ const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
     const { identifier } = useParams();
     const navigate = useNavigate();
-    const { posts: allPosts } = useContent();
+    const { posts: allPosts, savedPosts } = useContent();
     const { addNotification } = useNotifications();
     const [profileUser, setProfileUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -187,7 +187,10 @@ const Profile = () => {
                     </div>
                     <div className="profile-info">
                         <div className="profile-top">
-                            <h2 className="profile-username">{profileUser.username}</h2>
+                            <h2 className="profile-username" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {profileUser.username}
+                                {profileUser.isOfficial && <BadgeCheck size={20} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                            </h2>
                             {isOwnProfile ? (
                                 <div className="profile-actions">
                                     <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
@@ -292,10 +295,12 @@ const Profile = () => {
                 </div>
 
                 <div className="profile-grid">
-                    {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : []).length > 0 ? (
-                        (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : []).map(post => (
+                    {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
+                        (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
                             <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
-                                {post.type === 'image' || post.type === 'post' || post.type === 'reel' || post.contentUrl ? (
+                                {post.type === 'video' ? (
+                                    <video src={post.contentUrl} className="grid-img" />
+                                ) : (post.type === 'image' || post.type === 'post' || post.type === 'reel' || post.contentUrl) ? (
                                     <img src={getImageUrl(post.contentUrl)} alt={post.caption} className="grid-img" />
                                 ) : (
                                     <div className="placeholder-content">Post {post.id}</div>
@@ -303,7 +308,16 @@ const Profile = () => {
                             </div>
                         ))
                     ) : (
-                        <div className="no-posts">No {activeTab} yet.</div>
+                        <div className="no-posts">
+                            {activeTab === 'saved' ? (
+                                <div className="empty-state">
+                                    <Bookmark size={48} />
+                                    <p>Save posts to watch later</p>
+                                </div>
+                            ) : (
+                                `No ${activeTab} yet.`
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

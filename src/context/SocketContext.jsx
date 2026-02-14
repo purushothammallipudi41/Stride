@@ -4,9 +4,9 @@ import { useAuth } from './AuthContext';
 
 import config from '../config';
 
-const SocketContext = createContext();
+const SocketContext = createContext({ socket: null });
 
-export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => useContext(SocketContext) || { socket: null };
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);

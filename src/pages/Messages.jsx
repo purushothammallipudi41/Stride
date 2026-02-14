@@ -13,33 +13,36 @@ const Messages = () => {
     const [activeChatId, setActiveChatId] = useState(targetEmail);
     const [allUsers, setAllUsers] = useState([]);
     const [messages, setMessages] = useState([]);
+    const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const fetchData = async () => {
         if (!user) return;
+        try {
+            const [usersRes, messagesRes, convosRes] = await Promise.all([
+                fetch(`${config.API_URL}/api/users`),
+                fetch(`${config.API_URL}/api/messages/${user.email}`),
+                fetch(`${config.API_URL}/api/conversations/${user.email}`)
+            ]);
 
-        const fetchData = async () => {
-            try {
-                const [usersRes, messagesRes] = await Promise.all([
-                    fetch(`${config.API_URL}/api/users`),
-                    fetch(`${config.API_URL}/api/messages/${user.email}`)
-                ]);
-
-                if (usersRes.ok && messagesRes.ok) {
-                    const usersData = await usersRes.json();
-                    const messagesData = await messagesRes.json();
-                    setAllUsers(usersData);
-                    setMessages(messagesData);
-                }
-            } catch (err) {
-                console.error('Failed to fetch messages data:', err);
-            } finally {
-                setLoading(false);
+            if (usersRes.ok && messagesRes.ok && convosRes.ok) {
+                const usersData = await usersRes.json();
+                const messagesData = await messagesRes.json();
+                const convosData = await convosRes.json();
+                setAllUsers(usersData);
+                setMessages(messagesData);
+                setConversations(convosData);
             }
-        };
+        } catch (err) {
+            console.error('Failed to fetch messages data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 5000); // Poll for new messages
+        const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, [user]);
 
@@ -48,43 +51,65 @@ const Messages = () => {
         if (targetEmail) setActiveChatId(targetEmail);
     }, [targetEmail]);
 
-    // Group messages into chats
-    const chats = allUsers
-        .filter(u => u.email !== user?.email)
-        .map(otherUser => {
-            const threadMessages = messages.filter(m =>
-                (m.from === user.email && m.to === otherUser.email) ||
-                (m.from === otherUser.email && m.to === user.email)
-            ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    // Map conversations to chats
+    const existingChats = conversations.map(convo => {
+        const otherEmail = convo.participants.find(p => p !== user.email);
+        const otherUser = allUsers.find(u => u.email === otherEmail) || {
+            email: otherEmail,
+            username: otherEmail ? otherEmail.split('@')[0] : 'User'
+        };
 
-            const lastMsg = threadMessages[threadMessages.length - 1];
+        const settings = convo.settings.find(s => s.email === user.email) || {};
+        const lastCleared = settings.lastClearedAt ? new Date(settings.lastClearedAt) : null;
 
-            return {
-                id: otherUser.email,
-                username: otherUser.username,
-                name: otherUser.name,
-                avatar: otherUser.avatar,
-                lastMessage: lastMsg ? (lastMsg.sharedContent ? `Shared a ${lastMsg.sharedContent.type}` : lastMsg.text) : "Start a conversation",
-                time: lastMsg ? lastMsg.time : "",
-                messages: threadMessages.map(m => ({
-                    ...m,
-                    isMe: m.from === user.email
-                }))
-            };
-        })
-        .filter(chat => chat.messages.length > 0 || chat.id === targetEmail) // Show chats with history OR current target
-        .sort((a, b) => {
-            const timeA = a.messages[a.messages.length - 1]?.timestamp || 0;
-            const timeB = b.messages[b.messages.length - 1]?.timestamp || 0;
+        const threadMessages = messages.filter(m => {
+            const isRelevant = (m.from === user.email && m.to === otherEmail) ||
+                (m.from === otherEmail && m.to === user.email);
+            if (!isRelevant) return false;
+            if (lastCleared && new Date(m.timestamp) <= lastCleared) return false;
+            return true;
+        }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-            // Put current target at the absolute top if they are active
-            if (a.id === activeChatId) return -1;
-            if (b.id === activeChatId) return 1;
+        return {
+            id: otherEmail,
+            conversationId: convo._id,
+            username: otherUser.username,
+            name: otherUser.name,
+            avatar: otherUser.avatar,
+            isMuted: settings.isMuted,
+            lastMessage: convo.lastMessage?.text || "No messages",
+            time: convo.lastMessage ? new Date(convo.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+            messages: threadMessages.map(m => ({
+                ...m,
+                isMe: m.from === user.email
+            }))
+        };
+    });
 
-            return new Date(timeB) - new Date(timeA);
+    // If targetEmail is specified but not in conversations, add a virtual chat
+    let chats = [...existingChats];
+    if (targetEmail && !existingChats.find(c => c.id === targetEmail)) {
+        const targetUser = allUsers.find(u => u.email === targetEmail) || {
+            email: targetEmail,
+            username: targetEmail ? targetEmail.split('@')[0] : 'User'
+        };
+        chats.unshift({
+            id: targetEmail,
+            isVirtual: true,
+            username: targetUser.username,
+            name: targetUser.name,
+            avatar: targetUser.avatar,
+            lastMessage: "Start a conversation",
+            time: "",
+            messages: []
         });
+    }
 
-    const activeChat = chats.find(c => c.id === activeChatId);
+    chats.sort((a, b) => {
+        if (a.id === activeChatId) return -1;
+        if (b.id === activeChatId) return 1;
+        return 0;
+    });
 
     const handleSendMessage = async (content, type = 'text') => {
         if (!activeChatId || !user) return;
@@ -104,11 +129,32 @@ const Messages = () => {
             if (res.ok) {
                 const newMessage = await res.json();
                 setMessages(prev => [...prev, newMessage]);
+                fetchData(); // Refresh conversations
             }
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
+
+    const handleConvoAction = async (convoId, action) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/conversations/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversationId: convoId, userEmail: user.email, action })
+            });
+            if (res.ok) {
+                fetchData();
+                if (action === 'hide' || action === 'delete') {
+                    setActiveChatId(null);
+                }
+            }
+        } catch (err) {
+            console.error('Action failed:', err);
+        }
+    };
+
+    const activeChat = chats.find(c => c.id === activeChatId);
 
     if (loading) return <div className="page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>Loading chats...</div>;
 
@@ -118,6 +164,7 @@ const Messages = () => {
                 chats={chats}
                 activeChatId={activeChatId}
                 onSelectChat={(chat) => setActiveChatId(chat.id)}
+                onConvoAction={handleConvoAction}
             />
             <ChatWindow
                 activeChat={activeChat || null}

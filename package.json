@@ -1,7 +1,7 @@
 {
   "name": "stride-social",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.4.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,9 +12,12 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.0.2",
+    "@capacitor/camera": "^8.0.0",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
     "@capacitor/ios": "^8.0.2",
+    "@capacitor/local-notifications": "^8.0.0",
+    "@capacitor/push-notifications": "^8.0.0",
     "dotenv": "^17.2.4",
     "lucide-react": "^0.563.0",
     "mongodb-memory-server": "^11.0.1",

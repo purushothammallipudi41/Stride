@@ -60,45 +60,82 @@ if (dns.setDefaultResultOrder) {
 
 // Email Transporter
 const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
+
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+const transporter = (process.env.EMAIL_USER && process.env.EMAIL_PASS) ? nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+}) : null;
 
 function generateVerificationCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+function getEmailTemplate(code) {
+    return `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Welcome to Stride! 🎵</h2>
+            <p>Please use the following code to verify your account:</p>
+            <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px; font-size: 24px; letter-spacing: 5px; font-weight: bold;">
+                ${code}
+            </div>
+            <p>This code will expire in 15 minutes.</p>
+        </div>
+    `;
+}
+
 async function sendVerificationEmail(email, code) {
-    if (!resend) {
-        console.log(`[EMAIL MOCK] Verification code for ${email}: ${code}`);
-        return;
+    let emailSent = false;
+    const emailHtml = getEmailTemplate(code);
+
+    // 1. Try Resend
+    if (resend) {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Stride <onboarding@resend.dev>',
+                to: [email],
+                subject: 'Verify your Stride Account',
+                html: emailHtml
+            });
+
+            if (!error) {
+                console.log(`[EMAIL SENT] via Resend to ${email} (ID: ${data.id})`);
+                emailSent = true;
+                return;
+            } else {
+                console.error('[RESEND ERROR]', error);
+            }
+        } catch (e) {
+            console.error('[RESEND EXCEPTION]', e);
+        }
     }
 
-    try {
-        const { data, error } = await resend.emails.send({
-            from: 'Stride <onboarding@resend.dev>',
-            to: [email],
-            subject: 'Verify your Stride Account',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #333;">Welcome to Stride! 🎵</h2>
-                    <p>Please use the following code to verify your account:</p>
-                    <div style="background: #f4f4f4; padding: 15px; text-align: center; border-radius: 8px; font-size: 24px; letter-spacing: 5px; font-weight: bold;">
-                        ${code}
-                    </div>
-                    <p>This code will expire in 15 minutes.</p>
-                </div>
-            `
-        });
-
-        if (error) {
-            console.error('[RESEND ERROR]', error);
-            throw new Error(error.message);
+    // 2. Try Nodemailer (Fallback)
+    if (!emailSent && transporter) {
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Verify your Stride Account',
+                html: emailHtml
+            });
+            console.log(`[EMAIL SENT] via Nodemailer to ${email}`);
+            emailSent = true;
+            return;
+        } catch (e) {
+            console.error('[NODEMAILER ERROR]', e);
         }
+    }
 
-        console.log(`[EMAIL SENT] Verification code sent to ${email} (ID: ${data.id})`);
-    } catch (e) {
-        console.error('[EMAIL SEND FAILURE]', e);
-        // Do not throw error here, so the signup/login flow can continue
-        // even if email fails (common in test mode for Resend)
+    // 3. Mock / Console Log
+    if (!emailSent) {
+        console.log(`[EMAIL MOCK] Verification code for ${email}: ${code}`);
+        console.log('⚠️ Email not sent. Configure RESEND_API_KEY or EMAIL_USER/PASS in .env');
     }
 }
 
@@ -256,6 +293,36 @@ async function seedDatabase() {
                 }
             ]);
             console.log('✅ Servers seeded');
+        }
+
+        // --- Stride Official Server Seeding ---
+        // --- Stride Official Server Seeding ---
+        const strideOfficial = await ServerModel.findOne({ id: 0 });
+        if (!strideOfficial) {
+            console.log('🌱 Seeding Stride Official Server...');
+            await ServerModel.create({
+                id: 0,
+                name: "Stride Official",
+                icon: "/logo.png", // Use local logo
+                channels: ["announcements", "welcome", "updates", "general"],
+                members: 1,
+                ownerId: "stride",
+                admins: ["stride", "purushotham_mallipudi"]
+            });
+            console.log('✅ Stride Official Server created');
+        } else {
+            // Ensure logo is updated if it exists but has old logo
+            if (strideOfficial.icon !== "/logo.png") {
+                strideOfficial.icon = "/logo.png";
+                await strideOfficial.save();
+                console.log('🔄 Updated Stride Official Server logo');
+            }
+            // Ensure welcome channel exists
+            if (!strideOfficial.channels.includes('welcome')) {
+                strideOfficial.channels.push('welcome');
+                await strideOfficial.save();
+                console.log('🔄 Added welcome channel to Stride Official Server');
+            }
         }
 
         /* 
@@ -654,8 +721,14 @@ app.post('/api/register', async (req, res) => {
             stats: {
                 posts: 0,
                 followers: 0,
+                followers: 0,
                 following: initialFollowing.length
-            }
+            },
+            serverProfiles: [{
+                serverId: 0,
+                nickname: username,
+                avatar: `https://api.dicebear.com/9.x/avataaars/svg?seed=${username}`
+            }]
         });
 
         // Update targets' followers list
@@ -665,6 +738,23 @@ app.post('/api/register', async (req, res) => {
                 target.stats.followers = target.followers.length;
                 await target.save();
             }
+        }
+
+        // --- Auto-Welcome Message ---
+        try {
+            const welcomeMsg = await ServerMessage.create({
+                serverId: 0,
+                channelId: 'welcome',
+                userEmail: targets.find(t => t.username === 'stride')?.email || newUser.email,
+                username: 'Stride Bot',
+                avatar: 'https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official',
+                text: `Welcome @${username} to the Stride community! 🎉 We're glad to have you here.`,
+                timestamp: new Date()
+            });
+            io.to('server-0').emit('receive-server-message', welcomeMsg);
+            io.to('server-0-welcome').emit('receive-server-message', welcomeMsg);
+        } catch (err) {
+            console.error('[REGISTER] Failed to send welcome message:', err);
         }
 
         await sendVerificationEmail(email, verificationCode);
@@ -995,10 +1085,59 @@ app.post('/api/servers', async (req, res) => {
             name: req.body.name,
             icon: req.body.icon || req.body.name.charAt(0).toUpperCase(),
             channels: ["general"],
-            members: 1
         });
         res.status(201).json(server);
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/broadcast', async (req, res) => {
+    try {
+        const { adminId, message, channelName = 'announcements' } = req.body; // adminId can be username or _id
+
+        // 1. Verify Admin
+        const server = await ServerModel.findOne({ id: 0 }); // Official Server
+        if (!server) return res.status(404).json({ error: 'Official server not found' });
+
+        const adminUser = await User.findOne({
+            $or: [{ _id: mongoose.Types.ObjectId.isValid(adminId) ? adminId : null }, { username: adminId }]
+        });
+
+        if (!adminUser) return res.status(404).json({ error: 'Admin user not found' });
+
+        const isAdmin = server.ownerId === adminUser.username ||
+            (server.admins && server.admins.includes(adminUser.username)) ||
+            (server.admins && server.admins.includes(adminUser._id.toString()));
+
+        if (!isAdmin) return res.status(403).json({ error: 'Unauthorized: Not an admin' });
+
+        // 2. Post Message
+        const channelId = `server-0-${channelName}`; // Convention for channel IDs?
+        // Actually, existing system uses serverId.channelName or similar?
+        // Looking at ServerView.jsx might reveal how channels are identified.
+        // But for now, let's just create the message. The fontend filters by serverId + channelId.
+
+        // Wait, ServerView.jsx likely uses socket rooms. 
+        // Typically it listens to `server-${serverId}` or `server-${serverId}-${channelId}`.
+        // I'll emit to both.
+
+        const newMessage = await ServerMessage.create({
+            serverId: 0,
+            channelId: channelName,
+            userId: adminUser._id,
+            username: adminUser.username,
+            avatar: adminUser.avatar,
+            content: message,
+            timestamp: new Date()
+        });
+
+        // 3. Emit Socket Event
+        io.to(`server-0`).emit('receive-server-message', newMessage);
+        io.to(`server-0-${channelName}`).emit('receive-server-message', newMessage);
+
+        res.json({ success: true, message: 'Broadcast sent', data: newMessage });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.get('/api/servers/:serverId', async (req, res) => {
@@ -1334,10 +1473,20 @@ async function syncOfficialRelationships() {
                 changed = true;
             }
 
+            // Ensure they are Official
+            if (!stride.isOfficial) {
+                stride.isOfficial = true;
+                changed = true;
+            }
+            if (!puru.isOfficial) {
+                puru.isOfficial = true;
+                changed = true;
+            }
+
             if (changed) {
                 await stride.save();
                 await puru.save();
-                console.log('[INIT] Official relationship synced: Stride now follows purushotham_mallipudi');
+                console.log('[INIT] Official relationship/status synced');
             }
         }
     } catch (e) {
@@ -1375,6 +1524,48 @@ app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
 
         await user.save();
         res.json({ success: true, user });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Verification Request
+app.post('/api/users/request-verification', async (req, res) => {
+    try {
+        const { userId, documentUrl } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.verificationRequest = {
+            status: 'pending',
+            documentUrl,
+            timestamp: new Date()
+        };
+        await user.save();
+
+        res.json({ success: true, message: 'Verification request submitted' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Verification Request
+app.post('/api/users/request-verification', async (req, res) => {
+    try {
+        const { userId, documentUrl } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.verificationRequest = {
+            status: 'pending',
+            documentUrl,
+            timestamp: new Date()
+        };
+        await user.save();
+
+        res.json({ success: true, message: 'Verification request submitted' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

@@ -77,7 +77,7 @@ const Login = () => {
                 // If we fell back here from a session where password might be lost? 
                 // We assume `password` state is still preserved as we haven't unmounted.
                 await login({ identifier: verificationEmail, password }, rememberMe);
-                navigate('/');
+                navigate(isRegistering ? '/servers/0' : '/');
             } else {
                 throw new Error(data.error || 'Verification failed');
             }
@@ -294,7 +294,7 @@ const Login = () => {
                     <span style={{ margin: '0 8px' }}>•</span>
                     <a href="/legal/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
                 </div>
-                <div className="version-tag">v1.1.8-verified</div>
+                <div className="version-tag">v1.4.3</div>
             </div>
         </div>
     );

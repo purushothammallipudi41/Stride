@@ -115,7 +115,7 @@ const ShareModal = ({ isOpen, onClose, data, type }) => {
         <div className="share-modal-overlay animate-fade-in" onClick={onClose}>
             <div className="share-modal-content glass-card" onClick={e => e.stopPropagation()}>
                 <div className="share-header">
-                    <h3>Share {type.charAt(0).toUpperCase() + type.slice(1)}</h3>
+                    <h3>Share {type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Content'}</h3>
                     <button className="close-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 

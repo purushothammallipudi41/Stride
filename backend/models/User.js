@@ -24,7 +24,13 @@ const userSchema = new mongoose.Schema({
         serverId: Number,
         nickname: String,
         avatar: String
-    }]
+    }],
+    isOfficial: { type: Boolean, default: false }, // Blue Tick status
+    verificationRequest: {
+        status: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
+        documentUrl: String, // URL to the uploaded ID proof
+        timestamp: Date
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

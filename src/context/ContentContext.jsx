@@ -216,18 +216,43 @@ export const ContentProvider = ({ children }) => {
         }
     };
 
+    const [savedPosts, setSavedPosts] = useState([]);
+
+    // Load saved posts from local storage on init
+    useEffect(() => {
+        const saved = localStorage.getItem('vibestream_saved_posts');
+        if (saved) setSavedPosts(JSON.parse(saved));
+    }, []);
+
+    const toggleSavePost = (post) => {
+        setSavedPosts(prev => {
+            const isSaved = prev.some(p => (p._id || p.id) === (post._id || post.id));
+            let newSaved;
+            if (isSaved) {
+                newSaved = prev.filter(p => (p._id || p.id) !== (post._id || post.id));
+            } else {
+                newSaved = [...prev, post];
+            }
+            localStorage.setItem('vibestream_saved_posts', JSON.stringify(newSaved));
+            return newSaved;
+        });
+    };
+
     return (
         <ContentContext.Provider value={{
             posts,
             stories,
+            savedPosts,
             addPost,
+            addStory,
             toggleLike,
             addComment,
             likeComment,
             replyToComment,
             fetchPosts,
             fetchStories,
-            deletePost
+            deletePost,
+            toggleSavePost
         }}>
             {children}
         </ContentContext.Provider>

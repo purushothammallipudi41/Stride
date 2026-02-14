@@ -139,7 +139,15 @@ const Servers = () => {
                             fontSize: '2rem',
                             boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)'
                         }}>
-                            {server.icon}
+                            {server.icon && (server.icon.startsWith('http') || server.icon.startsWith('/')) ? (
+                                <img
+                                    src={server.icon}
+                                    alt={server.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                server.icon
+                            )}
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', fontWeight: '700' }}>{server.name}</h3>

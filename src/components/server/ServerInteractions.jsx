@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { UserPlus, Settings, FolderPlus, Bell, LogOut, Search, X, Hash, User } from 'lucide-react';
+import { UserPlus, Settings, FolderPlus, Bell, LogOut, Search, X, Hash, User, BadgeCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import './ServerInteractions.css';
 
@@ -28,7 +28,7 @@ export const ServerMenu = ({ isOpen, onClose, onInvite, onSettings, onCreateChan
     };
 
     return (
-        <div className="server-menu-dropdown" ref={menuRef} style={{ zIndex: 9999, position: 'fixed', top: '70px', left: '260px' }}>
+        <div className="server-menu-dropdown" ref={menuRef} style={{ zIndex: 9999 }}>
             <div className="menu-item" onClick={(e) => handleAction(e, onInvite)}>
                 <span>Invite People</span>
                 <UserPlus size={16} />
@@ -58,16 +58,8 @@ export const ServerMenu = ({ isOpen, onClose, onInvite, onSettings, onCreateChan
 export const MembersList = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
-    const onlineMembers = [
-        { name: 'alex_beats', status: 'online', avatar: 'https://i.pravatar.cc/150?u=alex_beats' },
-        { name: 'sarah_j', status: 'idle', avatar: 'https://i.pravatar.cc/150?u=sarah_j' },
-        { name: 'lofi_lover', status: 'dnd', avatar: 'https://i.pravatar.cc/150?u=lofi' },
-    ];
-
-    const offlineMembers = [
-        { name: 'mike_drop', status: 'offline', avatar: 'https://i.pravatar.cc/150?u=mike' },
-        { name: 'beat_maker', status: 'offline', avatar: 'https://i.pravatar.cc/150?u=beat' },
-    ];
+    const onlineMembers = [];
+    const offlineMembers = [];
 
     return (
         <div className="members-sidebar">
@@ -85,7 +77,10 @@ export const MembersList = ({ isOpen, onClose }) => {
                             <div className="member-avatar" style={{ backgroundImage: `url(${m.avatar})` }}>
                                 <div className={`status-dot ${m.status}`} />
                             </div>
-                            <span style={{ fontWeight: 500 }}>{m.name}</span>
+                            <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {m.name}
+                                {m.isOfficial && <BadgeCheck size={12} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                            </span>
                         </div>
                     ))}
                 </div>

@@ -6,7 +6,8 @@ const serverSchema = new mongoose.Schema({
     icon: String,
     channels: [String],
     members: { type: Number, default: 1 },
-    ownerId: String
+    ownerId: String,
+    admins: [{ type: String }] // Array of user IDs or emails
 });
 
 module.exports = mongoose.model('Server', serverSchema);

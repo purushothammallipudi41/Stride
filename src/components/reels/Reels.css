@@ -146,10 +146,10 @@
 
 .reel-content {
     position: absolute;
-    bottom: 110px;
+    bottom: 90px;
     /* Above BottomPlayer */
-    left: 20px;
-    width: 80%;
+    left: 16px;
+    width: 85%;
     z-index: 10;
 }
 
@@ -157,32 +157,34 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .reel-avatar {
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     border: 2px solid #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
 }
 
 .reel-username {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .follow-btn {
     background: transparent;
-    border: 1px solid #fff;
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #fff;
     transition: all 0.2s;
+    backdrop-filter: blur(4px);
 }
 
 .follow-btn.following {
@@ -196,35 +198,38 @@
 }
 
 .reel-caption {
-    font-size: 1rem;
-    margin-bottom: 12px;
+    font-size: 1.05rem;
+    margin-bottom: 16px;
     color: #fff;
     width: 100%;
     max-width: 500px;
+    line-height: 1.4;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .reel-music-tag {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(20, 20, 20, 0.6);
     width: fit-content;
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 6px 14px;
+    border-radius: 24px;
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .reel-actions {
     position: absolute;
-    right: 15px;
-    bottom: 110px;
+    right: 12px;
+    bottom: 100px;
     z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: 28px;
 }
 
 .reel-action-btn {
@@ -234,6 +239,7 @@
     gap: 6px;
     color: #fff;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .reel-action-btn:active {
@@ -260,13 +266,13 @@
 }
 
 .reel-action-btn span {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
 }
 
 .music-disc-anim {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     background: #111;
     border-radius: 50%;
     border: 3px solid #333;
@@ -279,8 +285,8 @@
 }
 
 .disc-inner {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }

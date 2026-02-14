@@ -192,18 +192,18 @@ const ReelItem = ({ reel }) => {
                     className={`reel-action-btn ${isLiked ? 'liked' : ''}`}
                     onClick={handleLike}
                 >
-                    <Heart size={32} fill={isLiked ? "var(--color-danger)" : "none"} stroke={isLiked ? "var(--color-danger)" : "currentColor"} />
+                    <Heart size={36} fill={isLiked ? "var(--color-danger)" : "none"} stroke={isLiked ? "var(--color-danger)" : "currentColor"} strokeWidth={2.5} />
                     <span>{likeCount > 999 ? (likeCount / 1000).toFixed(1) + 'K' : likeCount}</span>
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsCommentsOpen(true))}>
-                    <MessageCircle size={32} />
+                    <MessageCircle size={36} strokeWidth={2.5} />
                     <span>{reel.comments}</span>
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsShareModalOpen(true))}>
-                    <Share2 size={32} />
+                    <Share2 size={36} strokeWidth={2.5} />
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => alert('Options menu opening...'))}>
-                    <MoreHorizontal size={32} />
+                    <MoreHorizontal size={36} strokeWidth={2.5} />
                 </button>
                 <div className="music-disc-anim">
                     <div className="disc-inner" style={{ backgroundImage: `url(https://api.dicebear.com/7.x/shapes/svg?seed=${reel.musicTrack})`, backgroundSize: 'cover' }} />

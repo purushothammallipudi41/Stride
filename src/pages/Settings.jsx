@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import VerificationModal from '../components/profile/VerificationModal';
 import config from '../config';
 import './Settings.css';
 
@@ -18,6 +19,9 @@ const Settings = () => {
     const [showVerificationInput, setShowVerificationInput] = useState(false);
     const [verificationStatus, setVerificationStatus] = useState(''); // 'sending', 'sent', 'verifying', 'success', 'error'
     const [verificationMsg, setVerificationMsg] = useState('');
+
+    // Blue Tick Verification
+    const [showBlueTickModal, setShowBlueTickModal] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -220,6 +224,22 @@ const Settings = () => {
                             </div>
                         )}
 
+                        <div className="settings-item" onClick={() => setShowBlueTickModal(true)}>
+                            <div className="settings-item-left">
+                                <BadgeCheck size={20} color={user?.isOfficial ? 'var(--color-primary)' : 'var(--text-secondary)'} fill={user?.isOfficial ? 'var(--color-primary-glow)' : 'transparent'} />
+                                <span>Get Verified {user?.isOfficial && '(Official)'}</span>
+                            </div>
+                            <div className="settings-item-right">
+                                {user?.isOfficial ? (
+                                    <Check size={18} color="var(--color-primary)" />
+                                ) : (
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                        {user?.verificationRequest?.status === 'pending' ? 'Pending' : 'Apply'}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="settings-item" onClick={togglePrivate}>
                             <div className="settings-item-left">
                                 <Shield size={20} />
@@ -233,6 +253,21 @@ const Settings = () => {
                                 <span>Notifications</span>
                             </div>
                             <div className={`toggle-switch ${notificationsEnabled ? 'active' : ''}`}></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="settings-group">
+                    <h3>Promotions</h3>
+                    <div className="settings-list">
+                        <div className="settings-item" onClick={() => navigate('/ads')}>
+                            <div className="settings-item-left">
+                                <Activity size={20} />
+                                <span>Ads Manager</span>
+                            </div>
+                            <div className="settings-item-right">
+                                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Manage your ads</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -292,7 +327,9 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
-        </div>
+
+            <VerificationModal isOpen={showBlueTickModal} onClose={() => setShowBlueTickModal(false)} />
+        </div >
     );
 };
 

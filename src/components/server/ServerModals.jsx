@@ -197,101 +197,116 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
                     ))}
                     <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
                     <div
-                        style={{ padding: '8px 12px', color: '#ef4444', cursor: 'pointer' }}
-                        onClick={() => {
-                            if (onDelete) onDelete();
-                        }}
+                        style={{ padding: '8px 12px', color: '#ef4444', cursor: 'pointer', background: activeTab === 'Delete' ? 'rgba(239,68,68,0.1)' : 'transparent', borderRadius: '4px' }}
+                        onClick={() => setActiveTab('Delete')}
                     >
                         Delete Server
                     </div>
                 </div>
                 <div style={{ flex: 1, paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ marginTop: 0, marginBottom: '20px' }}>{activeTab}</h4>
-                    {activeTab === 'Overview' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
-                            <div style={{ display: 'flex', gap: '20px' }}>
-                                <div
-                                    onClick={() => document.getElementById('server-icon-upload').click()}
-                                    style={{
-                                        width: '100px',
-                                        height: '100px',
-                                        borderRadius: '50%',
-                                        background: serverIcon ? `url(${serverIcon}) center/cover` : 'var(--color-surface)',
-                                        border: '2px dashed var(--text-secondary)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                        flexShrink: 0
-                                    }}>
-                                    {!serverIcon && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Upload</span>}
-                                    <input
-                                        id="server-icon-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileChange}
-                                    />
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.8rem' }}>SERVER NAME</label>
-                                    <input
-                                        type="text"
-                                        value={serverName}
-                                        onChange={(e) => setServerName(e.target.value)}
-                                        style={{ width: '100%', padding: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'white' }}
-                                    />
-                                </div>
-                            </div>
-                            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button
-                                    onClick={handleSave}
-                                    className="primary-btn"
-                                    style={{ padding: '10px 24px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
-                                >
-                                    Save Changes
-                                </button>
+                    {activeTab === 'Delete' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                            <h4 style={{ color: 'white', marginBottom: '1rem' }}>Delete {serverName}</h4>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+                                Are you sure you want to delete <strong>{serverName}</strong>? This action cannot be undone.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setActiveTab('Overview')} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--text-secondary)', color: 'white', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+                                <button onClick={() => { if (onDelete) onDelete(); }} style={{ padding: '10px 20px', background: '#ef4444', border: 'none', color: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Delete Server</button>
                             </div>
                         </div>
-                    )}
-                    {activeTab === 'Roles' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                                <button
-                                    onClick={handleAddRole}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '5px',
-                                        background: 'var(--color-primary)', border: 'none', borderRadius: '4px',
-                                        padding: '6px 12px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
-                                    }}
-                                >
-                                    <span>Add Role</span>
-                                </button>
-                            </div>
-                            <div className="premium-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
-                                {roles.map(role => (
-                                    <div key={role.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Shield size={16} color={role.color} />
-                                            <span>{role.name}</span>
+                    ) : (
+                        <>
+                            <h4 style={{ marginTop: 0, marginBottom: '20px' }}>{activeTab}</h4>
+                            {activeTab === 'Overview' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
+                                    <div style={{ display: 'flex', gap: '20px' }}>
+                                        <div
+                                            onClick={() => document.getElementById('server-icon-upload').click()}
+                                            style={{
+                                                width: '100px',
+                                                height: '100px',
+                                                borderRadius: '50%',
+                                                background: serverIcon ? `url(${serverIcon}) center/cover` : 'var(--color-surface)',
+                                                border: '2px dashed var(--text-secondary)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                position: 'relative',
+                                                overflow: 'hidden',
+                                                flexShrink: 0
+                                            }}>
+                                            {!serverIcon && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Upload</span>}
+                                            <input
+                                                id="server-icon-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                                onChange={handleFileChange}
+                                            />
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>0 members</span>
-                                            <button
-                                                className="icon-btn"
-                                                onClick={() => handleDeleteRole(role.id)}
-                                                style={{ color: '#ef4444', opacity: 0.7 }}
-                                                title="Delete Role"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.8rem' }}>SERVER NAME</label>
+                                            <input
+                                                type="text"
+                                                value={serverName}
+                                                onChange={(e) => setServerName(e.target.value)}
+                                                style={{ width: '100%', padding: '10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'white' }}
+                                            />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
+                                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                                        <button
+                                            onClick={handleSave}
+                                            className="primary-btn"
+                                            style={{ padding: '10px 24px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'Roles' && (
+
+                                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                                        <button
+                                            onClick={handleAddRole}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '5px',
+                                                background: 'var(--color-primary)', border: 'none', borderRadius: '4px',
+                                                padding: '6px 12px', color: 'white', cursor: 'pointer', fontSize: '0.8rem'
+                                            }}
+                                        >
+                                            <span>Add Role</span>
+                                        </button>
+                                    </div>
+                                    <div className="premium-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
+                                        {roles.map(role => (
+                                            <div key={role.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '8px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Shield size={16} color={role.color} />
+                                                    <span>{role.name}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>0 members</span>
+                                                    <button
+                                                        className="icon-btn"
+                                                        onClick={() => handleDeleteRole(role.id)}
+                                                        style={{ color: '#ef4444', opacity: 0.7 }}
+                                                        title="Delete Role"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

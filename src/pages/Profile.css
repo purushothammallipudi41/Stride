@@ -302,49 +302,137 @@
 
 @media (max-width: 640px) {
     .profile-container {
-        padding: 16px;
-        padding-bottom: 120px;
-        /* Space for bottom nav */
+        padding: 20px 16px 100px 16px;
     }
 
     .profile-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 20px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+            "username username"
+            "avatar actions"
+            "avatar stats"
+            "bio bio";
+        column-gap: 20px;
+        row-gap: 8px;
         margin-bottom: 24px;
+        align-items: start;
     }
 
+    .profile-info,
     .profile-top {
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
+        display: contents;
     }
 
-    /* Wrap buttons container */
-    .profile-top>div,
-    .profile-top button {
-        margin: 4px;
+    .profile-avatar-container {
+        grid-area: avatar;
+        align-self: start;
     }
-
-    /* Specifically target the container of action buttons if they are direct children */
-    /* But in JSX they are direct children of profile-top alongside h2.
-       Let's use a flex wrap approach for the buttons part if possible, 
-       but the structure is h2 then buttons. */
 
     .profile-username {
+        grid-area: username;
+        font-size: 1.5rem;
+        font-weight: 800;
         margin-bottom: 8px;
+        padding-left: 2px;
+        line-height: 1.2;
     }
 
-    /* Force buttons to be inline-ish or flex row */
-    .profile-header .profile-top {
+    .profile-actions {
+        grid-area: actions;
+        margin: 0;
+        align-self: center;
+        width: 100%;
+        justify-content: flex-start;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
-    /* We need to group buttons better. 
-       Currently: h2, button, button... 
-       On mobile: h2 on top, then buttons in a row.
-    */
+    .profile-stats {
+        grid-area: stats;
+        margin: 8px 0 0 0;
+        align-self: start;
+        gap: 20px;
+        justify-content: flex-start;
+    }
+
+    .profile-bio {
+        grid-area: bio;
+        margin-top: 16px;
+        padding-left: 2px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .profile-name {
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+        color: #fff;
+    }
+
+    .profile-avatar-large {
+        width: 86px;
+        height: 86px;
+        border-width: 2px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Premium Button Styles */
+    .edit-profile-btn,
+    .follow-btn,
+    .message-btn {
+        padding: 0 20px;
+        height: 36px;
+        font-size: 0.9rem;
+        border-radius: 18px;
+        /* Pill */
+    }
+
+    .settings-btn,
+    .more-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .stat-item {
+        flex-direction: column;
+        gap: 0;
+        align-items: flex-start;
+    }
+
+    .stat-value {
+        font-size: 1.15rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
+
+    .profile-tabs {
+        gap: 0;
+        justify-content: space-around;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 2px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 14px 0;
+    }
+
+    .tab-btn span {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-left: 6px;
+    }
 }

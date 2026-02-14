@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Image, X, RefreshCw, Zap, ZapOff, Play } from 'lucide-react';
+import { Camera, Image, X, RefreshCw, Zap, ZapOff, Play, Send } from 'lucide-react';
 import './MediaCapture.css';
 
 const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
@@ -10,6 +10,12 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
     const [mediaType, setMediaType] = useState('image'); // 'image' or 'video'
     const videoRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        if (mode === 'camera' && stream && videoRef.current) {
+            videoRef.current.srcObject = stream;
+        }
+    }, [mode, stream]);
 
     useEffect(() => {
         return () => {
@@ -24,7 +30,6 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
                 audio: false
             });
             setStream(mediaStream);
-            if (videoRef.current) videoRef.current.srcObject = mediaStream;
             setMode('camera');
         } catch (err) {
             console.error("Camera access denied:", err);
@@ -59,6 +64,7 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
     };
 
     const handleConfirm = () => {
+        console.log("[MediaCapture] handleConfirm triggered", { mediaType, hasPreview: !!previewUrl });
         onCapture(previewUrl, mediaType);
     };
 
@@ -117,8 +123,12 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
                         <img src={previewUrl} alt="Preview" className="preview-content" />
                     )}
                     <div className="preview-actions">
-                        <button className="preview-btn secondary" onClick={handleCancel}>Retake</button>
-                        <button className="preview-btn primary" onClick={handleConfirm}>Share</button>
+                        <button className="preview-btn secondary" onClick={handleCancel}>
+                            <RefreshCw size={24} />
+                        </button>
+                        <button className="preview-btn primary" onClick={handleConfirm}>
+                            <Send size={24} />
+                        </button>
                     </div>
                 </div>
             )}

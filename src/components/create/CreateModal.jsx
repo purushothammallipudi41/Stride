@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Camera, Image, Music, MapPin, Users, Share2, Film, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import './CreateModal.css';
@@ -8,11 +8,16 @@ import { useAuth } from '../../context/AuthContext';
 import { useMusic } from '../../context/MusicContext';
 import MediaCapture from '../common/MediaCapture';
 
-const CreateModal = ({ isOpen, onClose }) => {
-    const { addPost, fetchStories } = useContent();
+const CreateModal = ({ isOpen, onClose, initialTab = 'post' }) => {
+    const { addPost, fetchStories, addStory } = useContent();
     const { user } = useAuth();
     const { playTrack } = useMusic();
-    const [activeTab, setActiveTab] = useState('post');
+    const [activeTab, setActiveTab] = useState(initialTab);
+
+    // Sync activeTab when initialTab changes (e.g. when opening from different triggers)
+    useEffect(() => {
+        if (isOpen) setActiveTab(initialTab);
+    }, [isOpen, initialTab]);
     const [caption, setCaption] = useState('');
     const [capturedMedia, setCapturedMedia] = useState(null);
     const [activeSearch, setActiveSearch] = useState(null); // 'location', 'people', 'music'
@@ -67,7 +72,13 @@ const CreateModal = ({ isOpen, onClose }) => {
             }
         }
 
-        const success = await addPost({
+        const success = await (activeTab === 'story' ? addStory({
+            userId: user.email,
+            username: user.username,
+            userAvatar: user.avatar,
+            content: mediaUrl,
+            type: 'image'
+        }) : addPost({
             userId: user.email,
             username: user.username,
             userAvatar: user.avatar,
@@ -77,9 +88,10 @@ const CreateModal = ({ isOpen, onClose }) => {
             musicTrack: selections.music?.title,
             type: activeTab,
             isSensitive
-        });
+        }));
 
         if (success) {
+            if (activeTab === 'story') fetchStories();
             onClose();
         } else {
             alert("Failed to share post. Please try again.");
@@ -100,13 +112,14 @@ const CreateModal = ({ isOpen, onClose }) => {
                 {!activeSearch ? (
                     <>
                         <div className="modal-tabs">
-                            {['post', 'reel'].map(tab => (
+                            {['post', 'story', 'reel'].map(tab => (
                                 <button
                                     key={tab}
                                     className={`tab ${activeTab === tab ? 'active' : ''}`}
                                     onClick={() => { setActiveTab(tab); setCapturedMedia(null); }}
                                 >
                                     {tab === 'post' && <Image size={20} />}
+                                    {tab === 'story' && <Camera size={20} />}
                                     {tab === 'reel' && <Film size={20} />}
                                     <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
                                 </button>
@@ -117,7 +130,7 @@ const CreateModal = ({ isOpen, onClose }) => {
                             {!capturedMedia ? (
                                 <div className="media-capture-boundary">
                                     <MediaCapture
-                                        type={activeTab === 'post' ? 'image' : activeTab === 'reel' ? 'video' : 'all'}
+                                        type={activeTab === 'post' || activeTab === 'story' ? 'image' : activeTab === 'reel' ? 'video' : 'all'}
                                         onCapture={(url, type) => setCapturedMedia({ url, type })}
                                     />
                                 </div>

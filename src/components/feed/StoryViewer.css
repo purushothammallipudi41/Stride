@@ -185,15 +185,20 @@
 }
 
 .story-footer.owner {
-    justify-content: center;
-    gap: 30px;
+    justify-content: space-between;
+    align-items: center;
     color: white;
     font-weight: 500;
     background: rgba(0, 0, 0, 0.4);
-    padding: 12px;
+    padding: 12px 20px;
     border-radius: 16px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.owner-stats {
+    display: flex;
+    gap: 20px;
 }
 
 .stats-item {

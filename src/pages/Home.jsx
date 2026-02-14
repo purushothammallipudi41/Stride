@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Heart, Search, RefreshCw } from 'lucide-react';
+import { Heart, Search, RefreshCw, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
@@ -83,6 +83,9 @@ const Home = () => {
                 </div>
 
                 <div className="header-actions">
+                    <div className="notification-btn glass-card" onClick={() => navigate('/messages')}>
+                        <MessageCircle size={20} className="header-icon" />
+                    </div>
                     <div className="notification-btn glass-card" onClick={() => navigate('/notifications')}>
                         <Heart size={20} className="header-icon" />
                         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}

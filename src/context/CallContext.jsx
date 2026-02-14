@@ -14,7 +14,7 @@ const CallContext = createContext({
 export const useCall = () => useContext(CallContext);
 
 export const CallProvider = ({ children }) => {
-    const { socket } = useSocket();
+    const { socket } = useSocket() || {};
     const { user } = useAuth();
 
     const [callState, setCallState] = useState('IDLE'); // IDLE, INCOMING, OUTGOING, CONNECTED

@@ -239,4 +239,12 @@ button:active {
     width: 0px;
     background: transparent;
   }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
 }

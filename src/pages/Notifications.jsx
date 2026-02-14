@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
 import { useToast } from '../context/ToastContext';
@@ -36,12 +36,11 @@ const Notifications = () => {
                     <h1>Notifications</h1>
                 </div>
                 <div className="header-actions">
-                    <button className="mark-read-btn" onClick={markAllRead}>
-                        <CheckCircle size={18} />
-                        Mark read
+                    <button className="mark-read-btn" onClick={markAllRead} aria-label="Mark all as read" title="Mark all as read">
+                        <CheckCircle size={20} />
                     </button>
-                    <button className="clear-btn" onClick={() => setIsConfirmOpen(true)} style={{ marginLeft: '12px', color: '#ff4b4b', border: '1px solid rgba(255, 75, 75, 0.3)', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'rgba(255, 75, 75, 0.1)' }}>
-                        Clear all
+                    <button className="clear-btn" onClick={() => setIsConfirmOpen(true)} aria-label="Clear all notifications" title="Clear all notifications">
+                        <Trash2 size={20} />
                     </button>
                 </div>
             </header>

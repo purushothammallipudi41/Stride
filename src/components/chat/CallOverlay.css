@@ -108,8 +108,8 @@
     height: 64px;
 }
 
-transform: scale(1.1) rotate(135deg);
-/* Spin slightly on hover */
+.hangup-btn:hover {
+    transform: scale(1.1) rotate(135deg);
 }
 
 /* Video Layout */

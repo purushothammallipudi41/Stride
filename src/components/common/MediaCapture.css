@@ -48,6 +48,7 @@
     width: 100%;
     height: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 .camera-preview,
@@ -113,29 +114,31 @@
 
 .preview-actions {
     position: absolute;
-    bottom: 40px;
+    bottom: 60px;
+    /* Moved up from 40px */
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
     gap: 20px;
-    padding: 0 20px;
+    padding: 30px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    z-index: 100;
 }
 
 .preview-btn {
-    flex: 1;
-    max-width: 160px;
-    height: 48px;
-    border-radius: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1rem;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .preview-btn:hover {

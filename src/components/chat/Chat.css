@@ -2,6 +2,24 @@
 
 /* Mobile Layout Logic */
 @media (max-width: 768px) {
+    .messages-page {
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: calc(60px + env(safe-area-inset-bottom));
+        z-index: 900;
+        background: #000 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Override parent main-content padding */
+    :global(.main-content) {
+        padding-bottom: 0 !important;
+    }
+
     .messages-page.show-list .chat-window {
         display: none !important;
     }
@@ -9,6 +27,7 @@
     .messages-page.show-list .chat-list-container {
         width: 100% !important;
         display: flex !important;
+        height: 100% !important;
     }
 
     .messages-page.show-chat .chat-list-container {
@@ -18,6 +37,40 @@
     .messages-page.show-chat .chat-window {
         display: flex !important;
         width: 100% !important;
+        height: 100% !important;
+    }
+
+    .chat-header,
+    .chat-input-area,
+    .chat-list-header-row {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+
+    .chat-window {
+        border-radius: 0 !important;
+    }
+
+    .chat-controls {
+        padding: 8px 10px 0 10px !important;
+        /* Removed bottom padding */
+        gap: 6px !important;
+        background: black;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        /* Subtle separator */
+        /* Ensure contrast against messages */
+    }
+
+    .chat-input-area {
+        padding: 4px 4px 4px 12px !important;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .send-btn-vibe {
+        width: 36px !important;
+        height: 36px !important;
     }
 
     .mobile-only {
@@ -40,15 +93,49 @@
     backdrop-filter: blur(20px);
 }
 
-.chat-list-header {
+.chat-list-header-row {
     padding: var(--spacing-lg);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-list-header {
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, #fff 0%, #aaa 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.chat-list {
+    position: relative;
+    /* Anchor for absolute menu */
+    flex: 1;
+    overflow-y: auto;
+}
+
+.clear-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 75, 75, 0.1);
+    color: #ff4b4b;
+    border: 1px solid rgba(255, 75, 75, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+}
+
+.clear-all-btn:hover {
+    background: rgba(255, 75, 75, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 75, 75, 0.2);
 }
 
 .chat-item {
@@ -106,11 +193,36 @@
     text-overflow: ellipsis;
 }
 
-.chat-item-time {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    align-self: flex-start;
-    margin-top: 4px;
+.chat-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.convo-menu-btn {
+    opacity: 0.4;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    color: var(--color-text-secondary);
+}
+
+.chat-item:hover .convo-menu-btn {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.convo-menu-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* On mobile, make menu button always visible for accessibility */
+@media (max-width: 768px) {
+    .convo-menu-btn {
+        opacity: 1;
+    }
 }
 
 .chat-avatar-ring {
@@ -580,10 +692,6 @@
     text-align: center;
 }
 
-.pulse {
-    animation: pulse 2s infinite;
-}
-
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -601,11 +709,101 @@
     }
 }
 
-.empty-chat-vibe {
+.empty-chats-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
     text-align: center;
 }
 
-.vibe-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+.empty-chats-vibe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6366f1;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.empty-chats-vibe h4 {
+    color: white;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.empty-chats-vibe p {
+    font-size: 0.9rem;
+    max-width: 220px;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+
+.chat-item.muted {
+    opacity: 0.8;
+}
+
+.chat-item-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.muted-icon {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.convo-context-menu {
+    position: absolute;
+    z-index: 1000;
+    min-width: 160px;
+    padding: 8px;
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.convo-context-menu button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.convo-context-menu button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.convo-context-menu button.delete-action {
+    color: #ff4d4d;
+}
+
+.convo-context-menu button.delete-action:hover {
+    background: rgba(255, 77, 77, 0.1);
 }

@@ -268,14 +268,12 @@ const ServerView = () => {
                 onClose={() => setShowSettings(false)}
                 server={server}
                 onDelete={async () => {
-                    if (window.confirm(`Are you sure you want to delete ${server.name}? This cannot be undone.`)) {
-                        const success = await deleteServer(server.id, user.email);
-                        if (success) {
-                            showToast('Server deleted', 'success');
-                            navigate('/servers');
-                        } else {
-                            showToast('Failed to delete server', 'error');
-                        }
+                    const success = await deleteServer(server.id, user.email);
+                    if (success) {
+                        showToast('Server deleted', 'success');
+                        navigate('/servers');
+                    } else {
+                        showToast('Failed to delete server', 'error');
                     }
                 }}
                 onUpdate={async (updates) => {
