@@ -1086,13 +1086,21 @@ app.get('/api/servers', async (req, res) => {
     try {
         const servers = await ServerModel.find().sort({ id: 1 }).lean();
 
-        // Calculate dynamic member counts for each server
-        const serversWithMemberCounts = await Promise.all(servers.map(async (server) => {
-            const memberCount = await User.countDocuments({ "serverProfiles.serverId": server.id });
-            return {
-                ...server,
-                members: memberCount // Override static count with dynamic count
-            };
+        // Calculate dynamic member counts using aggregation for performance
+        const memberCounts = await User.aggregate([
+            { $unwind: "$serverProfiles" },
+            { $group: { _id: "$serverProfiles.serverId", count: { $sum: 1 } } }
+        ]);
+
+        // Create a map for O(1) lookup
+        const countMap = {};
+        memberCounts.forEach(item => {
+            countMap[item._id] = item.count;
+        });
+
+        const serversWithMemberCounts = servers.map(server => ({
+            ...server,
+            members: countMap[server.id] || 0
         }));
 
         res.json(serversWithMemberCounts);
