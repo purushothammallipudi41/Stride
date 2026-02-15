@@ -1,12 +1,23 @@
+import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import ReelItem from '../components/reels/ReelItem';
 import '../components/reels/Reels.css';
 
 const Reels = () => {
-    const { posts } = useContent();
+    const { fetchPosts } = useContent();
+    const [reelsData, setReelsData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Filter for video posts or specific 'reel' type
-    const reelsData = posts.filter(post => post.videoUrl || post.type === 'reel' || post.mediaType === 'video');
+    useEffect(() => {
+        const loadReels = async () => {
+            const data = await fetchPosts({ type: 'reel', limit: 50 });
+            setReelsData(data || []);
+            setLoading(false);
+        };
+        loadReels();
+    }, []);
+
+    if (loading) return <div className="flex-center" style={{ height: '100vh' }}><div className="loading-spinner"></div></div>;
 
     if (reelsData.length === 0) {
         return (

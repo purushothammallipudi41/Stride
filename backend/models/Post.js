@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-    username: String,
+    username: { type: String, index: true },
     userAvatar: String,
-    userId: String,
-    type: { type: String, default: 'image' },
+    userId: { type: String, index: true },
+    type: { type: String, default: 'image', index: true },
     contentUrl: String,
     caption: String,
     musicTrack: String,
@@ -18,7 +18,10 @@ const postSchema = new mongoose.Schema({
         userAvatar: String,
         timestamp: { type: Date, default: Date.now }
     }],
-    timestamp: { type: Date, default: Date.now }
+    timestamp: { type: Date, default: Date.now, index: true }
 });
+
+postSchema.index({ timestamp: -1 }); // Optimized for latest feed
+postSchema.index({ username: 1, timestamp: -1 }); // Optimized for profile
 
 module.exports = mongoose.model('Post', postSchema);

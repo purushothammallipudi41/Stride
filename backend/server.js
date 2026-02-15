@@ -375,33 +375,35 @@ app.get('/api/health', (req, res) => {
 // Posts
 app.get('/api/posts', async (req, res) => {
     try {
-        const { viewerId } = req.query;
+        const { viewerId, type, username, limit = 20, skip = 0 } = req.query;
         let filter = {};
 
+        // 1. Base Filter (Type / Username)
+        if (type) filter.type = type;
+        if (username) filter.username = username;
+
+        // 2. Blocked User Filter
         if (viewerId) {
             const viewer = await User.findById(viewerId);
             if (viewer && viewer.blockedUsers && viewer.blockedUsers.length > 0) {
-                // Determine the valid user IDs (users not in the blocked list)
-                // However, Post schema relies on `username` not `userId` in some legacy parts?
-                // Checking Post.js schema... it stores `username` and `userAvatar`.
-                // It does NOT strictly store `userId`. This is a tech debt.
-                // We must filter by username if we don't have userId on posts.
-
-                // Strategy: Get usernames of blocked users
                 const blockedUsers = await User.find({ _id: { $in: viewer.blockedUsers } });
                 const blockedUsernames = blockedUsers.map(u => u.username);
-
-                filter = { username: { $nin: blockedUsernames } };
+                filter.username = { ...filter.username, $nin: blockedUsernames };
             }
         }
 
-        const posts = await Post.find(filter).sort({ timestamp: -1 });
+        // 3. Optimized Query with Indexing and Pagination
+        const posts = await Post.find(filter)
+            .sort({ timestamp: -1 })
+            .skip(parseInt(skip))
+            .limit(parseInt(limit))
+            .lean();
+
         res.json(posts);
     } catch (e) {
         console.error('API Error:', e);
         res.status(500).json({
             error: e.message,
-            stack: process.env.NODE_ENV === 'production' ? null : e.stack,
             dbState: mongoose.connection.readyState
         });
     }

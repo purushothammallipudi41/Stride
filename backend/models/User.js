@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     verificationCodeExpires: Date,
     blockedUsers: [{ type: String }], // Array of user IDs or emails blocked by this user
     serverProfiles: [{
-        serverId: Number,
+        serverId: { type: Number, index: true },
         nickname: String,
         avatar: String
     }],
@@ -29,8 +29,10 @@ const userSchema = new mongoose.Schema({
     verificationRequest: {
         status: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
         documentUrl: String, // URL to the uploaded ID proof
-        timestamp: Date
+        timestamp: { type: Date, index: true }
     }
 }, { timestamps: true });
+
+userSchema.index({ "serverProfiles.serverId": 1 });
 
 module.exports = mongoose.model('User', userSchema);

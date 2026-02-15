@@ -13,20 +13,33 @@ export const ContentProvider = ({ children }) => {
     const { addNotification } = useNotifications();
     const { user } = useAuth();
 
-    const fetchPosts = async () => {
+    const fetchPosts = async (params = {}) => {
         try {
-            // Pass viewerId if user is logged in to filter blocked content
-            const query = user ? `?viewerId=${user.id || user._id}` : '';
-            const res = await fetch(`${config.API_URL}/api/posts${query}`);
-            if (res.ok) setPosts(await res.json());
+            const queryParams = new URLSearchParams();
+            if (user) queryParams.append('viewerId', user.id || user._id);
+
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) queryParams.append(key, value);
+            });
+
+            const res = await fetch(`${config.API_URL}/api/posts?${queryParams.toString()}`);
+            if (res.ok) {
+                const data = await res.json();
+                // If it's a specialized fetch (profile/reels), we don't want to overwrite the main feed
+                // unless we are purposefuly refreshing it.
+                if (!params.type && !params.username) {
+                    setPosts(data);
+                }
+                return data;
+            }
         } catch (error) {
             console.error('Failed to fetch posts:', error);
+            return [];
         }
     };
 
     const fetchStories = async () => {
         try {
-            // Similar logic could apply to stories
             const query = user ? `?viewerId=${user.id || user._id}` : '';
             const res = await fetch(`${config.API_URL}/api/stories${query}`);
             if (res.ok) setStories(await res.json());
@@ -38,7 +51,7 @@ export const ContentProvider = ({ children }) => {
     useEffect(() => {
         fetchPosts();
         fetchStories();
-    }, [user?.id, user?._id]); // Refetch when user changes (login/logout)
+    }, [user?.id, user?._id]);
 
     const addPost = async (postData) => {
         try {

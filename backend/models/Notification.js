@@ -7,10 +7,12 @@ const notificationSchema = new mongoose.Schema({
         avatar: String,
         email: String
     },
-    targetUserEmail: String, // Who receives it
+    targetUserEmail: { type: String, index: true }, // Who receives it
     content: String,
-    read: { type: Boolean, default: false },
-    timestamp: { type: Date, default: Date.now }
+    read: { type: Boolean, default: false, index: true },
+    timestamp: { type: Date, default: Date.now, index: true }
 });
+
+notificationSchema.index({ targetUserEmail: 1, timestamp: -1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);

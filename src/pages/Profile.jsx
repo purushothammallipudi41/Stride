@@ -19,9 +19,11 @@ const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
     const { identifier } = useParams();
     const navigate = useNavigate();
-    const { posts: allPosts, savedPosts } = useContent();
+    const { posts: allPosts, savedPosts, fetchPosts } = useContent();
     const { addNotification } = useNotifications();
     const [profileUser, setProfileUser] = useState(null);
+    const [userPosts, setUserPosts] = useState([]);
+    const [userReels, setUserReels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
     const [isAvatarOpen, setIsAvatarOpen] = useState(false);
@@ -133,6 +135,18 @@ const Profile = () => {
         }
     };
 
+    useEffect(() => {
+        if (profileUser?.username) {
+            const loadUserContent = async () => {
+                const posts = await fetchPosts({ username: profileUser.username, type: 'post' });
+                const reels = await fetchPosts({ username: profileUser.username, type: 'reel' });
+                setUserPosts(posts || []);
+                setUserReels(reels || []);
+            };
+            loadUserContent();
+        }
+    }, [profileUser?.username]);
+
     if (loading) return (
         <div className="profile-loading glass-card">
             <div className="loading-spinner"></div>
@@ -152,9 +166,6 @@ const Profile = () => {
     // UNIFY ID CHECK: Backend stores _id strings in followers array
     const currentUserId = currentUser?._id || currentUser?.id;
     const isFollowing = profileUser.followers?.includes(currentUserId);
-
-    const userPosts = allPosts.filter(p => (p.username === profileUser.username) && p.type !== 'reel');
-    const userReels = allPosts.filter(p => (p.username === profileUser.username) && p.type === 'reel');
 
     const stats = [
         { label: 'Posts', value: userPosts.length, clickable: false },
