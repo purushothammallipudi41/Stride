@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useContent } from '../../context/ContentContext';
 import Post from './Post';
 import SponsoredPost from './SponsoredPost';
 import config from '../../config';
 
-const Feed = () => {
+const Feed = memo(() => {
     const { posts } = useContent();
     const [ads, setAds] = useState([]);
 
@@ -49,6 +49,6 @@ const Feed = () => {
             ))}
         </div>
     );
-};
+});
 
 export default Feed;

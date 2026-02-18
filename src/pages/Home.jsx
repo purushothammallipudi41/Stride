@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo } from 'react';
 import { Heart, Search, RefreshCw, MessageCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
@@ -8,7 +8,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { useContent } from '../context/ContentContext';
 import './Home.css';
 
-const Home = () => {
+const Home = memo(() => {
     const navigate = useNavigate();
     const { unreadCount } = useNotifications();
     const { fetchPosts } = useContent();
@@ -131,6 +131,6 @@ const Home = () => {
             />
         </div>
     );
-};
+});
 
 export default Home;

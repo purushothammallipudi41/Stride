@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import config from '../../config';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, BadgeCheck } from 'lucide-react';
@@ -13,7 +13,7 @@ import CommentsModal from '../common/CommentsModal';
 import ConfirmModal from '../common/ConfirmModal';
 import { ShieldAlert } from 'lucide-react';
 
-const Post = ({ post }) => {
+const Post = memo(({ post }) => {
     if (!post) return null;
     const { toggleLike, deletePost, toggleSavePost, savedPosts } = useContent();
     const { user } = useAuth();
@@ -259,6 +259,6 @@ const Post = ({ post }) => {
             />
         </article>
     );
-};
+});
 
 export default Post;

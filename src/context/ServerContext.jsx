@@ -16,9 +16,9 @@ export const ServerProvider = ({ children }) => {
             .then(res => res.json())
             .then(data => {
                 setServers(data);
-                setLoading(false);
             })
-            .catch(err => console.error("Failed to fetch servers:", err));
+            .catch(err => console.error("Failed to fetch servers:", err))
+            .finally(() => setLoading(false));
     }, []);
 
     const addServer = async (data) => {
