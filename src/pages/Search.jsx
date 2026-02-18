@@ -119,16 +119,22 @@ const SearchPage = () => {
             </div>
 
             {/* Content Results */}
-            <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto', minHeight: '50vh' }}>
                 {loading ? (
-                    <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>Searching...</h3>
-                ) : query ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '4rem', gap: '1rem' }}>
+                        <div className="loading-spinner"></div>
+                        <p style={{ color: 'var(--text-secondary)' }}>Searching Stride...</p>
+                    </div>
+                ) : query.trim() ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>Search Results</h3>
+                        <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                            {userResults.length > 0 ? `Results for "${query}"` : 'No results found'}
+                        </h3>
                         {(activeTab === 'all' || activeTab === 'users') && userResults.map(user => (
                             <div
                                 key={user._id || user.id}
                                 onClick={() => navigate(`/profile/${user.username}`)}
+                                className="search-result-item"
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -137,10 +143,9 @@ const SearchPage = () => {
                                     background: 'rgba(255,255,255,0.03)',
                                     borderRadius: '12px',
                                     cursor: 'pointer',
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.2s',
+                                    border: '1px solid rgba(255,255,255,0.05)'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                             >
                                 <img
                                     src={getImageUrl(user.avatar)}
@@ -149,24 +154,18 @@ const SearchPage = () => {
                                         width: '48px',
                                         height: '48px',
                                         borderRadius: '50%',
-                                        objectFit: 'cover'
+                                        objectFit: 'cover',
+                                        border: '2px solid rgba(255,255,255,0.1)'
                                     }}
-                                    onError={(e) => { e.target.src = getImageUrl(null); }}
+                                    onError={(e) => { e.target.src = getImageUrl(null, 'user'); }}
                                 />
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>{user.name}</div>
+                                    <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>{user.name}</div>
                                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@{user.username}</div>
                                 </div>
-                                <button className="icon-btn">
-                                    <User size={18} />
-                                </button>
+                                <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
                             </div>
                         ))}
-                        {userResults.length === 0 && (
-                            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>
-                                No users found for "{query}"
-                            </p>
-                        )}
                     </div>
                 ) : (
                     <div className="discovery-section">

@@ -208,7 +208,7 @@ const Profile = () => {
                                     <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
                                         <Share2 size={24} />
                                     </button>
-                                    <button className="nav-icon-btn" onClick={() => navigate('/settings')}>
+                                    <button className="nav-icon-btn settings-btn" onClick={() => navigate('/settings')} title="Settings">
                                         <SettingsIcon size={24} />
                                     </button>
                                 </>

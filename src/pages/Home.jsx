@@ -71,26 +71,12 @@ const Home = memo(() => {
                     <h1 className="home-title text-gradient">Stride</h1>
                 </div>
 
-                {/* Search Bar */}
                 <div
+                    className="header-search-container"
                     onClick={() => navigate('/search')}
-                    style={{
-                        flex: 1,
-                        maxWidth: '400px',
-                        margin: '0 20px',
-                        background: 'rgba(255,255,255,0.05)',
-                        height: '40px',
-                        borderRadius: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '0 15px',
-                        gap: '10px',
-                        cursor: 'pointer',
-                        border: '1px solid rgba(255,255,255,0.1)'
-                    }}
                 >
                     <Search size={18} color="var(--text-secondary)" />
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Search users...</span>
+                    <span className="search-placeholder">Search users...</span>
                 </div>
 
                 <div className="header-actions">
