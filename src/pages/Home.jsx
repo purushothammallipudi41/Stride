@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
-import { Heart, Search, RefreshCw, MessageCircle } from 'lucide-react';
+import { Heart, Search, RefreshCw, MessageCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
+import CreateModal from '../components/create/CreateModal';
 import { useNotifications } from '../context/NotificationContext';
 import { useContent } from '../context/ContentContext';
 import './Home.css';
@@ -11,6 +12,7 @@ const Home = () => {
     const navigate = useNavigate();
     const { unreadCount } = useNotifications();
     const { fetchPosts } = useContent();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Pull to Refresh Logic
     const [startY, setStartY] = useState(0);
@@ -58,7 +60,16 @@ const Home = () => {
             onTouchEnd={handleTouchEnd}
         >
             <header className="home-header glass-blur">
-                <h1 className="home-title text-gradient">Stride</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                        className="create-story-btn glass-card"
+                        onClick={() => setIsCreateModalOpen(true)}
+                        title="Create Story"
+                    >
+                        <Plus size={20} />
+                    </button>
+                    <h1 className="home-title text-gradient">Stride</h1>
+                </div>
 
                 {/* Search Bar */}
                 <div
@@ -111,6 +122,13 @@ const Home = () => {
                 <StoriesRail />
                 <Feed />
             </div>
+
+            <CreateModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                initialTab="story"
+                lockTab={true}
+            />
         </div>
     );
 };

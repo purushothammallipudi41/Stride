@@ -45,7 +45,7 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
 
-        const dataUrl = canvas.toDataURL('image/jpeg');
+        const dataUrl = canvas.toDataURL('image/webp', 1.0);
         setPreviewUrl(dataUrl);
         setMediaType('image');
         setMode('preview');
@@ -64,7 +64,6 @@ const MediaCapture = ({ onCapture, onClose, type = 'all' }) => {
     };
 
     const handleConfirm = () => {
-        console.log("[MediaCapture] handleConfirm triggered", { mediaType, hasPreview: !!previewUrl });
         onCapture(previewUrl, mediaType);
     };
 

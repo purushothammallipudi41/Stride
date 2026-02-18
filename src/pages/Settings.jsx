@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import VerificationModal from '../components/profile/VerificationModal';
 import config from '../config';
@@ -137,6 +137,25 @@ const Settings = () => {
         <div className="settings-container">
             <header className="settings-header">
                 <h2>Settings</h2>
+                <button
+                    className="close-settings-btn"
+                    onClick={() => navigate(-1)}
+                    style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        color: 'var(--color-text)',
+                        cursor: 'pointer',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '36px',
+                        height: '36px'
+                    }}
+                >
+                    <X size={20} />
+                </button>
             </header>
 
             <div className="settings-content">
@@ -153,7 +172,56 @@ const Settings = () => {
                                 onClick={() => switchAccount(acc.id || acc.email)}
                             >
                                 <div className="settings-item-left">
-                                    <img src={acc.avatar} alt={acc.name} className="acc-avatar" />
+                                    <div style={{ position: 'relative', width: '40px', height: '40px' }}>
+                                        <img src={acc.avatar} alt={acc.name} className="acc-avatar" style={{ width: '100%', height: '100%' }} />
+                                        {(acc.id === user?.id || acc.email === user?.email) && (
+                                            <>
+                                                <div
+                                                    className="avatar-overlay"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        document.getElementById('avatar-upload').click();
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        inset: 0,
+                                                        background: 'rgba(0,0,0,0.5)',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        opacity: 0,
+                                                        transition: 'opacity 0.2s',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                                                    onMouseLeave={e => e.currentTarget.style.opacity = 0}
+                                                >
+                                                    <span style={{ fontSize: '0.6rem', color: 'white', fontWeight: 700 }}>EDIT</span>
+                                                </div>
+                                                <input
+                                                    type="file"
+                                                    id="avatar-upload"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files[0];
+                                                        if (!file) return;
+
+                                                        const reader = new FileReader();
+                                                        reader.onloadend = async () => {
+                                                            try {
+                                                                await updateProfile({ avatar: reader.result });
+                                                            } catch (err) {
+                                                                alert('Failed to update profile picture');
+                                                            }
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }}
+                                                />
+                                            </>
+                                        )}
+                                    </div>
                                     <div className="acc-info">
                                         <span className="acc-name">{acc.name}</span>
                                         <span className="acc-email">{acc.email}</span>

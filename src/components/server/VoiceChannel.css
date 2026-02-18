@@ -1,0 +1,139 @@
+.voice-channel-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+}
+
+.voice-header {
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+.voice-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.voice-status {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+    margin-left: 28px;
+}
+
+.voice-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 80px 20px 100px;
+    overflow-y: auto;
+    align-content: center;
+    justify-items: center;
+}
+
+.video-card {
+    background: #1a1b1e;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s;
+}
+
+.video-card.local-video {
+    border: 1px solid var(--color-primary);
+}
+
+.video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #111;
+}
+
+.video-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px 12px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    align-items: center;
+}
+
+.participant-name {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Controls Bar */
+.voice-controls-bar {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    gap: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+}
+
+.control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.control-btn.danger {
+    background: white;
+    color: #ff4757;
+}
+
+.control-btn.hangup-btn {
+    background: #ff4757;
+    color: white;
+    width: 60px;
+}
+
+.control-btn.hangup-btn:hover {
+    background: #ff6b81;
+}

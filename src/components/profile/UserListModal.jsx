@@ -83,7 +83,7 @@ const UserListModal = ({ title, userIds, onClose }) => {
                                     className="user-item-avatar"
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${u.username}`;
+                                        e.target.src = getImageUrl(null, 'user');
                                     }}
                                 />
                                 <div className="user-item-info">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Heart, Send, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Trash2, User, MessageSquare } from 'lucide-react';
+import { X, Heart, Send, ChevronLeft, ChevronRight, MoreHorizontal, Plus, Trash2, User, MessageSquare, Eye } from 'lucide-react';
 import './StoryViewer.css';
 import { useAuth } from '../../context/AuthContext';
 import ShareModal from '../common/ShareModal';
@@ -28,9 +28,17 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
 
     // Use a ref to track if we've had a valid story at least once
     const hasBeenInitialized = useRef(false);
+
+    // Consolidate useEffect hooks
     useEffect(() => {
+        // Initialize hasBeenInitialized ref
         if (currentStory) hasBeenInitialized.current = true;
-    }, [currentStory]);
+
+        // Set initial like status
+        if (currentStory) {
+            setIsLiked(currentStory.likes?.includes(user?.email));
+        }
+    }, [currentStory, user]);
 
     // Defensive cleanup if story is deleted from under the viewer or ID is invalid
     useEffect(() => {
@@ -44,12 +52,6 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
         }
         return () => clearTimeout(timeout);
     }, [currentStory, stories.length, onClose]);
-
-    useEffect(() => {
-        if (currentStory) {
-            setIsLiked(currentStory.likes?.includes(user?.email));
-        }
-    }, [currentStory, user]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -68,6 +70,9 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
 
     useEffect(() => {
         if (!currentStory) return;
+
+        // Pause if any menu/modal is open
+        if (showMoreMenu || isShareModalOpen || viewingUsers) return;
 
         const timer = setInterval(() => {
             setProgress(prev => {
@@ -91,7 +96,7 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
         }
 
         return () => clearInterval(timer);
-    }, [currentStoryIndex, currentStory?._id || currentStory?.id]);
+    }, [currentStoryIndex, currentStory?._id || currentStory?.id, showMoreMenu, isShareModalOpen, viewingUsers]);
 
     // Early return AFTER all hooks
 
@@ -136,7 +141,6 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
     };
 
     const handleDelete = async (storyId) => {
-        if (!window.confirm("Delete this story?")) return;
         try {
             const res = await fetch(`${config.API_URL}/api/stories/${storyId}?userEmail=${encodeURIComponent(user.email)}`, {
                 method: 'DELETE',
@@ -229,7 +233,7 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
         return allUsers.find(u => u.email === email) || {
             name: email.split('@')[0],
             username: email.split('@')[0],
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
+            avatar: "" // Fallback to getImageUrl default
         };
     };
 
@@ -289,7 +293,7 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                 {/* Header */}
                 <div className="story-header" onClick={(e) => e.stopPropagation()}>
                     <div className="story-user-info">
-                        <img src={getImageUrl(currentStory.userAvatar) || 'https://i.pravatar.cc/100'} alt="" className="story-avatar" />
+                        <img src={getImageUrl(currentStory.userAvatar)} alt="" className="story-avatar" />
                         <span className="story-username">{currentStory.username}</span>
                         <span className="story-time">2h</span>
                     </div>
@@ -338,23 +342,25 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                 <div onClick={(e) => e.stopPropagation()}>
                     {!isOwner && (
                         <div className="story-footer">
-                            <input
-                                type="text"
-                                className="story-reply-input"
-                                placeholder={`Reply to ${currentStory.username}...`}
-                                value={reply}
-                                onChange={(e) => setReply(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleReply()}
-                            />
+                            <div className="story-reply-container">
+                                <input
+                                    type="text"
+                                    className="story-reply-input"
+                                    placeholder={`Reply to ${currentStory.username}...`}
+                                    value={reply}
+                                    onChange={(e) => setReply(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleReply()}
+                                />
+                                {reply.trim().length > 0 && (
+                                    <button className="story-send-btn" onClick={(e) => { e.stopPropagation(); handleReply(); }}>
+                                        Send
+                                    </button>
+                                )}
+                            </div>
                             <div className="story-footer-actions">
                                 <Heart
                                     className={`story-icon ${isLiked ? 'liked' : ''}`}
                                     onClick={(e) => { e.stopPropagation(); handleLike(); }}
-                                />
-                                <MessageSquare
-                                    className="story-icon"
-                                    onClick={(e) => { e.stopPropagation(); handleReply(); }}
-                                    title="Reply"
                                 />
                                 <Send
                                     className="story-icon"
@@ -368,11 +374,11 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                     {isOwner && (
                         <div className="story-footer owner">
                             <div className="owner-stats">
-                                <span className="stats-item" onClick={() => setViewingUsers('likes')}>
-                                    {currentStory.likes?.length || 0} likes
+                                <span className="stats-item" onClick={() => setViewingUsers('likes')} title="Likes">
+                                    <Heart size={16} fill="white" stroke="none" /> {currentStory.likes?.length || 0}
                                 </span>
-                                <span className="stats-item" onClick={() => setViewingUsers('viewers')}>
-                                    {currentStory.viewers?.length || 0} viewers
+                                <span className="stats-item" onClick={() => setViewingUsers('viewers')} title="Viewers">
+                                    <Eye size={16} /> {currentStory.viewers?.length || 0}
                                 </span>
                             </div>
                             <Send

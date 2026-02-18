@@ -1,0 +1,199 @@
+.server-icon-sidebar {
+    width: 68px;
+    background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    margin: 12px;
+    height: calc(100vh - 24px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.server-icon-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+.server-icon-wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.server-icon-wrapper:hover {
+    transform: scale(1.08);
+}
+
+.active-indicator {
+    position: absolute;
+    left: -12px;
+    width: 4px;
+    height: 0;
+    background: var(--primary-gradient, linear-gradient(135deg, #8257e5, #ff007a));
+    border-radius: 0 4px 4px 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 10px rgba(130, 87, 229, 0.5);
+}
+
+.server-icon-wrapper.active .active-indicator {
+    height: 32px;
+    width: 5px;
+}
+
+.server-icon-wrapper:hover:not(.active) .active-indicator {
+    height: 12px;
+    opacity: 0.6;
+}
+
+.server-icon-circle {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    /* Soft Square */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #DBDEE1;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.server-icon-wrapper:hover .server-icon-circle {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.server-icon-wrapper.active .server-icon-circle {
+    border-radius: 12px;
+    background: var(--primary-gradient, linear-gradient(135deg, #8257e5, #ff007a));
+    border: none;
+    color: white;
+    box-shadow: 0 8px 20px rgba(130, 87, 229, 0.4);
+}
+
+.server-icon-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.server-icon-circle span {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.sidebar-divider {
+    width: 32px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0 16px 0;
+}
+
+.stride-home-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.server-icon-wrapper.exit-link:hover .stride-home-btn {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+}
+
+.exit-arrow {
+    position: absolute;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s;
+}
+
+.exit-home {
+    transition: all 0.3s;
+}
+
+.server-icon-wrapper.exit-link:hover .exit-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.server-icon-wrapper.exit-link:hover .exit-home {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.plus-icon {
+    color: #23A559;
+    background: rgba(35, 165, 89, 0.1);
+    border: 1px dashed rgba(35, 165, 89, 0.3);
+}
+
+.server-icon-wrapper.create-trigger:hover .plus-icon {
+    background: #23A559;
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(35, 165, 89, 0.4);
+}
+
+@media (max-width: 640px) {
+    .server-icon-sidebar {
+        /* display: none; Remove this */
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        margin: 0;
+        border-radius: 0 16px 16px 0;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2000;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        height: 100vh;
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .server-icon-sidebar.mobile-open {
+        transform: translateX(0);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .server-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 1999;
+        backdrop-filter: blur(2px);
+    }
+
+    .server-sidebar-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}

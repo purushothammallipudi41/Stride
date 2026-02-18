@@ -151,10 +151,7 @@ const SearchPage = () => {
                                         borderRadius: '50%',
                                         objectFit: 'cover'
                                     }}
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
-                                    }}
+                                    onError={(e) => { e.target.src = getImageUrl(null); }}
                                 />
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: 600, fontSize: '1rem' }}>{user.name}</div>
@@ -196,7 +193,7 @@ const SearchPage = () => {
                                                 src={getImageUrl(user.avatar)}
                                                 alt={user.username}
                                                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                                onError={(e) => { e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`; }}
+                                                onError={(e) => { e.target.src = getImageUrl(null); }}
                                             />
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{user.name}</div>

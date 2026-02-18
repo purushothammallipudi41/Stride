@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { VolumeX, MoreHorizontal, Trash2, EyeOff, Eraser, Volume2 } from 'lucide-react';
+import { VolumeX, MoreHorizontal, Trash2, EyeOff, Eraser, Volume2, ArrowLeft } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUtils';
 import './Chat.css';
 
 // Long press hook removed in favor of explicit menu button
@@ -10,7 +11,7 @@ const ChatItem = ({ chat, activeChatId, onSelectChat, onShowMenu, menuConvo }) =
             className={`chat-item ${activeChatId === chat.id ? 'active' : ''} ${chat.isMuted ? 'muted' : ''}`}
             onClick={() => onSelectChat(chat)}
         >
-            <div className="chat-avatar" style={{ backgroundImage: `url(${chat.avatar || `https://i.pravatar.cc/100?u=${chat.id}`})` }} />
+            <div className="chat-avatar" style={{ backgroundImage: `url(${getImageUrl(chat.avatar)})` }} />
             <div className="chat-item-info">
                 <div className="chat-item-name-row">
                     <span className="chat-item-name">{chat.username}</span>
@@ -34,7 +35,7 @@ const ChatItem = ({ chat, activeChatId, onSelectChat, onShowMenu, menuConvo }) =
     );
 };
 
-const ChatList = ({ chats, activeChatId, onSelectChat, onConvoAction }) => {
+const ChatList = ({ chats, activeChatId, onSelectChat, onConvoAction, onBack }) => {
     const [menuConvo, setMenuConvo] = useState(null);
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
@@ -61,6 +62,11 @@ const ChatList = ({ chats, activeChatId, onSelectChat, onConvoAction }) => {
     return (
         <div className="chat-list-container">
             <div className="chat-list-header-row">
+                {onBack && (
+                    <button className="back-btn-simple mobile-only" onClick={onBack}>
+                        <ArrowLeft size={24} />
+                    </button>
+                )}
                 <h3 className="chat-list-header">Messages</h3>
             </div>
             <div className="chat-list" ref={listRef}>

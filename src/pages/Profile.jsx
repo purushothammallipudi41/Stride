@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -20,7 +20,7 @@ const Profile = () => {
     const { identifier } = useParams();
     const navigate = useNavigate();
     const { posts: allPosts, savedPosts, fetchPosts } = useContent();
-    const { addNotification } = useNotifications();
+    const { addNotification, unreadCount } = useNotifications();
     const [profileUser, setProfileUser] = useState(null);
     const [userPosts, setUserPosts] = useState([]);
     const [userReels, setUserReels] = useState([]);
@@ -51,8 +51,7 @@ const Profile = () => {
             setLoading(true);
             try {
                 const targetUrl = `${config.API_URL}/api/users/${id}`;
-                // TEMPORARY DEBUGGING
-                console.log(`[Profile] Fetching: ${targetUrl}`);
+
 
                 // If checking own profile, assume success with current data first to speed up UI
                 // If checking own profile, assume success with current data first for speed
@@ -66,7 +65,7 @@ const Profile = () => {
                             const data = await res.json();
                             // Only update if data is different/newer to avoid flicker (optional, but good)
                             // For now, just set it to ensure we get the badge
-                            console.log('[Profile] Refreshed user data:', data);
+                            // For now, just set it to ensure we get the badge
                             setProfileUser(data);
                         }
                     } catch (e) {
@@ -168,7 +167,7 @@ const Profile = () => {
     const isFollowing = profileUser.followers?.includes(currentUserId);
 
     const stats = [
-        { label: 'Posts', value: userPosts.length, clickable: false },
+        { label: 'Posts', value: userPosts.length + userReels.length, clickable: false },
         {
             label: 'Followers',
             value: (profileUser.followers?.length || 0).toLocaleString(),
@@ -186,101 +185,103 @@ const Profile = () => {
     return (
         <>
             <div className="profile-container">
-                {/* Header */}
-                <div className="profile-header">
-                    <div className="profile-avatar-container" onClick={() => setIsAvatarOpen(true)}>
-                        {profileUser.avatar ? (
-                            <img
-                                src={getImageUrl(profileUser.avatar)}
-                                alt={profileUser.username}
-                                className="profile-avatar-large"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${profileUser.username}`;
-                                }}
-                            />
-                        ) : (
-                            <div className="profile-avatar-placeholder" style={{ backgroundColor: '#333' }}>
-                                {profileUser.username[0].toUpperCase()}
-                            </div>
-                        )}
-                    </div>
-                    <div className="profile-info">
-                        <div className="profile-top">
-                            <h2 className="profile-username" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div className="profile-header-content">
+                    {/* New Integrated Header (One step below top nav) */}
+                    <div className="profile-top-controls">
+                        <div className="controls-left">
+                            {!isOwnProfile && (
+                                <button
+                                    className="nav-btn-back"
+                                    onClick={() => navigate(-1)}
+                                >
+                                    <ArrowLeft size={24} />
+                                </button>
+                            )}
+                            <h2 className="nav-username">
                                 {profileUser.username}
-                                {profileUser.isOfficial && <BadgeCheck size={20} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                                {profileUser.isOfficial && <BadgeCheck size={18} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
                             </h2>
+                        </div>
+                        <div className="controls-right">
                             {isOwnProfile ? (
-                                <div className="profile-actions">
-                                    <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
-                                        Edit Profile
+                                <>
+                                    <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
+                                        <Share2 size={24} />
                                     </button>
-                                    <button className="settings-btn" onClick={() => navigate('/settings')}>
-                                        <SettingsIcon size={20} />
+                                    <button className="nav-icon-btn" onClick={() => navigate('/settings')}>
+                                        <SettingsIcon size={24} />
                                     </button>
-                                    <button className="settings-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={20} />
-                                    </button>
-                                </div>
+                                </>
                             ) : (
-                                <div className="profile-actions">
-                                    <button
-                                        className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
-                                        onClick={handleFollow}
-                                    >
-                                        {isFollowing ? 'Following' : 'Follow'}
+                                <>
+                                    <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
+                                        <Share2 size={24} />
                                     </button>
-                                    <button className="message-btn" onClick={() => navigate(`/messages?user=${profileUser.email}`)}>Message</button>
-                                    <button className="settings-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={20} />
+                                    <button className="nav-icon-btn" onClick={() => setShowMoreMenu(!showMoreMenu)}>
+                                        <MoreHorizontal size={24} />
                                     </button>
-                                    <div className="profile-more-container">
-                                        <button className="more-btn" onClick={() => setShowMoreMenu(!showMoreMenu)}>
-                                            <MoreHorizontal size={20} />
-                                        </button>
-                                        {showMoreMenu && (
-                                            <div className="more-dropdown glass-card">
-                                                <button onClick={async () => {
-                                                    setShowMoreMenu(false);
-                                                    if (!currentUser) return alert('Login required');
-                                                    if (confirm(`Are you sure you want to block ${profileUser.username}? Their content will be hidden.`)) {
-                                                        try {
-                                                            const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser._id}/block`, {
-                                                                method: 'POST',
-                                                                headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({ currentUserId: currentUser.id || currentUser._id })
-                                                            });
-                                                            if (res.ok) {
-                                                                alert('User blocked');
-                                                                await refreshUser(); // Update local blocked list
-                                                                navigate('/'); // Return home
-                                                            }
-                                                        } catch (e) { alert('Failed to block user'); }
-                                                    }
-                                                }}>Block User</button>
-                                                <button onClick={async () => {
-                                                    setShowMoreMenu(false);
-                                                    if (!currentUser) return alert('Login required');
-                                                    await fetch(`${config.API_URL}/api/report`, {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            reporterId: currentUser.id || currentUser._id,
-                                                            targetId: profileUser.id || profileUser._id,
-                                                            targetType: 'user',
-                                                            reason: 'spam_or_abuse'
-                                                        })
-                                                    });
-                                                    alert('User reported');
-                                                }}>Report User</button>
-                                                <button onClick={() => { setShowMoreMenu(false); navigator.clipboard.writeText(window.location.href); alert('Link Copied'); }}>Copy Link</button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {showMoreMenu && (
+                                        <div className="more-dropdown glass-card">
+                                            <button onClick={async () => {
+                                                setShowMoreMenu(false);
+                                                if (!currentUser) return alert('Login required');
+                                                if (window.confirm(`Are you sure you want to block ${profileUser.username}? Their content will be hidden.`)) {
+                                                    try {
+                                                        const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser._id}/block`, {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ currentUserId: currentUser.id || currentUser._id })
+                                                        });
+                                                        if (res.ok) {
+                                                            alert('User blocked');
+                                                            await refreshUser();
+                                                            navigate('/');
+                                                        }
+                                                    } catch (e) { alert('Failed to block user'); }
+                                                }
+                                            }}>Block User</button>
+                                            <button onClick={async () => {
+                                                setShowMoreMenu(false);
+                                                if (!currentUser) return alert('Login required');
+                                                await fetch(`${config.API_URL}/api/report`, {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        reporterId: currentUser.id || currentUser._id,
+                                                        targetId: profileUser.id || profileUser._id,
+                                                        targetType: 'user',
+                                                        reason: 'spam_or_abuse'
+                                                    })
+                                                });
+                                                alert('User reported');
+                                            }}>Report User</button>
+                                            <button onClick={() => { setShowMoreMenu(false); navigator.clipboard.writeText(window.location.href); alert('Link Copied'); }}>Copy Link</button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    {/* Top Row: Avatar + Stats */}
+                    <div className="profile-top-row">
+                        <div className="profile-avatar-container" onClick={() => setIsAvatarOpen(true)}>
+                            {profileUser.avatar ? (
+                                <img
+                                    src={getImageUrl(profileUser.avatar)}
+                                    alt={profileUser.username}
+                                    className="profile-avatar-large"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = getImageUrl(null, 'user');
+                                    }}
+                                />
+                            ) : (
+                                <div className="profile-avatar-placeholder">
+                                    {profileUser.username[0].toUpperCase()}
                                 </div>
                             )}
                         </div>
+
                         <div className="profile-stats">
                             {stats.map(s => (
                                 <div
@@ -293,24 +294,46 @@ const Profile = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="profile-bio">
-                            <p className="profile-name">{profileUser.name}</p>
-                            <p>{profileUser.bio}</p>
-                            {/* <a href="#" className="bio-link">linktr.ee/{profileUser.username}</a> */}
-                        </div>
+                    </div>
+
+                    {/* Middle Row: Name + Bio */}
+                    <div className="profile-bio-section">
+                        <p className="profile-name">{profileUser.name}</p>
+                        <p className="profile-bio-text">{profileUser.bio}</p>
+                    </div>
+
+                    {/* Bottom Row: Actions */}
+                    <div className="profile-actions-row">
+                        {isOwnProfile ? (
+                            <button className="edit-profile-btn fade-in-btn" onClick={() => setIsEditProfileOpen(true)}>
+                                Edit Profile
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
+                                    onClick={handleFollow}
+                                >
+                                    {isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                                <button className="message-btn" onClick={() => navigate(`/messages?user=${profileUser.email}`)}>
+                                    Message
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
                 {/* Tabs, same as before */}
                 <div className="profile-tabs">
                     <button className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>
-                        <Grid size={20} /><span>Posts</span>
+                        <Grid size={22} />
                     </button>
                     <button className={`tab-btn ${activeTab === 'reels' ? 'active' : ''}`} onClick={() => setActiveTab('reels')}>
-                        <Film size={20} /><span>Reels</span>
+                        <Film size={22} />
                     </button>
                     <button className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
-                        <Bookmark size={20} /><span>Saved</span>
+                        <Bookmark size={22} />
                     </button>
                 </div>
 
@@ -318,24 +341,50 @@ const Profile = () => {
                     {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
                         (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
                             <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
-                                {post.type === 'video' ? (
-                                    <video src={post.contentUrl} className="grid-img" />
-                                ) : (post.type === 'image' || post.type === 'post' || post.type === 'reel' || post.contentUrl) ? (
-                                    <img src={getImageUrl(post.contentUrl)} alt={post.caption} className="grid-img" />
+                                {post.type === 'video' || post.type === 'reel' ? (
+                                    <video
+                                        src={post.contentUrl}
+                                        className="grid-img"
+                                        muted
+                                        loop
+                                        playsInline
+                                        onMouseOver={e => e.target.play()}
+                                        onMouseOut={e => e.target.pause()}
+                                    />
+                                ) : (post.type === 'image' || post.type === 'post' || post.contentUrl) ? (
+                                    <img
+                                        src={getImageUrl(post.contentUrl)}
+                                        alt={post.caption}
+                                        className="grid-img"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = getImageUrl(null, 'media');
+                                        }}
+                                    />
                                 ) : (
                                     <div className="placeholder-content">Post {post.id}</div>
                                 )}
                             </div>
                         ))
                     ) : (
-                        <div className="no-posts">
-                            {activeTab === 'saved' ? (
-                                <div className="empty-state">
+                        <div className="profile-empty-state">
+                            {activeTab === 'posts' && (
+                                <div className="empty-state-content">
+                                    <Grid size={48} />
+                                    <p>No posts yet</p>
+                                </div>
+                            )}
+                            {activeTab === 'reels' && (
+                                <div className="empty-state-content">
+                                    <Film size={48} />
+                                    <p>No reels yet</p>
+                                </div>
+                            )}
+                            {activeTab === 'saved' && (
+                                <div className="empty-state-content">
                                     <Bookmark size={48} />
                                     <p>Save posts to watch later</p>
                                 </div>
-                            ) : (
-                                `No ${activeTab} yet.`
                             )}
                         </div>
                     )}

@@ -23,6 +23,11 @@ const Login = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    // Forgot Password State
+    const [forgotPasswordStep, setForgotPasswordStep] = useState(0); // 0: None, 1: Email, 2: Reset
+    const [resetCode, setResetCode] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+
     const { login, register } = useAuth();
     const navigate = useNavigate();
 
@@ -110,6 +115,55 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        try {
+            const res = await fetch(`${config.API_URL}/api/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: identifier }) // Reusing identifier for email
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setForgotPasswordStep(2);
+                setSuccessMessage(data.message);
+            } else {
+                throw new Error(data.error || 'Failed to send reset code');
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        try {
+            const res = await fetch(`${config.API_URL}/api/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: identifier, code: resetCode, newPassword })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSuccessMessage('Password reset successful! You can now login.');
+                setForgotPasswordStep(0);
+                setPassword('');
+            } else {
+                throw new Error(data.error || 'Failed to reset password');
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="login-container">
             <div className="login-glass-card">
@@ -148,7 +202,7 @@ const Login = () => {
                     </div>
                 )}
 
-                {!showVerification ? (
+                {!showVerification && forgotPasswordStep === 0 ? (
                     <form className="login-form" onSubmit={handleSubmit}>
                         {isRegistering && (
                             <>
@@ -218,6 +272,16 @@ const Login = () => {
                         </div>
 
                         {!isRegistering && (
+                            <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                                <button type="button" className="text-link-btn" onClick={() => {
+                                    setForgotPasswordStep(1);
+                                    setIdentifier(''); // Clear to let them type email
+                                    setError('');
+                                }}>Forgot Password?</button>
+                            </div>
+                        )}
+
+                        {!isRegistering && (
                             <div className="remember-me-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
                                 <input
                                     type="checkbox"
@@ -239,6 +303,63 @@ const Login = () => {
                             ) : (
                                 isRegistering ? 'Sign Up' : 'Sign In'
                             )}
+                        </button>
+                    </form>
+                ) : forgotPasswordStep === 1 ? (
+                    <form className="login-form" onSubmit={handleForgotPassword}>
+                        <div style={{ textAlign: 'center', marginBottom: '1rem', color: '#ccc', fontSize: '0.9rem' }}>
+                            Enter your email to reset your password.
+                        </div>
+                        <div className="input-group">
+                            <Mail size={20} className="input-icon" />
+                            <input
+                                type="email"
+                                placeholder="Email address"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <button type="submit" className="login-btn" disabled={isLoading}>
+                            {isLoading ? <Activity className="animate-spin" size={20} /> : 'Send Reset Code'}
+                        </button>
+                        <button type="button" className="text-link-btn" onClick={() => setForgotPasswordStep(0)} style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>
+                            Back to Login
+                        </button>
+                    </form>
+                ) : forgotPasswordStep === 2 ? (
+                    <form className="login-form" onSubmit={handleResetPassword}>
+                        <div style={{ textAlign: 'center', marginBottom: '1rem', color: '#ccc', fontSize: '0.9rem' }}>
+                            Enter the code sent to <strong>{identifier}</strong> and your new password.
+                        </div>
+                        <div className="input-group">
+                            <Key size={20} className="input-icon" />
+                            <input
+                                type="text"
+                                placeholder="Reset Code"
+                                value={resetCode}
+                                onChange={(e) => setResetCode(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="input-group">
+                            <Lock size={20} className="input-icon" />
+                            <input
+                                type="password"
+                                placeholder="New Password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <button type="submit" className="login-btn" disabled={isLoading}>
+                            {isLoading ? <Activity className="animate-spin" size={20} /> : 'Reset Password'}
+                        </button>
+                        <button type="button" className="text-link-btn" onClick={() => setForgotPasswordStep(1)} style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>
+                            Back
                         </button>
                     </form>
                 ) : (

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, Send, Heart, Reply } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
+import { getImageUrl } from '../../utils/imageUtils';
 import './CommentsModal.css';
 
 const CommentsModal = ({ isOpen, onClose, postId, comments = [], username }) => {
@@ -46,7 +47,7 @@ const CommentsModal = ({ isOpen, onClose, postId, comments = [], username }) => 
                         comments.map((comment, i) => (
                             <div key={i} className="comment-item animate-in" style={{ animationDelay: `${i * 0.05}s` }}>
                                 <img
-                                    src={comment.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user}`}
+                                    src={getImageUrl(comment.avatar)}
                                     alt={comment.user}
                                     className="comment-avatar"
                                 />
@@ -69,7 +70,7 @@ const CommentsModal = ({ isOpen, onClose, postId, comments = [], username }) => 
                 <div className="modal-footer">
                     <div className="comment-input-wrap">
                         <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'Guest'}`}
+                            src={getImageUrl(user?.avatar)}
                             alt="Me"
                             className="my-avatar"
                         />

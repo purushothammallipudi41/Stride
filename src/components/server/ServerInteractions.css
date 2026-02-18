@@ -270,3 +270,256 @@
         transform: translateY(0);
     }
 }
+
+/* Premium Creation Modal */
+.premium-creation-modal {
+    background: #111214 !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.template-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: #1E1F22;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.template-card:hover {
+    background: #2B2D31;
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.template-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+.template-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.own-template {
+    background: rgba(88, 101, 242, 0.1);
+    border-color: rgba(88, 101, 242, 0.3);
+    margin-bottom: 24px;
+}
+
+.own-template:hover {
+    background: rgba(88, 101, 242, 0.2);
+}
+
+.premium-input-large {
+    width: 100%;
+    padding: 12px 16px;
+    background: #1E1F22;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.premium-input-large:focus {
+    border-color: #5865F2;
+}
+
+/* Mute Dropdown */
+.mute-dropdown-menu {
+    position: absolute;
+    top: 35px;
+    right: 0;
+    width: 200px;
+    padding: 8px;
+    background: rgba(30, 31, 34, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mute-dropdown-menu .menu-header {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #949BA4;
+    padding: 8px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mute-dropdown-menu button {
+    background: transparent;
+    border: none;
+    color: #DBDEE1;
+    padding: 8px 12px;
+    text-align: left;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.1s, color 0.1s;
+}
+
+.mute-dropdown-menu button:hover {
+    background: #5865F2;
+    color: white;
+}
+
+/* Member Items */
+.member-item-row {
+    transition: background 0.1s;
+    cursor: default;
+}
+
+.member-item-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Channel Administrative Icons */
+.channel-gear-icon {
+    opacity: 0;
+    transition: opacity 0.1s;
+    cursor: pointer;
+}
+
+.channel-pill:hover .channel-gear-icon {
+    opacity: 0.6;
+}
+
+.channel-gear-icon:hover {
+    opacity: 1 !important;
+}
+
+/* Glassmorphism Classes */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.animate-slide-up {
+    animation: slideUpFade 0.2s ease-out;
+}
+
+/* Server Confirmation Modal */
+.server-confirmation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100001 !important;
+    /* Beat search-modal-overlay 99999 */
+    animation: fadeIn 0.2s ease;
+}
+
+.server-confirmation-content {
+    background: #1e1e2f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Mobile Responsive - Server Settings Modal */
+@media (max-width: 768px) {
+    .server-settings-container {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
+    .settings-sidebar {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding-right: 0 !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 10px !important;
+        /* Horizontal scroll for tabs if needed */
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        gap: 8px;
+        align-items: center;
+        /* Hide title on mobile to save space or style differently */
+    }
+
+    .settings-sidebar>div:first-child {
+        /* "Server Settings" title */
+        display: none;
+    }
+
+    .settings-sidebar>div {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* Hide the divider line in sidebar on mobile */
+    .settings-sidebar>div[style*="height: 1px"] {
+        display: none !important;
+    }
+
+    .settings-content {
+        padding-left: 0 !important;
+    }
+
+    .settings-tab-title {
+        display: none !important;
+        /* Hide redundant title in mobile */
+    }
+
+    /* Force the modal overlay to center on mobile and remove padding */
+    .search-modal-overlay {
+        padding-top: 0 !important;
+        align-items: center !important;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* Desktop dimensions moved to CSS */
+    .modal-wrapper-dimensions {
+        width: 95vw !important;
+        max-height: 80vh !important;
+        /* Prevent it from being too tall */
+        height: auto !important;
+        margin: 0 !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+}
+
+/* Default Desktop Dimensions */
+.modal-wrapper-dimensions {
+    width: 800px;
+    max-width: 98vw;
+    height: 640px;
+    max-height: 95vh;
+}

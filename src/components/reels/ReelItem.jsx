@@ -6,19 +6,49 @@ import { useMusic } from '../../context/MusicContext';
 import CommentsModal from '../common/CommentsModal';
 import ShareModal from '../common/ShareModal';
 import config from '../../config';
+import { getImageUrl } from '../../utils/imageUtils';
+import { Trash2, Flag, UserMinus, ShieldAlert } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
+
+const OptionsModal = ({ isOpen, onClose, onAction }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="options-modal-overlay" onClick={onClose}>
+            <div className="options-modal-content" onClick={e => e.stopPropagation()}>
+                <button className="option-item" onClick={() => onAction('report')}>
+                    <Flag size={20} /> Report Content
+                </button>
+                <button className="option-item" onClick={() => onAction('not-interested')}>
+                    <ShieldAlert size={20} /> Not Interested
+                </button>
+                <button className="option-item" onClick={() => onAction('follow')}>
+                    <UserMinus size={20} /> Unfollow Creator
+                </button>
+                <button className="option-item danger" onClick={() => onAction('cancel')} style={{ marginTop: '8px' }}>
+                    Cancel
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const ReelItem = ({ reel }) => {
     const { user, refreshUser } = useAuth();
     const { pauseTrack } = useMusic();
+    const { showToast } = useToast();
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(parseInt(reel.likes) || 0);
     const [isFollowing, setIsFollowing] = useState(false);
+    const [showCaption, setShowCaption] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
     const [showHeartAnim, setShowHeartAnim] = useState(false);
     const [showStatusIcon, setShowStatusIcon] = useState(null); // 'play', 'pause', 'mute', 'unmute'
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [shouldLoad, setShouldLoad] = useState(false);
     const videoRef = useRef(null);
     const containerRef = useRef(null);
 
@@ -34,7 +64,7 @@ const ReelItem = ({ reel }) => {
                     sharedContent: {
                         type: 'reel',
                         id: reel.id,
-                        thumbnail: `https://api.dicebear.com/7.x/shapes/svg?seed=${reel.musicTrack}`,
+                        thumbnail: getImageUrl(null, 'track'),
                         title: `${reel.username}'s Reel`
                     }
                 })
@@ -47,12 +77,12 @@ const ReelItem = ({ reel }) => {
     // ... rest of the component
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
+        // Observer for actual playback (High threshold)
+        const playbackObserver = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
                     videoRef.current?.play().then(() => {
                         setIsPlaying(true);
-                        // If playing with sound, pause global music
                         if (!isMuted) pauseTrack();
                     }).catch(() => setIsPlaying(false));
                 } else {
@@ -63,8 +93,26 @@ const ReelItem = ({ reel }) => {
             { threshold: 0.8 }
         );
 
-        if (containerRef.current) observer.observe(containerRef.current);
-        return () => observer.disconnect();
+        // Observer for preloading (Large margin)
+        const preloadObserver = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setShouldLoad(true);
+                    preloadObserver.disconnect(); // Once loaded, stay loaded
+                }
+            },
+            { rootMargin: '100% 0px' }
+        );
+
+        if (containerRef.current) {
+            playbackObserver.observe(containerRef.current);
+            preloadObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            playbackObserver.disconnect();
+            preloadObserver.disconnect();
+        };
     }, [isMuted, pauseTrack]);
 
     const togglePlay = () => {
@@ -136,16 +184,28 @@ const ReelItem = ({ reel }) => {
             <div className="reel-video-bg">
                 <video
                     ref={videoRef}
-                    src={reel.videoUrl}
+                    src={shouldLoad ? (reel.contentUrl || reel.videoUrl) : ''}
+                    poster={reel.posterUrl}
                     loop
                     muted={isMuted}
                     playsInline
+                    preload={shouldLoad ? "auto" : "none"}
+                    autoPlay={shouldLoad}
                     className="reel-video-element"
+                    onWaiting={() => setIsLoading(true)}
+                    onPlaying={() => setIsLoading(false)}
+                    onCanPlay={() => setIsLoading(false)}
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
-                    onError={(e) => console.error("Video Playback Error:", e.target.error, "URL:", reel.videoUrl)}
+                    onError={(e) => console.error("Video Playback Error:", e.target.error, "URL:", reel.contentUrl || reel.videoUrl)}
                 />
                 <div className="reel-overlay" />
+
+                {isLoading && (
+                    <div className="reel-loading-spinner">
+                        <div className="loading-spinner"></div>
+                    </div>
+                )}
 
                 {showHeartAnim && (
                     <div className="status-icon-anim heart">
@@ -167,10 +227,13 @@ const ReelItem = ({ reel }) => {
                 </button>
             </div>
 
-            <div className="reel-content">
+            <div className={`reel-content ${!showCaption ? 'hidden' : ''}`} onClick={(e) => {
+                e.stopPropagation();
+                setShowCaption(!showCaption);
+            }}>
                 <div className="reel-info">
                     <div className="reel-user">
-                        <div className="reel-avatar" style={{ backgroundImage: `url(https://api.dicebear.com/7.x/avataaars/svg?seed=${reel.username})`, backgroundSize: 'cover' }} />
+                        <div className="reel-avatar" style={{ backgroundImage: `url(${getImageUrl(reel.userAvatar)})`, backgroundSize: 'cover' }} />
                         <span className="reel-username">{reel.username}</span>
                         <button
                             className={`follow-btn ${isFollowing ? 'following' : ''}`}
@@ -202,11 +265,11 @@ const ReelItem = ({ reel }) => {
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsShareModalOpen(true))}>
                     <Share2 size={36} strokeWidth={2.5} />
                 </button>
-                <button className="reel-action-btn" onClick={(e) => handleAction(e, () => alert('Options menu opening...'))}>
+                <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsOptionsOpen(true))}>
                     <MoreHorizontal size={36} strokeWidth={2.5} />
                 </button>
                 <div className="music-disc-anim">
-                    <div className="disc-inner" style={{ backgroundImage: `url(https://api.dicebear.com/7.x/shapes/svg?seed=${reel.musicTrack})`, backgroundSize: 'cover' }} />
+                    <div className="disc-inner" style={{ backgroundImage: `url(${getImageUrl(null, 'track')})`, backgroundSize: 'cover' }} />
                 </div>
             </div>
 
@@ -223,6 +286,21 @@ const ReelItem = ({ reel }) => {
                 onClose={() => setIsShareModalOpen(false)}
                 onShare={handleShareToUser}
                 contentTitle={`${reel.username}'s Reel`}
+            />
+
+            <OptionsModal
+                isOpen={isOptionsOpen}
+                onClose={() => setIsOptionsOpen(false)}
+                onAction={(action) => {
+                    if (action === 'report') {
+                        showToast('Thank you for reporting. Our team will review this reel.', 'info');
+                    } else if (action === 'not-interested') {
+                        showToast('We will show you fewer reels like this.', 'info');
+                    } else if (action === 'follow') {
+                        showToast('Unfollow logic pending implementation.', 'error');
+                    }
+                    setIsOptionsOpen(false);
+                }}
             />
         </div>
     );

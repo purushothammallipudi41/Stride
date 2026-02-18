@@ -1,5 +1,6 @@
 .reels-container {
     height: 100%;
+    width: 100%;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     background-color: #000;
@@ -16,6 +17,8 @@
     scroll-snap-align: start;
     display: flex;
     justify-content: center;
+    align-items: center;
+    background: #000;
 }
 
 .reel-video-bg {
@@ -151,6 +154,13 @@
     left: 16px;
     width: 85%;
     z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.reel-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
 }
 
 .reel-user {
@@ -289,4 +299,93 @@
     height: 28px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.reel-loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.reels-back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    z-index: 1000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reels-back-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.options-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+}
+
+.options-modal-content {
+    width: 100%;
+    background: #121212;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.option-item {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.option-item:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.option-item.danger {
+    color: var(--color-danger);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }

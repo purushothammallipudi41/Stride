@@ -5,9 +5,20 @@ const serverSchema = new mongoose.Schema({
     name: String,
     icon: String,
     channels: [String],
-    members: { type: Number, default: 1 },
+    categories: [{
+        name: String,
+        channels: [String]
+    }],
+    members: [{
+        userId: String, // email or username
+        roles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }]
+    }],
     ownerId: String,
-    admins: [{ type: String }] // Array of user IDs or emails
-});
+    admins: [{ type: String }], // Array of user IDs or emails (legacy)
+    roles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }],
+    verificationLevel: { type: String, default: 'None' },
+    explicitContentFilter: { type: String, default: 'Scan members' },
+    readOnlyChannels: [{ type: String }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Server', serverSchema);

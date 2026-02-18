@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Music, Play, TrendingUp, Share2, User } from 'lucide-react';
+import { Search, Music, Play, TrendingUp, Share2, User, Heart, MessageCircle } from 'lucide-react';
+import { useNotifications } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { audiusService } from '../services/audiusService';
 import { useMusic } from '../context/MusicContext';
@@ -16,7 +17,7 @@ const Explore = () => {
     const [userResults, setUserResults] = useState([]);
     const [trending, setTrending] = useState([]);
     const [loadingTrending, setLoadingTrending] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const { unreadCount } = useNotifications();
     const [shareData, setShareData] = useState(null);
 
     const handleShare = (track) => {
@@ -83,6 +84,15 @@ const Explore = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+                <div className="header-actions">
+                    <div className="notification-btn" onClick={() => navigate('/messages')}>
+                        <MessageCircle size={20} className="header-icon" />
+                    </div>
+                    <div className="notification-btn" onClick={() => navigate('/notifications')}>
+                        <Heart size={20} className="header-icon" />
+                        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+                    </div>
+                </div>
             </header>
 
             <main className="explore-content">
@@ -100,10 +110,6 @@ const Explore = () => {
                                             <img
                                                 src={getImageUrl(user.avatar)}
                                                 alt={user.username}
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
-                                                }}
                                             />
                                             <div className="user-info">
                                                 <span className="username">@{user.username}</span>

@@ -20,7 +20,7 @@ async function testStrideServer() {
                 name: "Stride Official",
                 icon: "/logo.png",
                 channels: ["announcements", "updates", "general"],
-                members: 1,
+                members: [],
                 ownerId: "stride",
                 admins: ["stride", "purushotham_mallipudi"]
             });

@@ -25,10 +25,10 @@ const EditProfileModal = ({ onClose }) => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log('[EditProfileModal] File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+
             const reader = new FileReader();
             reader.onloadend = () => {
-                console.log('[EditProfileModal] File read complete. Base64 Length:', reader.result.length);
+
                 setFormData(prev => ({ ...prev, avatar: reader.result }));
             };
             reader.readAsDataURL(file);
@@ -39,9 +39,7 @@ const EditProfileModal = ({ onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            console.log('[EditProfileModal] Submitting update. Avatar length:', formData.avatar?.length || 0);
-            await updateProfile(formData);
-            console.log('[EditProfileModal] Update successful');
+
             onClose();
         } catch (error) {
             console.error('Update profile error:', error);

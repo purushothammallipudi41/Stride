@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import config from '../config';
-import { useSearchParams } from 'react-router-dom';
+import './Messages.css';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
+import { ArrowLeft } from 'lucide-react';
 
 const Messages = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const targetEmail = searchParams.get('user');
 
@@ -15,6 +19,8 @@ const Messages = () => {
     const [messages, setMessages] = useState([]);
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const { socket } = useSocket();
 
     const fetchData = async () => {
         if (!user) return;
@@ -42,9 +48,41 @@ const Messages = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 5000);
-        return () => clearInterval(interval);
     }, [user]);
+
+    // Socket.io Real-time Updates
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (newMessage) => {
+            setMessages(prev => {
+                // Prevent duplicates if optimistic update already added it (by temporary ID?)
+                // Since sender gets echo, we might get duplicate if we optimistically added.
+                // But handleSendMessage logic (below) awaits response then adds.
+                // The socket event might come faster or slower.
+                // Backend 'send' returns the message, handleSendMessage adds it.
+                // Socket 'receive-message' also sends it.
+                // We should check duplication by _id if possible, or simple content/timestamp match.
+                // Backend returns MongoDB object with _id.
+
+                if (prev.find(m => m._id === newMessage._id)) return prev;
+                return [...prev, newMessage];
+            });
+
+            // Re-fetch conversations to update last message preview / ordering
+            // Debounce this if high traffic, but fine for now
+            fetch(`${config.API_URL}/api/conversations/${user.email}`)
+                .then(res => res.json())
+                .then(data => setConversations(data))
+                .catch(err => console.error('Failed to update convos:', err));
+        };
+
+        socket.on('receive-message', handleNewMessage);
+
+        return () => {
+            socket.off('receive-message', handleNewMessage);
+        };
+    }, [socket, user]);
 
     // Handle initial target focus
     useEffect(() => {
@@ -111,19 +149,31 @@ const Messages = () => {
         return 0;
     });
 
-    const handleSendMessage = async (content, type = 'text') => {
+    const handleSendMessage = async (content, type = 'text', additionalData = null) => {
         if (!activeChatId || !user) return;
+
+        let messageBody = {
+            from: user.email,
+            to: activeChatId,
+            text: type === 'text' ? content : '',
+            sharedContent: null
+        };
+
+        if (type === 'gif') {
+            messageBody.sharedContent = { type: 'gif', thumbnail: content };
+        } else if (type === 'location') {
+            messageBody.text = ''; // No text for location
+            messageBody.sharedContent = {
+                type: 'location',
+                ...additionalData // { lat, lng, url, title }
+            };
+        }
 
         try {
             const res = await fetch(`${config.API_URL}/api/messages/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    from: user.email,
-                    to: activeChatId,
-                    text: type === 'text' ? content : '',
-                    sharedContent: type === 'gif' ? { type: 'gif', thumbnail: content } : null
-                })
+                body: JSON.stringify(messageBody)
             });
 
             if (res.ok) {
@@ -137,6 +187,15 @@ const Messages = () => {
     };
 
     const handleConvoAction = async (convoId, action) => {
+        // Handle Virtual Chats (No backend ID yet)
+        if (!convoId) {
+            if (action === 'hide' || action === 'delete') {
+                setActiveChatId(null);
+                navigate('/messages'); // Clear query param
+            }
+            return;
+        }
+
         try {
             const res = await fetch(`${config.API_URL}/api/conversations/action`, {
                 method: 'POST',
@@ -147,6 +206,7 @@ const Messages = () => {
                 fetchData();
                 if (action === 'hide' || action === 'delete') {
                     setActiveChatId(null);
+                    navigate('/messages'); // Ensure query param is cleared for real chats too
                 }
             }
         } catch (err) {
@@ -165,6 +225,7 @@ const Messages = () => {
                 activeChatId={activeChatId}
                 onSelectChat={(chat) => setActiveChatId(chat.id)}
                 onConvoAction={handleConvoAction}
+                onBack={() => navigate('/')}
             />
             <ChatWindow
                 activeChat={activeChat || null}

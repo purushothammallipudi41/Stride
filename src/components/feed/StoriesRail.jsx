@@ -39,7 +39,7 @@ const StoriesRail = () => {
                 onClick={handleYourStoryClick}
             >
                 <div className={`story-avatar-wrap ${userStory ? '' : 'viewed'}`}>
-                    <img src={getImageUrl(user?.avatar) || 'https://api.dicebear.com/7.x/avataaars/svg?seed=me'} alt="Me" />
+                    <img src={getImageUrl(user?.avatar)} alt="Me" />
                 </div>
                 <span className="story-username">Your Story</span>
             </div>
@@ -48,7 +48,7 @@ const StoriesRail = () => {
             {otherStories.map(story => (
                 <div key={story._id || story.id} className="story-card" onClick={() => setViewingStoryId(story._id || story.id)}>
                     <div className={`story-avatar-wrap ${story.viewed ? 'viewed' : ''}`}>
-                        <img src={getImageUrl(story.userAvatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${story.username}`} alt={story.username} />
+                        <img src={getImageUrl(story.userAvatar)} alt={story.username} />
                     </div>
                     <span className="story-username">{story.username}</span>
                 </div>

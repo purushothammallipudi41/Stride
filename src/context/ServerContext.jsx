@@ -8,6 +8,8 @@ export const useServer = () => useContext(ServerContext);
 export const ServerProvider = ({ children }) => {
     const [servers, setServers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     useEffect(() => {
         fetch(`${config.API_URL}/api/servers`)
@@ -19,12 +21,13 @@ export const ServerProvider = ({ children }) => {
             .catch(err => console.error("Failed to fetch servers:", err));
     }, []);
 
-    const addServer = async (name) => {
+    const addServer = async (data) => {
         try {
+            const serverData = typeof data === 'string' ? { name: data } : data;
             const res = await fetch(`${config.API_URL}/api/servers`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
+                body: JSON.stringify(serverData)
             });
             const newServer = await res.json();
             setServers([...servers, newServer]);
@@ -161,18 +164,110 @@ export const ServerProvider = ({ children }) => {
         }
     };
 
+    const fetchRoles = async (serverId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/roles`);
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to fetch roles:", err);
+            return [];
+        }
+    };
+
+    const createRole = async (serverId, roleData) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/roles`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(roleData)
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to create role:", err);
+            return null;
+        }
+    };
+
+    const updateRole = async (roleId, updates) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/roles/${roleId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to update role:", err);
+            return null;
+        }
+    };
+
+    const deleteRole = async (roleId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/roles/${roleId}`, {
+                method: 'DELETE'
+            });
+            return res.ok;
+        } catch (err) {
+            console.error("Failed to delete role:", err);
+            return false;
+        }
+    };
+
+    const assignRole = async (serverId, userId, roleId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/members/${userId}/roles`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roleId })
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to assign role:", err);
+            return false;
+        }
+    };
+
+    const deleteChannel = async (serverId, channelId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/channels/${channelId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                const updatedServer = await res.json();
+                setServers(prev => prev.map(s => s.id === parseInt(serverId) ? updatedServer : s));
+                return true;
+            }
+            return false;
+        } catch (err) {
+            console.error("Failed to delete channel:", err);
+            return false;
+        }
+    };
+
     const value = {
         servers,
         addServer,
         fetchMessages,
         sendServerMessage,
         createChannel,
+        deleteChannel,
         leaveServer,
         deleteServer,
         updateServer,
         updateServerProfile,
         fetchMembers,
-        loading
+        fetchRoles,
+        createRole,
+        updateRole,
+        deleteRole,
+        assignRole,
+        isCreateModalOpen,
+        setIsCreateModalOpen,
+        loading,
+        isMobileSidebarOpen,
+        setIsMobileSidebarOpen,
+        toggleMobileSidebar: () => setIsMobileSidebarOpen(prev => !prev)
     };
 
     return (

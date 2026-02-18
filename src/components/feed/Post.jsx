@@ -86,7 +86,14 @@ const Post = ({ post }) => {
             />
             <div className="post-header">
                 <div className="post-user">
-                    <img src={getImageUrl(post.userAvatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.username}`} alt={post.username} />
+                    <img
+                        src={getImageUrl(post.userAvatar) || getImageUrl(null, 'user')}
+                        alt={post.username}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = getImageUrl(null, 'user');
+                        }}
+                    />
                     <div className="user-details" onClick={() => navigate(`/profile/${post.username}`)} style={{ cursor: 'pointer' }}>
                         <h4 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             {post.username}
@@ -110,10 +117,15 @@ const Post = ({ post }) => {
                     {showMore && (
                         <div className="post-more-dropdown glass-card animate-in" onClick={e => e.stopPropagation()}>
                             {isOwner && (
-                                <button className="delete-btn" onClick={(e) => {
+                                <button className="delete-btn" onClick={async (e) => {
                                     e.stopPropagation();
                                     setShowMore(false);
-                                    setIsConfirmOpen(true);
+                                    const success = await deletePost(postId);
+                                    if (success) {
+                                        showToast('Post deleted', 'success');
+                                    } else {
+                                        showToast('Failed to delete post', 'error');
+                                    }
                                 }} style={{ color: '#ff4b4b' }}>Delete Post</button>
                             )}
                             <button onClick={(e) => {
@@ -141,7 +153,18 @@ const Post = ({ post }) => {
             </div>
 
             <div className="post-content">
-                {(post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
+                {(post.type === 'video' || post.type === 'reel') ? (
+                    <div className="post-image-container">
+                        <video
+                            src={post.contentUrl}
+                            className="post-image"
+                            muted
+                            loop
+                            controls
+                            playsInline
+                        />
+                    </div>
+                ) : (post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
                     <div className="post-image-container">
                         <img
                             src={getImageUrl(post.contentUrl)}
@@ -149,7 +172,7 @@ const Post = ({ post }) => {
                             className={`post-image ${post.isSensitive && !showSensitive ? 'blur-active' : ''}`}
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
+                                e.target.src = getImageUrl(null, 'media');
                             }}
                         />
                         {post.isSensitive && !showSensitive && (
@@ -166,7 +189,28 @@ const Post = ({ post }) => {
                         )}
                     </div>
                 )}
-                {post.caption && <div className="post-caption">{post.caption}</div>}
+                {post.caption && (
+                    <div className="post-caption">
+                        {post.caption.split(/(\s+)/).map((part, i) => {
+                            if (part.startsWith('#')) {
+                                return (
+                                    <span
+                                        key={i}
+                                        className="hashtag"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/search?q=${encodeURIComponent(part)}`);
+                                        }}
+                                        style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}
+                                    >
+                                        {part}
+                                    </span>
+                                );
+                            }
+                            return part;
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="post-footer">

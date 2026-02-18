@@ -78,7 +78,7 @@ const ShareModal = ({ isOpen, onClose, data, type }) => {
                     url: shareUrl
                 });
             } catch (err) {
-                console.log('Error sharing:', err);
+                // Error sharing
             }
         } else {
             handleCopy();

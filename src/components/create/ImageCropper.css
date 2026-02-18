@@ -1,0 +1,51 @@
+.cropper-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.2);
+}
+
+.grid-line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.grid-line.v1 {
+    left: 33.33%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+}
+
+.grid-line.v2 {
+    left: 66.66%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+}
+
+.grid-line.h1 {
+    top: 33.33%;
+    left: 0;
+    right: 0;
+    height: 1px;
+}
+
+.grid-line.h2 {
+    top: 66.66%;
+    left: 0;
+    right: 0;
+    height: 1px;
+}
+
+.canvas-wrapper:active .cropper-grid-overlay {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.canvas-wrapper:active .grid-line {
+    background: rgba(255, 255, 255, 0.8);
+}

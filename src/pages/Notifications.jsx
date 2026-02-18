@@ -49,7 +49,7 @@ const Notifications = () => {
                 {notifications.length > 0 ? (
                     notifications.map(notification => (
                         <div key={notification._id || notification.id} className={`notification-item ${notification.read ? 'read' : 'unread'}`}>
-                            <img src={getImageUrl(notification.user?.avatar) || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + notification.user?.name} alt="" className="notif-avatar" />
+                            <img src={getImageUrl(notification.user?.avatar)} alt="" className="notif-avatar" />
                             <div className="notif-content">
                                 <p>
                                     <span className="notif-username">{notification.user?.name}</span>

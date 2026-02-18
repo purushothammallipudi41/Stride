@@ -15,21 +15,21 @@ const NativePermissions = () => {
                 const localPerms = await LocalNotifications.checkPermissions();
                 if (localPerms.display === 'prompt') {
                     await LocalNotifications.requestPermissions();
-                    console.log('[NativePermissions] Local notifications requested');
+
                 }
 
                 // 2. Camera & Photos (Used for posts/stories)
                 const cameraPerms = await Camera.checkPermissions();
                 if (cameraPerms.camera === 'prompt' || cameraPerms.photos === 'prompt') {
                     await Camera.requestPermissions();
-                    console.log('[NativePermissions] Camera/Photos requested');
+
                 }
 
                 // 3. Microphone (Used for calls/videos)
                 try {
                     // This will trigger the native prompt if not already granted
                     await navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop()));
-                    console.log('[NativePermissions] Microphone requested');
+
                 } catch (micErr) {
                     console.warn('[NativePermissions] Microphone permission error:', micErr);
                 }
@@ -39,7 +39,7 @@ const NativePermissions = () => {
                     const pushPerms = await PushNotifications.checkPermissions();
                     if (pushPerms.receive === 'prompt') {
                         await PushNotifications.requestPermissions();
-                        console.log('[NativePermissions] Push notification perms requested');
+
                     }
                 } catch (pushErr) {
                     console.warn('[NativePermissions] Push plugin error (expected if Firebase missing):', pushErr);

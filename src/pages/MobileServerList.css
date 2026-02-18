@@ -1,0 +1,104 @@
+.mobile-server-list-page {
+    padding: 20px;
+    padding-bottom: 80px;
+    /* Nav bar space */
+    background: #000;
+    min-height: 100vh;
+}
+
+.mobile-server-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-top: 10px;
+}
+
+.mobile-server-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.create-server-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(130, 87, 229, 0.4);
+}
+
+.mobile-server-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mobile-server-card {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-server-card:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
+}
+
+.mobile-server-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.mobile-server-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mobile-server-icon span {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+}
+
+.mobile-server-info {
+    flex: 1;
+}
+
+.mobile-server-info h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: white;
+    font-weight: 600;
+}
+
+.mobile-server-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.arrow-icon {
+    color: var(--text-muted);
+}

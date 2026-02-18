@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Home, Music, Film, MessageCircle, User, Activity, Hash, Plus, Heart, Globe } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Home, Music, Film, User, Activity, Hash, Plus, Heart, Globe } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import CreateModal from '../create/CreateModal';
 import './Sidebar.css';
@@ -8,18 +8,24 @@ import './Sidebar.css';
 const Sidebar = () => {
     const { unreadCount } = useNotifications();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const location = useLocation();
+
+    const isHiddenOnMobile = ['/messages', '/notifications', '/reels', '/servers'].some(path =>
+        location.pathname.startsWith(path)
+    );
 
     const navItems = [
         { icon: Home, label: 'Home', path: '/' },
         { icon: Music, label: 'Explore', path: '/explore' },
         { icon: Film, label: 'Reels', path: '/reels' },
+
         { icon: Globe, label: 'Servers', path: '/servers' },
         { icon: User, label: 'Profile', path: '/profile' },
     ];
 
     return (
         <>
-            <aside className="sidebar">
+            <aside className={`sidebar ${isHiddenOnMobile ? 'mobile-hide-forced' : ''}`}>
                 <div className="sidebar-header">
                     <img src="/logo.png" alt="Stride Logo" className="logo-icon" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                     <div className="logo-container">

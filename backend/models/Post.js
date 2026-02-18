@@ -7,6 +7,7 @@ const postSchema = new mongoose.Schema({
     type: { type: String, default: 'image', index: true },
     contentUrl: String,
     caption: String,
+    posterUrl: String,
     musicTrack: String,
     isSensitive: { type: Boolean, default: false },
     moderationStatus: { type: String, enum: ['none', 'flagged', 'reviewed'], default: 'none' },

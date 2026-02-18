@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mic, MicOff, Video as VideoIcon, VideoOff, Phone, Settings, Maximize2, Minimize2 } from 'lucide-react';
 import { useCall } from '../../context/CallContext';
+import { getImageUrl } from '../../utils/imageUtils';
 import './CallOverlay.css';
 
 const CallOverlay = ({ username, type, onEndCall }) => {
@@ -155,7 +156,7 @@ const CallOverlay = ({ username, type, onEndCall }) => {
         return (
             <div className="call-overlay glass-panel">
                 <div className="incoming-call-alert">
-                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(https://i.pravatar.cc/150?u=${caller?.username})` }} />
+                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(${getImageUrl(caller?.avatar) || getImageUrl(null, 'user')})` }} />
                     <h2>{caller?.username || 'Unknown'}</h2>
                     <p>Incoming {type} Call...</p>
                     <div className="call-actions">
@@ -174,7 +175,7 @@ const CallOverlay = ({ username, type, onEndCall }) => {
 
             {!userVideo.current?.srcObject && callState !== 'CONNECTED' && (
                 <div className="remote-video-placeholder">
-                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(https://i.pravatar.cc/150?u=${username})` }} />
+                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(${getImageUrl(null, 'user')})` }} />
                     <h2>{username}</h2>
                     <p>{callState === 'OUTGOING' ? 'Calling...' : 'Connecting...'}</p>
                 </div>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import ReelItem from '../components/reels/ReelItem';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import '../components/reels/Reels.css';
 
 const Reels = () => {
+    const navigate = useNavigate();
     const { fetchPosts } = useContent();
     const [reelsData, setReelsData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,6 +34,15 @@ const Reels = () => {
 
     return (
         <div className="reels-container">
+            <button className="reels-back-btn" onClick={() => {
+                if (window.history.state && window.history.state.idx > 0) {
+                    navigate(-1);
+                } else {
+                    navigate('/');
+                }
+            }}>
+                <ArrowLeft size={24} color="#fff" />
+            </button>
             {reelsData.map(reel => (
                 <ReelItem key={reel.id || reel._id} reel={reel} />
             ))}
