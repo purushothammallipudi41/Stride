@@ -194,31 +194,31 @@ const Profile = () => {
                                     className="nav-btn-back"
                                     onClick={() => navigate(-1)}
                                 >
-                                    <ArrowLeft size={24} />
+                                    <ArrowLeft size={20} />
                                 </button>
                             )}
                             <h2 className="nav-username">
                                 {profileUser.username}
-                                {profileUser.isOfficial && <BadgeCheck size={18} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                                {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
                             </h2>
                         </div>
                         <div className="controls-right">
                             {isOwnProfile ? (
                                 <>
                                     <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={24} />
+                                        <Share2 size={20} />
                                     </button>
                                     <button className="nav-icon-btn settings-btn" onClick={() => navigate('/settings')} title="Settings">
-                                        <SettingsIcon size={24} />
+                                        <SettingsIcon size={20} />
                                     </button>
                                 </>
                             ) : (
                                 <>
                                     <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={24} />
+                                        <Share2 size={20} />
                                     </button>
                                     <button className="nav-icon-btn" onClick={() => setShowMoreMenu(!showMoreMenu)}>
-                                        <MoreHorizontal size={24} />
+                                        <MoreHorizontal size={20} />
                                     </button>
                                     {showMoreMenu && (
                                         <div className="more-dropdown glass-card">

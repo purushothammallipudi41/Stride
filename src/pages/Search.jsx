@@ -128,44 +128,92 @@ const SearchPage = () => {
                 ) : query.trim() ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '1rem' }}>
-                            {userResults.length > 0 ? `Results for "${query}"` : 'No results found'}
+                            {query.trim() ? `Results for "${query}"` : 'Discovery'}
                         </h3>
-                        {(activeTab === 'all' || activeTab === 'users') && userResults.map(user => (
-                            <div
-                                key={user._id || user.id}
-                                onClick={() => navigate(`/profile/${user.username}`)}
-                                className="search-result-item"
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '15px',
-                                    padding: '12px',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    borderRadius: '12px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    border: '1px solid rgba(255,255,255,0.05)'
-                                }}
-                            >
-                                <img
-                                    src={getImageUrl(user.avatar)}
-                                    alt={user.username}
-                                    style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '50%',
-                                        objectFit: 'cover',
-                                        border: '2px solid rgba(255,255,255,0.1)'
-                                    }}
-                                    onError={(e) => { e.target.src = getImageUrl(null, 'user'); }}
-                                />
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>{user.name}</div>
-                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@{user.username}</div>
-                                </div>
-                                <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
+
+                        {/* Users Section */}
+                        {(activeTab === 'all' || activeTab === 'users') && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {userResults.map(user => (
+                                    <div
+                                        key={user._id || user.id}
+                                        onClick={() => navigate(`/profile/${user.username}`)}
+                                        className="search-result-item"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '15px',
+                                            padding: '12px',
+                                            background: 'rgba(255,255,255,0.03)',
+                                            borderRadius: '12px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }}
+                                    >
+                                        <img
+                                            src={getImageUrl(user.avatar)}
+                                            alt={user.username}
+                                            style={{
+                                                width: '48px',
+                                                height: '48px',
+                                                borderRadius: '50%',
+                                                objectFit: 'cover',
+                                                border: '2px solid rgba(255,255,255,0.1)'
+                                            }}
+                                            onError={(e) => { e.target.src = getImageUrl(null, 'user'); }}
+                                        />
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>{user.name}</div>
+                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>@{user.username}</div>
+                                        </div>
+                                        <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        )}
+
+                        {/* Channels Section (Mocked for now as backend lacks a dedicated channel search endpoint) */}
+                        {(activeTab === 'all' || activeTab === 'channels') && query.length > 2 && (
+                            <div style={{ marginTop: activeTab === 'all' ? '1rem' : 0 }}>
+                                {activeTab === 'all' && userResults.length > 0 && <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '1rem 0' }} />}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {['general', 'announcements', 'lounge', 'dev-chat'].filter(c => c.includes(query.toLowerCase())).map(channel => (
+                                        <div
+                                            key={channel}
+                                            onClick={() => navigate('/servers/0')}
+                                            className="search-result-item"
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '15px',
+                                                padding: '12px',
+                                                background: 'rgba(255,255,255,0.03)',
+                                                borderRadius: '12px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                border: '1px solid rgba(255,255,255,0.05)'
+                                            }}
+                                        >
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Hash size={24} color="var(--color-primary)" />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>#{channel}</div>
+                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Official Stride Server</div>
+                                            </div>
+                                            <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {query.trim() && userResults.length === 0 && !(['general', 'announcements', 'lounge', 'dev-chat'].some(c => c.includes(query.toLowerCase()))) && (
+                            <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
+                                No results found for "{query}"
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="discovery-section">

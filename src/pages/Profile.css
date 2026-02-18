@@ -24,6 +24,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-right: 8px;
 }
 
 .nav-btn-back {
@@ -54,7 +55,7 @@
     border: none;
     color: white;
     cursor: pointer;
-    padding: 8px;
+    padding: 6px;
     transition: var(--transition-fast);
 }
 

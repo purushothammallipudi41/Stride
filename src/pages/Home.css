@@ -21,8 +21,8 @@
 }
 
 .create-story-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -57,8 +57,8 @@
     max-width: 400px;
     margin: 0 1rem;
     background: rgba(255, 255, 255, 0.05);
-    height: 40px;
-    border-radius: 20px;
+    height: 36px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     padding: 0 1rem;
@@ -84,7 +84,7 @@
 .notification-btn {
     position: relative;
     cursor: pointer;
-    padding: 8px;
+    padding: 6px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
     transition: background 0.2s;
@@ -95,8 +95,8 @@
 }
 
 .header-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--color-text-primary);
 }
 

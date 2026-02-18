@@ -452,7 +452,7 @@ const ServerView = () => {
                                 <div className="header-right">
                                     <Pin size={20} className="clickable-icon" onClick={() => setShowPinned(true)} />
                                     <Users size={20} className="clickable-icon" onClick={() => setShowMembers(!showMembers)} />
-                                    <div className="search-input-pill">
+                                    <div className="search-input-pill" onClick={() => setShowSearch(true)}>
                                         <span>Search</span>
                                         <Search size={16} />
                                     </div>

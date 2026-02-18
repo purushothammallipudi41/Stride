@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import config from '../../config';
 import { Hash, X, ChevronLeft, ChevronRight, Download, ExternalLink, Image as ImageIcon, Video } from 'lucide-react';
 import './MediaGallery.css';
 
@@ -18,7 +19,7 @@ const MediaGallery = ({ serverId, onClose }) => {
     const fetchMedia = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`http://localhost:3001/api/servers/${serverId}/media`);
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/media`);
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data)) {

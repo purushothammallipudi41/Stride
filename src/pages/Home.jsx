@@ -66,7 +66,7 @@ const Home = memo(() => {
                         onClick={() => setIsCreateModalOpen(true)}
                         title="Create Story"
                     >
-                        <Plus size={20} />
+                        <Plus size={18} />
                     </button>
                     <h1 className="home-title text-gradient">Stride</h1>
                 </div>
@@ -75,16 +75,16 @@ const Home = memo(() => {
                     className="header-search-container"
                     onClick={() => navigate('/search')}
                 >
-                    <Search size={18} color="var(--text-secondary)" />
+                    <Search size={16} color="var(--text-secondary)" />
                     <span className="search-placeholder">Search users...</span>
                 </div>
 
                 <div className="header-actions">
                     <div className="notification-btn glass-card" onClick={() => navigate('/messages')}>
-                        <MessageCircle size={20} className="header-icon" />
+                        <MessageCircle size={18} className="header-icon" />
                     </div>
                     <div className="notification-btn glass-card" onClick={() => navigate('/notifications')}>
-                        <Heart size={20} className="header-icon" />
+                        <Heart size={18} className="header-icon" />
                         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                     </div>
                 </div>
