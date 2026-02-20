@@ -317,7 +317,7 @@ const Profile = () => {
                     {/* Middle Row: Name + Bio */}
                     <div className="profile-bio-section">
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                            <p className={`profile-name ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`} style={{ margin: 0 }}>
+                            <p className="profile-name" style={{ margin: 0 }}>
                                 {profileUser.name || profileUser.username}
                             </p>
                         </div>

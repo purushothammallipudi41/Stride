@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import VerificationModal from '../components/profile/VerificationModal';
 import config from '../config';
@@ -387,15 +387,15 @@ const Settings = () => {
 
                 <div className="settings-group">
                     <div className="settings-list">
-                        <div className="settings-item" onClick={handleLogout} style={{ color: 'var(--color-danger)' }}>
+                        <div className="settings-item danger-item" onClick={handleLogout}>
                             <div className="settings-item-left">
                                 <LogOut size={20} />
                                 <span>Logout Current Account</span>
                             </div>
                         </div>
-                        <div className="settings-item" onClick={handleDeleteAccount} style={{ color: 'var(--color-danger)' }}>
+                        <div className="settings-item danger-item" onClick={handleDeleteAccount}>
                             <div className="settings-item-left">
-                                <Shield size={20} color="var(--color-danger)" />
+                                <Shield size={20} />
                                 <span>Delete Account</span>
                             </div>
                         </div>
