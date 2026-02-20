@@ -316,7 +316,13 @@ const Profile = () => {
 
                     {/* Middle Row: Name + Bio */}
                     <div className="profile-bio-section">
-                        <p className="profile-name">{profileUser.name || profileUser.username}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <p className={`profile-name ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`} style={{ margin: 0 }}>
+                                {profileUser.name || profileUser.username}
+                            </p>
+                            {profileUser.isOfficial && <BadgeCheck size={18} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                            {profileUser.unlockedPerks?.includes('custom_status') && <span className="custom-status-badge" title="VIP Status" style={{ fontSize: '1.2rem' }}>💎</span>}
+                        </div>
                         <p className="profile-bio-text">{profileUser.bio}</p>
                     </div>
 
