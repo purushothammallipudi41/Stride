@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -210,7 +210,7 @@ const Profile = () => {
                             <h2 className={`nav-username ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`}>
                                 {profileUser.username}
                                 {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                                {profileUser.unlockedPerks?.includes('custom_status') && <span className="custom-status-badge" title="VIP Status">💎</span>}
+                                {profileUser.unlockedPerks?.includes('custom_status') && <Gem className="custom-status-badge" size={18} color="#00ffcc" fill="rgba(0, 255, 204, 0.2)" />}
                             </h2>
                             {!isOwnProfile && (
                                 <div className="vibe-match-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', marginLeft: '8px' }}>
@@ -321,7 +321,7 @@ const Profile = () => {
                                 {profileUser.name || profileUser.username}
                             </p>
                             {profileUser.isOfficial && <BadgeCheck size={18} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                            {profileUser.unlockedPerks?.includes('custom_status') && <span className="custom-status-badge" title="VIP Status" style={{ fontSize: '1.2rem' }}>💎</span>}
+                            {profileUser.unlockedPerks?.includes('custom_status') && <Gem className="custom-status-badge" size={18} color="#00ffcc" fill="rgba(0, 255, 204, 0.2)" />}
                         </div>
                         <p className="profile-bio-text">{profileUser.bio}</p>
                     </div>
