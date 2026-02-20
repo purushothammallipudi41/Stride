@@ -156,7 +156,8 @@ const Post = memo(({ post }) => {
                 {(post.type === 'video' || post.type === 'reel') ? (
                     <div className="post-image-container">
                         <video
-                            src={post.contentUrl}
+                            src={getImageUrl(post.contentUrl)}
+                            poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
                             className="post-image"
                             muted
                             loop

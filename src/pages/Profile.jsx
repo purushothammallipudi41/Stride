@@ -343,7 +343,8 @@ const Profile = () => {
                             <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
                                 {post.type === 'video' || post.type === 'reel' ? (
                                     <video
-                                        src={post.contentUrl}
+                                        src={getImageUrl(post.contentUrl)}
+                                        poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
                                         className="grid-img"
                                         muted
                                         loop
