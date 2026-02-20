@@ -6,7 +6,9 @@ const directMessageSchema = new mongoose.Schema({
     text: String,
     sharedContent: Object,
     timestamp: { type: Date, default: Date.now },
-    time: String // Legacy formatted time string
+    time: String, // Legacy formatted time string
+    status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'DirectMessage' }
 });
 
 module.exports = mongoose.model('DirectMessage', directMessageSchema);

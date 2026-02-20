@@ -119,15 +119,32 @@ const ServerView = () => {
                 setLoading(false);
             };
             loadMessages();
-
-            const interval = setInterval(async () => {
-                const data = await fetchMessages(serverId, activeChannel);
-                setMessages(prev => JSON.stringify(prev) !== JSON.stringify(data) ? data : prev);
-            }, 3000);
-
-            return () => clearInterval(interval);
         }
     }, [serverId, activeChannel]);
+
+    useEffect(() => {
+        if (!socket || !serverId || !activeChannel) return;
+
+        const roomName = `server_${serverId}_${activeChannel}`;
+        socket.emit('join-server-channel', { serverId, channelId: activeChannel });
+
+        const handleNewMessage = (msg) => {
+            console.log('[SOCKET] New server message received:', msg);
+            if (msg.channelId === activeChannel && parseInt(msg.serverId) === parseInt(serverId)) {
+                setMessages(prev => {
+                    if (prev.find(m => (m._id === msg._id || m.id === msg.id))) return prev;
+                    return [...prev, msg];
+                });
+            }
+        };
+
+        socket.on('new-server-message', handleNewMessage);
+
+        return () => {
+            socket.off('new-server-message', handleNewMessage);
+            socket.emit('leave-server-channel', { serverId, channelId: activeChannel });
+        };
+    }, [socket, serverId, activeChannel]);
 
     if (serversLoading) {
         return (
@@ -213,14 +230,15 @@ const ServerView = () => {
         return !!defaultPerms[perm];
     };
 
-    const handleSendMessage = async (text, type = 'text') => {
+    const handleSendMessage = async (text, type = 'text', extraData = null) => {
         if (!user || !activeChannel) return;
         const msgData = {
             userEmail: user.email,
             username: user.username,
             userAvatar: user.avatar,
             text,
-            type
+            type,
+            replyTo: extraData?.replyTo || null
         };
         const newMsg = await sendServerMessage(serverId, activeChannel, msgData);
         if (newMsg) setMessages(prev => [...prev, newMsg]);

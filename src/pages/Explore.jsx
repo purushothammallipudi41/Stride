@@ -16,6 +16,7 @@ const Explore = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [userResults, setUserResults] = useState([]);
     const [trending, setTrending] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [loadingTrending, setLoadingTrending] = useState(true);
     const { unreadCount } = useNotifications();
     const [shareData, setShareData] = useState(null);

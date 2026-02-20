@@ -17,8 +17,6 @@ const DMOverlay = ({ targetUser, onClose, minimized, onToggleMinimize }) => {
         const loadChat = async () => {
             setLoading(true);
             try {
-                // Fetch full user details if needed, or just use targetUser
-                // Fetch existing messages
                 const [messagesRes, convosRes] = await Promise.all([
                     fetch(`${config.API_URL}/api/messages/${user.email}`),
                     fetch(`${config.API_URL}/api/conversations/${user.email}`)
@@ -27,18 +25,14 @@ const DMOverlay = ({ targetUser, onClose, minimized, onToggleMinimize }) => {
                 if (messagesRes.ok && convosRes.ok) {
                     const messagesData = await messagesRes.json();
                     const convosData = await convosRes.json();
-
-                    // Find convo
                     const convo = convosData.find(c => c.participants.includes(targetUser.email));
 
-                    // Filter messages
                     const relevantMessages = messagesData.filter(m =>
                         (m.from === user.email && m.to === targetUser.email) ||
                         (m.from === targetUser.email && m.to === user.email)
                     ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-                    // Construct chat object compatible with ChatWindow
-                    const chatObj = {
+                    setActiveChat({
                         id: targetUser.email,
                         conversationId: convo?._id,
                         username: targetUser.username,
@@ -51,8 +45,7 @@ const DMOverlay = ({ targetUser, onClose, minimized, onToggleMinimize }) => {
                             senderName: m.username,
                             senderAvatar: m.userAvatar
                         }))
-                    };
-                    setActiveChat(chatObj);
+                    });
                 }
             } catch (err) {
                 console.error("Failed to load DM overlay chat", err);
@@ -62,25 +55,59 @@ const DMOverlay = ({ targetUser, onClose, minimized, onToggleMinimize }) => {
         };
 
         loadChat();
-        // Poll for new messages every 3s while open
-        const interval = setInterval(loadChat, 3000);
-        return () => clearInterval(interval);
     }, [targetUser, user]);
+
+    // Handle real-time updates from socket
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (!socket || !activeChat) return;
+
+        const handleNewMessage = (msg) => {
+            if ((msg.from === user.email && msg.to === targetUser.email) ||
+                (msg.from === targetUser.email && msg.to === user.email)) {
+
+                // Emit delivered status
+                if (msg.from !== user.email) {
+                    socket.emit('message-delivered', {
+                        messageId: msg._id,
+                        fromId: user.id
+                    });
+                }
+
+                setActiveChat(prev => ({
+                    ...prev,
+                    messages: [...prev.messages, {
+                        ...msg,
+                        isMe: msg.from === user.email,
+                        senderName: msg.username,
+                        senderAvatar: msg.userAvatar
+                    }]
+                }));
+            }
+        };
+
+        socket.on('direct-message', handleNewMessage);
+        return () => socket.off('direct-message');
+    }, [socket, activeChat, targetUser.email, user.email]);
 
     const handleSendMessage = async (content, type = 'text') => {
         if (!user || !targetUser) return;
         try {
+            const msgData = {
+                from: user.email,
+                to: targetUser.email,
+                text: type === 'text' ? content : '',
+                sharedContent: type === 'gif' ? { type: 'gif', thumbnail: content } : null
+            };
+
             await fetch(`${config.API_URL}/api/messages/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    from: user.email,
-                    to: targetUser.email,
-                    text: type === 'text' ? content : '',
-                    sharedContent: type === 'gif' ? { type: 'gif', thumbnail: content } : null
-                })
+                body: JSON.stringify(msgData)
             });
-            // Polling will pick it up, or we canoptimistically update
+
+            // Optimistic update already handled by socket if backend broadcasts back to sender
+            // or we add it here manually if needed.
         } catch (e) {
             console.error("Send failed", e);
         }

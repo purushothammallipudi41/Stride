@@ -11,6 +11,19 @@ const mongoose = require('mongoose');
 const { Resend } = require('resend');
 const nodemailer = require('nodemailer'); // Re-enabled for fallback
 
+// --- Global Error Handlers ---
+process.on('uncaughtException', (err) => {
+    console.error('[FATAL] Uncaught Exception:', err);
+    // Keep the process alive for now but log loudly
+
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+
+});
+
+
 // Mongoose & Database
 const connectDB = require('./db');
 const User = require('./models/User');
@@ -52,13 +65,20 @@ app.use(cors({
     credentials: true
 }));
 app.use(morgan('dev'));
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ limit: '500mb', extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 const dns = require('dns');
 // Force IPv4 for DNS resolution to avoid ENETUNREACH on Render
 if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
 }
+
+// --- Request Logging Middleware ---
+app.use((req, res, next) => {
+    const log = `[${new Date().toISOString()}] ${req.method} ${req.url} - Body: ${JSON.stringify(req.body)}\n`;
+    fs.appendFileSync(path.join(__dirname, 'api_requests.log'), log);
+    next();
+});
 
 // --- Socket.IO Initialization (Moved Up) ---
 const httpServer = http.createServer(app);
@@ -212,7 +232,9 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 
 // --- Seeding Logic ---
 // Run seeding slightly after connection
-setTimeout(seedDatabase, 2000);
+setTimeout(() => {
+    seedDatabase().catch(err => console.error('[INIT] seedDatabase failed:', err));
+}, 2000);
 
 async function seedDatabase() {
     try {
@@ -820,7 +842,6 @@ app.post('/api/register', async (req, res) => {
             stats: {
                 posts: 0,
                 followers: 0,
-                followers: 0,
                 following: initialFollowing.length
             },
             serverProfiles: [{
@@ -1102,6 +1123,23 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const notification = await Notification.create(req.body);
+
+        // Real-time broadcast
+        const targetUser = await User.findOne({ email: req.body.targetUserEmail });
+        if (targetUser && onlineUsers.has(targetUser._id.toString())) {
+            io.to(targetUser._id.toString()).emit('new-notification', notification);
+            console.log(`[SOCKET] Notification broadcasted to ${targetUser.username}`);
+        }
+
+        res.json(notification);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.delete('/api/notifications/clear', async (req, res) => {
     try {
         const { email } = req.query;
@@ -1265,28 +1303,27 @@ app.get('/api/servers', async (req, res) => {
     try {
         const servers = await ServerModel.find().sort({ id: 1 }).lean();
 
-        // Calculate dynamic member counts using aggregation for performance
-        const memberCounts = await User.aggregate([
+        // Optimized member counts: Get counts per serverId
+        const counts = await User.aggregate([
             { $unwind: "$serverProfiles" },
             { $group: { _id: "$serverProfiles.serverId", count: { $sum: 1 } } }
         ]);
 
-        // Create a map for O(1) lookup
         const countMap = {};
-        memberCounts.forEach(item => {
-            countMap[item._id] = item.count;
-        });
+        counts.forEach(c => { countMap[c._id] = c.count; });
 
-        const serversWithMemberCounts = servers.map(server => ({
-            ...server,
-            members: countMap[server.id] || 0
+        const formatted = servers.map(s => ({
+            ...s,
+            memberCount: countMap[s.id] || 0
         }));
 
-        res.json(serversWithMemberCounts);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.json(formatted);
+    } catch (err) {
+        console.error('Error fetching servers:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 app.post('/api/servers', async (req, res) => {
     try {
@@ -1611,7 +1648,9 @@ app.delete('/api/servers/:serverId', async (req, res) => {
 
 app.get('/api/servers/:serverId/messages/:channelId', async (req, res) => {
     const { serverId, channelId } = req.params;
-    const messages = await ServerMessage.find({ serverId: parseInt(serverId), channelId }).sort({ timestamp: 1 });
+    const messages = await ServerMessage.find({ serverId: parseInt(serverId), channelId })
+        .populate('replyTo')
+        .sort({ timestamp: 1 });
     res.json(messages);
 });
 
@@ -1629,7 +1668,7 @@ app.post('/api/servers/:serverId/messages/:channelId', async (req, res) => {
             }
         }
 
-        const message = await ServerMessage.create({
+        const messageData = {
             serverId: sId,
             channelId,
             userEmail: req.body.userEmail,
@@ -1637,9 +1676,20 @@ app.post('/api/servers/:serverId/messages/:channelId', async (req, res) => {
             userAvatar: req.body.userAvatar,
             text: req.body.text,
             type: req.body.type || 'text',
-            time: "Just now"
-        });
-        res.status(201).json(message);
+            replyTo: req.body.replyTo || null,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        const message = await ServerMessage.create(messageData);
+        let populatedMsg = await ServerMessage.findById(message._id).populate('replyTo');
+
+        // Notify room via Socket.IO
+        const roomName = `server_${sId}_${channelId}`;
+        if (req.io) {
+            req.io.to(roomName).emit('new-server-message', populatedMsg);
+        }
+
+        res.status(201).json(populatedMsg);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1678,17 +1728,23 @@ app.get('/api/messages/:userEmail', async (req, res) => {
     const { userEmail } = req.params;
     const messages = await DirectMessage.find({
         $or: [{ from: userEmail }, { to: userEmail }]
-    }).sort({ timestamp: 1 });
+    })
+        .populate('replyTo')
+        .sort({ timestamp: 1 });
     res.json(messages);
 });
 
 app.post('/api/messages/send', async (req, res) => {
     try {
-        const { from, to, text, sharedContent } = req.body;
+        const { from, to, text, sharedContent, replyTo } = req.body;
         const message = await DirectMessage.create({
             from, to, text, sharedContent,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            replyTo: replyTo || null,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'sent'
         });
+
+        const populatedMsg = await DirectMessage.findById(message._id).populate('replyTo');
 
         // Sync Conversation
         const participants = [from, to].sort();
@@ -1711,10 +1767,10 @@ app.post('/api/messages/send', async (req, res) => {
         }
 
         if (req.io) {
-            req.io.to(to).emit('receive-message', message);
-            req.io.to(from).emit('receive-message', message);
+            req.io.to(to).emit('receive-message', populatedMsg);
+            req.io.to(from).emit('receive-message', populatedMsg);
         }
-        res.json(message);
+        res.json(populatedMsg);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1928,6 +1984,7 @@ const onlineUsers = new Map(); // userId -> { socketId, username, email }
 io.on("connection", (socket) => {
     socket.on("join-room", async (userId) => {
         socket.join(userId);
+        socket.userId = userId; // Store on socket for easy access
         console.log(`[SOCKET] User joined room: ${userId}`);
 
         // Try to find user to track online status
@@ -1945,6 +2002,18 @@ io.on("connection", (socket) => {
         } catch (e) {
             console.error('[SOCKET] Error in join-room:', e);
         }
+    });
+
+    socket.on("join-server-channel", ({ serverId, channelId }) => {
+        const roomName = `server_${serverId}_${channelId}`;
+        socket.join(roomName);
+        console.log(`[SOCKET] Socket ${socket.id} joined channel room: ${roomName}`);
+    });
+
+    socket.on("leave-server-channel", ({ serverId, channelId }) => {
+        const roomName = `server_${serverId}_${channelId}`;
+        socket.leave(roomName);
+        console.log(`[SOCKET] Socket ${socket.id} left channel room: ${roomName}`);
     });
 
     socket.on("call-user", ({ userToCall, signalData, from, name }) => {
@@ -1983,20 +2052,48 @@ io.on("connection", (socket) => {
         io.to(payload.targetId).emit("voice-signal", payload);
     });
 
+    socket.on("typing-start", ({ to, fromName }) => {
+        io.to(to).emit("user-typing", { from: socket.userId, fromName, typing: true });
+    });
+
+    socket.on("typing-stop", ({ to }) => {
+        io.to(to).emit("user-typing", { from: socket.userId, typing: false });
+    });
+
+    socket.on("message-read", async ({ messageId, fromId }) => {
+        try {
+            const msg = await DirectMessage.findById(messageId);
+            if (msg && msg.status !== 'read') {
+                msg.status = 'read';
+                await msg.save();
+                // Notify the sender
+                io.to(fromId).emit("msg-status-update", { messageId, status: 'read' });
+            }
+        } catch (e) {
+            console.error('[SOCKET] Error in message-read:', e);
+        }
+    });
+
+    socket.on("message-delivered", async ({ messageId, fromId }) => {
+        try {
+            const msg = await DirectMessage.findById(messageId);
+            if (msg && msg.status === 'sent') {
+                msg.status = 'delivered';
+                await msg.save();
+                // Notify the sender
+                io.to(fromId).emit("msg-status-update", { messageId, status: 'delivered' });
+            }
+        } catch (e) {
+            console.error('[SOCKET] Error in message-delivered:', e);
+        }
+    });
+
     socket.on("disconnect", () => {
         console.log(`[SOCKET] Disconnected: ${socket.id}`);
 
-        let disconnectedUserId = null;
-        for (const [userId, data] of onlineUsers.entries()) {
-            if (data.socketId === socket.id) {
-                disconnectedUserId = userId;
-                break;
-            }
-        }
-
-        if (disconnectedUserId) {
-            onlineUsers.delete(disconnectedUserId);
-            io.emit("user-status-change", { userId: disconnectedUserId, status: 'offline' });
+        if (socket.userId) {
+            onlineUsers.delete(socket.userId);
+            io.emit("user-status-change", { userId: socket.userId, status: 'offline' });
         }
 
         socket.broadcast.emit("call-ended");
@@ -2089,5 +2186,5 @@ async function syncOfficialRelationships() {
 // Start server on single port correctly
 httpServer.listen(port, () => {
     console.log(`Backend server running at http://localhost:${port}`);
-    syncOfficialRelationships();
+    syncOfficialRelationships().catch(err => console.error('[INIT] syncOfficialRelationships failed:', err));
 });

@@ -9,6 +9,7 @@ import config from '../../config';
 import { getImageUrl } from '../../utils/imageUtils';
 import { Trash2, Flag, UserMinus, ShieldAlert } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useContent } from '../../context/ContentContext';
 
 const OptionsModal = ({ isOpen, onClose, onAction }) => {
     if (!isOpen) return null;
@@ -33,12 +34,11 @@ const OptionsModal = ({ isOpen, onClose, onAction }) => {
 };
 
 const ReelItem = ({ reel }) => {
-    const { user, refreshUser } = useAuth();
-    const { pauseTrack } = useMusic();
-    const { showToast } = useToast();
-    const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(parseInt(reel.likes) || 0);
-    const [isFollowing, setIsFollowing] = useState(false);
+    const { user, refreshUser, pauseTrack } = useAuth();
+    const { toggleLike, addComment } = useContent();
+    const [isLiked, setIsLiked] = useState(reel.likes?.includes(user?.email) || false);
+    const [likeCount, setLikeCount] = useState(Array.isArray(reel.likes) ? reel.likes.length : 0);
+    const [isFollowing, setIsFollowing] = useState(user?.following?.includes(reel.userId) || false);
     const [showCaption, setShowCaption] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
@@ -142,6 +142,11 @@ const ReelItem = ({ reel }) => {
 
     const handleLike = (e) => {
         if (e) e.stopPropagation();
+        if (!user) {
+            showToast('Please login to like reels', 'info');
+            return;
+        }
+        toggleLike(reel._id || reel.id, user.email);
         setIsLiked(!isLiked);
         setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
     };
@@ -260,7 +265,7 @@ const ReelItem = ({ reel }) => {
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsCommentsOpen(true))}>
                     <MessageCircle size={36} strokeWidth={2.5} />
-                    <span>{reel.comments}</span>
+                    <span>{reel.comments?.length || 0}</span>
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsShareModalOpen(true))}>
                     <Share2 size={36} strokeWidth={2.5} />
@@ -269,15 +274,15 @@ const ReelItem = ({ reel }) => {
                     <MoreHorizontal size={36} strokeWidth={2.5} />
                 </button>
                 <div className="music-disc-anim">
-                    <div className="disc-inner" style={{ backgroundImage: `url(${getImageUrl(null, 'track')})`, backgroundSize: 'cover' }} />
+                    <div className="disc-inner" style={{ backgroundImage: `url(${getImageUrl(reel.userAvatar || null, 'track')})`, backgroundSize: 'cover' }} />
                 </div>
             </div>
 
             <CommentsModal
                 isOpen={isCommentsOpen}
                 onClose={() => setIsCommentsOpen(false)}
-                postId={reel.id}
-                comments={[]} // Reels comments are currently mock but can use context if connected
+                postId={reel._id || reel.id}
+                comments={reel.comments || []}
                 username={reel.username}
             />
 
@@ -297,12 +302,12 @@ const ReelItem = ({ reel }) => {
                     } else if (action === 'not-interested') {
                         showToast('We will show you fewer reels like this.', 'info');
                     } else if (action === 'follow') {
-                        showToast('Unfollow logic pending implementation.', 'error');
+                        handleFollow();
                     }
                     setIsOptionsOpen(false);
                 }}
             />
-        </div>
+        </div >
     );
 };
 

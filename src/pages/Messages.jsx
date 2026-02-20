@@ -56,31 +56,37 @@ const Messages = () => {
 
         const handleNewMessage = (newMessage) => {
             setMessages(prev => {
-                // Prevent duplicates if optimistic update already added it (by temporary ID?)
-                // Since sender gets echo, we might get duplicate if we optimistically added.
-                // But handleSendMessage logic (below) awaits response then adds.
-                // The socket event might come faster or slower.
-                // Backend 'send' returns the message, handleSendMessage adds it.
-                // Socket 'receive-message' also sends it.
-                // We should check duplication by _id if possible, or simple content/timestamp match.
-                // Backend returns MongoDB object with _id.
-
                 if (prev.find(m => m._id === newMessage._id)) return prev;
                 return [...prev, newMessage];
             });
 
+            // Emit delivered status back to sender
+            if (newMessage.from !== user.email) {
+                socket.emit('message-delivered', {
+                    messageId: newMessage._id,
+                    fromId: user.id
+                });
+            }
+
             // Re-fetch conversations to update last message preview / ordering
-            // Debounce this if high traffic, but fine for now
             fetch(`${config.API_URL}/api/conversations/${user.email}`)
                 .then(res => res.json())
                 .then(data => setConversations(data))
                 .catch(err => console.error('Failed to update convos:', err));
         };
 
+        const handleStatusUpdate = ({ messageId, status }) => {
+            setMessages(prev => prev.map(m =>
+                (m._id === messageId || m.id === messageId) ? { ...m, status } : m
+            ));
+        };
+
         socket.on('receive-message', handleNewMessage);
+        socket.on('msg-status-update', handleStatusUpdate);
 
         return () => {
             socket.off('receive-message', handleNewMessage);
+            socket.off('msg-status-update', handleStatusUpdate);
         };
     }, [socket, user]);
 
@@ -119,7 +125,9 @@ const Messages = () => {
             time: convo.lastMessage ? new Date(convo.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
             messages: threadMessages.map(m => ({
                 ...m,
-                isMe: m.from === user.email
+                isMe: m.from === user.email,
+                senderName: m.from === user.email ? user.username : otherUser.username,
+                senderAvatar: m.from === user.email ? user.avatar : otherUser.avatar
             }))
         };
     });
@@ -149,25 +157,18 @@ const Messages = () => {
         return 0;
     });
 
-    const handleSendMessage = async (content, type = 'text', additionalData = null) => {
+    const handleSendMessage = async (text, type = 'text', extraData = null) => {
         if (!activeChatId || !user) return;
 
-        let messageBody = {
+        const messageBody = {
             from: user.email,
             to: activeChatId,
-            text: type === 'text' ? content : '',
-            sharedContent: null
+            text,
+            type,
+            sharedContent: type !== 'text' ? extraData : null,
+            replyTo: extraData?.replyTo || null,
+            timestamp: new Date().toISOString()
         };
-
-        if (type === 'gif') {
-            messageBody.sharedContent = { type: 'gif', thumbnail: content };
-        } else if (type === 'location') {
-            messageBody.text = ''; // No text for location
-            messageBody.sharedContent = {
-                type: 'location',
-                ...additionalData // { lat, lng, url, title }
-            };
-        }
 
         try {
             const res = await fetch(`${config.API_URL}/api/messages/send`, {
@@ -178,8 +179,15 @@ const Messages = () => {
 
             if (res.ok) {
                 const newMessage = await res.json();
-                setMessages(prev => [...prev, newMessage]);
-                fetchData(); // Refresh conversations
+                setMessages(prev => {
+                    if (prev.find(m => m._id === newMessage._id)) return prev;
+                    return [...prev, newMessage];
+                });
+                // Re-fetch conversations to update last message preview / ordering
+                fetch(`${config.API_URL}/api/conversations/${user.email}`)
+                    .then(res => res.json())
+                    .then(data => setConversations(data))
+                    .catch(err => console.error('Failed to update convos:', err));
             }
         } catch (error) {
             console.error('Failed to send message:', error);
@@ -187,11 +195,10 @@ const Messages = () => {
     };
 
     const handleConvoAction = async (convoId, action) => {
-        // Handle Virtual Chats (No backend ID yet)
         if (!convoId) {
             if (action === 'hide' || action === 'delete') {
                 setActiveChatId(null);
-                navigate('/messages'); // Clear query param
+                navigate('/messages');
             }
             return;
         }
@@ -206,7 +213,7 @@ const Messages = () => {
                 fetchData();
                 if (action === 'hide' || action === 'delete') {
                     setActiveChatId(null);
-                    navigate('/messages'); // Ensure query param is cleared for real chats too
+                    navigate('/messages');
                 }
             }
         } catch (err) {
@@ -216,7 +223,7 @@ const Messages = () => {
 
     const activeChat = chats.find(c => c.id === activeChatId);
 
-    if (loading) return <div className="page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>Loading chats...</div>;
+    if (loading) return <div className="page-container flex-center" style={{ color: 'white' }}>Loading chats...</div>;
 
     return (
         <div className={`page-container messages-page ${activeChatId ? 'show-chat' : 'show-list'}`} style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>

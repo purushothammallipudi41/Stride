@@ -9,7 +9,8 @@ const serverMessageSchema = new mongoose.Schema({
     text: String,
     type: { type: String, default: 'text' },
     timestamp: { type: Date, default: Date.now },
-    time: String
+    time: String,
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'ServerMessage' }
 });
 
 module.exports = mongoose.model('ServerMessage', serverMessageSchema);

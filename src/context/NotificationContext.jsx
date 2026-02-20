@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import config from '../config';
 import { useAuth } from './AuthContext';
+import { useSocket } from './SocketContext';
 
 const NotificationContext = createContext();
 
@@ -8,6 +9,7 @@ export const useNotifications = () => useContext(NotificationContext);
 
 export const NotificationProvider = ({ children }) => {
     const { user } = useAuth();
+    const { socket } = useSocket();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -26,12 +28,19 @@ export const NotificationProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (user?.email) {
-            fetchNotifications();
-            const interval = setInterval(fetchNotifications, 10000);
-            return () => clearInterval(interval);
+        if (!user?.email) return;
+
+        fetchNotifications();
+
+        if (socket) {
+            socket.on('new-notification', (notification) => {
+                setNotifications(prev => [notification, ...prev]);
+                setUnreadCount(prev => prev + 1);
+            });
+
+            return () => socket.off('new-notification');
         }
-    }, [user?.email]);
+    }, [user?.email, socket]);
 
     const addNotification = async (notification) => {
         try {

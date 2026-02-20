@@ -10,6 +10,7 @@ export const useSocket = () => useContext(SocketContext) || { socket: null };
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
+    const [onlineUsers, setOnlineUsers] = useState(new Set());
     const { user } = useAuth();
 
     useEffect(() => {
@@ -25,11 +26,28 @@ export const SocketProvider = ({ children }) => {
             }
         });
 
+        newSocket.on('user-status-change', ({ userId, status }) => {
+            setOnlineUsers(prev => {
+                const next = new Set(prev);
+                if (status === 'online') next.add(userId);
+                else next.delete(userId);
+                return next;
+            });
+        });
+
+        // Initial fetch of online users
+        fetch(`${config.API_URL}/api/online-users`)
+            .then(res => res.json())
+            .then(users => setOnlineUsers(new Set(users)))
+            .catch(console.error);
+
         return () => newSocket.close();
     }, [user?.id]); // Re-connect/re-join if user changes (or just on mount)
 
+    const isUserOnline = (userId) => onlineUsers.has(userId);
+
     return (
-        <SocketContext.Provider value={{ socket }}>
+        <SocketContext.Provider value={{ socket, isUserOnline, onlineUsers }}>
             {children}
         </SocketContext.Provider>
     );
