@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({
         timestamp: { type: Date, index: true }
     },
     vibeTokens: { type: Number, default: 0 },
-    unlockedPerks: [{ type: String }]
+    unlockedPerks: [{ type: String }],
+    profileThemeUrl: { type: String, default: null }
 }, { timestamps: true });
 
 userSchema.index({ "serverProfiles.serverId": 1 });

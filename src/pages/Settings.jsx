@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X, ChevronRight } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X, ChevronRight, Music } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import VerificationModal from '../components/profile/VerificationModal';
 import config from '../config';
+import { uploadToCloudinary } from '../utils/cloudinaryUtils';
 import './Settings.css';
 
 const Settings = () => {
@@ -22,6 +23,9 @@ const Settings = () => {
 
     // Blue Tick Verification
     const [showBlueTickModal, setShowBlueTickModal] = useState(false);
+
+    // Profile Audio
+    const [uploadingAudio, setUploadingAudio] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -238,6 +242,60 @@ const Settings = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Profile Customization Section */}
+                {user?.unlockedPerks?.includes('profile_audio') && (
+                    <div className="settings-group">
+                        <div className="group-header">
+                            <h3>Profile Customization</h3>
+                        </div>
+                        <div className="settings-list">
+                            <div className="settings-item">
+                                <div className="settings-item-left">
+                                    <Music size={20} color="var(--color-primary)" />
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <span>Profile Theme Song</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
+                                            {user.profileThemeUrl ? 'Audio track active' : 'No track set'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="settings-item-right">
+                                    <input
+                                        type="file"
+                                        id="profile-audio-upload"
+                                        accept="audio/*"
+                                        style={{ display: 'none' }}
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            setUploadingAudio(true);
+                                            try {
+                                                const uploadedUrl = await uploadToCloudinary(file);
+                                                if (uploadedUrl) {
+                                                    await updateProfile({ profileThemeUrl: uploadedUrl });
+                                                }
+                                            } catch (err) {
+                                                alert('Failed to upload audio');
+                                            } finally {
+                                                setUploadingAudio(false);
+                                                e.target.value = '';
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => document.getElementById('profile-audio-upload').click()}
+                                        style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                        disabled={uploadingAudio}
+                                    >
+                                        {uploadingAudio ? 'Uploading...' : (user.profileThemeUrl ? 'Change' : 'Upload')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="settings-group">
                     <h3>Account Security</h3>

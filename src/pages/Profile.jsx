@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
@@ -38,6 +37,20 @@ const Profile = () => {
     const [selectedPost, setSelectedPost] = useState(null);
 
     const isOwnProfile = !identifier || identifier === currentUser?.username || identifier === currentUser?.email || identifier === currentUser?.id;
+
+    // Profile Theme Audio State
+    const audioRef = useRef(null);
+    const [isPlayingTheme, setIsPlayingTheme] = useState(false);
+
+    const toggleProfileTheme = () => {
+        if (!audioRef.current) return;
+        if (isPlayingTheme) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlayingTheme(!isPlayingTheme);
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -322,14 +335,17 @@ const Profile = () => {
                             </p>
                         </div>
                         <p className="profile-bio-text">{profileUser.bio}</p>
-                        {profileUser.unlockedPerks?.includes('profile_audio') && (
-                            <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)' }}>
-                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Music size={12} color="white" />
+                        {profileUser.unlockedPerks?.includes('profile_audio') && profileUser.profileThemeUrl && (
+                            <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)', border: isPlayingTheme ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)' }} onClick={toggleProfileTheme}>
+                                <audio ref={audioRef} src={profileUser.profileThemeUrl} onEnded={() => setIsPlayingTheme(false)} />
+                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.3s' }}>
+                                    <Music size={12} color="white" className={isPlayingTheme ? 'pulse' : ''} />
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Profile Theme</span>
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}>Now Playing 🎵</span>
+                                    <span style={{ fontSize: '0.65rem', color: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.5)' }}>
+                                        {isPlayingTheme ? 'Now Playing 🎵' : 'Play Song'}
+                                    </span>
                                 </div>
                             </div>
                         )}
