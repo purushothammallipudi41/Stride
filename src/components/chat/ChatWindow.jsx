@@ -132,7 +132,7 @@ const ChatWindow = ({
             (position) => {
                 const { latitude, longitude } = position.coords;
                 const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-                onSendMessage(null, 'location', { lat: latitude, lng: longitude, url: locationUrl, title: 'Shared Location' });
+                onSendMessage(null, 'location', { type: 'location', lat: latitude, lng: longitude, url: locationUrl, title: 'Shared Location' });
                 setIsLocating(false);
             },
             (error) => {
@@ -257,8 +257,8 @@ const ChatWindow = ({
 
                                     <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('chat_bubbles') ? 'chat-bubbles-perk' : ''}`}>
                                         {msg.sharedContent ? (
-                                            <div className="shared-content-card" onClick={() => msg.sharedContent.type === 'location' && window.open(msg.sharedContent.url, '_blank')}>
-                                                {msg.sharedContent.type === 'location' ? (
+                                            <div className="shared-content-card" onClick={() => (msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) && window.open(msg.sharedContent.url, '_blank')}>
+                                                {(msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) ? (
                                                     <div className="location-preview">
                                                         <div className="map-placeholder"><MapPin size={32} color="#ff4b4b" /></div>
                                                         <div className="location-info">
