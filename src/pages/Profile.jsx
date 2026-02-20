@@ -209,8 +209,6 @@ const Profile = () => {
                             )}
                             <h2 className={`nav-username ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`}>
                                 {profileUser.username}
-                                {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                                {profileUser.unlockedPerks?.includes('custom_status') && <Gem className="custom-status-badge" size={18} color="#00ffcc" fill="rgba(0, 255, 204, 0.2)" />}
                             </h2>
                             {!isOwnProfile && (
                                 <div className="vibe-match-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', marginLeft: '8px' }}>
@@ -320,8 +318,6 @@ const Profile = () => {
                             <p className={`profile-name ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`} style={{ margin: 0 }}>
                                 {profileUser.name || profileUser.username}
                             </p>
-                            {profileUser.isOfficial && <BadgeCheck size={18} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                            {profileUser.unlockedPerks?.includes('custom_status') && <Gem className="custom-status-badge" size={18} color="#00ffcc" fill="rgba(0, 255, 204, 0.2)" />}
                         </div>
                         <p className="profile-bio-text">{profileUser.bio}</p>
                     </div>
