@@ -109,6 +109,28 @@
     box-shadow: 0 0 15px rgba(0, 255, 204, 0.6), inset 0 0 10px rgba(0, 255, 204, 0.3);
 }
 
+.profile-avatar-container.holographic-ring .profile-avatar-large {
+    border: 4px solid transparent;
+    background-image: linear-gradient(var(--color-bg), var(--color-bg)),
+        linear-gradient(45deg, #ff007f, #7f00ff, #00ffff, #00ff7f, #ffff00, #ff0000);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    animation: holoSpin 4s linear infinite;
+    box-shadow: 0 0 20px rgba(127, 0, 255, 0.4);
+}
+
+@keyframes holoSpin {
+    0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        background-position: 100% 50%;
+        filter: hue-rotate(360deg);
+    }
+}
+
 .profile-stats {
     display: flex;
     flex: 1;

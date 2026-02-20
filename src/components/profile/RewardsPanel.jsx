@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Sparkles, Gift, Shield, Star, Award, Zap } from 'lucide-react';
+import { Sparkles, Gift, Shield, Star, Award, Zap, Disc, MessageSquare, Music } from 'lucide-react';
 import config from '../../config';
 import './RewardsPanel.css';
 
@@ -14,7 +14,10 @@ const RewardsPanel = () => {
     const shopItems = [
         { id: 'neon_frame', name: 'Neon Avatar Frame', cost: 500, icon: <Shield className="item-icon neon" /> },
         { id: 'gold_name', name: 'Golden Username', cost: 1000, icon: <Star className="item-icon gold" /> },
-        { id: 'custom_status', name: 'Custom Status Badge', cost: 1500, icon: <Award className="item-icon platinum" /> }
+        { id: 'custom_status', name: 'Custom Status Badge', cost: 1500, icon: <Award className="item-icon platinum" /> },
+        { id: 'chat_bubbles', name: 'Custom Chat Bubbles', cost: 1500, icon: <MessageSquare className="item-icon chat-dye" /> },
+        { id: 'holographic_ring', name: 'Holographic Avatar Ring', cost: 2000, icon: <Disc className="item-icon holo" /> },
+        { id: 'profile_audio', name: 'Profile Theme Song', cost: 3000, icon: <Music className="item-icon audio" /> }
     ];
 
     const handleClaimDaily = async () => {

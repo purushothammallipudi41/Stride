@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, Video, Smile, Gift, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft } from 'lucide-react';
+import { Send, Phone, Video, Smile, Gift, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft, Image } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useCall } from '../../context/CallContext';
 import { useSocket } from '../../context/SocketContext';
@@ -9,6 +9,7 @@ import '../../components/common/IconBtn.css';
 import './Chat.css';
 import GifPicker from '../common/GifPicker';
 import config from '../../config';
+import { uploadToCloudinary } from '../../utils/cloudinaryUtils';
 
 const EMOJI_CATEGORIES = {
     'Smileys': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🥴'],
@@ -41,6 +42,8 @@ const ChatWindow = ({
 
     const [translatedMessages, setTranslatedMessages] = useState({});
     const [typingUser, setTypingUser] = useState(null);
+    const [uploadingMedia, setUploadingMedia] = useState(false);
+    const fileInputRef = useRef(null);
     const chatContainerRef = useRef(null);
     const { showToast } = useToast();
     const { startCall } = useCall();
@@ -139,6 +142,25 @@ const ChatWindow = ({
         );
     };
 
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingMedia(true);
+        try {
+            const uploadedUrl = await uploadToCloudinary(file);
+            if (uploadedUrl) {
+                const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+                onSendMessage(mediaType === 'video' ? 'Sent a video' : 'Sent an image', 'text', null, { mediaUrl: uploadedUrl, mediaType });
+            }
+        } catch (error) {
+            showToast('Failed to upload media', 'error');
+        } finally {
+            setUploadingMedia(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
     const handleTranslate = (index, text) => {
         if (translatedMessages[index]) {
             const newTranslations = { ...translatedMessages };
@@ -233,7 +255,7 @@ const ChatWindow = ({
                                         </div>
                                     )}
 
-                                    <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''}`}>
+                                    <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('chat_bubbles') ? 'chat-bubbles-perk' : ''}`}>
                                         {msg.sharedContent ? (
                                             <div className="shared-content-card" onClick={() => msg.sharedContent.type === 'location' && window.open(msg.sharedContent.url, '_blank')}>
                                                 {msg.sharedContent.type === 'location' ? (
@@ -255,6 +277,12 @@ const ChatWindow = ({
                                                     </>
                                                 )}
                                             </div>
+                                        ) : msg.mediaUrl ? (
+                                            msg.mediaType === 'video' ? (
+                                                <video src={msg.mediaUrl} controls className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px' }} />
+                                            ) : (
+                                                <img src={msg.mediaUrl} alt="Attachment" className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                                            )
                                         ) : msg.gif ? (
                                             <img src={msg.gif} alt="GIF" className="chat-gif" />
                                         ) : (
@@ -318,6 +346,10 @@ const ChatWindow = ({
                     ) : (
                         <>
                             <div className="input-actions-left">
+                                <button className="input-tool-btn" onClick={() => fileInputRef.current?.click()} disabled={uploadingMedia}>
+                                    <Image size={22} color={uploadingMedia ? 'var(--color-primary)' : 'currentColor'} className={uploadingMedia ? 'pulse' : ''} />
+                                </button>
+                                <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,video/*" onChange={handleFileUpload} />
                                 <button className={`input-tool-btn ${showEmojiPicker ? 'active' : ''}`} onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }}><Smile size={22} /></button>
                                 <button className={`input-tool-btn ${showGifPicker ? 'active' : ''}`} onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }}><Gift size={22} /></button>
                                 {showLocation && <button className={`input-tool-btn ${isLocating ? 'pulse' : ''}`} onClick={handleLocationShare} title="Share Location" disabled={isLocating}><MapPin size={22} color={isLocating ? 'var(--color-primary)' : 'currentColor'} /></button>}

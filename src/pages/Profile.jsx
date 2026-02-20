@@ -281,7 +281,7 @@ const Profile = () => {
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''}`} onClick={() => setIsAvatarOpen(true)}>
+                        <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''} ${profileUser.unlockedPerks?.includes('holographic_ring') ? 'holographic-ring' : ''}`} onClick={() => setIsAvatarOpen(true)}>
                             {profileUser.avatar ? (
                                 <img
                                     src={getImageUrl(profileUser.avatar)}
@@ -322,6 +322,17 @@ const Profile = () => {
                             </p>
                         </div>
                         <p className="profile-bio-text">{profileUser.bio}</p>
+                        {profileUser.unlockedPerks?.includes('profile_audio') && (
+                            <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)' }}>
+                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Music size={12} color="white" />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Profile Theme</span>
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}>Now Playing 🎵</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Bottom Row: Actions */}
