@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
