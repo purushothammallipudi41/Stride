@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Search, Music, Play, TrendingUp, Share2, User, Heart, MessageCircle } from 'lucide-react';
+import { Search, Music, Play, TrendingUp, Share2, User, Heart, MessageCircle, Sparkles } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { audiusService } from '../services/audiusService';
 import { useMusic } from '../context/MusicContext';
 import ShareModal from '../components/common/ShareModal';
+import VibeMatchModal from '../components/explore/VibeMatchModal';
 import config from '../config';
 import { getImageUrl } from '../utils/imageUtils';
 import './Explore.css';
 
 const Explore = () => {
     const { playTrack, currentTrack, isPlaying } = useMusic();
+    const { unreadCount } = useNotifications();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -18,8 +20,8 @@ const Explore = () => {
     const [trending, setTrending] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingTrending, setLoadingTrending] = useState(true);
-    const { unreadCount } = useNotifications();
     const [shareData, setShareData] = useState(null);
+    const [vibeModalOpen, setVibeModalOpen] = useState(false);
 
     const handleShare = (track) => {
         setShareData({
@@ -86,6 +88,9 @@ const Explore = () => {
                     />
                 </div>
                 <div className="header-actions">
+                    <button className="vibe-match-btn" onClick={() => setVibeModalOpen(true)} title="AI Vibe Match">
+                        <Sparkles size={20} className="sparkle-icon" />
+                    </button>
                     <div className="notification-btn" onClick={() => navigate('/messages')}>
                         <MessageCircle size={20} className="header-icon" />
                     </div>
@@ -180,12 +185,16 @@ const Explore = () => {
 
             {shareData && (
                 <ShareModal
-                    isOpen={!!shareData}
+                    isOpen={true}
                     onClose={() => setShareData(null)}
-                    type="song"
                     data={shareData}
                 />
             )}
+
+            <VibeMatchModal
+                isOpen={vibeModalOpen}
+                onClose={() => setVibeModalOpen(false)}
+            />
         </div>
     );
 };

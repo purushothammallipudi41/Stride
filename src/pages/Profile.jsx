@@ -14,6 +14,9 @@ import UserListModal from '../components/profile/UserListModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ShareModal from '../components/common/ShareModal';
 import PostDetailModal from '../components/profile/PostDetailModal';
+import { useMusic } from '../context/MusicContext';
+import { useSocket } from '../context/SocketContext';
+import { Radio } from 'lucide-react';
 
 const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
@@ -182,6 +185,12 @@ const Profile = () => {
         }
     ];
 
+    const { liveVibes } = useSocket();
+    const { joinVibeSession, sessionHost } = useMusic();
+
+    const isLive = liveVibes?.has(profileUser.email);
+    const isSyncedWithThisUser = sessionHost === profileUser.email;
+
     return (
         <>
             <div className="profile-container">
@@ -264,7 +273,7 @@ const Profile = () => {
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <div className="profile-avatar-container" onClick={() => setIsAvatarOpen(true)}>
+                        <div className={`profile-avatar-container ${isLive ? 'live' : ''}`} onClick={() => setIsAvatarOpen(true)}>
                             {profileUser.avatar ? (
                                 <img
                                     src={getImageUrl(profileUser.avatar)}
@@ -280,17 +289,18 @@ const Profile = () => {
                                     {profileUser.username[0].toUpperCase()}
                                 </div>
                             )}
+                            {isLive && <div className="live-badge-small">Live</div>}
                         </div>
 
                         <div className="profile-stats">
-                            {stats.map(s => (
+                            {stats.map((stat, i) => (
                                 <div
-                                    key={s.label}
-                                    className={`stat-item ${s.clickable ? 'clickable' : ''}`}
-                                    onClick={() => s.clickable && setModalConfig({ title: s.label, ids: s.ids })}
+                                    key={i}
+                                    className={`stat-item ${stat.clickable ? 'clickable' : ''}`}
+                                    onClick={() => stat.clickable && setModalConfig({ title: stat.label, ids: stat.ids })}
                                 >
-                                    <span className="stat-value">{s.value}</span>
-                                    <span className="stat-label">{s.label}</span>
+                                    <span className="stat-value">{stat.value}</span>
+                                    <span className="stat-label">{stat.label}</span>
                                 </div>
                             ))}
                         </div>
@@ -298,18 +308,28 @@ const Profile = () => {
 
                     {/* Middle Row: Name + Bio */}
                     <div className="profile-bio-section">
-                        <p className="profile-name">{profileUser.name}</p>
+                        <p className="profile-name">{profileUser.name || profileUser.username}</p>
                         <p className="profile-bio-text">{profileUser.bio}</p>
                     </div>
 
                     {/* Bottom Row: Actions */}
                     <div className="profile-actions-row">
                         {isOwnProfile ? (
-                            <button className="edit-profile-btn fade-in-btn" onClick={() => setIsEditProfileOpen(true)}>
-                                Edit Profile
-                            </button>
+                            <>
+                                <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
+                                    Edit Profile
+                                </button>
+                                <button className="dashboard-link-btn" onClick={() => navigate('/dashboard')}>
+                                    Professional Dashboard
+                                </button>
+                            </>
                         ) : (
                             <>
+                                {isLive && !isSyncedWithThisUser && (
+                                    <button className="join-vibe-btn animate-in" onClick={() => joinVibeSession(profileUser.email)}>
+                                        <Radio size={18} /> Join Vibe
+                                    </button>
+                                )}
                                 <button
                                     className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
                                     onClick={handleFollow}

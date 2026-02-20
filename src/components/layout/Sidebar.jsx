@@ -40,6 +40,7 @@ const Sidebar = () => {
                             <NavLink
                                 key={item.path}
                                 to={item.path}
+                                end={item.path === '/'}
                                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                             >
                                 <div style={{ position: 'relative' }}>
@@ -67,6 +68,7 @@ const Sidebar = () => {
                             <NavLink
                                 key={item.path}
                                 to={item.path}
+                                end={item.path === '/'}
                                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                             >
                                 <div style={{ position: 'relative' }}>

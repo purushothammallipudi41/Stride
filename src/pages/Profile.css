@@ -138,6 +138,75 @@
     white-space: pre-wrap;
 }
 
+.profile-avatar-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-avatar-container.live::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff4b4b, #8257e5, #0095f6, #ff4b4b);
+    z-index: -1;
+    animation: rotate-gradient 2s linear infinite;
+    padding: 3px;
+}
+
+.live-badge-small {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(50%);
+    background: #ff4b4b;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(255, 75, 75, 0.4);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.join-vibe-btn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    height: 40px;
+    flex: 1.5;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(130, 87, 229, 0.3);
+    transition: all 0.3s ease;
+}
+
+.join-vibe-btn:hover {
+    transform: translateY(-2px);
+    background: var(--color-primary-glow);
+    box-shadow: 0 6px 20px rgba(130, 87, 229, 0.5);
+}
+
+@keyframes rotate-gradient {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .profile-actions-row {
     display: flex;
     gap: 8px;
@@ -147,7 +216,8 @@
 
 .edit-profile-btn,
 .follow-btn,
-.message-btn {
+.message-btn,
+.dashboard-link-btn {
     flex: 1;
     height: 40px;
     /* Extra robust height */
@@ -159,6 +229,11 @@
     justify-content: center;
     border: none;
     cursor: pointer;
+}
+
+.dashboard-link-btn {
+    background: #363636;
+    color: white;
 }
 
 .edit-profile-btn {

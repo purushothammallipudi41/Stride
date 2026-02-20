@@ -3,6 +3,7 @@ import { useContent } from '../context/ContentContext';
 import ReelItem from '../components/reels/ReelItem';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import CreateModal from '../components/create/CreateModal';
 import '../components/reels/Reels.css';
 
 const Reels = () => {
@@ -10,6 +11,18 @@ const Reels = () => {
     const { fetchPosts } = useContent();
     const [reelsData, setReelsData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [remixData, setRemixData] = useState(null);
+
+    const handleRemix = (reel) => {
+        setRemixData({
+            parentPostId: reel.id || reel._id,
+            originalUsername: reel.username,
+            music: {
+                title: reel.musicTrack?.split(' - ')[0] || reel.musicTrack,
+                artist: reel.musicTrack?.split(' - ')[1] || ''
+            }
+        });
+    };
 
     useEffect(() => {
         const loadReels = async () => {
@@ -44,8 +57,16 @@ const Reels = () => {
                 <ArrowLeft size={24} color="#fff" />
             </button>
             {reelsData.map(reel => (
-                <ReelItem key={reel.id || reel._id} reel={reel} />
+                <ReelItem key={reel.id || reel._id} reel={reel} onRemix={handleRemix} />
             ))}
+
+            <CreateModal
+                isOpen={!!remixData}
+                onClose={() => setRemixData(null)}
+                initialTab="reel"
+                lockTab={true}
+                remixData={remixData}
+            />
         </div>
     );
 };

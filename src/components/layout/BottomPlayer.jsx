@@ -1,14 +1,30 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, X } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, X, Radio, Users } from 'lucide-react';
 import { useMusic } from '../../context/MusicContext';
 import './BottomPlayer.css';
 
 const BottomPlayer = () => {
-    const { currentTrack, isPlaying, togglePlay, progress, volume, setVolume, seek, playNext, playPrevious, closePlayer } = useMusic();
+    const {
+        currentTrack, isPlaying, togglePlay, progress, volume,
+        setVolume, seek, playNext, playPrevious, closePlayer,
+        isHosting, sessionHost, startVibeSession, leaveVibeSession
+    } = useMusic();
 
     if (!currentTrack || !currentTrack.streamUrl) return null;
 
+    const toggleVibe = (e) => {
+        e.stopPropagation();
+        if (isHosting) {
+            leaveVibeSession();
+        } else {
+            startVibeSession();
+        }
+    };
+
     return (
         <div className="bottom-player">
+            {isHosting && <div className="vibe-badge">Live Vibe Session</div>}
+            {sessionHost && <div className="vibe-badge following">Synced with @{sessionHost.split('@')[0]}</div>}
+
             <div className="player-content">
                 <div className="track-info">
                     <img src={currentTrack.cover} alt={currentTrack.title} className="track-art" />
@@ -44,6 +60,20 @@ const BottomPlayer = () => {
                 </div>
 
                 <div className="player-actions">
+                    <button
+                        className={`vibe-btn ${isHosting ? 'active' : ''}`}
+                        onClick={toggleVibe}
+                        title={isHosting ? "Stop Vibe Session" : "Go Live (Listen Together)"}
+                    >
+                        <Radio size={20} />
+                    </button>
+
+                    {sessionHost && (
+                        <button className="vibe-btn active following" onClick={(e) => { e.stopPropagation(); leaveVibeSession(); }}>
+                            <Users size={20} />
+                        </button>
+                    )}
+
                     {/* PC Volume Control */}
                     <div className="volume-control mobile-hide">
                         <Volume2 size={20} />
@@ -57,12 +87,11 @@ const BottomPlayer = () => {
                         </div>
                     </div>
 
-                    {/* Mobile Play Button (Visible only on mobile mini-player via CSS) */}
+                    {/* Mobile Play Button */}
                     <button className="play-btn mobile-only-play" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>
                         {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                     </button>
 
-                    {/* Mobile Close Button */}
                     <button className="close-player-btn" onClick={(e) => { e.stopPropagation(); closePlayer(); }}>
                         <X size={20} />
                     </button>

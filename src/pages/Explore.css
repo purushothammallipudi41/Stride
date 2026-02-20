@@ -38,6 +38,30 @@
     color: var(--color-text-primary);
 }
 
+.vibe-match-btn {
+    background: var(--color-primary);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
+}
+
+.vibe-match-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+    background: var(--color-primary-glow);
+    box-shadow: 0 6px 20px rgba(130, 87, 229, 0.5);
+}
+
+.vibe-match-btn .sparkle-icon {
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
 .notification-badge {
     position: absolute;
     top: -2px;

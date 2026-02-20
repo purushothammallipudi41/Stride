@@ -11,7 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import CommentsModal from '../common/CommentsModal';
 import ConfirmModal from '../common/ConfirmModal';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, Play } from 'lucide-react';
+import { formatTime } from '../../utils/timeUtils';
 
 const Post = memo(({ post }) => {
     if (!post) return null;
@@ -100,7 +101,7 @@ const Post = memo(({ post }) => {
                             {post.isOfficial && <BadgeCheck size={14} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
                         </h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <p>{post.timestamp}</p>
+                            <p>{formatTime(post.timestamp)}</p>
                             {post.isSensitive && (
                                 <span className="sensitive-badge">
                                     <ShieldAlert size={12} />
@@ -161,9 +162,13 @@ const Post = memo(({ post }) => {
                             className="post-image"
                             muted
                             loop
-                            controls
                             playsInline
+                            autoPlay
+                            onMouseEnter={(e) => e.target.play()}
                         />
+                        <div className="video-indicator">
+                            <Play size={20} fill="white" />
+                        </div>
                     </div>
                 ) : (post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
                     <div className="post-image-container">

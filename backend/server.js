@@ -249,18 +249,18 @@ async function seedDatabase() {
                 name: "Stride Official",
                 email: "thestrideapp@gmail.com",
                 password: "password123",
-                avatar: "https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official",
+                avatar: "/logo.png", // Fixed: Use local logo asset
                 bio: "The official beat of Stride. 🎵 #KeepStriding",
                 stats: { posts: 999, followers: 12500, following: 0 },
                 isVerified: true,
-                serverProfiles: [{ serverId: 0, nickname: "Stride Official", avatar: "https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official" }]
+                serverProfiles: [{ serverId: 0, nickname: "Stride Official", avatar: "/logo.png" }]
             },
             {
                 username: "purushotham_mallipudi",
                 name: "Purushotham Mallipudi",
                 email: "purushothammallipudi41@gmail.com",
                 password: "password123",
-                avatar: "", // Removed DiceBear
+                avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=purushotham", // Restored DiceBear
                 bio: "Building the future of social music. 🚀",
                 stats: { posts: 12, followers: 12500, following: 450 },
                 isVerified: true,
@@ -386,7 +386,7 @@ async function seedDatabase() {
             const sampleReels = [
                 {
                     username: "stride",
-                    userAvatar: "https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official",
+                    userAvatar: "/logo.png",
                     type: "reel",
                     contentUrl: "https://assets.mixkit.co/videos/1170/1170-720.mp4",
                     caption: "Morning vibes 🌅 #Nature #Sunrise",
@@ -408,7 +408,7 @@ async function seedDatabase() {
                 },
                 {
                     username: "stride",
-                    userAvatar: "https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official",
+                    userAvatar: "/logo.png",
                     type: "reel",
                     contentUrl: "https://assets.mixkit.co/videos/1186/1186-720.mp4",
                     caption: "Spring bloomin' 🌸 #Flowers #Beauty",
@@ -462,7 +462,18 @@ app.get('/api/posts', async (req, res) => {
             .limit(parseInt(limit))
             .lean();
 
-        res.json(posts);
+        // 4. Dynamic Avatar Enrichment
+        // Fetch current avatars for all users in this batch to ensure UI is always up to date
+        const usernames = [...new Set(posts.map(p => p.username))];
+        const users = await User.find({ username: { $in: usernames } }, 'username avatar').lean();
+        const avatarMap = users.reduce((acc, u) => ({ ...acc, [u.username]: u.avatar }), {});
+
+        const enrichedPosts = posts.map(post => ({
+            ...post,
+            userAvatar: avatarMap[post.username] || post.userAvatar
+        }));
+
+        res.json(enrichedPosts);
     } catch (e) {
         console.error('API Error:', e);
         res.status(500).json({
@@ -587,8 +598,31 @@ app.post('/api/posts/:id/comment', async (req, res) => {
 // Stories
 app.get('/api/stories', async (req, res) => {
     try {
-        const stories = await Story.find().sort({ timestamp: -1 });
-        res.json(stories);
+        const stories = await Story.find().sort({ timestamp: -1 }).lean();
+
+        // Dynamic Avatar Enrichment
+        const userIds = [...new Set(stories.map(s => s.userId))];
+        const users = await User.find({
+            $or: [
+                { email: { $in: userIds } },
+                { username: { $in: userIds } },
+                { _id: { $in: userIds.filter(id => mongoose.Types.ObjectId.isValid(id)) } }
+            ]
+        }, 'email username avatar').lean();
+
+        const avatarMap = users.reduce((acc, u) => {
+            acc[u.email] = u.avatar;
+            acc[u.username] = u.avatar;
+            acc[u._id.toString()] = u.avatar;
+            return acc;
+        }, {});
+
+        const enrichedStories = stories.map(story => ({
+            ...story,
+            userAvatar: avatarMap[story.userId] || avatarMap[story.username] || story.userAvatar
+        }));
+
+        res.json(enrichedStories);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -867,7 +901,7 @@ app.post('/api/register', async (req, res) => {
                 channelId: 'welcome',
                 userEmail: targets.find(t => t.username === 'stride')?.email || newUser.email,
                 username: 'Stride Bot',
-                avatar: 'https://res.cloudinary.com/dp6524/image/upload/v1/stride_logo_official',
+                avatar: '/logo.png',
                 text: `Welcome @${username} to the Stride community! 🎉 We're glad to have you here.`,
                 timestamp: new Date()
             });
@@ -2088,6 +2122,55 @@ io.on("connection", (socket) => {
         }
     });
 
+    // --- Listen Together (Vibe Sessions) ---
+    const vibeSessions = new Map(); // hostEmail -> { track, isPlaying }
+
+    socket.on("join-vibe-session", ({ hostEmail }) => {
+        const roomName = `vibe_session_${hostEmail}`;
+        socket.join(roomName);
+        console.log(`[SOCKET] User ${socket.userId} joined vibe session of ${hostEmail}`);
+
+        // Send current session state to the newcomer
+        if (vibeSessions.has(hostEmail)) {
+            socket.emit("vibe-playback-update", {
+                ...vibeSessions.get(hostEmail),
+                hostEmail
+            });
+        }
+    });
+
+    socket.on("vibe-playback-sync", ({ hostEmail, track, isPlaying, progress, timestamp }) => {
+        const roomName = `vibe_session_${hostEmail}`;
+
+        // Update session cache
+        vibeSessions.set(hostEmail, { track, isPlaying, progress, timestamp });
+
+        // Broadcast to all listeners in the session except the host
+        socket.to(roomName).emit("vibe-playback-update", {
+            track,
+            isPlaying,
+            progress,
+            timestamp,
+            hostEmail
+        });
+
+        // Broadcast "Live" status change to everyone for discovery if this is a new session
+        if (progress === 0 && isPlaying) {
+            io.emit("vibe-status-change", { hostEmail, isLive: true });
+        }
+    });
+
+    socket.on("leave-vibe-session", ({ hostEmail }) => {
+        const roomName = `vibe_session_${hostEmail}`;
+        socket.leave(roomName);
+        console.log(`[SOCKET] User ${socket.userId} left vibe session of ${hostEmail}`);
+    });
+
+    socket.on("stop-vibe-session", ({ hostEmail }) => {
+        vibeSessions.delete(hostEmail);
+        io.emit("vibe-status-change", { hostEmail, isLive: false });
+    });
+
     socket.on("disconnect", () => {
         console.log(`[SOCKET] Disconnected: ${socket.id}`);
 
@@ -2182,6 +2265,70 @@ async function syncOfficialRelationships() {
         console.error('[INIT] Error syncing official relationships:', e);
     }
 }
+
+app.get('/api/active-vibe-sessions', (req, res) => {
+    try {
+        const sessionHosts = Array.from(vibeSessions.keys());
+        res.json(sessionHosts);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Analytics Endpoints
+app.post('/api/posts/:postId/view', async (req, res) => {
+    try {
+        await Post.findByIdAndUpdate(req.params.postId, { $inc: { views: 1 } });
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/users/:email/analytics', async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.params.email });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const posts = await Post.find({ userId: user.id || user._id });
+
+        // Aggregate data
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+        const postPerformance = posts.map(p => {
+            totalViews += (p.views || 0);
+            totalLikes += p.likes.length;
+            totalComments += p.comments.length;
+            return {
+                title: p.caption?.substring(0, 15) || 'Post',
+                views: p.views || 0,
+                likes: p.likes.length,
+                comments: p.comments.length
+            };
+        });
+
+        // Mock time-series data for chart (in real app, we'd track daily snapshots)
+        const reachData = [
+            { name: 'Mon', reach: totalViews * 0.1 },
+            { name: 'Tue', reach: totalViews * 0.15 },
+            { name: 'Wed', reach: totalViews * 0.2 },
+            { name: 'Thu', reach: totalViews * 0.4 },
+            { name: 'Fri', reach: totalViews * 0.6 },
+            { name: 'Sat', reach: totalViews * 0.8 },
+            { name: 'Sun', reach: totalViews }
+        ];
+
+        res.json({
+            summary: {
+                totalViews,
+                totalLikes,
+                totalComments,
+                avgEngagement: totalViews > 0 ? (((totalLikes + totalComments) / totalViews) * 100).toFixed(2) : 0
+            },
+            reachData,
+            postPerformance: postPerformance.sort((a, b) => b.views - a.views).slice(0, 5)
+        });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // Start server on single port correctly
 httpServer.listen(port, () => {

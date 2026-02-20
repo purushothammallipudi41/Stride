@@ -10,7 +10,7 @@ import MediaCapture from '../common/MediaCapture';
 import StoryEditor from './StoryEditor';
 import ImageCropper from './ImageCropper';
 
-const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) => {
+const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, remixData = null }) => {
     const { addPost, fetchStories, addStory } = useContent();
     const { user } = useAuth();
     const { playTrack } = useMusic();
@@ -18,8 +18,18 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) 
 
     // Sync activeTab when initialTab changes (e.g. when opening from different triggers)
     useEffect(() => {
-        if (isOpen) setActiveTab(initialTab);
-    }, [isOpen, initialTab]);
+        if (isOpen) {
+            setActiveTab(initialTab);
+            if (remixData) {
+                setSelections(prev => ({
+                    ...prev,
+                    music: remixData.music,
+                    parentPostId: remixData.parentPostId
+                }));
+                setCaption(`Remix with @${remixData.originalUsername} #VibeBattle`);
+            }
+        }
+    }, [isOpen, initialTab, remixData]);
     const [caption, setCaption] = useState('');
     const [capturedMedia, setCapturedMedia] = useState(null);
     const [activeSearch, setActiveSearch] = useState(null); // 'location', 'people', 'music'
@@ -29,7 +39,8 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) 
     const [selections, setSelections] = useState({
         location: null,
         music: null,
-        people: []
+        people: [],
+        parentPostId: null
     });
     const [isSensitive, setIsSensitive] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -102,9 +113,10 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) 
 
     const handleShare = async (editedMediaUrl = null) => {
         let mediaUrl = editedMediaUrl || capturedMedia?.url || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
+        const isBlob = mediaUrl.startsWith('blob:');
 
-        // Convert blob URL to base64 if needed (and not already edited/converted)
-        if (mediaUrl.startsWith('blob:') && !editedMediaUrl) {
+        // Always convert blob URL to base64 to ensure persistence on backend
+        if (isBlob) {
             try {
                 const response = await fetch(mediaUrl);
                 const blob = await response.blob();
@@ -116,7 +128,7 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) 
                 });
             } catch (e) {
                 console.error("Failed to convert blob to base64", e);
-                alert("Failed to process image. Please try again.");
+                alert("Failed to process media. Please try again.");
                 return;
             }
         }
@@ -126,23 +138,31 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false }) 
             return;
         }
 
+        const posterUrl = capturedMedia?.posterUrl || null; // Assuming posterUrl might be available for videos
+
+        const postData = {
+            username: user.username,
+            userId: user.id || user._id || user.email, // Use user.id or _id if available, fallback to email
+            userAvatar: user.avatar,
+            type: activeTab,
+            contentUrl: mediaUrl,
+            posterUrl: posterUrl,
+            caption,
+            musicTrack: selections.music ? `${selections.music.title} - ${selections.music.artist}` : '',
+            location: selections.location,
+            taggedUsers: selections.people.map(u => u.username),
+            isSensitive,
+            isRemix: !!selections.parentPostId,
+            parentPostId: selections.parentPostId
+        };
+
         const success = await (activeTab === 'story' ? addStory({
             userId: user.email,
             username: user.username,
             userAvatar: user.avatar,
             content: mediaUrl,
             type: capturedMedia?.type === 'video' ? 'video' : 'image'
-        }) : addPost({
-            userId: user.email,
-            username: user.username,
-            userAvatar: user.avatar,
-            contentUrl: mediaUrl,
-            caption,
-            location: selections.location,
-            musicTrack: selections.music?.title,
-            type: activeTab,
-            isSensitive
-        }));
+        }) : addPost(postData));
 
         if (success) {
             if (activeTab === 'story') fetchStories();

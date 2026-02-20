@@ -46,6 +46,7 @@ const AdsManager = lazy(() => import('./pages/AdsManager'));
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
 const ServerNavigation = lazy(() => import('./pages/ServerNavigation'));
+const CreatorDashboard = lazy(() => import('./pages/CreatorDashboard'));
 
 const LoadingFallback = () => (
   <div className="flex-center" style={{ height: '100%', width: '100%' }}>
@@ -160,6 +161,7 @@ function App() {
                                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                                   <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
                                   <Route path="/ads" element={<ProtectedRoute><AdsManager /></ProtectedRoute>} />
+                                  <Route path="/dashboard" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
 
                                   <Route path="/legal/terms" element={<TermsOfService />} />
                                   <Route path="/legal/privacy" element={<PrivacyPolicy />} />

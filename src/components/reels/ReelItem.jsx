@@ -7,7 +7,7 @@ import CommentsModal from '../common/CommentsModal';
 import ShareModal from '../common/ShareModal';
 import config from '../../config';
 import { getImageUrl } from '../../utils/imageUtils';
-import { Trash2, Flag, UserMinus, ShieldAlert } from 'lucide-react';
+import { Trash2, Flag, UserMinus, ShieldAlert, Sparkles } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useContent } from '../../context/ContentContext';
 
@@ -33,7 +33,7 @@ const OptionsModal = ({ isOpen, onClose, onAction }) => {
     );
 };
 
-const ReelItem = ({ reel }) => {
+const ReelItem = ({ reel, onRemix }) => {
     const { user, refreshUser, pauseTrack } = useAuth();
     const { toggleLike, addComment } = useContent();
     const [isLiked, setIsLiked] = useState(reel.likes?.includes(user?.email) || false);
@@ -269,6 +269,10 @@ const ReelItem = ({ reel }) => {
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsShareModalOpen(true))}>
                     <Share2 size={36} strokeWidth={2.5} />
+                </button>
+                <button className="reel-action-btn remix-btn" onClick={(e) => handleAction(e, () => onRemix && onRemix(reel))} title="Remix This Vibe">
+                    <Sparkles size={36} strokeWidth={2.5} color="var(--color-primary)" />
+                    <span className="premium-label">REMIX</span>
                 </button>
                 <button className="reel-action-btn" onClick={(e) => handleAction(e, () => setIsOptionsOpen(true))}>
                     <MoreHorizontal size={36} strokeWidth={2.5} />

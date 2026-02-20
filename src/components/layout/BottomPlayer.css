@@ -185,6 +185,81 @@
     border-radius: 50%;
 }
 
+.vibe-btn {
+    background: none;
+    border: none;
+    color: var(--player-text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vibe-btn:hover {
+    color: var(--color-primary);
+    background: rgba(130, 87, 229, 0.1);
+}
+
+.vibe-btn.active {
+    color: #ff4b4b;
+    background: rgba(255, 75, 75, 0.1);
+    animation: pulse-red 2s infinite;
+}
+
+.vibe-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4b4b;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: slide-down 0.3s ease-out;
+    box-shadow: 0 2px 8px rgba(255, 75, 75, 0.4);
+}
+
+.vibe-badge.following {
+    background: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(130, 87, 229, 0.4);
+}
+
+@keyframes pulse-red {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.4);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 75, 75, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0);
+    }
+}
+
+@keyframes slide-down {
+    from {
+        transform: translate(-50%, -20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -10px);
+        opacity: 1;
+    }
+}
+
 @media (max-width: 768px) {
     .bottom-player {
         position: fixed !important;

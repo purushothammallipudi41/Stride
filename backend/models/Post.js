@@ -12,6 +12,9 @@ const postSchema = new mongoose.Schema({
     isSensitive: { type: Boolean, default: false },
     moderationStatus: { type: String, enum: ['none', 'flagged', 'reviewed'], default: 'none' },
     likes: [String],
+    views: { type: Number, default: 0 },
+    isRemix: { type: Boolean, default: false },
+    parentPostId: { type: String, index: true },
     comments: [{
         id: String,
         text: String,
