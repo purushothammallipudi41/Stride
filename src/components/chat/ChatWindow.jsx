@@ -271,7 +271,7 @@ const ChatWindow = ({
                                                     <>
                                                         <img src={msg.sharedContent.thumbnail} alt="" className="shared-thumb" />
                                                         <div className="shared-info">
-                                                            <span className="shared-type">{msg.sharedContent.type.toUpperCase()}</span>
+                                                            <span className="shared-type">{msg.sharedContent.type?.toUpperCase() || 'SHARED'}</span>
                                                             <span className="shared-title">{msg.sharedContent.title}</span>
                                                         </div>
                                                     </>
