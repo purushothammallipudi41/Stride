@@ -23,8 +23,12 @@ const MediaGallery = ({ serverId, onClose }) => {
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data)) {
-                    // Filter out any without valid content
-                    setMediaItems(data.filter(item => item.text && (item.text.startsWith('http') || item.text.startsWith('data:'))));
+                    // Filter for messages that have media content (image/video/gif)
+                    const validatedMedia = data.filter(item =>
+                        item.text &&
+                        (item.type === 'image' || item.type === 'video' || item.type === 'gif')
+                    );
+                    setMediaItems(validatedMedia);
                 }
             }
         } catch (error) {
@@ -72,7 +76,9 @@ const MediaGallery = ({ serverId, onClose }) => {
             <div className="gallery-header glass-header">
                 <div className="header-left">
                     <h3><ImageIcon size={20} style={{ marginRight: '8px', color: 'var(--color-primary)' }} /> Server Media</h3>
-                    <span className="media-count">{mediaItems.length} items shared</span>
+                    <span className="media-count">
+                        {loading ? 'Loading content...' : `${mediaItems.length} items shared`}
+                    </span>
                 </div>
                 <button onClick={onClose} className="icon-btn close-gallery-btn">
                     <X size={24} />

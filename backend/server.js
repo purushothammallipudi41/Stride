@@ -8,7 +8,8 @@ const http = require('http');
 const { Server } = require("socket.io");
 require('dotenv').config();
 const mongoose = require('mongoose');
-// const nodemailer = require('nodemailer'); // Removed in favor of Resend
+const { Resend } = require('resend');
+const nodemailer = require('nodemailer'); // Re-enabled for fallback
 
 // Mongoose & Database
 const connectDB = require('./db');
