@@ -6,6 +6,7 @@ import { audiusService } from '../services/audiusService';
 import { useMusic } from '../context/MusicContext';
 import ShareModal from '../components/common/ShareModal';
 import VibeMatchModal from '../components/explore/VibeMatchModal';
+import SmartDJ from '../components/explore/SmartDJ';
 import config from '../config';
 import { getImageUrl } from '../utils/imageUtils';
 import './Explore.css';

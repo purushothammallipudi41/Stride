@@ -28,9 +28,11 @@ const userSchema = new mongoose.Schema({
     isOfficial: { type: Boolean, default: false }, // Blue Tick status
     verificationRequest: {
         status: { type: String, enum: ['pending', 'approved', 'rejected'], default: null },
-        documentUrl: String, // URL to the uploaded ID proof
+        documentUrl: String,
         timestamp: { type: Date, index: true }
-    }
+    },
+    vibeTokens: { type: Number, default: 0 },
+    unlockedPerks: [{ type: String }]
 }, { timestamps: true });
 
 userSchema.index({ "serverProfiles.serverId": 1 });

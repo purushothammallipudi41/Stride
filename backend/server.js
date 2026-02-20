@@ -769,6 +769,45 @@ app.delete('/api/stories/:id', async (req, res) => {
 });
 
 // Users
+app.post('/api/users/:targetId/claim-daily-vibe', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.targetId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Simple mock logic for claiming 50 tokens
+        user.vibeTokens = (user.vibeTokens || 0) + 50;
+        await user.save();
+
+        res.json({ message: 'Tokens claimed successfully', amount: 50, newBalance: user.vibeTokens });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/users/:targetId/purchase-perk', async (req, res) => {
+    try {
+        const { perkId, cost } = req.body;
+        const user = await User.findById(req.params.targetId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        if (user.unlockedPerks.includes(perkId)) {
+            return res.status(400).json({ error: 'Perk already unlocked' });
+        }
+
+        if ((user.vibeTokens || 0) < cost) {
+            return res.status(400).json({ error: 'Not enough Vibe Tokens' });
+        }
+
+        user.vibeTokens -= cost;
+        user.unlockedPerks.push(perkId);
+        await user.save();
+
+        res.json({ message: 'Perk unlocked successfully', newBalance: user.vibeTokens });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find({}, 'username name email avatar');
@@ -1445,11 +1484,12 @@ app.get('/api/servers/:serverId', async (req, res) => {
 app.post('/api/servers/:serverId/channels', async (req, res) => {
     try {
         const { serverId } = req.params;
-        const { name } = req.body;
+        const { name, type = 'text' } = req.body;
         const server = await ServerModel.findOne({ id: parseInt(serverId) });
         if (server) {
-            if (!server.channels.includes(name)) {
-                server.channels.push(name);
+            const channelExists = server.channels.some(c => (typeof c === 'string' ? c : c.name) === name);
+            if (!channelExists) {
+                server.channels.push({ name, type });
                 await server.save();
             }
             res.json(server);
@@ -2158,6 +2198,12 @@ io.on("connection", (socket) => {
         if (progress === 0 && isPlaying) {
             io.emit("vibe-status-change", { hostEmail, isLive: true });
         }
+    });
+
+    socket.on("send-vibe-reaction", ({ hostEmail, reaction, username }) => {
+        const roomName = `vibe_session_${hostEmail}`;
+        // Broadcast to everyone in the room (including host)
+        io.to(roomName).emit("new-vibe-reaction", { reaction, username, timestamp: Date.now() });
     });
 
     socket.on("leave-vibe-session", ({ hostEmail }) => {

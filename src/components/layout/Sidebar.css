@@ -18,8 +18,8 @@
 }
 
 .logo-icon {
-    color: var(--color-primary);
-    filter: drop-shadow(0 0 10px var(--color-primary-glow));
+    color: var(--vibe-accent, var(--color-primary));
+    filter: drop-shadow(0 0 10px var(--vibe-glow, var(--color-primary-glow)));
 }
 
 .logo-text {
@@ -59,9 +59,9 @@
 }
 
 .nav-item.active {
-    background: var(--color-primary-glow);
+    background: var(--vibe-glow, var(--color-primary-glow));
     color: var(--color-text-primary);
-    border-color: rgba(130, 87, 229, 0.2);
+    border-color: var(--vibe-glow, rgba(130, 87, 229, 0.2));
 }
 
 .nav-item.active::before {
@@ -72,9 +72,9 @@
     transform: translateY(-50%);
     width: 4px;
     height: 60%;
-    background: var(--color-primary);
+    background: var(--vibe-accent, var(--color-primary));
     border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 15px var(--color-primary);
+    box-shadow: 0 0 15px var(--vibe-accent, var(--color-primary));
 }
 
 .nav-item svg {
@@ -84,7 +84,7 @@
 
 .nav-item:hover svg {
     transform: scale(1.1) rotate(-5deg);
-    color: var(--color-primary);
+    color: var(--vibe-accent, var(--color-primary));
 }
 
 @media (max-width: 640px) {

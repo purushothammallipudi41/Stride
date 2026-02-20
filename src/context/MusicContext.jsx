@@ -17,6 +17,48 @@ export const MusicProvider = ({ children }) => {
     const [isHosting, setIsHosting] = useState(false);
     const audioRef = useRef(null);
 
+    // Mood-Synced UI: Update theme colors based on current track
+    useEffect(() => {
+        if (!currentTrack) {
+            // Reset to default Stride purple
+            document.documentElement.style.setProperty('--vibe-accent', '#8257e5');
+            document.documentElement.style.setProperty('--vibe-glow', 'rgba(130, 87, 229, 0.3)');
+            document.documentElement.style.setProperty('--vibe-bg', '#030303');
+            return;
+        }
+
+        const extractColors = async () => {
+            try {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = currentTrack.cover;
+
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 1;
+                    canvas.height = 1;
+
+                    ctx.drawImage(img, 0, 0, 1, 1);
+                    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+
+                    // Boost saturation/brightness for accent color
+                    const accent = `rgb(${r}, ${g}, ${b})`;
+                    const glow = `rgba(${r}, ${g}, ${b}, 0.3)`;
+                    const darkBg = `rgba(${Math.max(0, r - 150)}, ${Math.max(0, g - 150)}, ${Math.max(0, b - 150)}, 1)`;
+
+                    document.documentElement.style.setProperty('--vibe-accent', accent);
+                    document.documentElement.style.setProperty('--vibe-glow', glow);
+                    document.documentElement.style.setProperty('--vibe-bg', darkBg);
+                };
+            } catch (e) {
+                console.warn("Color extraction failed:", e);
+            }
+        };
+
+        extractColors();
+    }, [currentTrack]);
+
     // Sync handle: emit state if hosting
     useEffect(() => {
         if (isHosting && socket && user) {

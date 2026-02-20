@@ -64,6 +64,21 @@
     transform: scale(1.1);
 }
 
+.gold-username {
+    background: linear-gradient(90deg, #ffd700, #ffaa00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
+}
+
+.custom-status-badge {
+    animation: float 3s ease-in-out infinite;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+
 /* Profile Header Content */
 .profile-header-content {
     padding: 16px 16px 24px;
@@ -87,6 +102,11 @@
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
+}
+
+.profile-avatar-container.neon-frame .profile-avatar-large {
+    border: 3px solid #00ffcc;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.6), inset 0 0 10px rgba(0, 255, 204, 0.3);
 }
 
 .profile-stats {

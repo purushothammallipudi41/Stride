@@ -14,6 +14,7 @@ import ChatWindow from '../components/chat/ChatWindow';
 import { ServerMenu, MembersList, SearchModal } from '../components/server/ServerInteractions';
 import { CreateChannelModal, ServerSettingsModal, InviteModal, ServerProfileModal, ChannelSettingsModal, ConfirmationModal } from '../components/server/ServerModals';
 import VoiceChannel from '../components/server/VoiceChannel';
+import LiveStage from '../components/server/LiveStage';
 import { useNotifications } from '../context/NotificationContext';
 import './ServerView.css';
 
@@ -81,7 +82,7 @@ const ServerView = () => {
             // Prioritize #welcome or #rules for official server
             const officialDefaults = ['welcome', 'rules', 'faq'];
             const defaultChannel = server.id === 0
-                ? server.channels.find(c => officialDefaults.includes(c.toLowerCase())) || server.channels[0]
+                ? server.channels.find(c => officialDefaults.includes((typeof c === 'string' ? c : c.name).toLowerCase())) || server.channels[0]
                 : server.channels[0];
 
             setActiveChannel(defaultChannel);
@@ -162,9 +163,16 @@ const ServerView = () => {
         setCollapsedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
     };
 
-    const getChannelIcon = (name) => {
+    const getChannelIcon = (channel) => {
+        const name = typeof channel === 'string' ? channel : channel?.name;
+        const type = typeof channel === 'string' ? 'text' : channel?.type;
+
         if (!name) return <Hash size={18} />;
         if (readOnlyChannels[name]) return <Lock size={16} style={{ color: 'var(--text-secondary)', opacity: 0.8 }} />;
+
+        if (type === 'stage') return <Radio size={18} className="pulse-red" />;
+        if (type === 'voice') return <Volume2 size={18} />;
+
         const n = name.toLowerCase();
         if (n.includes('video') || n.includes('art') || n.includes('sound')) return <Volume2 size={18} />;
         if (n.includes('giveaway')) return <Gift size={18} />;
@@ -398,30 +406,34 @@ const ServerView = () => {
                                             )}
                                         </div>
                                     </div>
-                                    {!collapsedCategories[cat.name] && cat.channels.map(channel => (
-                                        <div
-                                            key={channel}
-                                            className={`channel-pill ${activeChannel === channel ? 'active' : ''}`}
-                                            onClick={() => { setActiveChannel(channel); setShowMediaGallery(false); }}
-                                        >
-                                            <div className="channel-icon-wrapper">
-                                                {getChannelIcon(channel)}
+                                    {!collapsedCategories[cat.name] && cat.channels.map(channel => {
+                                        const chName = typeof channel === 'string' ? channel : channel.name;
+                                        const activeName = typeof activeChannel === 'string' ? activeChannel : activeChannel?.name;
+                                        return (
+                                            <div
+                                                key={chName}
+                                                className={`channel-pill ${activeName === chName ? 'active' : ''}`}
+                                                onClick={() => { setActiveChannel(channel); setShowMediaGallery(false); }}
+                                            >
+                                                <div className="channel-icon-wrapper">
+                                                    {getChannelIcon(channel)}
+                                                </div>
+                                                <span className="channel-name-text">{chName}</span>
+                                                {hasPermission('manageChannels') && (
+                                                    <Settings
+                                                        size={14}
+                                                        className="channel-gear-icon"
+                                                        style={{ marginLeft: 'auto' }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingChannel(channel);
+                                                            setShowChannelSettings(true);
+                                                        }}
+                                                    />
+                                                )}
                                             </div>
-                                            <span className="channel-name-text">{channel}</span>
-                                            {hasPermission('manageChannels') && (
-                                                <Settings
-                                                    size={14}
-                                                    className="channel-gear-icon"
-                                                    style={{ marginLeft: 'auto' }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingChannel(channel);
-                                                        setShowChannelSettings(true);
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ))}
                     </div>
@@ -449,10 +461,16 @@ const ServerView = () => {
                             serverId={server.id}
                             onClose={() => { setShowMediaGallery(false); setActiveChannel(null); }}
                         />
-                    ) : activeChannel && (activeChannel.toLowerCase().includes('voice') || activeChannel.toLowerCase().includes('lounge') || activeChannel.toLowerCase().includes('music')) ? (
+                    ) : activeChannel && ((typeof activeChannel === 'object' && activeChannel.type === 'stage') || (typeof activeChannel === 'string' && activeChannel.toLowerCase().includes('stage'))) ? (
+                        <LiveStage
+                            channelId={`${server.id}-${typeof activeChannel === 'string' ? activeChannel : activeChannel.name}`}
+                            channelName={typeof activeChannel === 'string' ? activeChannel : activeChannel.name}
+                            onClose={() => setActiveChannel(null)}
+                        />
+                    ) : activeChannel && ((typeof activeChannel === 'object' && activeChannel.type === 'voice') || (typeof activeChannel === 'string' && (activeChannel.toLowerCase().includes('voice') || activeChannel.toLowerCase().includes('lounge') || activeChannel.toLowerCase().includes('music')))) ? (
                         <VoiceChannel
-                            channelId={`${server.id}-${activeChannel}`}
-                            channelName={activeChannel}
+                            channelId={`${server.id}-${typeof activeChannel === 'string' ? activeChannel : activeChannel.name}`}
+                            channelName={typeof activeChannel === 'string' ? activeChannel : activeChannel.name}
                             onClose={() => setActiveChannel(null)}
                         />
                     ) : (

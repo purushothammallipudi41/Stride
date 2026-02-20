@@ -4,10 +4,16 @@ const serverSchema = new mongoose.Schema({
     id: { type: Number, unique: true }, // Keeping custom ID for now to avoid breaking frontend that expects ints
     name: String,
     icon: String,
-    channels: [String],
+    channels: [{
+        name: String,
+        type: { type: String, enum: ['text', 'voice', 'stage'], default: 'text' }
+    }],
     categories: [{
         name: String,
-        channels: [String]
+        channels: [{
+            name: String,
+            type: { type: String, enum: ['text', 'voice', 'stage'], default: 'text' }
+        }]
     }],
     members: [{
         userId: String, // email or username

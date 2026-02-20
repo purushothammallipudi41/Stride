@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -14,6 +14,7 @@ import UserListModal from '../components/profile/UserListModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ShareModal from '../components/common/ShareModal';
 import PostDetailModal from '../components/profile/PostDetailModal';
+import RewardsPanel from '../components/profile/RewardsPanel';
 import { useMusic } from '../context/MusicContext';
 import { useSocket } from '../context/SocketContext';
 import { Radio } from 'lucide-react';
@@ -206,10 +207,17 @@ const Profile = () => {
                                     <ArrowLeft size={20} />
                                 </button>
                             )}
-                            <h2 className="nav-username">
+                            <h2 className={`nav-username ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`}>
                                 {profileUser.username}
                                 {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                                {profileUser.unlockedPerks?.includes('custom_status') && <span className="custom-status-badge" title="VIP Status">💎</span>}
                             </h2>
+                            {!isOwnProfile && (
+                                <div className="vibe-match-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', marginLeft: '8px' }}>
+                                    <Heart size={12} fill="#ffab00" />
+                                    {Math.floor(Math.random() * 20) + 80}% Vibe Match
+                                </div>
+                            )}
                         </div>
                         <div className="controls-right">
                             {isOwnProfile ? (
@@ -273,7 +281,7 @@ const Profile = () => {
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <div className={`profile-avatar-container ${isLive ? 'live' : ''}`} onClick={() => setIsAvatarOpen(true)}>
+                        <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''}`} onClick={() => setIsAvatarOpen(true)}>
                             {profileUser.avatar ? (
                                 <img
                                     src={getImageUrl(profileUser.avatar)}
@@ -344,7 +352,7 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Tabs, same as before */}
+                {/* Tabs */}
                 <div className="profile-tabs">
                     <button className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>
                         <Grid size={22} />
@@ -355,56 +363,67 @@ const Profile = () => {
                     <button className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
                         <Bookmark size={22} />
                     </button>
+                    {isOwnProfile && (
+                        <button className={`tab-btn ${activeTab === 'rewards' ? 'active' : ''}`} onClick={() => setActiveTab('rewards')}>
+                            <Gift size={22} className={activeTab === 'rewards' ? 'pulse' : ''} style={{ color: activeTab === 'rewards' ? 'var(--vibe-accent)' : 'inherit' }} />
+                        </button>
+                    )}
                 </div>
 
-                <div className="profile-grid">
-                    {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
-                        (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
-                            <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
-                                {post.type === 'video' || post.type === 'reel' ? (
-                                    <video
-                                        src={getImageUrl(post.contentUrl)}
-                                        poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
-                                        className="grid-img"
-                                        muted
-                                        loop
-                                        playsInline
-                                        onMouseOver={e => e.target.play()}
-                                        onMouseOut={e => e.target.pause()}
-                                    />
-                                ) : (post.type === 'image' || post.type === 'post' || post.contentUrl) ? (
-                                    <img
-                                        src={getImageUrl(post.contentUrl)}
-                                        alt={post.caption}
-                                        className="grid-img"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = getImageUrl(null, 'media');
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="placeholder-content">Post {post.id}</div>
-                                )}
-                            </div>
-                        ))
+                <div className="profile-content-area" style={{ width: '100%' }}>
+                    {activeTab === 'rewards' ? (
+                        <RewardsPanel />
                     ) : (
-                        <div className="profile-empty-state">
-                            {activeTab === 'posts' && (
-                                <div className="empty-state-content">
-                                    <Grid size={48} />
-                                    <p>No posts yet</p>
-                                </div>
-                            )}
-                            {activeTab === 'reels' && (
-                                <div className="empty-state-content">
-                                    <Film size={48} />
-                                    <p>No reels yet</p>
-                                </div>
-                            )}
-                            {activeTab === 'saved' && (
-                                <div className="empty-state-content">
-                                    <Bookmark size={48} />
-                                    <p>Save posts to watch later</p>
+                        <div className="profile-grid">
+                            {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
+                                (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
+                                    <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
+                                        {post.type === 'video' || post.type === 'reel' ? (
+                                            <video
+                                                src={getImageUrl(post.contentUrl)}
+                                                poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
+                                                className="grid-img"
+                                                muted
+                                                loop
+                                                playsInline
+                                                onMouseOver={e => e.target.play()}
+                                                onMouseOut={e => e.target.pause()}
+                                            />
+                                        ) : (post.type === 'image' || post.type === 'post' || post.contentUrl) ? (
+                                            <img
+                                                src={getImageUrl(post.contentUrl)}
+                                                alt={post.caption}
+                                                className="grid-img"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = getImageUrl(null, 'media');
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="placeholder-content">Post {post.id}</div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="profile-empty-state">
+                                    {activeTab === 'posts' && (
+                                        <div className="empty-state-content">
+                                            <Grid size={48} />
+                                            <p>No posts yet</p>
+                                        </div>
+                                    )}
+                                    {activeTab === 'reels' && (
+                                        <div className="empty-state-content">
+                                            <Film size={48} />
+                                            <p>No reels yet</p>
+                                        </div>
+                                    )}
+                                    {activeTab === 'saved' && (
+                                        <div className="empty-state-content">
+                                            <Bookmark size={48} />
+                                            <p>Save posts to watch later</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

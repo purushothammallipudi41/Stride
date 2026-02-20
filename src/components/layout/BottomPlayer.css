@@ -135,11 +135,12 @@
 
 .progress-fill {
     height: 100%;
-    background: var(--player-text);
+    background: var(--vibe-accent, var(--player-text));
     border-radius: 2px;
     position: absolute;
     left: 0;
     top: 0;
+    box-shadow: 0 0 12px var(--vibe-glow);
 }
 
 .player-actions {
@@ -199,8 +200,8 @@
 }
 
 .vibe-btn:hover {
-    color: var(--color-primary);
-    background: rgba(130, 87, 229, 0.1);
+    color: var(--vibe-accent, var(--color-primary));
+    background: var(--vibe-glow, rgba(130, 87, 229, 0.1));
 }
 
 .vibe-btn.active {
@@ -227,8 +228,8 @@
 }
 
 .vibe-badge.following {
-    background: var(--color-primary);
-    box-shadow: 0 2px 8px rgba(130, 87, 229, 0.4);
+    background: var(--vibe-accent, var(--color-primary));
+    box-shadow: 0 2px 8px var(--vibe-glow, rgba(130, 87, 229, 0.4));
 }
 
 @keyframes pulse-red {

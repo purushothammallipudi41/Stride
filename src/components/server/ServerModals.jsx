@@ -154,6 +154,17 @@ export const CreateChannelModal = ({ isOpen, onClose, onCreate }) => {
                         </div>
                         {type === 'voice' && <div style={{ marginLeft: 'auto', width: '20px', height: '20px', borderRadius: '50%', border: '2px solid var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: '10px', height: '10px', background: 'var(--color-primary)', borderRadius: '50%' }} /></div>}
                     </div>
+                    <div
+                        onClick={() => setType('stage')}
+                        style={{ padding: '12px', borderRadius: '8px', background: type === 'stage' ? 'rgba(255,255,255,0.1)' : 'transparent', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                    >
+                        <Radio size={24} color="#ff4b4b" />
+                        <div>
+                            <div style={{ fontWeight: 600 }}>Live Stage</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Host interactive sessions with real-time vibe reactions.</div>
+                        </div>
+                        {type === 'stage' && <div style={{ marginLeft: 'auto', width: '20px', height: '20px', borderRadius: '50%', border: '2px solid var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ width: '10px', height: '10px', background: 'var(--color-primary)', borderRadius: '50%' }} /></div>}
+                    </div>
                 </div>
             </div>
 

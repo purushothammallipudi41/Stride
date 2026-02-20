@@ -16,6 +16,11 @@
   /* Neon Pink */
   --color-accent-glow: rgba(255, 0, 122, 0.3);
 
+  /* Dynamic Vibe Tokens (Updated by MusicContext) */
+  --vibe-accent: var(--color-primary);
+  --vibe-glow: var(--color-primary-glow);
+  --vibe-bg: var(--color-bg);
+
   --mobile-bottom-nav-height: 104px;
 
   --color-success: #00ffa3;
