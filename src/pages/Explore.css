@@ -1,16 +1,16 @@
 .explore-page {
-    padding: 30px;
+    padding: var(--spacing-lg);
     max-width: 1400px;
     margin: 0 auto;
-    padding-bottom: calc(var(--player-height) + 40px);
+    padding-bottom: calc(var(--player-height) + var(--spacing-xl));
 }
 
 .explore-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 40px;
-    padding: 0 0.5rem;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding: 0 var(--spacing-xs);
 }
 
 .header-actions {

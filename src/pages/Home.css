@@ -1,14 +1,14 @@
 .home-page-container {
-    padding: 1rem;
-    padding-bottom: 5rem;
+    padding: var(--spacing-sm);
+    padding-bottom: calc(var(--mobile-bottom-nav-height) + var(--spacing-lg));
 }
 
 .home-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding: 0 0.5rem;
+    margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-xs);
 }
 
 .home-title {
