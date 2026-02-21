@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
+import UserAvatar from '../common/UserAvatar';
 import './StoriesRail.css';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -38,18 +39,26 @@ const StoriesRail = () => {
                 className="story-card user-story-card"
                 onClick={handleYourStoryClick}
             >
-                <div className={`story-avatar-wrap ${userStory ? '' : 'viewed'}`}>
-                    <img src={getImageUrl(user?.avatar)} alt="Me" />
-                </div>
+                <UserAvatar
+                    user={user}
+                    isStory={true}
+                    isViewed={!userStory}
+                />
                 <span className="story-username">Your Story</span>
             </div>
 
             {/* Friends' Stories */}
             {otherStories.map(story => (
                 <div key={story._id || story.id} className="story-card" onClick={() => setViewingStoryId(story._id || story.id)}>
-                    <div className={`story-avatar-wrap ${story.viewed ? 'viewed' : ''}`}>
-                        <img src={getImageUrl(story.userAvatar)} alt={story.username} />
-                    </div>
+                    <UserAvatar
+                        user={{
+                            username: story.username,
+                            avatar: story.userAvatar,
+                            activeAvatarFrame: story.userActiveAvatarFrame
+                        }}
+                        isStory={true}
+                        isViewed={story.viewed}
+                    />
                     <span className="story-username">{story.username}</span>
                 </div>
             ))}

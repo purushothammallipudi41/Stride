@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { VolumeX, MoreHorizontal, Trash2, EyeOff, Eraser, Volume2, ArrowLeft } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
+import UserAvatar from '../common/UserAvatar';
 import './Chat.css';
 
 // Long press hook removed in favor of explicit menu button
@@ -11,7 +12,7 @@ const ChatItem = ({ chat, activeChatId, onSelectChat, onShowMenu, menuConvo }) =
             className={`chat-item ${activeChatId === chat.id ? 'active' : ''} ${chat.isMuted ? 'muted' : ''}`}
             onClick={() => onSelectChat(chat)}
         >
-            <div className="chat-avatar" style={{ backgroundImage: `url(${getImageUrl(chat.avatar)})` }} />
+            <UserAvatar user={chat} size="sm" />
             <div className="chat-item-info">
                 <div className="chat-item-name-row">
                     <span className="chat-item-name">{chat.username}</span>

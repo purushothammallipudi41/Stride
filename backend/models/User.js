@@ -32,8 +32,10 @@ const userSchema = new mongoose.Schema({
         timestamp: { type: Date, index: true }
     },
     vibeTokens: { type: Number, default: 0 },
+    lastVibeClaim: { type: Date, default: null },
     unlockedPerks: [{ type: String }],
-    profileThemeUrl: { type: String, default: null }
+    profileThemeUrl: { type: String, default: null },
+    activeAvatarFrame: { type: String, default: null }
 }, { timestamps: true });
 
 userSchema.index({ "serverProfiles.serverId": 1 });

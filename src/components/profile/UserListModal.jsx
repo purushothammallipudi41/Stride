@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import { X, Search } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
+import UserAvatar from '../common/UserAvatar';
 import './UserListModal.css';
 
 const UserListModal = ({ title, userIds, onClose }) => {
@@ -77,15 +78,7 @@ const UserListModal = ({ title, userIds, onClose }) => {
                                 onClick={() => handleUserClick(u.username)}
                                 style={{ cursor: 'pointer' }}
                             >
-                                <img
-                                    src={getImageUrl(u.avatar)}
-                                    alt={u.name}
-                                    className="user-item-avatar"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = getImageUrl(null, 'user');
-                                    }}
-                                />
+                                <UserAvatar user={u} size="xs" />
                                 <div className="user-item-info">
                                     <span className="user-item-username">{u.username}</span>
                                     <span className="user-item-name">{u.name}</span>

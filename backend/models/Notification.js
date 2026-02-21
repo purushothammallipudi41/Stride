@@ -5,7 +5,8 @@ const notificationSchema = new mongoose.Schema({
     user: {
         name: String,
         avatar: String,
-        email: String
+        email: String,
+        activeAvatarFrame: String
     },
     targetUserEmail: { type: String, index: true }, // Who receives it
     content: String,

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, Video, Smile, Gift, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft, Image } from 'lucide-react';
+import { Send, Phone, Video, Smile, Sticker, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft, Image } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useCall } from '../../context/CallContext';
 import { useSocket } from '../../context/SocketContext';
@@ -10,6 +10,7 @@ import './Chat.css';
 import GifPicker from '../common/GifPicker';
 import config from '../../config';
 import { uploadToCloudinary } from '../../utils/cloudinaryUtils';
+import UserAvatar from '../common/UserAvatar';
 
 const EMOJI_CATEGORIES = {
     'Smileys': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🥴'],
@@ -211,10 +212,11 @@ const ChatWindow = ({
                                 <ArrowLeft size={20} />
                             </button>
                         )}
-                        <div className="chat-avatar-ring">
-                            <div className="chat-avatar small" style={{ backgroundImage: `url(${getImageUrl(activeChat.avatar) || getImageUrl(activeChat.username, 'user')})` }} />
-                            <div className={`online-indicator ${isUserOnline(activeChat.id) ? 'online' : ''}`} />
-                        </div>
+                        <UserAvatar
+                            user={{ ...activeChat, isOnline: isUserOnline(activeChat.id) }}
+                            size="sm"
+                            showOnline={true}
+                        />
                         <div className="chat-user-meta">
                             <span className="chat-username" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 {activeChat.username}
@@ -255,7 +257,7 @@ const ChatWindow = ({
                                         </div>
                                     )}
 
-                                    <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('chat_bubbles') ? 'chat-bubbles-perk' : ''}`}>
+                                    <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('cyberpunk_bubbles') ? 'cyberpunk-bubbles-perk' : ''}`}>
                                         {msg.sharedContent ? (
                                             <div className="shared-content-card" onClick={() => (msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) && window.open(msg.sharedContent.url, '_blank')}>
                                                 {(msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) ? (
@@ -351,7 +353,7 @@ const ChatWindow = ({
                                 </button>
                                 <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,video/*" onChange={handleFileUpload} />
                                 <button className={`input-tool-btn ${showEmojiPicker ? 'active' : ''}`} onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }}><Smile size={22} /></button>
-                                <button className={`input-tool-btn ${showGifPicker ? 'active' : ''}`} onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }}><Gift size={22} /></button>
+                                <button className={`input-tool-btn ${showGifPicker ? 'active' : ''}`} onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }}><Sticker size={22} /></button>
                                 {showLocation && <button className={`input-tool-btn ${isLocating ? 'pulse' : ''}`} onClick={handleLocationShare} title="Share Location" disabled={isLocating}><MapPin size={22} color={isLocating ? 'var(--color-primary)' : 'currentColor'} /></button>}
                             </div>
                             <input

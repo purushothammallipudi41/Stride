@@ -87,6 +87,14 @@
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
+.message.me .cyberpunk-bubbles-perk {
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.2), rgba(255, 0, 128, 0.2)) !important;
+    border: 1px solid #00ffcc !important;
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.5), inset 0 0 10px rgba(255, 0, 128, 0.4) !important;
+    color: #fff !important;
+    text-shadow: 0 0 5px rgba(0, 255, 204, 0.8);
+}
+
 /* Input Area */
 .chat-input-area {
     background: rgba(0, 0, 0, 0.3) !important;

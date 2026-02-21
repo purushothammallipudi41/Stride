@@ -1,0 +1,155 @@
+.user-avatar-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.user-avatar-wrapper:hover {
+    transform: scale(1.05);
+}
+
+.user-avatar-main {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--color-bg-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+}
+
+/* Sizes */
+.user-avatar-wrapper.xs {
+    width: 24px;
+    height: 24px;
+}
+
+.user-avatar-wrapper.sm {
+    width: 38px;
+    height: 38px;
+}
+
+.user-avatar-wrapper.md {
+    width: 52px;
+    height: 52px;
+}
+
+.user-avatar-wrapper.lg {
+    width: 110px;
+    height: 110px;
+}
+
+.user-avatar-wrapper.xl {
+    width: 150px;
+    height: 150px;
+}
+
+/* Placeholder */
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    opacity: 0.5;
+}
+
+/* Online Indicator */
+.user-avatar-wrapper .online-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 25%;
+    height: 25%;
+    min-width: 8px;
+    min-height: 8px;
+    background: #555;
+    border: 2px solid #000;
+    border-radius: 50%;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.user-avatar-wrapper .online-indicator.online {
+    background: #00ff88;
+    box-shadow: 0 0 10px #00ff88;
+}
+
+/* Live State */
+.user-avatar-wrapper.live::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff4b4b, #8257e5, #0095f6, #ff4b4b);
+    z-index: 1;
+    animation: rotate-gradient 2s linear infinite;
+}
+
+@keyframes rotate-gradient {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Story Rings */
+.user-avatar-wrapper.story::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff007f, #7f00ff, #00ffff, #ff007f);
+    z-index: 1;
+}
+
+.user-avatar-wrapper.story.viewed::after {
+    background: #333;
+}
+
+.user-avatar-wrapper.story .user-avatar-main {
+    border: 2px solid var(--color-bg);
+}
+
+/* Holographic Ring Perk */
+.user-avatar-wrapper.holographic-ring .user-avatar-main {
+    border: 3px solid transparent;
+    background-image: linear-gradient(var(--color-bg), var(--color-bg)),
+        linear-gradient(45deg, #ff007f, #7f00ff, #00ffff, #00ff7f, #ffff00, #ff0000);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    animation: holoSpin 4s linear infinite;
+    box-shadow: 0 0 20px rgba(127, 0, 255, 0.4);
+}
+
+@keyframes holoSpin {
+    0% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        background-position: 100% 50%;
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Neon Frame Perk */
+.user-avatar-wrapper.neon-frame .user-avatar-main {
+    border: 2px solid #00ffcc;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.6), inset 0 0 10px rgba(0, 255, 204, 0.3);
+}

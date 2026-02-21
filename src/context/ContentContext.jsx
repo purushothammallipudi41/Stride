@@ -124,7 +124,7 @@ export const ContentProvider = ({ children }) => {
         }
     };
 
-    const addComment = async (postId, commentText) => {
+    const addComment = async (postId, commentText, gif = null) => {
         try {
             const res = await fetch(`${config.API_URL}/api/posts/${postId}/comment`, {
                 method: 'POST',
@@ -132,8 +132,10 @@ export const ContentProvider = ({ children }) => {
                 body: JSON.stringify({
                     comment: {
                         text: commentText,
+                        gif: gif,
                         username: user.username,
                         userAvatar: user.avatar,
+                        userActiveAvatarFrame: user.activeAvatarFrame,
                         userId: user.email
                     }
                 })
@@ -165,22 +167,70 @@ export const ContentProvider = ({ children }) => {
         }
     };
 
-    const likeComment = (postId, commentId) => {
-        const updateLikes = (comments) => comments.map(c => {
-            if (c.id === commentId) {
-                const isLiked = !c.isLiked;
-                return { ...c, isLiked, likeCount: (c.likeCount || 0) + (isLiked ? 1 : -1) };
+    const likeComment = async (postId, commentId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts/${postId}/comment/${commentId}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail: user.email })
+            });
+            if (res.ok) {
+                const { likes } = await res.json();
+                setPosts(prev => prev.map(post => {
+                    if ((post._id || post.id) === postId) {
+                        return {
+                            ...post,
+                            comments: post.comments.map(c => c.id === commentId ? { ...c, likes } : c)
+                        };
+                    }
+                    return post;
+                }));
             }
-            if (c.replies) return { ...c, replies: updateLikes(c.replies) };
-            return c;
-        });
+        } catch (error) {
+            console.error('Failed to like comment:', error);
+        }
+    };
 
-        setPosts(posts.map(post => {
-            if ((post._id || post.id) === postId) {
-                return { ...post, comments: updateLikes(post.comments) };
+    const deleteComment = async (postId, commentId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts/${postId}/comment/${commentId}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                setPosts(prev => prev.map(post => {
+                    if ((post._id || post.id) === postId) {
+                        return { ...post, comments: post.comments.filter(c => c.id !== commentId) };
+                    }
+                    return post;
+                }));
             }
-            return post;
-        }));
+        } catch (error) {
+            console.error('Failed to delete comment:', error);
+        }
+    };
+
+    const editComment = async (postId, commentId, newText) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts/${postId}/comment/${commentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: newText })
+            });
+            if (res.ok) {
+                const { comment } = await res.json();
+                setPosts(prev => prev.map(post => {
+                    if ((post._id || post.id) === postId) {
+                        return {
+                            ...post,
+                            comments: post.comments.map(c => c.id === commentId ? { ...c, text: newText } : c)
+                        };
+                    }
+                    return post;
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to edit comment:', error);
+        }
     };
 
     const replyToComment = (postId, parentId, text) => {
@@ -208,6 +258,30 @@ export const ContentProvider = ({ children }) => {
             return post;
         }));
     };
+    const editPost = async (postId, newCaption) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/posts/${postId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    caption: newCaption,
+                    requesterId: user?.email || user?.username
+                })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setPosts(prev => prev.map(p =>
+                    (p._id || p.id) === postId ? { ...p, caption: newCaption } : p
+                ));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to edit post:', error);
+            return false;
+        }
+    };
+
 
     const deletePost = async (postId) => {
         try {
@@ -262,9 +336,12 @@ export const ContentProvider = ({ children }) => {
             addComment,
             likeComment,
             replyToComment,
+            deleteComment,
+            editComment,
             fetchPosts,
             fetchStories,
             deletePost,
+            editPost,
             toggleSavePost
         }}>
             {children}

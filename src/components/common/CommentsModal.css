@@ -173,10 +173,104 @@
 }
 
 @keyframes slideUp {
-    from { transform: translate(-50%, 100%); }
-    to { transform: translate(-50%, 0); }
+    from {
+        transform: translate(-50%, 100%);
+    }
+
+    to {
+        transform: translate(-50%, 0);
+    }
 }
 
 .animate-slide-up {
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* GifPicker Overrides for Comments Modal */
+.modal-footer .gif-picker-panel {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    /* Anchor it precisely above the input container with a small gap */
+    left: 20px;
+    right: 20px;
+    width: auto;
+    height: 320px;
+    margin: 0;
+    border-radius: 16px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+    z-index: 1010;
+    /* Ensure it stays above the input field and other modal elements */
+}
+
+/* Comment Interaction Styles */
+.action-btn.liked {
+    color: var(--color-accent);
+}
+
+.action-btn.edit-btn:hover {
+    color: #4CAF50;
+}
+
+.action-btn.delete-btn:hover {
+    color: #f44336;
+}
+
+.edit-comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.edit-comment-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.edit-comment-input:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.save-edit-btn,
+.cancel-edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.save-edit-btn {
+    background: var(--color-primary);
+    color: white;
+}
+
+.save-edit-btn:hover {
+    background: var(--color-primary-glow);
+}
+
+.cancel-edit-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.cancel-edit-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

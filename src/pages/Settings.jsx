@@ -244,55 +244,90 @@ const Settings = () => {
                 </div>
 
                 {/* Profile Customization Section */}
-                {user?.unlockedPerks?.includes('profile_audio') && (
+                {user?.unlockedPerks?.some(p => ['profile_audio', 'neon_frame', 'holographic_ring'].includes(p)) && (
                     <div className="settings-group">
                         <div className="group-header">
                             <h3>Profile Customization</h3>
                         </div>
                         <div className="settings-list">
-                            <div className="settings-item">
-                                <div className="settings-item-left">
-                                    <Music size={20} color="var(--color-primary)" />
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <span>Profile Theme Song</span>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
-                                            {user.profileThemeUrl ? 'Audio track active' : 'No track set'}
-                                        </span>
+                            {user?.unlockedPerks?.includes('profile_audio') && (
+                                <div className="settings-item">
+                                    <div className="settings-item-left">
+                                        <Music size={20} color="var(--color-primary)" />
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span>Profile Theme Song</span>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
+                                                {user.profileThemeUrl ? 'Audio track active' : 'No track set'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="settings-item-right">
+                                        <input
+                                            type="file"
+                                            id="profile-audio-upload"
+                                            accept="audio/*"
+                                            style={{ display: 'none' }}
+                                            onChange={async (e) => {
+                                                const file = e.target.files[0];
+                                                if (!file) return;
+
+                                                setUploadingAudio(true);
+                                                try {
+                                                    const uploadedUrl = await uploadToCloudinary(file);
+                                                    if (uploadedUrl) {
+                                                        await updateProfile({ profileThemeUrl: uploadedUrl });
+                                                    }
+                                                } catch (err) {
+                                                    alert('Failed to upload audio');
+                                                } finally {
+                                                    setUploadingAudio(false);
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => document.getElementById('profile-audio-upload').click()}
+                                            style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                            disabled={uploadingAudio}
+                                        >
+                                            {uploadingAudio ? 'Uploading...' : (user.profileThemeUrl ? 'Change' : 'Upload')}
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="settings-item-right">
-                                    <input
-                                        type="file"
-                                        id="profile-audio-upload"
-                                        accept="audio/*"
-                                        style={{ display: 'none' }}
-                                        onChange={async (e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
+                            )}
 
-                                            setUploadingAudio(true);
-                                            try {
-                                                const uploadedUrl = await uploadToCloudinary(file);
-                                                if (uploadedUrl) {
-                                                    await updateProfile({ profileThemeUrl: uploadedUrl });
-                                                }
-                                            } catch (err) {
-                                                alert('Failed to upload audio');
-                                            } finally {
-                                                setUploadingAudio(false);
-                                                e.target.value = '';
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => document.getElementById('profile-audio-upload').click()}
-                                        style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
-                                        disabled={uploadingAudio}
-                                    >
-                                        {uploadingAudio ? 'Uploading...' : (user.profileThemeUrl ? 'Change' : 'Upload')}
-                                    </button>
+                            {user?.unlockedPerks?.some(p => ['neon_frame', 'holographic_ring'].includes(p)) && (
+                                <div className="settings-item">
+                                    <div className="settings-item-left">
+                                        <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid var(--color-primary)' }} />
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span>Avatar Frame</span>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
+                                                {user.activeAvatarFrame ? user.activeAvatarFrame.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'No frame selected'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="settings-item-right">
+                                        <select
+                                            value={user.activeAvatarFrame || ''}
+                                            onChange={(e) => updateProfile({ activeAvatarFrame: e.target.value || null })}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.1)',
+                                                color: 'white',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                padding: '6px 12px',
+                                                borderRadius: '8px',
+                                                outline: 'none',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <option value="" style={{ color: 'black' }}>None</option>
+                                            {user?.unlockedPerks?.includes('neon_frame') && <option value="neon_frame" style={{ color: 'black' }}>Neon Frame</option>}
+                                            {user?.unlockedPerks?.includes('holographic_ring') && <option value="holographic_ring" style={{ color: 'black' }}>Holographic Ring</option>}
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 )}

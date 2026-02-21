@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
 import { useToast } from '../context/ToastContext';
 import { getImageUrl } from '../utils/imageUtils';
+import UserAvatar from '../components/common/UserAvatar';
 import ConfirmModal from '../components/common/ConfirmModal';
 import './Notifications.css';
 
@@ -49,7 +50,7 @@ const Notifications = () => {
                 {notifications.length > 0 ? (
                     notifications.map(notification => (
                         <div key={notification._id || notification.id} className={`notification-item ${notification.read ? 'read' : 'unread'}`}>
-                            <img src={getImageUrl(notification.user?.avatar)} alt="" className="notif-avatar" />
+                            <UserAvatar user={notification.user} size="sm" />
                             <div className="notif-content">
                                 <p>
                                     <span className="notif-username">{notification.user?.name}</span>

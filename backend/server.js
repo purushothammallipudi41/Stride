@@ -1,4 +1,5 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const cors = require('cors');
 const morgan = require('morgan');
 const fs = require('fs');
@@ -465,12 +466,17 @@ app.get('/api/posts', async (req, res) => {
         // 4. Dynamic Avatar Enrichment
         // Fetch current avatars for all users in this batch to ensure UI is always up to date
         const usernames = [...new Set(posts.map(p => p.username))];
-        const users = await User.find({ username: { $in: usernames } }, 'username avatar').lean();
-        const avatarMap = users.reduce((acc, u) => ({ ...acc, [u.username]: u.avatar }), {});
+        const users = await User.find({ username: { $in: usernames } }, 'username avatar activeAvatarFrame isOfficial').lean();
+        const userMap = users.reduce((acc, u) => ({
+            ...acc,
+            [u.username]: { avatar: u.avatar, activeAvatarFrame: u.activeAvatarFrame, isOfficial: u.isOfficial }
+        }), {});
 
         const enrichedPosts = posts.map(post => ({
             ...post,
-            userAvatar: avatarMap[post.username] || post.userAvatar
+            userAvatar: userMap[post.username]?.avatar || post.userAvatar,
+            userActiveAvatarFrame: userMap[post.username]?.activeAvatarFrame || null,
+            isOfficial: userMap[post.username]?.isOfficial || false
         }));
 
         res.json(enrichedPosts);
@@ -507,7 +513,40 @@ app.post('/api/posts', async (req, res) => {
         console.error('[API POST] Error creating post:', e);
         res.status(500).json({ error: e.message });
     }
+}); app.put('/api/posts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { caption, requesterId: rawRequesterId } = req.body;
+        const requesterId = typeof rawRequesterId === 'string' ? rawRequesterId.trim() : rawRequesterId;
+
+        const post = await Post.findById(id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        // Auth check
+        let requester = null;
+        if (requesterId) {
+            requester = await User.findOne({
+                $or: [
+                    { email: requesterId },
+                    { username: requesterId },
+                    { _id: mongoose.Types.ObjectId.isValid(requesterId) ? requesterId : new mongoose.Types.ObjectId() }
+                ]
+            });
+        }
+
+        if (!requester || (post.username !== requester.username && post.userId !== requester.email)) {
+            return res.status(403).json({ error: 'Unauthorized to edit this post' });
+        }
+
+        post.caption = caption;
+        await post.save();
+
+        res.json({ message: 'Post updated successfully', post });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
+
 
 app.delete('/api/posts/:id', async (req, res) => {
     try {
@@ -567,22 +606,16 @@ app.post('/api/posts/:id/like', async (req, res) => {
 });
 
 app.post('/api/posts/:id/comment', async (req, res) => {
-    // Note: Post Schema 'comments' is currently a Number in my definition for simplicity or Object?
-    // In Post.js I defined comments: { type: Number, default: 0 }. 
-    // BUT legacy code pushed objects array to comments.
-    // FIX: I should probably update Post.js to have an array of comment objects if I want real comments.
-    // For now, to match Schema, I'll just increment count, but the frontend might expect the comment back.
-    // Let's assume for this transition we just increment the counter or if I really want comments I need to change schema.
-    // I'll stick to incrementing count to match schema, but return the 'mock' comment to frontend for UI update.
     try {
         const { id } = req.params;
-        const { comment } = req.body; // Expecting { text, username, userAvatar }
+        const { comment } = req.body;
         const post = await Post.findById(id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
 
         const newComment = {
             id: Date.now().toString(),
             ...comment,
+            likes: [], // Initialize likes array
             timestamp: new Date()
         };
 
@@ -590,6 +623,68 @@ app.post('/api/posts/:id/comment', async (req, res) => {
         await post.save();
 
         res.status(201).json(newComment);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Delete Comment
+app.delete('/api/posts/:postId/comment/:commentId', async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        post.comments = post.comments.filter(c => c.id !== commentId);
+        await post.save();
+        res.json({ success: true, comments: post.comments });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Edit Comment
+app.put('/api/posts/:postId/comment/:commentId', async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const { text } = req.body;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        const comment = post.comments.find(c => c.id === commentId);
+        if (!comment) return res.status(404).json({ error: 'Comment not found' });
+
+        comment.text = text;
+        await post.save();
+        res.json({ success: true, comment });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Like Comment
+app.post('/api/posts/:postId/comment/:commentId/like', async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const { userEmail } = req.body;
+
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        const comment = post.comments.find(c => c.id === commentId);
+        if (!comment) return res.status(404).json({ error: 'Comment not found' });
+
+        if (!comment.likes) comment.likes = [];
+        const index = comment.likes.indexOf(userEmail);
+
+        if (index > -1) {
+            comment.likes.splice(index, 1); // Unlike
+        } else {
+            comment.likes.push(userEmail); // Like
+        }
+
+        await post.save();
+        res.json({ success: true, likes: comment.likes });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -608,19 +703,24 @@ app.get('/api/stories', async (req, res) => {
                 { username: { $in: userIds } },
                 { _id: { $in: userIds.filter(id => mongoose.Types.ObjectId.isValid(id)) } }
             ]
-        }, 'email username avatar').lean();
+        }, 'email username avatar activeAvatarFrame').lean();
 
-        const avatarMap = users.reduce((acc, u) => {
-            acc[u.email] = u.avatar;
-            acc[u.username] = u.avatar;
-            acc[u._id.toString()] = u.avatar;
+        const userMap = users.reduce((acc, u) => {
+            const data = { avatar: u.avatar, activeAvatarFrame: u.activeAvatarFrame };
+            acc[u.email] = data;
+            acc[u.username] = data;
+            acc[u._id.toString()] = data;
             return acc;
         }, {});
 
-        const enrichedStories = stories.map(story => ({
-            ...story,
-            userAvatar: avatarMap[story.userId] || avatarMap[story.username] || story.userAvatar
-        }));
+        const enrichedStories = stories.map(story => {
+            const userData = userMap[story.userId] || userMap[story.username] || {};
+            return {
+                ...story,
+                userAvatar: userData.avatar || story.userAvatar,
+                userActiveAvatarFrame: userData.activeAvatarFrame || null
+            };
+        });
 
         res.json(enrichedStories);
     } catch (e) {
@@ -774,8 +874,20 @@ app.post('/api/users/:targetId/claim-daily-vibe', async (req, res) => {
         const user = await User.findById(req.params.targetId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Simple mock logic for claiming 50 tokens
+        const now = new Date();
+        if (user.lastVibeClaim) {
+            const lastClaim = new Date(user.lastVibeClaim);
+            const isSameDay = lastClaim.getFullYear() === now.getFullYear() &&
+                lastClaim.getMonth() === now.getMonth() &&
+                lastClaim.getDate() === now.getDate();
+
+            if (isSameDay) {
+                return res.status(400).json({ error: 'You have already claimed your daily Vibe Tokens today. Come back tomorrow!' });
+            }
+        }
+
         user.vibeTokens = (user.vibeTokens || 0) + 50;
+        user.lastVibeClaim = now;
         await user.save();
 
         res.json({ message: 'Tokens claimed successfully', amount: 50, newBalance: user.vibeTokens });
@@ -810,7 +922,7 @@ app.post('/api/users/:targetId/purchase-perk', async (req, res) => {
 
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find({}, 'username name email avatar');
+        const users = await User.find({}, 'username name email avatar activeAvatarFrame');
         res.json(users);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -829,7 +941,7 @@ app.post('/api/users/batch', async (req, res) => {
                 { email: { $in: ids } },
                 { username: { $in: ids } }
             ]
-        }, 'username name email avatar');
+        }, 'username name email avatar activeAvatarFrame');
 
         res.json(users);
     } catch (e) {
@@ -847,7 +959,7 @@ app.get('/api/users/search', async (req, res) => {
                 { username: { $regex: q, $options: 'i' } },
                 { name: { $regex: q, $options: 'i' } }
             ]
-        }, 'username name email avatar').limit(10);
+        }, 'username name email avatar activeAvatarFrame').limit(10);
 
         res.json(users);
     } catch (e) {
@@ -1189,8 +1301,26 @@ app.get('/api/notifications', async (req, res) => {
         const { email } = req.query;
         if (!email) return res.status(400).json({ error: 'Email required for notifications' });
         const targetEmail = decodeURIComponent(email).trim();
-        const notifications = await Notification.find({ targetUserEmail: targetEmail }).sort({ timestamp: -1 });
-        res.json(notifications);
+        const notifications = await Notification.find({ targetUserEmail: targetEmail }).sort({ timestamp: -1 }).lean();
+
+        // Dynamic Avatar Enrichment
+        const userEmails = [...new Set(notifications.filter(n => n.user?.email).map(n => n.user.email))];
+        const users = await User.find({ email: { $in: userEmails } }, 'email avatar activeAvatarFrame').lean();
+        const userMap = users.reduce((acc, u) => ({
+            ...acc,
+            [u.email]: { avatar: u.avatar, activeAvatarFrame: u.activeAvatarFrame }
+        }), {});
+
+        const enrichedNotifications = notifications.map(n => ({
+            ...n,
+            user: n.user ? {
+                ...n.user,
+                avatar: userMap[n.user.email]?.avatar || n.user.avatar,
+                activeAvatarFrame: userMap[n.user.email]?.activeAvatarFrame || n.user.activeAvatarFrame
+            } : n.user
+        }));
+
+        res.json(enrichedNotifications);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -1823,7 +1953,7 @@ app.post('/api/messages/send', async (req, res) => {
         // Sync Conversation
         const participants = [from, to].sort();
         let convo = await Conversation.findOne({ participants });
-        const lastMsg = { sender: from, text: text || (sharedContent ? `Shared ${sharedContent.type}` : ''), timestamp: new Date() };
+        const lastMsg = { sender: from, text: text || (sharedContent ? `Shared ${sharedContent.type || (type === 'location' ? 'Location' : 'Item')}` : ''), timestamp: new Date() };
 
         if (convo) {
             convo.lastMessage = lastMsg;
@@ -1962,7 +2092,7 @@ app.get('/api/audius/trending', async (req, res) => {
     } catch (e) { res.status(503).json({ error: 'Audius API unavailable' }); }
 });
 
-const fetch = require('node-fetch');
+// Audius Logic Removed local fetch require
 
 app.get('/api/audius/stream/:id', async (req, res) => {
     try {
@@ -1989,13 +2119,67 @@ app.get('/api/audius/stream/:id', async (req, res) => {
         res.set('Content-Type', response.headers.get('content-type'));
         res.set('Content-Length', response.headers.get('content-length'));
         res.set('Accept-Ranges', 'bytes');
+        res.set('Access-Control-Allow-Origin', '*');
 
         // Pipe the stream to the response
         response.body.pipe(res);
-
     } catch (e) {
         console.error('[AUDIUS STREAM] Error:', e);
         res.status(500).send("Stream error");
+    }
+});
+
+app.get('/api/audius/image', async (req, res) => {
+    try {
+        let url = req.query.url;
+        if (!url) return res.status(400).send('URL required');
+
+        // Basic validation - should be an Audius URL
+        if (!url.includes('audius')) {
+            console.warn('[AUDIUS PROXY] Non-audius URL blocked:', url);
+            return res.status(403).send('Only Audius images allowed');
+        }
+
+        // Rewrite failing node URLs to a known working gateway (audius-content-13.figment.io)
+        // This targets /content/... CID URLs to bypass Cloudflare 403 blocks on other nodes
+        const contentMatch = url.match(/\/content\/([a-zA-Z0-9]+)\/([a-zA-Z0-9x.]+)/);
+        if (contentMatch) {
+            url = `https://audius-content-13.figment.io/content/${contentMatch[1]}/${contentMatch[2]}`;
+        }
+
+        console.log('[AUDIUS PROXY] Fetching:', url);
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Referer': 'https://audius.co/'
+            },
+            timeout: 8000 // 8s timeout for slower gateways
+        });
+
+        if (!response.ok) {
+            console.error(`[AUDIUS PROXY] Upstream error ${response.status} for ${url}`);
+            return res.status(response.status).send('Image unavailable');
+        }
+
+        const contentType = response.headers.get('content-type') || 'image/jpeg';
+        res.set('Content-Type', contentType);
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Cache-Control', 'public, max-age=86400');
+
+        response.body.pipe(res);
+    } catch (e) {
+        console.error('[AUDIUS IMAGE PROXY] Exception:', e.message, 'URL:', req.query.url);
+        res.status(500).send("Proxy error");
+    }
+});
+
+app.get('/api/active-vibe-sessions', (req, res) => {
+    try {
+        const sessionHosts = Array.from(vibeSessions.keys());
+        res.json(sessionHosts);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 
@@ -2054,6 +2238,7 @@ app.post('/api/users/:userId/server-profile/:serverId', async (req, res) => {
 
 // Track online users
 const onlineUsers = new Map(); // userId -> { socketId, username, email }
+const vibeSessions = new Map(); // hostEmail -> { track, isPlaying }
 
 io.on("connection", (socket) => {
     socket.on("join-room", async (userId) => {
@@ -2163,7 +2348,6 @@ io.on("connection", (socket) => {
     });
 
     // --- Listen Together (Vibe Sessions) ---
-    const vibeSessions = new Map(); // hostEmail -> { track, isPlaying }
 
     socket.on("join-vibe-session", ({ hostEmail }) => {
         const roomName = `vibe_session_${hostEmail}`;
@@ -2311,15 +2495,6 @@ async function syncOfficialRelationships() {
         console.error('[INIT] Error syncing official relationships:', e);
     }
 }
-
-app.get('/api/active-vibe-sessions', (req, res) => {
-    try {
-        const sessionHosts = Array.from(vibeSessions.keys());
-        res.json(sessionHosts);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
 
 // Analytics Endpoints
 app.post('/api/posts/:postId/view', async (req, res) => {

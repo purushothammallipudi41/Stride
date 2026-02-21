@@ -26,6 +26,12 @@
   --color-success: #00ffa3;
   --color-danger: #ff4d4d;
 
+  --color-bg-primary: #030303;
+  --color-bg-primary-rgb: 3, 3, 3;
+  --accent-primary: #8257e5;
+  --accent-primary-rgb: 130, 87, 229;
+  --color-bg-light: #161616;
+
   /* Glassmorphism Tokens */
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);

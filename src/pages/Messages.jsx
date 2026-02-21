@@ -120,6 +120,7 @@ const Messages = () => {
             username: otherUser.username,
             name: otherUser.name,
             avatar: otherUser.avatar,
+            activeAvatarFrame: otherUser.activeAvatarFrame,
             isMuted: settings.isMuted,
             lastMessage: (convo.lastMessage?.text === 'Shared undefined' ? 'Shared Location' : convo.lastMessage?.text) || "No messages",
             time: convo.lastMessage ? new Date(convo.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",

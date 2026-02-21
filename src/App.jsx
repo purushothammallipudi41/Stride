@@ -1,21 +1,23 @@
-import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useMusic } from './context/MusicContext';
-import { ServerProvider } from './context/ServerContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import { CreateServerModal } from './components/server/ServerModals';
+import { useServer } from './context/ServerContext';
+import { useAuth, AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { VoiceProvider } from './context/VoiceContext';
+import { CallProvider, useCall } from './context/CallContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ContentProvider } from './context/ContentContext';
+import { MusicProvider, useMusic } from './context/MusicContext';
+import { ToastProvider } from './context/ToastContext';
+import { ServerProvider } from './context/ServerContext';
 import Sidebar from './components/layout/Sidebar';
 import ServerSidebar from './components/server/ServerSidebar';
-import BottomPlayer from './components/layout/BottomPlayer';
-import { MusicProvider } from './context/MusicContext';
-import { ToastProvider } from './context/ToastContext';
-import { CallProvider, useCall } from './context/CallContext';
-import { VoiceProvider } from './context/VoiceContext';
 import CallOverlay from './components/chat/CallOverlay';
+import BottomPlayer from './components/layout/BottomPlayer';
+import CanvasView from './components/layout/CanvasView';
 import NativePermissions from './components/NativePermissions';
-import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Global Call UI Wrapper
 const GlobalCallUI = () => {
@@ -101,10 +103,6 @@ const Layout = ({ children }) => {
   );
 };
 
-import { useNavigate } from 'react-router-dom';
-import { CreateServerModal } from './components/server/ServerModals';
-import { useServer } from './context/ServerContext';
-
 // Global Server Modals Wrapper
 const GlobalServerModals = () => {
   const { isCreateModalOpen, setIsCreateModalOpen, addServer } = useServer();
@@ -152,7 +150,6 @@ function App() {
                                   <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
                                   <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                                   <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                                  <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                                   <Route path="/servers" element={<ProtectedRoute><ServerNavigation /></ProtectedRoute>} />
                                   <Route path="/servers/:serverId" element={<ProtectedRoute><ServerView /></ProtectedRoute>} />
                                   <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -189,8 +186,19 @@ function App() {
 const MusicPlayerController = () => {
   const { pathname } = useLocation();
   const { currentTrack } = useMusic();
-  if (pathname !== '/explore' || !currentTrack) return null;
-  return <BottomPlayer />;
+  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
+
+  if (!currentTrack) return null;
+
+  // Only show bottom bar on Explore for now, but Canvas can be toggled
+  const showBottomBar = pathname === '/explore';
+
+  return (
+    <>
+      {showBottomBar && <BottomPlayer onExpand={() => setIsCanvasOpen(true)} />}
+      <CanvasView isOpen={isCanvasOpen} onClose={() => setIsCanvasOpen(false)} />
+    </>
+  );
 };
 
 export default App;

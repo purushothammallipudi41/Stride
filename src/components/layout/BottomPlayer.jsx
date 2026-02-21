@@ -2,7 +2,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, X, Radio, Users } from 'lu
 import { useMusic } from '../../context/MusicContext';
 import './BottomPlayer.css';
 
-const BottomPlayer = () => {
+const BottomPlayer = ({ onExpand }) => {
     const {
         currentTrack, isPlaying, togglePlay, progress, volume,
         setVolume, seek, playNext, playPrevious, closePlayer,
@@ -26,7 +26,7 @@ const BottomPlayer = () => {
             {sessionHost && <div className="vibe-badge following">Synced with @{sessionHost.split('@')[0]}</div>}
 
             <div className="player-content">
-                <div className="track-info">
+                <div className="track-info" onClick={onExpand} style={{ cursor: 'pointer' }}>
                     <img src={currentTrack.cover} alt={currentTrack.title} className="track-art" />
                     <div className="track-details">
                         <h4 className="track-title">{currentTrack.title}</h4>

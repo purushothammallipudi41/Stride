@@ -9,6 +9,7 @@ import VibeMatchModal from '../components/explore/VibeMatchModal';
 import SmartDJ from '../components/explore/SmartDJ';
 import config from '../config';
 import { getImageUrl } from '../utils/imageUtils';
+import UserAvatar from '../components/common/UserAvatar';
 import './Explore.css';
 
 const Explore = () => {
@@ -114,10 +115,7 @@ const Explore = () => {
                                 <div className="users-grid">
                                     {userResults.map(user => (
                                         <div key={user._id || user.id} className="user-result-card" onClick={() => navigate(`/profile/${user.username}`)}>
-                                            <img
-                                                src={getImageUrl(user.avatar)}
-                                                alt={user.username}
-                                            />
+                                            <UserAvatar user={user} size="sm" />
                                             <div className="user-info">
                                                 <span className="username">@{user.username}</span>
                                                 <span className="name">{user.name}</span>

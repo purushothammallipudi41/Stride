@@ -10,6 +10,7 @@ import { getImageUrl } from '../../utils/imageUtils';
 import { Trash2, Flag, UserMinus, ShieldAlert, Sparkles } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useContent } from '../../context/ContentContext';
+import UserAvatar from '../common/UserAvatar';
 
 const OptionsModal = ({ isOpen, onClose, onAction }) => {
     if (!isOpen) return null;
@@ -238,7 +239,14 @@ const ReelItem = ({ reel, onRemix }) => {
             }}>
                 <div className="reel-info">
                     <div className="reel-user">
-                        <div className="reel-avatar" style={{ backgroundImage: `url(${getImageUrl(reel.userAvatar)})`, backgroundSize: 'cover' }} />
+                        <UserAvatar
+                            user={{
+                                username: reel.username,
+                                avatar: reel.userAvatar,
+                                activeAvatarFrame: reel.userActiveAvatarFrame
+                            }}
+                            size="sm"
+                        />
                         <span className="reel-username">{reel.username}</span>
                         <button
                             className={`follow-btn ${isFollowing ? 'following' : ''}`}

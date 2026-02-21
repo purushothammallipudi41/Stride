@@ -20,16 +20,18 @@ export const audiusService = {
         return tracks.map(track => {
             const artistName = track.user?.name || track.user?.handle || 'Unknown Artist';
             const title = track.title || 'Unknown Track';
-            // Clean title if it contains artist name "Title - Artist"
             const cleanTitle = title.replace(new RegExp(`^${artistName}\\s*-\\s*|\\s*-\\s*${artistName}$`, 'i'), '').trim();
+
+            const artworkUrl = track.artwork?.['480x480'] || track.artwork?.['150x150'];
+            const cover = artworkUrl
+                ? `${config.API_URL}/api/audius/image?url=${encodeURIComponent(artworkUrl)}`
+                : 'https://images.unsplash.com/photo-1514525253344-99a429994c41?q=80&w=600&auto=format';
 
             return {
                 id: track.id,
-                title: cleanTitle || title, // Fallback if cleaning results in empty string
+                title: cleanTitle || title,
                 artist: artistName,
-                cover: track.artwork?.['480x480'] ||
-                    track.artwork?.['150x150'] ||
-                    'https://images.unsplash.com/photo-1514525253344-99a429994c41?q=80&w=600&auto=format',
+                cover,
                 streamUrl: `${config.API_URL}/api/audius/stream/${track.id}`,
                 duration: track.duration,
                 trackId: track.id

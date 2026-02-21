@@ -120,6 +120,29 @@ export const MusicProvider = ({ children }) => {
         }
     }, [volume]);
 
+    const [analyser, setAnalyser] = useState(null);
+    const audioSourceRef = useRef(null);
+    const audioContextRef = useRef(null);
+
+    const initAudioContext = () => {
+        if (!audioContextRef.current && audioRef.current) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioContext();
+            const src = ctx.createMediaElementSource(audioRef.current);
+            const analyzerNode = ctx.createAnalyser();
+
+            src.connect(analyzerNode);
+            analyzerNode.connect(ctx.destination);
+
+            analyzerNode.fftSize = 256;
+            audioContextRef.current = ctx;
+            audioSourceRef.current = src;
+            setAnalyser(analyzerNode);
+        } else if (audioContextRef.current?.state === 'suspended') {
+            audioContextRef.current.resume();
+        }
+    };
+
     const playTrack = (track, list = []) => {
         if (list.length > 0) setTrackList(list);
 
@@ -128,6 +151,7 @@ export const MusicProvider = ({ children }) => {
             return;
         }
 
+        initAudioContext();
         setCurrentTrack(track);
         if (audioRef.current) {
             audioRef.current.pause();
@@ -153,6 +177,7 @@ export const MusicProvider = ({ children }) => {
 
     const togglePlay = () => {
         if (!audioRef.current) return;
+        initAudioContext();
         const newState = !isPlaying;
         if (isPlaying) {
             audioRef.current.pause();
@@ -254,6 +279,7 @@ export const MusicProvider = ({ children }) => {
             duration,
             sessionHost,
             isHosting,
+            analyser,
             playTrack,
             pauseTrack,
             playNext,
@@ -269,6 +295,7 @@ export const MusicProvider = ({ children }) => {
             {children}
             <audio
                 ref={audioRef}
+                crossOrigin="anonymous"
                 onTimeUpdate={(e) => {
                     const audio = e.target;
                     if (audio.duration) {

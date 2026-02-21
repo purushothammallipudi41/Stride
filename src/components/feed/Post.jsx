@@ -13,16 +13,19 @@ import CommentsModal from '../common/CommentsModal';
 import ConfirmModal from '../common/ConfirmModal';
 import { ShieldAlert, Play } from 'lucide-react';
 import { formatTime } from '../../utils/timeUtils';
+import UserAvatar from '../common/UserAvatar';
 
 const Post = memo(({ post }) => {
     if (!post) return null;
-    const { toggleLike, deletePost, toggleSavePost, savedPosts } = useContent();
+    const { toggleLike, deletePost, toggleSavePost, savedPosts, editPost } = useContent();
     const { user } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [showMore, setShowMore] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(post.caption || '');
     const [showSensitive, setShowSensitive] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -62,6 +65,20 @@ const Post = memo(({ post }) => {
         }
     };
 
+    const handleEditSave = async () => {
+        if (editContent.trim() === post.caption) {
+            setIsEditing(false);
+            return;
+        }
+        const success = await editPost(postId, editContent);
+        if (success) {
+            showToast('Post updated', 'success');
+            setIsEditing(false);
+        } else {
+            showToast('Failed to update post', 'error');
+        }
+    };
+
     const handleSave = () => {
         toggleSavePost(post);
         showToast(isSaved ? 'Post unsaved' : 'Post saved to collection', 'success');
@@ -87,13 +104,13 @@ const Post = memo(({ post }) => {
             />
             <div className="post-header">
                 <div className="post-user">
-                    <img
-                        src={getImageUrl(post.userAvatar) || getImageUrl(null, 'user')}
-                        alt={post.username}
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = getImageUrl(null, 'user');
+                    <UserAvatar
+                        user={{
+                            username: post.username,
+                            avatar: post.userAvatar,
+                            activeAvatarFrame: post.userActiveAvatarFrame
                         }}
+                        size="sm"
                     />
                     <div className="user-details" onClick={() => navigate(`/profile/${post.username}`)} style={{ cursor: 'pointer' }}>
                         <h4 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -118,16 +135,19 @@ const Post = memo(({ post }) => {
                     {showMore && (
                         <div className="post-more-dropdown glass-card animate-in" onClick={e => e.stopPropagation()}>
                             {isOwner && (
-                                <button className="delete-btn" onClick={async (e) => {
-                                    e.stopPropagation();
-                                    setShowMore(false);
-                                    const success = await deletePost(postId);
-                                    if (success) {
-                                        showToast('Post deleted', 'success');
-                                    } else {
-                                        showToast('Failed to delete post', 'error');
-                                    }
-                                }} style={{ color: '#ff4b4b' }}>Delete Post</button>
+                                <>
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsEditing(true);
+                                        setEditContent(post.caption || '');
+                                        setShowMore(false);
+                                    }}>Edit Post</button>
+                                    <button className="delete-btn" onClick={async (e) => {
+                                        e.stopPropagation();
+                                        setShowMore(false);
+                                        setIsConfirmOpen(true);
+                                    }} style={{ color: '#ff4b4b' }}>Delete Post</button>
+                                </>
                             )}
                             <button onClick={(e) => {
                                 e.stopPropagation();
@@ -195,7 +215,20 @@ const Post = memo(({ post }) => {
                         )}
                     </div>
                 )}
-                {post.caption && (
+                {isEditing ? (
+                    <div className="edit-caption-form" onClick={e => e.stopPropagation()}>
+                        <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="edit-caption-input"
+                            autoFocus
+                        />
+                        <div className="edit-actions">
+                            <button className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
+                            <button className="save-btn" onClick={handleEditSave}>Save Changes</button>
+                        </div>
+                    </div>
+                ) : post.caption && (
                     <div className="post-caption">
                         {post.caption.split(/(\s+)/).map((part, i) => {
                             if (part.startsWith('#')) {
@@ -263,7 +296,7 @@ const Post = memo(({ post }) => {
                     image: post.contentUrl
                 }}
             />
-        </article>
+        </article >
     );
 });
 

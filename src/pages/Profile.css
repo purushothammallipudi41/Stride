@@ -483,3 +483,18 @@
     right: 0;
     color: white;
 }
+/* Premium Vibe Shop Enhancements */
+.void-theme {
+    background: radial-gradient(circle at 50% -20%, #1a0b2e 0%, #000000 70%) !important;
+}
+
+.void-theme .profile-header-content {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) inset;
+}
+
+.void-theme .stat-item {
+    background: rgba(20, 10, 30, 0.6) !important;
+    border: 1px solid rgba(138, 43, 226, 0.3) !important;
+}

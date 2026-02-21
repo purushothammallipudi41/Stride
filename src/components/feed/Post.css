@@ -234,3 +234,52 @@
     background-color: var(--color-surface-hover);
     color: var(--color-primary);
 }
+
+.edit-caption-form {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.edit-caption-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    padding: var(--spacing-sm);
+    font-size: 0.95rem;
+    min-height: 80px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+}
+
+.edit-caption-input:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+}
+
+.edit-actions button {
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.edit-actions .cancel-btn {
+    background: none;
+    color: var(--color-text-secondary);
+}
+
+.edit-actions .save-btn {
+    background: var(--color-primary);
+    color: white;
+}

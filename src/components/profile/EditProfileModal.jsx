@@ -3,6 +3,7 @@ import { X, Camera, Image as ImageIcon, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 import { getImageUrl } from '../../utils/imageUtils';
+import UserAvatar from '../common/UserAvatar';
 import './EditProfileModal.css';
 
 const EditProfileModal = ({ onClose }) => {
@@ -59,7 +60,10 @@ const EditProfileModal = ({ onClose }) => {
 
                 <form onSubmit={handleSubmit} className="edit-profile-form">
                     <div className="profile-image-section">
-                        <img src={getImageUrl(formData.avatar)} alt="Profile Preview" className="preview-avatar" />
+                        <UserAvatar
+                            user={{ ...user, avatar: formData.avatar }}
+                            size="lg"
+                        />
                         <div className="image-actions">
                             <button type="button" className="icon-btn image-action-btn" onClick={() => fileInputRef.current.click()} title="Upload from Gallery">
                                 <ImageIcon size={20} />

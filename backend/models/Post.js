@@ -18,8 +18,12 @@ const postSchema = new mongoose.Schema({
     comments: [{
         id: String,
         text: String,
+        gif: String,
         username: String,
+        userId: String,
         userAvatar: String,
+        userActiveAvatarFrame: String,
+        likes: [String],
         timestamp: { type: Date, default: Date.now }
     }],
     timestamp: { type: Date, default: Date.now, index: true }

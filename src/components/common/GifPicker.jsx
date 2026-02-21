@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import config from '../../config';
+import './GifPicker.css';
 
 const TENOR_API_KEY = 'LIVDSRZULEUE'; // Public key
 
@@ -61,34 +62,31 @@ const GifPicker = ({ onSelect, onClose, type = 'gifs' }) => {
     };
 
     return (
-        <div className="gif-picker-panel glass-card animate-slide-up">
+        <div className="gif-picker-panel animate-slide-up">
             <div className="gif-picker-header">
+                <div className="gif-picker-top-row">
+                    <div className="gif-tabs">
+                        <button className={`gif-tab ${activeTab === 'gifs' ? 'active' : ''}`} onClick={() => setActiveTab('gifs')}>
+                            GIFs
+                        </button>
+                        <button className={`gif-tab ${activeTab === 'stickers' ? 'active' : ''}`} onClick={() => setActiveTab('stickers')}>
+                            Stickers
+                        </button>
+                    </div>
+                    {onClose && (
+                        <button className="close-btn-mini" onClick={onClose}><X size={18} /></button>
+                    )}
+                </div>
                 <div className="search-bar-mini">
-                    <Search size={16} />
+                    <Search size={14} color="rgba(255,255,255,0.5)" />
                     <input
                         type="text"
                         placeholder={activeTab === 'stickers' ? "Search stickers..." : "Search GIFs..."}
                         value={search}
                         onChange={(e) => handleSearch(e.target.value)}
                     />
-                    {search && <X size={16} onClick={() => handleSearch('')} style={{ cursor: 'pointer' }} />}
+                    {search && <button className="clear-search-btn" onClick={() => handleSearch('')}><X size={14} /></button>}
                 </div>
-                <button className="close-btn-mini" onClick={onClose}><X size={20} /></button>
-            </div>
-
-            <div className="gif-tabs">
-                <button
-                    className={`gif-tab ${activeTab === 'gifs' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('gifs')}
-                >
-                    GIFs
-                </button>
-                <button
-                    className={`gif-tab ${activeTab === 'stickers' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('stickers')}
-                >
-                    Stickers
-                </button>
             </div>
 
             <div className="gif-grid premium-scrollbar">
