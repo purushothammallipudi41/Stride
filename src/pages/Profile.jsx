@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music, Radio, PlayCircle, Calendar } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -9,8 +9,6 @@ import './Profile.css';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import { useNotifications } from '../context/NotificationContext';
-import { useToast } from '../context/ToastContext';
-import UserAvatar from '../components/common/UserAvatar';
 import UserListModal from '../components/profile/UserListModal';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import ShareModal from '../components/common/ShareModal';
@@ -18,6 +16,7 @@ import PostDetailModal from '../components/profile/PostDetailModal';
 import RewardsPanel from '../components/profile/RewardsPanel';
 import { useMusic } from '../context/MusicContext';
 import { useSocket } from '../context/SocketContext';
+import { Radio } from 'lucide-react';
 
 const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
@@ -204,12 +203,11 @@ const Profile = () => {
     const { joinVibeSession, sessionHost } = useMusic();
 
     const isLive = liveVibes?.has(profileUser.email);
-    // Determine Profile Theme
-    const hasVoidTheme = profileUser.unlockedPerks?.includes('void_theme');
+    const isSyncedWithThisUser = sessionHost === profileUser.email;
 
     return (
         <>
-            <div className={`profile-container ${hasVoidTheme ? 'void-theme' : ''}`}>
+            <div className="profile-container">
                 <div className="profile-header-content">
                     {/* New Integrated Header (One step below top nav) */}
                     <div className="profile-top-controls">
@@ -296,161 +294,172 @@ const Profile = () => {
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <UserAvatar
-                            user={profileUser}
-                            size="lg"
-                            isLive={isLive}
-                            onClick={() => setIsAvatarOpen(true)}
-                        />
-                        {isLive && <div className="live-badge-small">Live</div>}
-                    </div>
-
-                    <div className="profile-stats">
-                        {stats.map((stat, i) => (
-                            <div
-                                key={i}
-                                className={`stat-item ${stat.clickable ? 'clickable' : ''}`}
-                                onClick={() => stat.clickable && setModalConfig({ title: stat.label, ids: stat.ids })}
-                            >
-                                <span className="stat-value">{stat.value}</span>
-                                <span className="stat-label">{stat.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Middle Row: Name + Bio */}
-                <div className="profile-bio-section">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                        <p className="profile-name" style={{ margin: 0 }}>
-                            {profileUser.name || profileUser.username}
-                        </p>
-                    </div>
-                    <p className="profile-bio-text">{profileUser.bio}</p>
-                    {profileUser.unlockedPerks?.includes('profile_audio') && profileUser.profileThemeUrl && (
-                        <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)', border: isPlayingTheme ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)' }} onClick={toggleProfileTheme}>
-                            <audio ref={audioRef} src={profileUser.profileThemeUrl} onEnded={() => setIsPlayingTheme(false)} />
-                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.3s' }}>
-                                <Music size={12} color="white" className={isPlayingTheme ? 'pulse' : ''} />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Profile Theme</span>
-                                <span style={{ fontSize: '0.65rem', color: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.5)' }}>
-                                    {isPlayingTheme ? 'Now Playing 🎵' : 'Play Song'}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Bottom Row: Actions */}
-                <div className="profile-actions-row">
-                    {isOwnProfile ? (
-                        <>
-                            <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
-                                Edit Profile
-                            </button>
-                            <button className="dashboard-link-btn" onClick={() => navigate('/dashboard')}>
-                                Professional Dashboard
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            {isLive && !isSyncedWithThisUser && (
-                                <button className="join-vibe-btn animate-in" onClick={() => joinVibeSession(profileUser.email)}>
-                                    <Radio size={18} /> Join Vibe
-                                </button>
-                            )}
-                            <button
-                                className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
-                                onClick={handleFollow}
-                            >
-                                {isFollowing ? 'Following' : 'Follow'}
-                            </button>
-                            <button className="message-btn" onClick={() => navigate(`/messages?user=${profileUser.email}`)}>
-                                Message
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="profile-tabs">
-                <button className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>
-                    <Grid size={22} />
-                </button>
-                <button className={`tab-btn ${activeTab === 'reels' ? 'active' : ''}`} onClick={() => setActiveTab('reels')}>
-                    <Film size={22} />
-                </button>
-                <button className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
-                    <Bookmark size={22} />
-                </button>
-                {isOwnProfile && (
-                    <button className={`tab-btn ${activeTab === 'rewards' ? 'active' : ''}`} onClick={() => setActiveTab('rewards')}>
-                        <Gift size={22} className={activeTab === 'rewards' ? 'pulse' : ''} style={{ color: activeTab === 'rewards' ? 'var(--vibe-accent)' : 'inherit' }} />
-                    </button>
-                )}
-            </div>
-
-            <div className="profile-content-area" style={{ width: '100%' }}>
-                {activeTab === 'rewards' ? (
-                    <RewardsPanel />
-                ) : (
-                    <div className="profile-grid">
-                        {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
-                            (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
-                                <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
-                                    {post.type === 'video' || post.type === 'reel' ? (
-                                        <video
-                                            src={getImageUrl(post.contentUrl)}
-                                            poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
-                                            className="grid-img"
-                                            muted
-                                            loop
-                                            playsInline
-                                            onMouseOver={e => e.target.play()}
-                                            onMouseOut={e => e.target.pause()}
-                                        />
-                                    ) : (post.type === 'image' || post.type === 'post' || post.contentUrl) ? (
-                                        <img
-                                            src={getImageUrl(post.contentUrl)}
-                                            alt={post.caption}
-                                            className="grid-img"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = getImageUrl(null, 'media');
-                                            }}
-                                        />
-                                    ) : (
-                                        <div className="placeholder-content">Post {post.id}</div>
-                                    )}
+                        <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''} ${profileUser.unlockedPerks?.includes('holographic_ring') ? 'holographic-ring' : ''}`} onClick={() => setIsAvatarOpen(true)}>
+                            {profileUser.avatar ? (
+                                <img
+                                    src={getImageUrl(profileUser.avatar)}
+                                    alt={profileUser.username}
+                                    className="profile-avatar-large"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = getImageUrl(null, 'user');
+                                    }}
+                                />
+                            ) : (
+                                <div className="profile-avatar-placeholder">
+                                    {profileUser.username[0].toUpperCase()}
                                 </div>
-                            ))
-                        ) : (
-                            <div className="profile-empty-state">
-                                {activeTab === 'posts' && (
-                                    <div className="empty-state-content">
-                                        <Grid size={48} />
-                                        <p>No posts yet</p>
-                                    </div>
-                                )}
-                                {activeTab === 'reels' && (
-                                    <div className="empty-state-content">
-                                        <Film size={48} />
-                                        <p>No reels yet</p>
-                                    </div>
-                                )}
-                                {activeTab === 'saved' && (
-                                    <div className="empty-state-content">
-                                        <Bookmark size={48} />
-                                        <p>Save posts to watch later</p>
-                                    </div>
-                                )}
+                            )}
+                            {isLive && <div className="live-badge-small">Live</div>}
+                        </div>
+
+                        <div className="profile-stats">
+                            {stats.map((stat, i) => (
+                                <div
+                                    key={i}
+                                    className={`stat-item ${stat.clickable ? 'clickable' : ''}`}
+                                    onClick={() => stat.clickable && setModalConfig({ title: stat.label, ids: stat.ids })}
+                                >
+                                    <span className="stat-value">{stat.value}</span>
+                                    <span className="stat-label">{stat.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Middle Row: Name + Bio */}
+                    <div className="profile-bio-section">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <p className="profile-name" style={{ margin: 0 }}>
+                                {profileUser.name || profileUser.username}
+                            </p>
+                        </div>
+                        <p className="profile-bio-text">{profileUser.bio}</p>
+                        {profileUser.unlockedPerks?.includes('profile_audio') && profileUser.profileThemeUrl && (
+                            <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)', border: isPlayingTheme ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)' }} onClick={toggleProfileTheme}>
+                                <audio ref={audioRef} src={profileUser.profileThemeUrl} onEnded={() => setIsPlayingTheme(false)} />
+                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.3s' }}>
+                                    <Music size={12} color="white" className={isPlayingTheme ? 'pulse' : ''} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Profile Theme</span>
+                                    <span style={{ fontSize: '0.65rem', color: isPlayingTheme ? 'var(--color-primary)' : 'rgba(255,255,255,0.5)' }}>
+                                        {isPlayingTheme ? 'Now Playing 🎵' : 'Play Song'}
+                                    </span>
+                                </div>
                             </div>
                         )}
                     </div>
-                )}
+
+                    {/* Bottom Row: Actions */}
+                    <div className="profile-actions-row">
+                        {isOwnProfile ? (
+                            <>
+                                <button className="edit-profile-btn" onClick={() => setIsEditProfileOpen(true)}>
+                                    Edit Profile
+                                </button>
+                                <button className="dashboard-link-btn" onClick={() => navigate('/dashboard')}>
+                                    Professional Dashboard
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                {isLive && !isSyncedWithThisUser && (
+                                    <button className="join-vibe-btn animate-in" onClick={() => joinVibeSession(profileUser.email)}>
+                                        <Radio size={18} /> Join Vibe
+                                    </button>
+                                )}
+                                <button
+                                    className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
+                                    onClick={handleFollow}
+                                >
+                                    {isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                                <button className="message-btn" onClick={() => navigate(`/messages?user=${profileUser.email}`)}>
+                                    Message
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="profile-tabs">
+                    <button className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>
+                        <Grid size={22} />
+                    </button>
+                    <button className={`tab-btn ${activeTab === 'reels' ? 'active' : ''}`} onClick={() => setActiveTab('reels')}>
+                        <Film size={22} />
+                    </button>
+                    <button className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
+                        <Bookmark size={22} />
+                    </button>
+                    {isOwnProfile && (
+                        <button className={`tab-btn ${activeTab === 'rewards' ? 'active' : ''}`} onClick={() => setActiveTab('rewards')}>
+                            <Gift size={22} className={activeTab === 'rewards' ? 'pulse' : ''} style={{ color: activeTab === 'rewards' ? 'var(--vibe-accent)' : 'inherit' }} />
+                        </button>
+                    )}
+                </div>
+
+                <div className="profile-content-area" style={{ width: '100%' }}>
+                    {activeTab === 'rewards' ? (
+                        <RewardsPanel />
+                    ) : (
+                        <div className="profile-grid">
+                            {(activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).length > 0 ? (
+                                (activeTab === 'posts' ? userPosts : activeTab === 'reels' ? userReels : activeTab === 'saved' ? savedPosts : []).map(post => (
+                                    <div key={post._id || post.id} className="grid-item glass-card" onClick={() => setSelectedPost(post)} style={{ cursor: 'pointer' }}>
+                                        {post.type === 'video' || post.type === 'reel' ? (
+                                            <video
+                                                src={getImageUrl(post.contentUrl)}
+                                                poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
+                                                className="grid-img"
+                                                muted
+                                                loop
+                                                playsInline
+                                                onMouseOver={e => e.target.play()}
+                                                onMouseOut={e => e.target.pause()}
+                                            />
+                                        ) : (post.type === 'image' || post.type === 'post' || post.contentUrl) ? (
+                                            <img
+                                                src={getImageUrl(post.contentUrl)}
+                                                alt={post.caption}
+                                                className="grid-img"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = getImageUrl(null, 'media');
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="placeholder-content">Post {post.id}</div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="profile-empty-state">
+                                    {activeTab === 'posts' && (
+                                        <div className="empty-state-content">
+                                            <Grid size={48} />
+                                            <p>No posts yet</p>
+                                        </div>
+                                    )}
+                                    {activeTab === 'reels' && (
+                                        <div className="empty-state-content">
+                                            <Film size={48} />
+                                            <p>No reels yet</p>
+                                        </div>
+                                    )}
+                                    {activeTab === 'saved' && (
+                                        <div className="empty-state-content">
+                                            <Bookmark size={48} />
+                                            <p>Save posts to watch later</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Modals */}
@@ -462,50 +471,41 @@ const Profile = () => {
                     </div>
                 </div>,
                 document.body
-            )
-            }
+            )}
 
-            {
-                isEditProfileOpen && (
-                    <EditProfileModal onClose={() => setIsEditProfileOpen(false)} />
-                )
-            }
+            {isEditProfileOpen && (
+                <EditProfileModal onClose={() => setIsEditProfileOpen(false)} />
+            )}
 
-            {
-                modalConfig && (
-                    <UserListModal
-                        title={modalConfig.title}
-                        userIds={modalConfig.ids}
-                        onClose={() => setModalConfig(null)}
-                    />
-                )
-            }
+            {modalConfig && (
+                <UserListModal
+                    title={modalConfig.title}
+                    userIds={modalConfig.ids}
+                    onClose={() => setModalConfig(null)}
+                />
+            )}
 
-            {
-                shareModalOpen && (
-                    <ShareModal
-                        isOpen={shareModalOpen}
-                        onClose={() => setShareModalOpen(false)}
-                        type="profile"
-                        data={{
-                            id: profileUser.id || profileUser.email,
-                            title: profileUser.name,
-                            subtitle: profileUser.username,
-                            image: getImageUrl(profileUser.avatar),
-                            username: profileUser.username
-                        }}
-                    />
-                )
-            }
+            {shareModalOpen && (
+                <ShareModal
+                    isOpen={shareModalOpen}
+                    onClose={() => setShareModalOpen(false)}
+                    type="profile"
+                    data={{
+                        id: profileUser.id || profileUser.email,
+                        title: profileUser.name,
+                        subtitle: profileUser.username,
+                        image: getImageUrl(profileUser.avatar),
+                        username: profileUser.username
+                    }}
+                />
+            )}
 
-            {
-                selectedPost && (
-                    <PostDetailModal
-                        post={selectedPost}
-                        onClose={() => setSelectedPost(null)}
-                    />
-                )
-            }
+            {selectedPost && (
+                <PostDetailModal
+                    post={selectedPost}
+                    onClose={() => setSelectedPost(null)}
+                />
+            )}
         </>
     );
 };
