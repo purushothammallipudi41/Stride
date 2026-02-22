@@ -255,7 +255,7 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                             const details = getUserDetails(email);
                             return (
                                 <div key={email} className="user-item">
-                                    <img src={getImageUrl(details.avatar)} alt="" />
+                                    <img src={getImageUrl(details.avatar, 'user')} alt="" />
                                     <div className="user-details">
                                         <span className="user-name">{details.name}</span>
                                         <span className="user-handle">@{details.username}</span>
@@ -293,7 +293,7 @@ const StoryViewer = ({ stories, initialStoryId, onClose, onStoryLiked, onAddStor
                 {/* Header */}
                 <div className="story-header" onClick={(e) => e.stopPropagation()}>
                     <div className="story-user-info">
-                        <img src={getImageUrl(currentStory.userAvatar)} alt="" className="story-avatar" />
+                        <img src={getImageUrl(currentStory.userAvatar, 'user')} alt="" className="story-avatar" />
                         <span className="story-username">{currentStory.username}</span>
                         <span className="story-time">2h</span>
                     </div>

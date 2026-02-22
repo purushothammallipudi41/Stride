@@ -58,7 +58,7 @@ const ShareModal = ({ isOpen, onClose, data, type }) => {
         id: data.id || data.username,
         title: data.name,
         subtitle: data.username,
-        image: getImageUrl(data.avatar)
+        image: data.image || getImageUrl(data.avatar, 'user') || getImageUrl(data.username, 'user')
     } : data; // Default for song which already has correct format
 
     const shareUrl = `${window.location.origin}/${type}/${previewData.id}`;
@@ -160,7 +160,7 @@ const ShareModal = ({ isOpen, onClose, data, type }) => {
                         {!loading && users.map(u => (
                             <div key={u._id || u.id} className="dm-user-item">
                                 <div className="dm-user-info">
-                                    <div className="dm-avatar" style={{ backgroundImage: `url(${getImageUrl(u.avatar)})` }}></div>
+                                    <div className="dm-avatar" style={{ backgroundImage: `url(${getImageUrl(u.avatar, 'user')})` }}></div>
                                     <div className="dm-text-info">
                                         <span className="dm-username">@{u.username}</span>
                                         <span className="dm-name">{u.name}</span>

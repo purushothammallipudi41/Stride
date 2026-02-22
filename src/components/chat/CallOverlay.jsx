@@ -156,7 +156,7 @@ const CallOverlay = ({ username, type, onEndCall }) => {
         return (
             <div className="call-overlay glass-panel">
                 <div className="incoming-call-alert">
-                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(${getImageUrl(caller?.avatar) || getImageUrl(null, 'user')})` }} />
+                    <div className="call-avatar large pulse-ring" style={{ backgroundImage: `url(${getImageUrl(caller?.avatar, 'user') || getImageUrl(null, 'user')})` }} />
                     <h2>{caller?.username || 'Unknown'}</h2>
                     <p>Incoming {type} Call...</p>
                     <div className="call-actions">

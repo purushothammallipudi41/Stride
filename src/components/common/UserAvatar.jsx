@@ -3,7 +3,7 @@ import { getImageUrl } from '../../utils/imageUtils';
 import './UserAvatar.css';
 
 const UserAvatar = memo(({ user, size = 'md', className = '', showOnline = false, isLive = false, isStory = false, isViewed = false, onClick }) => {
-    const avatarUrl = getImageUrl(user?.avatar) || getImageUrl(user?.username, 'user');
+    const avatarUrl = getImageUrl(user?.avatar, 'user') || getImageUrl(user?.username, 'user');
     const activeFrame = user?.activeAvatarFrame;
 
     return (

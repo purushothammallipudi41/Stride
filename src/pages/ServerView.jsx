@@ -147,7 +147,7 @@ const ServerView = () => {
         };
     }, [socket, serverId, activeChannel]);
 
-    if (serversLoading) {
+    if (serversLoading || (server && !activeChannel && !hasInitialSelected)) {
         return (
             <div className="flex-center h-screen bg-black" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="loading-spinner"></div>
@@ -155,7 +155,7 @@ const ServerView = () => {
         );
     }
 
-    if (!server) {
+    if (!serversLoading && !server) {
         return <Navigate to="/" />;
     }
 

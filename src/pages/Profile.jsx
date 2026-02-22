@@ -297,7 +297,7 @@ const Profile = () => {
                         <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''} ${profileUser.unlockedPerks?.includes('holographic_ring') ? 'holographic-ring' : ''}`} onClick={() => setIsAvatarOpen(true)}>
                             {profileUser.avatar ? (
                                 <img
-                                    src={getImageUrl(profileUser.avatar)}
+                                    src={getImageUrl(profileUser.avatar, 'user')}
                                     alt={profileUser.username}
                                     className="profile-avatar-large"
                                     onError={(e) => {
@@ -329,7 +329,7 @@ const Profile = () => {
 
                     {/* Middle Row: Name + Bio */}
                     <div className="profile-bio-section">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <p className="profile-name" style={{ margin: 0 }}>
                                 {profileUser.name || profileUser.username}
                             </p>
@@ -467,7 +467,7 @@ const Profile = () => {
                 <div className="avatar-modal-overlay" onClick={() => setIsAvatarOpen(false)}>
                     <div className="avatar-modal-content" onClick={e => e.stopPropagation()}>
                         <button className="close-modal-btn" onClick={() => setIsAvatarOpen(false)}><X size={24} /></button>
-                        <img src={getImageUrl(profileUser.avatar)} alt="Profile Full" className="full-avatar-img" />
+                        <img src={getImageUrl(profileUser.avatar, 'user')} alt="Profile Full" className="full-avatar-img" />
                     </div>
                 </div>,
                 document.body
@@ -494,7 +494,7 @@ const Profile = () => {
                         id: profileUser.id || profileUser.email,
                         title: profileUser.name,
                         subtitle: profileUser.username,
-                        image: getImageUrl(profileUser.avatar),
+                        image: getImageUrl(profileUser.avatar, 'user') || getImageUrl(profileUser.username, 'user'),
                         username: profileUser.username
                     }}
                 />

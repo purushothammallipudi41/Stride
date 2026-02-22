@@ -14,6 +14,8 @@ const RewardsPanel = () => {
     const shopItems = [
         { id: 'neon_frame', name: 'Neon Avatar Frame', cost: 500, icon: <Shield className="item-icon neon" /> },
         { id: 'gold_name', name: 'Golden Username', cost: 1000, icon: <Star className="item-icon gold" /> },
+        { id: 'gold_frame', name: 'Golden Avatar Frame', cost: 2000, icon: <Star className="item-icon gold" /> },
+        { id: 'gold_bubble', name: 'Golden Chat Bubble', cost: 2000, icon: <MessageSquare className="item-icon gold" /> },
         { id: 'cyberpunk_bubbles', name: 'Cyberpunk Chat Bubbles', cost: 1500, icon: <MessageSquare className="item-icon chat-dye" /> },
         { id: 'holographic_ring', name: 'Holographic Avatar Ring', cost: 2000, icon: <Disc className="item-icon holo" /> },
         { id: 'void_theme', name: 'Void Profile Theme', cost: 3000, icon: <Award className="item-icon platinum" /> }

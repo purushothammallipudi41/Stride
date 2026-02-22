@@ -407,7 +407,7 @@ export const AddMemberModal = ({ isOpen, onClose, members, onAdd, roleName }) =>
                                     <div
                                         style={{
                                             width: '32px', height: '32px', borderRadius: '50%',
-                                            background: `url(${getImageUrl(member.avatar)}) center/cover`
+                                            background: `url(${getImageUrl(member.avatar, 'user')}) center/cover`
                                         }}
                                     />
                                     <div style={{ flex: 1 }}>

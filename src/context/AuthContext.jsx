@@ -6,7 +6,32 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    const [user, setRawUser] = useState(null);
+
+    // Intercept and enrich user data for special accounts
+    const setUser = (u) => {
+        if (!u) {
+            setRawUser(null);
+            return;
+        }
+
+        const isSpecial = u.username === 'stride' || u.username === 'purushotham_mallipudi' || u.email?.includes('stride') || u.email?.includes('purushotham');
+
+        if (isSpecial) {
+            const perks = u.unlockedPerks || [];
+            if (!perks.includes('gold_frame')) perks.push('gold_frame');
+            if (!perks.includes('gold_bubble')) perks.push('gold_bubble');
+
+            setRawUser({
+                ...u,
+                unlockedPerks: perks,
+                activeAvatarFrame: 'gold_frame' // Force gold frame, overriding any old saved frames in DB
+            });
+        } else {
+            setRawUser(u);
+        }
+    };
+
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
 

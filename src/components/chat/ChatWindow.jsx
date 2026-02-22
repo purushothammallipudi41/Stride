@@ -236,82 +236,89 @@ const ChatWindow = ({
                 {groupedMessages.map((group, gIndex) => (
                     <div key={gIndex} className="message-group">
                         <div className="date-separator"><span>{group.label}</span></div>
-                        {group.messages.map((msg, index) => (
-                            <div key={index} className={`message ${msg.isMe ? 'me' : 'them'} animate-in`}>
-                                <div className="message-sender-info">
-                                    <div
-                                        className="message-sender-avatar"
-                                        style={{ backgroundImage: `url(${msg.senderAvatar ? getImageUrl(msg.senderAvatar) : getImageUrl(msg.senderName, 'user')})` }}
-                                    />
-                                </div>
-                                <div className="message-content-wrapper">
-                                    {!msg.isMe && <div className="message-sender-name">{msg.senderName}</div>}
+                        {group.messages.map((msg, index) => {
+                            const hasGoldBubble = msg?.senderPerks?.includes('gold_bubble') ||
+                                (msg.isMe && user?.unlockedPerks?.includes('gold_bubble')) ||
+                                ['stride', 'purushotham_mallipudi', 'Stride Official'].includes(msg.senderName) ||
+                                ['stride', 'purushotham_mallipudi'].includes(msg.senderUsername);
 
-                                    {msg.replyToMessage && (
-                                        <div className="reply-preview-bubble">
-                                            <div className="reply-bar" />
-                                            <div className="reply-content">
-                                                <span className="reply-user">{msg.replyToMessage.username || msg.replyToMessage.senderName}</span>
-                                                <span className="reply-text">{msg.replyToMessage.text}</span>
-                                            </div>
-                                        </div>
-                                    )}
+                            return (
+                                <div key={index} className={`message ${msg.isMe ? 'me' : 'them'} animate-in ${hasGoldBubble ? 'gold-bubble' : ''}`}>
+                                    <div className="message-sender-info">
+                                        <div
+                                            className="message-sender-avatar"
+                                            style={{ backgroundImage: `url(${msg.senderAvatar ? getImageUrl(msg.senderAvatar, 'user') : getImageUrl(msg.senderName, 'user')})` }}
+                                        />
+                                    </div>
+                                    <div className="message-content-wrapper">
+                                        {!msg.isMe && <div className="message-sender-name">{msg.senderName}</div>}
 
-                                    <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('cyberpunk_bubbles') ? 'cyberpunk-bubbles-perk' : ''}`}>
-                                        {msg.sharedContent ? (
-                                            <div className="shared-content-card" onClick={() => (msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) && window.open(msg.sharedContent.url, '_blank')}>
-                                                {(msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) ? (
-                                                    <div className="location-preview">
-                                                        <div className="map-placeholder"><MapPin size={32} color="#ff4b4b" /></div>
-                                                        <div className="location-info">
-                                                            <span className="shared-type">LOCATION</span>
-                                                            <span className="shared-title">Current Location</span>
-                                                            <span className="coords">{msg.sharedContent.lat?.toFixed(4)}, {msg.sharedContent.lng?.toFixed(4)}</span>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <img src={msg.sharedContent.thumbnail} alt="" className="shared-thumb" />
-                                                        <div className="shared-info">
-                                                            <span className="shared-type">{msg.sharedContent.type?.toUpperCase() || 'SHARED'}</span>
-                                                            <span className="shared-title">{msg.sharedContent.title}</span>
-                                                        </div>
-                                                    </>
-                                                )}
+                                        {msg.replyToMessage && (
+                                            <div className="reply-preview-bubble">
+                                                <div className="reply-bar" />
+                                                <div className="reply-content">
+                                                    <span className="reply-user">{msg.replyToMessage.username || msg.replyToMessage.senderName}</span>
+                                                    <span className="reply-text">{msg.replyToMessage.text}</span>
+                                                </div>
                                             </div>
-                                        ) : msg.mediaUrl ? (
-                                            msg.mediaType === 'video' ? (
-                                                <video src={msg.mediaUrl} controls className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px' }} />
-                                            ) : (
-                                                <img src={msg.mediaUrl} alt="Attachment" className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} />
-                                            )
-                                        ) : msg.gif ? (
-                                            <img src={msg.gif} alt="GIF" className="chat-gif" />
-                                        ) : (
-                                            <>
-                                                {msg.text}
-                                                {translatedMessages[index] && <div className="translated-text animate-in">{translatedMessages[index]}</div>}
-                                                {msg.isPinned && <div className="pinned-badge"><Pin size={10} /> Pinned</div>}
-                                            </>
                                         )}
-                                        <div className="message-meta-v2">
-                                            <span className="msg-timestamp">{msg.time || new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                            {msg.isMe && <span className={`msg-status-v2 ${msg.status}`}>{getStatusText(msg.status)}</span>}
-                                            <div className="message-actions-overlay">
-                                                <button className="msg-action-icon" onClick={() => setReplyingTo(msg)} title="Reply"><Reply size={14} /></button>
-                                                <button className="msg-action-icon" onClick={() => onPin && onPin(msg)} title="Pin"><Pin size={14} /></button>
-                                                {(isAdmin || canManageMessages || msg.isMe) && (
-                                                    <button className="msg-action-icon delete" onClick={() => onDelete && onDelete(msg)} title="Delete"><Trash2 size={14} /></button>
-                                                )}
-                                                {!msg.isMe && !msg.gif && !msg.sharedContent && (
-                                                    <button className={`msg-action-icon ${translatedMessages[index] ? 'active' : ''}`} onClick={() => handleTranslate(index, msg.text)} title="Translate"><Globe size={14} /></button>
-                                                )}
+
+                                        <div className={`message-bubble ${msg.sharedContent ? 'shared-bubble' : msg.gif ? 'gif-bubble' : ''} ${msg.isMe && user?.unlockedPerks?.includes('cyberpunk_bubbles') ? 'cyberpunk-bubbles-perk' : ''}`}>
+                                            {msg.sharedContent ? (
+                                                <div className="shared-content-card" onClick={() => (msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) && window.open(msg.sharedContent.url, '_blank')}>
+                                                    {(msg.sharedContent.type === 'location' || (msg.sharedContent.lat && msg.sharedContent.lng)) ? (
+                                                        <div className="location-preview">
+                                                            <div className="map-placeholder"><MapPin size={32} color="#ff4b4b" /></div>
+                                                            <div className="location-info">
+                                                                <span className="shared-type">LOCATION</span>
+                                                                <span className="shared-title">Current Location</span>
+                                                                <span className="coords">{msg.sharedContent.lat?.toFixed(4)}, {msg.sharedContent.lng?.toFixed(4)}</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <img src={msg.sharedContent.thumbnail} alt="" className="shared-thumb" />
+                                                            <div className="shared-info">
+                                                                <span className="shared-type">{msg.sharedContent.type?.toUpperCase() || 'SHARED'}</span>
+                                                                <span className="shared-title">{msg.sharedContent.title}</span>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            ) : msg.mediaUrl ? (
+                                                msg.mediaType === 'video' ? (
+                                                    <video src={msg.mediaUrl} controls className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px' }} />
+                                                ) : (
+                                                    <img src={msg.mediaUrl} alt="Attachment" className="chat-media-attachment" style={{ maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                                                )
+                                            ) : msg.gif ? (
+                                                <img src={msg.gif} alt="GIF" className="chat-gif" />
+                                            ) : (
+                                                <>
+                                                    {msg.text}
+                                                    {translatedMessages[index] && <div className="translated-text animate-in">{translatedMessages[index]}</div>}
+                                                    {msg.isPinned && <div className="pinned-badge"><Pin size={10} /> Pinned</div>}
+                                                </>
+                                            )}
+                                            <div className="message-meta-v2">
+                                                <span className="msg-timestamp">{msg.time || new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                {msg.isMe && <span className={`msg-status-v2 ${msg.status}`}>{getStatusText(msg.status)}</span>}
+                                                <div className="message-actions-overlay">
+                                                    <button className="msg-action-icon" onClick={() => setReplyingTo(msg)} title="Reply"><Reply size={14} /></button>
+                                                    <button className="msg-action-icon" onClick={() => onPin && onPin(msg)} title="Pin"><Pin size={14} /></button>
+                                                    {(isAdmin || canManageMessages || msg.isMe) && (
+                                                        <button className="msg-action-icon delete" onClick={() => onDelete && onDelete(msg)} title="Delete"><Trash2 size={14} /></button>
+                                                    )}
+                                                    {!msg.isMe && !msg.gif && !msg.sharedContent && (
+                                                        <button className={`msg-action-icon ${translatedMessages[index] ? 'active' : ''}`} onClick={() => handleTranslate(index, msg.text)} title="Translate"><Globe size={14} /></button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ))}
             </div>

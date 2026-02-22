@@ -152,7 +152,7 @@ const SearchPage = () => {
                                         }}
                                     >
                                         <img
-                                            src={getImageUrl(user.avatar)}
+                                            src={getImageUrl(user.avatar, 'user')}
                                             alt={user.username}
                                             style={{
                                                 width: '48px',
@@ -237,10 +237,10 @@ const SearchPage = () => {
                                             }}
                                         >
                                             <img
-                                                src={getImageUrl(user.avatar)}
+                                                src={getImageUrl(user.avatar, 'user')}
                                                 alt={user.username}
                                                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                                onError={(e) => { e.target.src = getImageUrl(null); }}
+                                                onError={(e) => { e.target.src = getImageUrl(null, 'user'); }}
                                             />
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{user.name}</div>
