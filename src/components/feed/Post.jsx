@@ -113,7 +113,7 @@ const Post = memo(({ post }) => {
                         size="sm"
                     />
                     <div className="user-details" onClick={() => navigate(`/profile/${post.username}`)} style={{ cursor: 'pointer' }}>
-                        <h4 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <h4 style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className={post.userUnlockedPerks?.includes('gold_name') ? 'gold-username' : ''}>
                             {post.username}
                             {post.isOfficial && <BadgeCheck size={14} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
                         </h4>

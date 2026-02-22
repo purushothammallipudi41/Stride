@@ -80,10 +80,16 @@ const Profile = () => {
                         const res = await fetch(targetUrl);
                         if (res.ok) {
                             const data = await res.json();
-                            // Only update if data is different/newer to avoid flicker (optional, but good)
-                            // For now, just set it to ensure we get the badge
-                            // For now, just set it to ensure we get the badge
-                            setProfileUser(data);
+                            // Preserve AuthContext overrides for the current user
+                            if (currentUser && data.email === currentUser.email) {
+                                setProfileUser({
+                                    ...data,
+                                    activeAvatarFrame: currentUser.activeAvatarFrame,
+                                    unlockedPerks: currentUser.unlockedPerks
+                                });
+                            } else {
+                                setProfileUser(data);
+                            }
                         }
                     } catch (e) {
                         console.error('[Profile] Background fetch failed', e);
@@ -92,7 +98,16 @@ const Profile = () => {
                     const res = await fetch(targetUrl);
                     if (res.ok) {
                         const data = await res.json();
-                        setProfileUser(data);
+                        // Also merge if standard fetch is for current user
+                        if (currentUser && data.email === currentUser.email) {
+                            setProfileUser({
+                                ...data,
+                                activeAvatarFrame: currentUser.activeAvatarFrame,
+                                unlockedPerks: currentUser.unlockedPerks
+                            });
+                        } else {
+                            setProfileUser(data);
+                        }
                     } else {
                         setProfileUser(null);
                     }
@@ -294,7 +309,10 @@ const Profile = () => {
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <div className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.unlockedPerks?.includes('neon_frame') ? 'neon-frame' : ''} ${profileUser.unlockedPerks?.includes('holographic_ring') ? 'holographic-ring' : ''}`} onClick={() => setIsAvatarOpen(true)}>
+                        <div
+                            className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.activeAvatarFrame ? profileUser.activeAvatarFrame.replace(/_/g, '-') : ''}`}
+                            onClick={() => setIsAvatarOpen(true)}
+                        >
                             {profileUser.avatar ? (
                                 <img
                                     src={getImageUrl(profileUser.avatar, 'user')}

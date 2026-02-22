@@ -296,7 +296,7 @@ const Settings = () => {
                                 </div>
                             )}
 
-                            {user?.unlockedPerks?.some(p => ['neon_frame', 'holographic_ring'].includes(p)) && (
+                            {user?.unlockedPerks?.some(p => ['neon_frame', 'holographic_ring', 'gold_frame'].includes(p)) && (
                                 <div className="settings-item">
                                     <div className="settings-item-left">
                                         <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid var(--color-primary)' }} />
@@ -324,6 +324,7 @@ const Settings = () => {
                                             <option value="" style={{ color: 'black' }}>None</option>
                                             {user?.unlockedPerks?.includes('neon_frame') && <option value="neon_frame" style={{ color: 'black' }}>Neon Frame</option>}
                                             {user?.unlockedPerks?.includes('holographic_ring') && <option value="holographic_ring" style={{ color: 'black' }}>Holographic Ring</option>}
+                                            {user?.unlockedPerks?.includes('gold_frame') && <option value="gold_frame" style={{ color: 'black' }}>Golden Frame</option>}
                                         </select>
                                     </div>
                                 </div>

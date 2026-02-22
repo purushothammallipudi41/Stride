@@ -466,16 +466,30 @@ app.get('/api/posts', async (req, res) => {
         // 4. Dynamic Avatar Enrichment
         // Fetch current avatars for all users in this batch to ensure UI is always up to date
         const usernames = [...new Set(posts.map(p => p.username))];
-        const users = await User.find({ username: { $in: usernames } }, 'username avatar activeAvatarFrame isOfficial').lean();
-        const userMap = users.reduce((acc, u) => ({
-            ...acc,
-            [u.username]: { avatar: u.avatar, activeAvatarFrame: u.activeAvatarFrame, isOfficial: u.isOfficial }
-        }), {});
+        const users = await User.find({ username: { $in: usernames } }, 'username avatar activeAvatarFrame unlockedPerks isOfficial').lean();
+        const userMap = users.reduce((acc, u) => {
+            const isSpecial = u.username === 'stride' || u.username === 'purushotham_mallipudi';
+            const perks = u.unlockedPerks || [];
+            if (isSpecial && !perks.includes('gold_name')) perks.push('gold_name');
+            if (isSpecial && !perks.includes('gold_frame')) perks.push('gold_frame');
+            if (isSpecial && !perks.includes('gold_bubble')) perks.push('gold_bubble');
+
+            return {
+                ...acc,
+                [u.username]: {
+                    avatar: u.avatar,
+                    activeAvatarFrame: isSpecial ? 'gold_frame' : u.activeAvatarFrame,
+                    unlockedPerks: perks,
+                    isOfficial: u.isOfficial
+                }
+            };
+        }, {});
 
         const enrichedPosts = posts.map(post => ({
             ...post,
             userAvatar: userMap[post.username]?.avatar || post.userAvatar,
             userActiveAvatarFrame: userMap[post.username]?.activeAvatarFrame || null,
+            userUnlockedPerks: userMap[post.username]?.unlockedPerks || [],
             isOfficial: userMap[post.username]?.isOfficial || false
         }));
 
@@ -988,7 +1002,17 @@ app.get('/api/users/:identifier', async (req, res) => {
         }
 
         if (user) {
-            res.json(user);
+            const userObj = user.toObject ? user.toObject() : user;
+            const isSpecial = userObj.username === 'stride' || userObj.username === 'purushotham_mallipudi';
+
+            if (isSpecial) {
+                userObj.unlockedPerks = userObj.unlockedPerks || [];
+                if (!userObj.unlockedPerks.includes('gold_name')) userObj.unlockedPerks.push('gold_name');
+                if (!userObj.unlockedPerks.includes('gold_frame')) userObj.unlockedPerks.push('gold_frame');
+                if (!userObj.unlockedPerks.includes('gold_bubble')) userObj.unlockedPerks.push('gold_bubble');
+                userObj.activeAvatarFrame = 'gold_frame';
+            }
+            res.json(userObj);
         } else {
             res.status(404).json({ error: 'User not found' });
         }
