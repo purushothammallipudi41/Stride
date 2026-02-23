@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useRef, useEffect } from 'react';
 import config from '../../config';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, BadgeCheck } from 'lucide-react';
@@ -28,6 +28,34 @@ const Post = memo(({ post }) => {
     const [editContent, setEditContent] = useState(post.caption || '');
     const [showSensitive, setShowSensitive] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+    // Intersection Observer for Video Playback Performance
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+        if (!videoRef.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    videoRef.current?.play().catch(() => {
+                        // Suppress auto-play restriction errors on mobile browsers silently
+                    });
+                } else {
+                    videoRef.current?.pause();
+                }
+            },
+            { threshold: 0.5 } // Trigger when 50% of the video is visible
+        );
+
+        observer.observe(videoRef.current);
+
+        return () => {
+            if (videoRef.current) {
+                observer.unobserve(videoRef.current);
+            }
+        };
+    }, []);
 
     // MongoDB uses _id, local new posts might use id
     const postId = post._id || post.id;
@@ -177,13 +205,14 @@ const Post = memo(({ post }) => {
                 {(post.type === 'video' || post.type === 'reel') ? (
                     <div className="post-image-container">
                         <video
+                            ref={videoRef}
                             src={getImageUrl(post.contentUrl)}
                             poster={getImageUrl(post.posterUrl || post.contentUrl, 'media')}
                             className="post-image"
                             muted
                             loop
                             playsInline
-                            autoPlay
+                            preload="none"
                             onMouseEnter={(e) => e.target.play()}
                         />
                         <div className="video-indicator">
@@ -196,6 +225,7 @@ const Post = memo(({ post }) => {
                             src={getImageUrl(post.contentUrl)}
                             alt="Post content"
                             className={`post-image ${post.isSensitive && !showSensitive ? 'blur-active' : ''}`}
+                            loading="lazy"
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = getImageUrl(null, 'media');
