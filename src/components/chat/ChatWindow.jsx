@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, Video, Smile, Sticker, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft, Image } from 'lucide-react';
+import { Send, Phone, Video, Smile, Sticker, Search, X, Globe, BadgeCheck, MoreVertical, Reply, Pin, Trash2, MapPin, ArrowLeft, Image, Edit2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useCall } from '../../context/CallContext';
 import { useSocket } from '../../context/SocketContext';
@@ -31,6 +31,7 @@ const ChatWindow = ({
     canPostInReadOnly = false,
     onPin,
     onDelete,
+    onEdit,
     onAvatarClick,
     showLocation = true
 }) => {
@@ -40,6 +41,7 @@ const ChatWindow = ({
     const [activeEmojiCategory, setActiveEmojiCategory] = useState('Smileys');
     const [isLocating, setIsLocating] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
+    const [editingMessageId, setEditingMessageId] = useState(null);
 
     const [translatedMessages, setTranslatedMessages] = useState({});
     const [typingUser, setTypingUser] = useState(null);
@@ -67,6 +69,7 @@ const ChatWindow = ({
         setShowGifPicker(false);
         setTypingUser(null);
         setReplyingTo(null);
+        setEditingMessageId(null);
     }, [activeChat?.id, activeChat?.username]);
 
     // Typing and Read Receipt Listeners
@@ -110,9 +113,16 @@ const ChatWindow = ({
 
     const handleSendMsg = () => {
         if (!inputText.trim()) return;
-        onSendMessage(inputText, 'text', replyingTo ? { replyTo: replyingTo._id || replyingTo.id } : null);
+
+        if (editingMessageId && onEdit) {
+            onEdit(editingMessageId, inputText);
+        } else {
+            onSendMessage(inputText, 'text', replyingTo ? { replyTo: replyingTo._id || replyingTo.id } : null);
+        }
+
         setInputText('');
         setReplyingTo(null);
+        setEditingMessageId(null);
     };
 
     const handleCall = (type) => {

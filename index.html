@@ -23,6 +23,17 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    // Force unregister any lingering production PWA Service Workers that break the local dev server
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Unregistered conflicting Service Worker');
+        }
+      });
+    }
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

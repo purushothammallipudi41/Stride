@@ -257,9 +257,25 @@ const ServerView = () => {
         showToast(msg.isPinned ? 'Unpinned' : 'Pinned', 'success');
     };
 
-    const handleDeleteMessage = (msg) => {
-        setMessages(prev => prev.filter(m => (m.id || m._id) !== (msg.id || msg._id)));
-        showToast('Deleted', 'success');
+    const handleDeleteMessage = async (msg) => {
+        const msgId = msg._id || msg.id;
+        const success = await deleteServerMessage(serverId, activeChannel, msgId);
+        if (success) {
+            setMessages(prev => prev.filter(m => (m._id || m.id) !== msgId));
+            showToast('Message deleted', 'success');
+        } else {
+            showToast('Failed to delete message', 'error');
+        }
+    };
+
+    const handleEditMessage = async (messageId, newText) => {
+        const updatedMsg = await editServerMessage(serverId, activeChannel, messageId, newText);
+        if (updatedMsg) {
+            setMessages(prev => prev.map(m => (m._id || m.id) === messageId ? { ...m, text: newText, isEdited: true } : m));
+            showToast('Message updated', 'success');
+        } else {
+            showToast('Failed to edit message', 'error');
+        }
     };
 
     const handleReplyMessage = (msg) => {
@@ -517,6 +533,7 @@ const ServerView = () => {
                                         canPostInReadOnly={isAdmin || hasPermission('administrator')}
                                         onPin={handlePinMessage}
                                         onDelete={handleDeleteMessage}
+                                        onEdit={handleEditMessage}
                                         onReply={handleReplyMessage}
                                         onAvatarClick={handleAvatarClick}
                                     />

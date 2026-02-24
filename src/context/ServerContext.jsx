@@ -60,6 +60,32 @@ export const ServerProvider = ({ children }) => {
         }
     };
 
+    const deleteServerMessage = async (serverId, channelId, messageId) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/messages/${channelId}/${messageId}`, {
+                method: 'DELETE'
+            });
+            return res.ok;
+        } catch (err) {
+            console.error("Failed to delete server message:", err);
+            return false;
+        }
+    };
+
+    const editServerMessage = async (serverId, channelId, messageId, newText) => {
+        try {
+            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/messages/${channelId}/${messageId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: newText })
+            });
+            return await res.json();
+        } catch (err) {
+            console.error("Failed to edit server message:", err);
+            return null;
+        }
+    };
+
 
     const createChannel = async (serverId, channelName, type = 'text') => {
         try {
@@ -250,6 +276,8 @@ export const ServerProvider = ({ children }) => {
         addServer,
         fetchMessages,
         sendServerMessage,
+        deleteServerMessage,
+        editServerMessage,
         createChannel,
         deleteChannel,
         leaveServer,
