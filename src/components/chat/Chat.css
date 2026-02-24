@@ -470,7 +470,7 @@
 .message-bubble.gif-bubble,
 .message.gold-bubble .message-bubble.gif-bubble {
     padding: 0 !important;
-    overflow: hidden;
+    overflow: visible !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -1315,7 +1315,7 @@
 
 .gif-bubble {
     padding: 6px;
-    overflow: hidden;
+    overflow: visible;
     background: rgba(0, 0, 0, 0.3) !important;
 }
 
