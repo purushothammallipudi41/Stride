@@ -266,6 +266,16 @@
 
     .explore-header {
         margin-bottom: 24px;
+        flex-wrap: nowrap;
+    }
+    
+    .search-container {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header-actions {
+        flex-shrink: 0;
     }
 
     .section-header h3 {
