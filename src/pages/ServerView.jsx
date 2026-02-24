@@ -22,7 +22,7 @@ import MediaGallery from '../components/server/MediaGallery';
 
 const ServerView = () => {
     const { serverId } = useParams();
-    const { servers, fetchMembers, fetchRoles, fetchMessages, sendServerMessage, createChannel, deleteChannel, leaveServer, deleteServer, updateServer, updateServerProfile, toggleMobileSidebar, assignRole, loading: serversLoading } = useServer();
+    const { servers, fetchMembers, fetchRoles, fetchMessages, sendServerMessage, deleteServerMessage, editServerMessage, createChannel, deleteChannel, leaveServer, deleteServer, updateServer, updateServerProfile, toggleMobileSidebar, assignRole, loading: serversLoading } = useServer();
     const navigate = useNavigate();
     const { user } = useAuth();
     const { socket } = useSocket();
