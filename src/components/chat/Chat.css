@@ -839,31 +839,7 @@
     transition: background 0.2s;
 }
 
-.message-actions-overlay {
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    gap: 4px;
-    margin-right: 8px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    pointer-events: none;
-}
 
-.message.me .message-actions-overlay {
-    right: auto;
-    left: 100%;
-    margin-right: 0;
-    margin-left: 8px;
-}
-
-.message-bubble:hover .message-actions-overlay,
-.message:hover .message-actions-overlay {
-    opacity: 1;
-    pointer-events: auto;
-}
 
 .action-btn {
     width: 28px;
@@ -1711,27 +1687,18 @@
 }
 
 .message-actions-overlay {
-    position: absolute;
-    top: -16px;
-    right: 16px;
-    background: var(--bg-secondary);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
     display: flex;
     gap: 4px;
-    padding: 4px;
-    opacity: 0;
-    transform: translateY(10px);
+    margin-left: auto;
+    /* Pushes it to the right of message-meta-v2 */
+    opacity: 0.6;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
     z-index: 10;
 }
 
-.message:hover .message-actions-overlay {
+.message:hover .message-actions-overlay,
+.message:active .message-actions-overlay {
     opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
 }
 
 .msg-action-icon {
