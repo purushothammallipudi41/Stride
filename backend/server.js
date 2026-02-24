@@ -1921,6 +1921,44 @@ app.post('/api/servers/:serverId/messages/:channelId', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.delete('/api/servers/:serverId/messages/:channelId/:messageId', async (req, res) => {
+    try {
+        const { serverId, channelId, messageId } = req.params;
+        const sId = parseInt(serverId);
+
+        const message = await ServerMessage.findOne({ _id: messageId, serverId: sId, channelId });
+        if (!message) return res.status(404).json({ error: 'Message not found' });
+
+        await ServerMessage.deleteOne({ _id: messageId });
+
+        const roomName = `server_${sId}_${channelId}`;
+        if (req.io) req.io.to(roomName).emit('delete-server-message', { messageId, channelId, serverId: sId });
+
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/servers/:serverId/messages/:channelId/:messageId', async (req, res) => {
+    try {
+        const { serverId, channelId, messageId } = req.params;
+        const { text } = req.body;
+        const sId = parseInt(serverId);
+
+        const message = await ServerMessage.findOneAndUpdate(
+            { _id: messageId, serverId: sId, channelId },
+            { $set: { text, isEdited: true } },
+            { new: true }
+        ).populate('replyTo');
+
+        if (!message) return res.status(404).json({ error: 'Message not found' });
+
+        const roomName = `server_${sId}_${channelId}`;
+        if (req.io) req.io.to(roomName).emit('update-server-message', message);
+
+        res.json(message);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/servers/:serverId/media', async (req, res) => {
     try {
         const { serverId } = req.params;

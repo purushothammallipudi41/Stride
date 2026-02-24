@@ -314,13 +314,32 @@ const ChatWindow = ({
                                                 <span className="msg-timestamp">{msg.time || new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                 {msg.isMe && <span className={`msg-status-v2 ${msg.status}`}>{getStatusText(msg.status)}</span>}
                                                 <div className="message-actions-overlay">
-                                                    <button className="msg-action-icon" onClick={() => setReplyingTo(msg)} title="Reply"><Reply size={14} /></button>
-                                                    <button className="msg-action-icon" onClick={() => onPin && onPin(msg)} title="Pin"><Pin size={14} /></button>
-                                                    {(isAdmin || canManageMessages || msg.isMe) && (
-                                                        <button className="msg-action-icon delete" onClick={() => onDelete && onDelete(msg)} title="Delete"><Trash2 size={14} /></button>
+                                                    <button className="msg-action-icon" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setReplyingTo(msg); }} title="Reply">
+                                                        <Reply size={14} />
+                                                    </button>
+                                                    <button className="msg-action-icon" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPin && onPin(msg); }} title="Pin">
+                                                        <Pin size={14} />
+                                                    </button>
+
+                                                    {/* Edit Button */}
+                                                    {msg.isMe && (!msg.type || msg.type === 'text') && !msg.gif && !msg.mediaUrl && !msg.sharedContent && (
+                                                        <button className="msg-action-icon edit" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingMessageId(msg._id || msg.id); setInputText(msg.text); setReplyingTo(null); }} title="Edit">
+                                                            <Edit2 size={14} />
+                                                        </button>
                                                     )}
+
+                                                    {/* Delete Button */}
+                                                    {(isAdmin || canManageMessages || msg.isMe) && (
+                                                        <button className="msg-action-icon delete" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete && onDelete(msg); }} title="Delete">
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+
+                                                    {/* Translate Button */}
                                                     {!msg.isMe && !msg.gif && !msg.sharedContent && (
-                                                        <button className={`msg-action-icon ${translatedMessages[index] ? 'active' : ''}`} onClick={() => handleTranslate(index, msg.text)} title="Translate"><Globe size={14} /></button>
+                                                        <button className={`msg-action-icon ${translatedMessages[index] ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleTranslate(index, msg.text); }} title="Translate">
+                                                            <Globe size={14} />
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
