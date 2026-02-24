@@ -93,13 +93,6 @@ const Explore = () => {
                     <button className="vibe-match-btn" onClick={() => setVibeModalOpen(true)} title="AI Vibe Match">
                         <Sparkles size={20} className="sparkle-icon" />
                     </button>
-                    <div className="notification-btn" onClick={() => navigate('/messages')}>
-                        <MessageCircle size={20} className="header-icon" />
-                    </div>
-                    <div className="notification-btn" onClick={() => navigate('/notifications')}>
-                        <Heart size={20} className="header-icon" />
-                        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
-                    </div>
                 </div>
             </header>
 
