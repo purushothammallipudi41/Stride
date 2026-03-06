@@ -30,8 +30,8 @@ const ServerSidebar = () => {
             <aside className={`server-icon-sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
                 <div
                     className="server-icon-wrapper exit-link"
-                    onClick={() => handleNavigation('/')}
-                    title="Back to Stride Home"
+                    onClick={() => handleNavigation('/servers/explore')}
+                    title="Back to Discover Communities"
                 >
                     <div className="active-indicator" />
                     <div className="server-icon-circle stride-home-btn">
@@ -43,23 +43,26 @@ const ServerSidebar = () => {
                 <div className="sidebar-divider" />
 
                 <div className="server-icons-list">
-                    {servers.map(server => (
-                        <div
-                            key={server.id}
-                            className={`server-icon-wrapper ${activeId === server.id ? 'active' : ''}`}
-                            onClick={() => handleNavigation(`/servers/${server.id}`)}
-                            title={server.name}
-                        >
-                            <div className="active-indicator" />
-                            <div className="server-icon-circle">
-                                {server.icon && (server.icon.startsWith('http') || server.icon.startsWith('/')) ? (
-                                    <img src={server.icon} alt={server.name} />
-                                ) : (
-                                    <span>{server.icon || server.name[0]}</span>
-                                )}
+                    {servers.map(server => {
+                        const sId = server.id ?? server._id;
+                        return (
+                            <div
+                                key={sId}
+                                className={`server-icon-wrapper ${activeId === sId || serverId === sId ? 'active' : ''}`}
+                                onClick={() => handleNavigation(`/servers/${sId}`)}
+                                title={server.name}
+                            >
+                                <div className="active-indicator" />
+                                <div className="server-icon-circle">
+                                    {server.icon && (server.icon.startsWith('http') || server.icon.startsWith('/')) ? (
+                                        <img src={server.icon} alt={server.name} />
+                                    ) : (
+                                        <span>{server.icon || server.name[0]}</span>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 <div className="server-icon-wrapper create-trigger" onClick={() => { setIsCreateModalOpen(true); setIsMobileSidebarOpen(false); }} title="Create a Server">

@@ -24,14 +24,23 @@
 <body>
   <div id="root"></div>
   <script>
-    // Force unregister any lingering production PWA Service Workers that break the local dev server
+    // Aggressive cleanup for native platforms to prevent SW/Cache interference
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {
-          registration.unregister();
-          console.log('Unregistered conflicting Service Worker');
+          registration.unregister().then(() => {
+            console.log('[Native] Service Worker unregistered');
+          });
         }
       });
+    }
+    // Clear caches on native if we detect erratic behavior
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+        });
+      }
     }
   </script>
   <script type="module" src="/src/main.jsx"></script>

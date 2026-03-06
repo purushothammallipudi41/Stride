@@ -1,6 +1,7 @@
 import { useState, memo, useRef, useEffect } from 'react';
 import config from '../../config';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, BadgeCheck } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
 import './Post.css';
@@ -14,11 +15,16 @@ import ConfirmModal from '../common/ConfirmModal';
 import { ShieldAlert, Play } from 'lucide-react';
 import { formatTime } from '../../utils/timeUtils';
 import UserAvatar from '../common/UserAvatar';
+import BlurImage from '../common/BlurImage';
+import StreakBadge from '../common/StreakBadge';
+import ReportModal from '../common/ReportModal';
+
 
 const Post = memo(({ post }) => {
     if (!post) return null;
+    const { t } = useTranslation();
     const { toggleLike, deletePost, toggleSavePost, savedPosts, editPost } = useContent();
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [isCommentsOpen, setIsCommentsOpen] = useState(false);
@@ -28,6 +34,7 @@ const Post = memo(({ post }) => {
     const [editContent, setEditContent] = useState(post.caption || '');
     const [showSensitive, setShowSensitive] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
     // Intersection Observer for Video Playback Performance
     const videoRef = useRef(null);
@@ -70,7 +77,6 @@ const Post = memo(({ post }) => {
     );
 
     const handleShareToUser = async (targetUser) => {
-        // ... (existing share logic)
         try {
             const res = await fetch(`${config.API_URL}/api/messages/send`, {
                 method: 'POST',
@@ -78,7 +84,7 @@ const Post = memo(({ post }) => {
                 body: JSON.stringify({
                     from: user.email,
                     to: targetUser.email,
-                    text: `Shared a post by ${post.username}`,
+                    text: t('feed.sharedAPost', { username: post.username }),
                     sharedContent: {
                         type: 'post',
                         id: postId,
@@ -87,7 +93,7 @@ const Post = memo(({ post }) => {
                     }
                 })
             });
-            if (res.ok) showToast(`Post shared with ${targetUser.name}!`, 'success');
+            if (res.ok) showToast(t('feed.postShared', { name: targetUser.name }), 'success');
         } catch (error) {
             console.error('Failed to share post:', error);
         }
@@ -100,16 +106,25 @@ const Post = memo(({ post }) => {
         }
         const success = await editPost(postId, editContent);
         if (success) {
-            showToast('Post updated', 'success');
+            showToast(t('feed.postUpdated'), 'success');
             setIsEditing(false);
         } else {
-            showToast('Failed to update post', 'error');
+            showToast(t('feed.updateFailed'), 'error');
         }
     };
 
     const handleSave = () => {
         toggleSavePost(post);
-        showToast(isSaved ? 'Post unsaved' : 'Post saved to collection', 'success');
+        showToast(isSaved ? t('feed.postUnsaved') : t('feed.postSaved'), 'success');
+    };
+
+    const handleReportSubmit = async (reportData) => {
+        const success = await reportContent(reportData);
+        if (success) {
+            showToast(t('feed.postReported'), 'success');
+        } else {
+            showToast(t('common.error'), 'error');
+        }
     };
 
     return (
@@ -120,14 +135,14 @@ const Post = memo(({ post }) => {
                 onConfirm={async () => {
                     const success = await deletePost(postId);
                     if (success) {
-                        showToast('Post deleted', 'success');
+                        showToast(t('feed.postDeleted'), 'success');
                     } else {
-                        showToast('Failed to delete post', 'error');
+                        showToast(t('feed.deleteFailed'), 'error');
                     }
                 }}
-                title="Delete Post"
-                message="Are you sure you want to permanently delete this post? This action cannot be undone."
-                confirmText="Delete"
+                title={t('feed.deletePost')}
+                message={t('feed.deletePostConfirm')}
+                confirmText={t('common.delete')}
                 type="danger"
             />
             <div className="post-header">
@@ -147,10 +162,11 @@ const Post = memo(({ post }) => {
                         </h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <p>{formatTime(post.timestamp)}</p>
+                            <StreakBadge size="sm" />
                             {post.isSensitive && (
                                 <span className="sensitive-badge">
                                     <ShieldAlert size={12} />
-                                    Sensitive
+                                    {t('feed.sensitiveContent')}
                                 </span>
                             )}
                         </div>
@@ -169,33 +185,45 @@ const Post = memo(({ post }) => {
                                         setIsEditing(true);
                                         setEditContent(post.caption || '');
                                         setShowMore(false);
-                                    }}>Edit Post</button>
+                                    }}>{t('feed.editPost')}</button>
                                     <button className="delete-btn" onClick={async (e) => {
                                         e.stopPropagation();
                                         setShowMore(false);
                                         setIsConfirmOpen(true);
-                                    }} style={{ color: '#ff4b4b' }}>Delete Post</button>
+                                    }} style={{ color: '#ff4b4b' }}>{t('feed.deletePost')}</button>
                                 </>
                             )}
                             <button onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/messages?user=${post.userEmail || post.userId || post.username}`);
                                 setShowMore(false);
-                            }}>Message User</button>
-                            <button onClick={async (e) => {
-                                // Report logic
+                            }}>{t('feed.messageUser')}</button>
+                            <button onClick={(e) => {
                                 e.stopPropagation();
-                                if (!user) return showToast('Please login to report.', 'error');
-                                // ... report fetch
-                                showToast('Post Reported. Thank you for making Stride safer.', 'success');
+                                if (!user) return showToast(t('feed.pleaseLoginReport'), 'error');
+                                setIsReportOpen(true);
                                 setShowMore(false);
-                            }}>Report Post</button>
+                            }}>{t('feed.reportPost')}</button>
+                            {(isOwner || user?.isAdmin) && (
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    showToast(t('feed.featurePost'), 'success');
+                                    setShowMore(false);
+                                }}>{t('feed.featurePost')}</button>
+                            )}
+                            {user?.isAdmin && (
+                                <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(post.serverId ? `/servers/${post.serverId}/moderation` : '/admin');
+                                    setShowMore(false);
+                                }} style={{ color: 'var(--accent-primary)' }}>{t('feed.managePost')}</button>
+                            )}
                             <button onClick={(e) => {
                                 // Copy link logic
                                 e.stopPropagation();
                                 setShowMore(false);
-                                showToast('Link Copied', 'success');
-                            }}>Copy Link</button>
+                                showToast(t('feed.linkCopied'), 'success');
+                            }}>{t('feed.copyLink')}</button>
                         </div>
                     )}
                 </div>
@@ -221,25 +249,80 @@ const Post = memo(({ post }) => {
                     </div>
                 ) : (post.type === 'image' || post.type === 'post' || !post.type) && post.contentUrl && (
                     <div className="post-image-container">
-                        <img
-                            src={getImageUrl(post.contentUrl)}
-                            alt="Post content"
-                            className={`post-image ${post.isSensitive && !showSensitive ? 'blur-active' : ''}`}
-                            loading="lazy"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = getImageUrl(null, 'media');
-                            }}
-                        />
-                        {post.isSensitive && !showSensitive && (
+                        {post.isLocked && (
+                            <img
+                                src={getImageUrl(null, 'media')} // Empty or default image for locked
+                                alt="Locked content preview"
+                                className="post-image blur-active"
+                                loading="lazy"
+                            />
+                        )}
+                        {!post.isLocked && (
+                            <BlurImage
+                                src={post.contentUrl}
+                                alt="Post content"
+                                className={`post-image ${post.isSensitive && !showSensitive ? 'blur-active' : ''}`}
+                                type="post"
+                            />
+                        )}
+
+
+                        {post.isLocked && (
+                            <div className="locked-content-overlay animate-in" onClick={(e) => e.stopPropagation()}>
+                                <ShieldAlert size={40} color="var(--color-primary)" />
+                                <h3>{t('feed.exclusiveContent')}</h3>
+                                <p>{t('feed.exclusiveContentDesc')}</p>
+
+                                <div className="unlock-actions" style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                                    {post.unlockPrice > 0 && (
+                                        <button className="primary-btn" onClick={async (e) => {
+                                            e.stopPropagation();
+                                            try {
+                                                const token = localStorage.getItem('stride_token') || localStorage.getItem('token');
+                                                const res = await fetch(`${config.API_URL}/api/creator/unlock-post`, {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                                    body: JSON.stringify({ postId })
+                                                });
+                                                const data = await res.json();
+                                                if (res.ok) {
+                                                    showToast(t('feed.contentUnlocked'), 'success');
+                                                    if (refreshUser) refreshUser(); // Refresh balance
+                                                    // In a real app we'd update context state, but reload is safe for Phase 1
+                                                    setTimeout(() => window.location.reload(), 1000);
+                                                } else {
+                                                    showToast(data.error || t('feed.unlockFailed'), 'error');
+                                                }
+                                            } catch (err) {
+                                                showToast(t('feed.networkError'), 'error');
+                                            }
+                                        }}>
+                                            {t('feed.unlockFor', { price: post.unlockPrice })}
+                                        </button>
+                                    )}
+
+                                    {post.requiredTier > 0 && post.serverId && (
+                                        <button className="secondary-btn" onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/servers/${post.serverId}`);
+                                            // showToast('Subscribe to this server to unlock.', 'info');
+                                        }}>
+                                            {t('feed.viewServerTier')}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {!post.isLocked && post.isSensitive && !showSensitive && (
                             <div className="sensitive-content-overlay animate-in" onClick={(e) => e.stopPropagation()}>
                                 <ShieldAlert size={40} color="#ff4b4b" />
-                                <p>This post is marked as sensitive</p>
+                                <p>{t('feed.sensitiveContentWarning')}</p>
                                 <button className="show-sensitive-btn" onClick={(e) => {
                                     e.stopPropagation();
                                     setShowSensitive(true);
                                 }}>
-                                    Show Content
+                                    {t('feed.showContent')}
                                 </button>
                             </div>
                         )}
@@ -254,8 +337,8 @@ const Post = memo(({ post }) => {
                             autoFocus
                         />
                         <div className="edit-actions">
-                            <button className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
-                            <button className="save-btn" onClick={handleEditSave}>Save Changes</button>
+                            <button className="cancel-btn" onClick={() => setIsEditing(false)}>{t('common.cancel')}</button>
+                            <button className="save-btn" onClick={handleEditSave}>{t('common.save')}</button>
                         </div>
                     </div>
                 ) : post.caption && (
@@ -325,6 +408,15 @@ const Post = memo(({ post }) => {
                     subtitle: post.caption || 'Post',
                     image: post.contentUrl
                 }}
+            />
+
+            <ReportModal
+                isOpen={isReportOpen}
+                onClose={() => setIsReportOpen(false)}
+                targetType="post"
+                targetId={postId}
+                targetOwnerId={post.userEmail || post.userId}
+                onSubmit={handleReportSubmit}
             />
         </article >
     );

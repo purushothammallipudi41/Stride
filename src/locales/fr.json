@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "error": "Quelque chose s'est mal passé",
+        "retry": "Réessayer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "share": "Partager",
+        "report": "Signaler",
+        "follow": "Suivre",
+        "following": "Abonné(e)",
+        "followers": "Abonnés",
+        "posts": "Publications",
+        "search": "Rechercher",
+        "notifications": "Notifications",
+        "settings": "Paramètres",
+        "logout": "Déconnexion",
+        "profile": "Profil",
+        "home": "Accueil",
+        "explore": "Explorer",
+        "messages": "Messages",
+        "more": "Plus",
+        "like": "J'aime",
+        "comment": "Commenter",
+        "send": "Envoyer",
+        "close": "Fermer",
+        "back": "Retour",
+        "next": "Suivant",
+        "skip": "Ignorer",
+        "done": "Terminé",
+        "trending": "Tendances"
+    },
+    "nav": {
+        "home": "Accueil",
+        "explore": "Explorer",
+        "messages": "Messages",
+        "notifications": "Notifications",
+        "profile": "Profil",
+        "servers": "Serveurs",
+        "spaces": "Espaces",
+        "insights": "Statistiques",
+        "dashboard": "Tableau de Bord Créateur",
+        "settings": "Paramètres"
+    },
+    "feed": {
+        "title": "Votre Fil",
+        "whatsOnMind": "À quoi pensez-vous ?",
+        "noPostsYet": "Aucune publication pour l'instant. Suivez des personnes pour voir leurs mises à jour !",
+        "loadMore": "Charger plus de publications"
+    },
+    "explore": {
+        "title": "Explorer",
+        "trendingNow": "Tendances Actuelles",
+        "discoverPeople": "Découvrir des Personnes",
+        "discoverServers": "Découvrir des Serveurs",
+        "searchPlaceholder": "Rechercher personnes, publications, tags..."
+    },
+    "profile": {
+        "editProfile": "Modifier le Profil",
+        "joinedOn": "Inscrit(e) le",
+        "bio": "Biographie",
+        "addBio": "Ajoutez une biographie...",
+        "noPostsYet": "Aucune publication encore",
+        "tip": "Pourboire",
+        "subscribe": "S'abonner"
+    },
+    "settings": {
+        "title": "Paramètres",
+        "account": "Compte",
+        "privacy": "Confidentialité",
+        "notifications": "Notifications",
+        "appearance": "Apparence",
+        "languageRegion": "Langue et Région",
+        "language": "Langue",
+        "region": "Région",
+        "security": "Sécurité",
+        "about": "À propos"
+    },
+    "insights": {
+        "title": "Stride Insights Pro",
+        "subtitle": "Vos statistiques de créateur en un coup d'œil",
+        "impressions": "Impressions",
+        "reach": "Portée",
+        "engagementRate": "Taux d'Engagement",
+        "newFollowers": "Nouveaux Abonnés",
+        "vsLastWeek": "vs semaine dernière",
+        "engagementTrend": "Tendance d'Engagement (7 jours)",
+        "topPosts": "Meilleures Publications",
+        "audienceBreakdown": "Répartition de l'Audience",
+        "likes": "J'aimes",
+        "comments": "Commentaires",
+        "shares": "Partages",
+        "noData": "Aucune donnée encore. Commencez à publier pour voir vos statistiques !"
+    },
+    "hashtag": {
+        "posts": "publications",
+        "trendingRank": "Tendance #{{rank}}",
+        "noPosts": "Aucune publication avec ce hashtag pour l'instant."
+    },
+    "creator": {
+        "dashboard": "Tableau de Bord Créateur",
+        "earnings": "Gains Totaux",
+        "balance": "Solde du Portefeuille",
+        "recentActivity": "Activité Récente"
+    }
+}

@@ -141,6 +141,12 @@
     font-size: 1rem;
     padding: 12px;
     resize: none;
+}
+
+.caption-ai-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
@@ -295,4 +301,160 @@
     border: none;
     font-weight: 700;
     font-size: 1rem;
+}
+
+/* Article Form Styles */
+.article-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 10px;
+}
+
+.article-title-input {
+    background: none;
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 12px 0;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.article-title-input:focus {
+    border-color: var(--color-primary);
+}
+
+.article-content-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    padding: 16px;
+    min-height: 200px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+}
+
+.article-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.setting-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.setting-item input,
+.setting-item select {
+    background: none;
+    border: none;
+    color: white;
+    flex: 1;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.setting-item.no-click {
+    cursor: default;
+}
+
+.mini-toggle {
+    width: 32px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-left: auto;
+    position: relative;
+}
+
+.mini-toggle.active {
+    background: var(--color-primary);
+}
+
+.mini-toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.2s;
+}
+
+.mini-toggle.active::after {
+    left: 16px;
+}
+
+.mini-number-input {
+    width: 50px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.media-capture-boundary.mini {
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: border-color 0.3s;
+}
+
+.media-capture-boundary.mini:hover {
+    border-color: var(--color-primary);
+}
+
+/* Scheduling UI */
+.schedule-input-row {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.date-picker-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.date-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(100%) saturate(500%) hue-rotate(240deg);
+    cursor: pointer;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

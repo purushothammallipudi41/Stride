@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Image, Music, MapPin, Users, Share2, Film, Search, ChevronRight, AlertCircle, ArrowLeft } from 'lucide-react';
+import { X, Camera, Image, Music, MapPin, Users, Share2, Film, Search, ChevronRight, AlertCircle, ArrowLeft, FileText, Globe, Lock as LockIcon, Calendar, Hash } from 'lucide-react';
 import './CreateModal.css';
 import { audiusService } from '../../services/audiusService';
 import { useContent } from '../../context/ContentContext';
@@ -9,6 +9,7 @@ import { useMusic } from '../../context/MusicContext';
 import MediaCapture from '../common/MediaCapture';
 import StoryEditor from './StoryEditor';
 import ImageCropper from './ImageCropper';
+import AIStudio from './AIStudio';
 
 const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, remixData = null }) => {
     const { addPost, fetchStories, addStory } = useContent();
@@ -46,6 +47,17 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
     const [isEditing, setIsEditing] = useState(false);
     const [isCropping, setIsCropping] = useState(false);
     const [tempMedia, setTempMedia] = useState(null);
+    const [isScheduled, setIsScheduled] = useState(false);
+    const [scheduledDate, setScheduledDate] = useState('');
+    const [articleData, setArticleData] = useState({
+        title: '',
+        content: '',
+        tags: '',
+        isWiki: false,
+        serverId: '',
+        isLocked: false,
+        unlockPrice: 0
+    });
 
     useEffect(() => {
         if (!searchQuery) {
@@ -111,7 +123,38 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
         }
     }, [capturedMedia, activeTab]);
 
+    const [isModerating, setIsModerating] = useState(false);
+
     const handleShare = async (editedMediaUrl = null) => {
+        // AI Safety Guard for Phase 31
+        if (caption.trim() || (activeTab === 'article' && articleData.title)) {
+            setIsModerating(true);
+            try {
+                const textToCheck = activeTab === 'article'
+                    ? `${articleData.title} ${articleData.content}`
+                    : caption;
+
+                const modRes = await fetch(`${config.API_URL}/api/ai/moderate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textToCheck })
+                });
+                const modData = await modRes.json();
+
+                if (!modData.isSafe) {
+                    const proceed = window.confirm(`⚠️ AI Safety Warning: Your content was flagged for "${modData.reason}". Are you sure you want to proceed? (Toxicity: ${Math.round(modData.toxicityScore * 100)}%)`);
+                    if (!proceed) {
+                        setIsModerating(false);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error("Moderation check failed", e);
+            } finally {
+                setIsModerating(false);
+            }
+        }
+
         let mediaUrl = editedMediaUrl || capturedMedia?.url || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format';
         const isBlob = mediaUrl.startsWith('blob:');
 
@@ -153,8 +196,41 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
             taggedUsers: selections.people.map(u => u.username),
             isSensitive,
             isRemix: !!selections.parentPostId,
-            parentPostId: selections.parentPostId
+            parentPostId: selections.parentPostId,
+            status: isScheduled ? 'scheduled' : 'published',
+            scheduledFor: isScheduled ? scheduledDate : null
         };
+
+        if (activeTab === 'article') {
+            const articlePayload = {
+                title: articleData.title,
+                content: articleData.content,
+                tags: articleData.tags.split(',').map(t => t.trim()).filter(t => t),
+                isWiki: articleData.isWiki,
+                serverId: articleData.serverId || null,
+                isLocked: articleData.isLocked,
+                unlockPrice: articleData.unlockPrice,
+                coverImage: mediaUrl
+            };
+
+            try {
+                const res = await fetch(`${config.API_URL}/api/articles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(articlePayload)
+                });
+                if (res.ok) {
+                    onClose();
+                    return true;
+                }
+            } catch (e) {
+                console.error('Article creation failed', e);
+            }
+            return false;
+        }
 
         const success = await (activeTab === 'story' ? addStory({
             userId: user.email,
@@ -200,7 +276,7 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                             <>
                                 {!lockTab && (
                                     <div className="modal-tabs">
-                                        {(initialTab === 'story' ? ['story'] : ['post', 'reel']).map(tab => (
+                                        {(initialTab === 'story' ? ['story'] : ['post', 'reel', 'article']).map(tab => (
                                             <button
                                                 key={tab}
                                                 className={`tab ${activeTab === tab ? 'active' : ''}`}
@@ -209,6 +285,7 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                                                 {tab === 'post' && <Image size={20} />}
                                                 {tab === 'story' && <Camera size={20} />}
                                                 {tab === 'reel' && <Film size={20} />}
+                                                {tab === 'article' && <FileText size={20} />}
                                                 <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
                                             </button>
                                         ))}
@@ -216,7 +293,81 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                                 )}
 
                                 <div className="modal-body">
-                                    {isCropping ? (
+                                    {activeTab === 'article' && !capturedMedia ? (
+                                        <div className="article-create-form animate-in">
+                                            <input
+                                                type="text"
+                                                placeholder="Article Title"
+                                                className="article-title-input"
+                                                value={articleData.title}
+                                                onChange={e => setArticleData({ ...articleData, title: e.target.value })}
+                                            />
+                                            <textarea
+                                                placeholder="Write your article here... (HTML supported)"
+                                                className="article-content-input"
+                                                value={articleData.content}
+                                                onChange={e => setArticleData({ ...articleData, content: e.target.value })}
+                                            />
+                                            <div className="article-settings-grid">
+                                                <div className="setting-item">
+                                                    <Hash size={16} />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Tags (comma separated)"
+                                                        value={articleData.tags}
+                                                        onChange={e => setArticleData({ ...articleData, tags: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="setting-item" onClick={() => setArticleData({ ...articleData, isWiki: !articleData.isWiki })}>
+                                                    <Globe size={16} color={articleData.isWiki ? 'var(--color-primary)' : 'inherit'} />
+                                                    <span>Server Wiki?</span>
+                                                    <div className={`mini-toggle ${articleData.isWiki ? 'active' : ''}`} />
+                                                </div>
+                                                {articleData.isWiki && (
+                                                    <div className="setting-item">
+                                                        <Users size={16} />
+                                                        <select
+                                                            value={articleData.serverId}
+                                                            onChange={e => setArticleData({ ...articleData, serverId: e.target.value })}
+                                                        >
+                                                            <option value="">Select Community</option>
+                                                            {user?.servers?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                                        </select>
+                                                    </div>
+                                                )}
+                                                <div className="setting-item" onClick={() => setArticleData({ ...articleData, isLocked: !articleData.isLocked })}>
+                                                    <LockIcon size={16} color={articleData.isLocked ? '#facc15' : 'inherit'} />
+                                                    <span>Paywall?</span>
+                                                    <div className={`mini-toggle ${articleData.isLocked ? 'active' : ''}`} />
+                                                </div>
+                                                {articleData.isLocked && (
+                                                    <div className="setting-item no-click">
+                                                        <span>Price</span>
+                                                        <input
+                                                            type="number"
+                                                            className="mini-number-input"
+                                                            value={articleData.unlockPrice}
+                                                            onChange={e => setArticleData({ ...articleData, unlockPrice: parseInt(e.target.value) })}
+                                                        />
+                                                        <span>🪙</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="media-capture-boundary mini" style={{ height: '120px', marginTop: '10px' }}>
+                                                <MediaCapture
+                                                    type="image"
+                                                    onCapture={(url) => setCapturedMedia({ url, type: 'image' })}
+                                                    label="Add Cover Image"
+                                                />
+                                            </div>
+
+                                            <AIStudio
+                                                mode="article"
+                                                currentCaption={articleData.title}
+                                                onInsert={(html) => setArticleData(prev => ({ ...prev, content: prev.content + html }))}
+                                            />
+                                        </div>
+                                    ) : isCropping ? (
                                         <div className="cropper-boundary animate-in">
                                             <ImageCropper
                                                 src={tempMedia.url}
@@ -253,7 +404,22 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                                                 }
                                             </div>
                                             <div className="post-options">
-                                                <textarea placeholder="Write a caption..." value={caption} onChange={(e) => setCaption(e.target.value)} />
+                                                <div className="caption-ai-group">
+                                                    <textarea
+                                                        placeholder="Write a caption..."
+                                                        value={caption}
+                                                        onChange={(e) => setCaption(e.target.value)}
+                                                    />
+                                                    <AIStudio
+                                                        mode={activeTab}
+                                                        currentCaption={caption}
+                                                        onInsert={(text) => setCaption(prev => prev + text)}
+                                                        onInsertMedia={(url) => {
+                                                            setCapturedMedia({ url, type: 'image' });
+                                                            setIsCropping(false);
+                                                        }}
+                                                    />
+                                                </div>
                                                 <div className="options-list">
                                                     <div className="option-item" onClick={() => setActiveSearch('location')}>
                                                         <MapPin size={20} /> <span>{selections.location || 'Add Location'}</span>
@@ -274,6 +440,29 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                                                             <div className="knob" />
                                                         </div>
                                                     </div>
+
+                                                    <div className="option-item schedule-toggle" onClick={() => setIsScheduled(!isScheduled)}>
+                                                        <Calendar size={20} style={{ color: isScheduled ? 'var(--color-primary)' : '#888' }} />
+                                                        <div className="toggle-label">
+                                                            <span>Schedule Post</span>
+                                                            <p>Queue this post for a future date</p>
+                                                        </div>
+                                                        <div className={`toggle-switch ${isScheduled ? 'active' : ''}`}>
+                                                            <div className="knob" />
+                                                        </div>
+                                                    </div>
+
+                                                    {isScheduled && (
+                                                        <div className="schedule-input-row animate-in">
+                                                            <input
+                                                                type="datetime-local"
+                                                                className="date-picker-input"
+                                                                value={scheduledDate}
+                                                                onChange={(e) => setScheduledDate(e.target.value)}
+                                                                min={new Date().toISOString().slice(0, 16)}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -282,7 +471,13 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
 
                                 {capturedMedia && (
                                     <div className="modal-footer">
-                                        <button className="main-share-btn" onClick={() => handleShare()}>Share to {activeTab}</button>
+                                        <button
+                                            className="main-share-btn"
+                                            disabled={isModerating}
+                                            onClick={() => handleShare()}
+                                        >
+                                            {isModerating ? 'Safety Check...' : `Share to ${activeTab}`}
+                                        </button>
                                     </div>
                                 )}
                             </>
@@ -336,7 +531,6 @@ const CreateModal = ({ isOpen, onClose, initialTab = 'post', lockTab = false, re
                                                         people: [...selections.people, result]
                                                     });
                                                 }
-                                                // Keep search open for more tagging
                                             }
                                         }}>
                                             {activeSearch === 'music' ? (

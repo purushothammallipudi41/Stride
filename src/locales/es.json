@@ -1,0 +1,108 @@
+{
+    "common": {
+        "loading": "Cargando...",
+        "error": "Algo salió mal",
+        "retry": "Reintentar",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "share": "Compartir",
+        "report": "Reportar",
+        "follow": "Seguir",
+        "following": "Siguiendo",
+        "followers": "Seguidores",
+        "posts": "Publicaciones",
+        "search": "Buscar",
+        "notifications": "Notificaciones",
+        "settings": "Configuración",
+        "logout": "Cerrar sesión",
+        "profile": "Perfil",
+        "home": "Inicio",
+        "explore": "Explorar",
+        "messages": "Mensajes",
+        "more": "Más",
+        "like": "Me gusta",
+        "comment": "Comentar",
+        "send": "Enviar",
+        "close": "Cerrar",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "skip": "Omitir",
+        "done": "Listo",
+        "trending": "Tendencias"
+    },
+    "nav": {
+        "home": "Inicio",
+        "explore": "Explorar",
+        "messages": "Mensajes",
+        "notifications": "Notificaciones",
+        "profile": "Perfil",
+        "servers": "Servidores",
+        "spaces": "Espacios",
+        "insights": "Estadísticas",
+        "dashboard": "Panel del Creador",
+        "settings": "Configuración"
+    },
+    "feed": {
+        "title": "Tu Feed",
+        "whatsOnMind": "¿Qué estás pensando?",
+        "noPostsYet": "Sin publicaciones aún. ¡Sigue a personas para ver sus actualizaciones!",
+        "loadMore": "Cargar más publicaciones"
+    },
+    "explore": {
+        "title": "Explorar",
+        "trendingNow": "Trending Ahora",
+        "discoverPeople": "Descubrir Personas",
+        "discoverServers": "Descubrir Servidores",
+        "searchPlaceholder": "Buscar personas, publicaciones, etiquetas..."
+    },
+    "profile": {
+        "editProfile": "Editar Perfil",
+        "joinedOn": "Se unió el",
+        "bio": "Biografía",
+        "addBio": "Agrega una biografía...",
+        "noPostsYet": "Sin publicaciones aún",
+        "tip": "Dar propina",
+        "subscribe": "Suscribirse"
+    },
+    "settings": {
+        "title": "Configuración",
+        "account": "Cuenta",
+        "privacy": "Privacidad",
+        "notifications": "Notificaciones",
+        "appearance": "Apariencia",
+        "languageRegion": "Idioma y Región",
+        "language": "Idioma",
+        "region": "Región",
+        "security": "Seguridad",
+        "about": "Acerca de"
+    },
+    "insights": {
+        "title": "Stride Insights Pro",
+        "subtitle": "Tus estadísticas de creador de un vistazo",
+        "impressions": "Impresiones",
+        "reach": "Alcance",
+        "engagementRate": "Tasa de Participación",
+        "newFollowers": "Nuevos Seguidores",
+        "vsLastWeek": "vs semana pasada",
+        "engagementTrend": "Tendencia de Participación (7 días)",
+        "topPosts": "Mejores Publicaciones",
+        "audienceBreakdown": "Desglose de Audiencia",
+        "likes": "Me gustas",
+        "comments": "Comentarios",
+        "shares": "Compartidos",
+        "noData": "Sin datos aún. ¡Empieza a publicar para ver tus estadísticas!"
+    },
+    "hashtag": {
+        "posts": "publicaciones",
+        "trendingRank": "Tendencia #{{rank}}",
+        "noPosts": "Aún no hay publicaciones con este hashtag."
+    },
+    "creator": {
+        "dashboard": "Panel del Creador",
+        "earnings": "Ganancias Totales",
+        "balance": "Saldo de la Cartera",
+        "recentActivity": "Actividad Reciente"
+    }
+}

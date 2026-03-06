@@ -23,18 +23,17 @@
 }
 
 .story-avatar-container {
-    width: 64px;
-    height: 64px;
+    width: 66px;
+    height: 66px;
     border-radius: 50%;
-    padding: 3px;
-    /* Space for ring */
     position: relative;
-    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .story-avatar-container.has-story {
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    /* This creates the gradient border effect */
+    pointer-events: auto;
 }
 
 /* Inner white border to separate image from gradient */
@@ -55,16 +54,24 @@
 
 .add-story-badge {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    background-color: var(--color-primary);
-    border: 2px solid var(--color-bg);
+    bottom: 0px;
+    right: 0px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border: 2px solid #0f172a;
     border-radius: 50%;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.add-story-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
 }
 
 .story-username {

@@ -136,55 +136,19 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-.gif-grid {
+.gif-grid-container {
     flex: 1;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    padding: 12px;
+    padding: 10px;
 }
 
-.gif-item {
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.03);
-    position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.02);
-    width: 100%;
-    padding-bottom: 100%;
-    /* Force 1:1 ratio safely */
-    flex-shrink: 0;
+.gif-grid-container::-webkit-scrollbar {
+    width: 4px;
 }
 
-.gif-item img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
-}
-
-.gif-item:hover img {
-    transform: scale(1.05);
-}
-
-.gif-loader {
-    grid-column: span 3;
-    display: flex;
-    justify-content: center;
-    padding: 40px;
-    color: var(--color-primary);
-}
-
-.no-results {
-    grid-column: span 3;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    padding: 40px;
+.gif-grid-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
 .tenor-attribution {
@@ -196,4 +160,34 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
+}
+.server-stickers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    padding: 10px;
+}
+
+.server-sticker-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.server-sticker-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.05);
+    border-color: var(--color-primary);
+}
+
+.server-sticker-item img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
 }

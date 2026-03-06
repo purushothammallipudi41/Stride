@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music } from 'lucide-react';
+import { Share2, Grid, Film, Bookmark, Settings as SettingsIcon, X, MoreHorizontal, BadgeCheck, ArrowLeft, Heart, MessageCircle, Gift, Gem, Music, Image as ImageIcon, BarChart2, Trophy } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUtils';
 import { createPortal } from 'react-dom';
 import config from '../config';
@@ -17,13 +17,22 @@ import RewardsPanel from '../components/profile/RewardsPanel';
 import { useMusic } from '../context/MusicContext';
 import { useSocket } from '../context/SocketContext';
 import { Radio } from 'lucide-react';
+import UserAvatar from '../components/common/UserAvatar';
+import TipModal from '../components/chat/TipModal';
+import SubscriptionModal from '../components/profile/SubscriptionModal';
+import { useToast } from '../context/ToastContext';
+import ReportModal from '../components/common/ReportModal';
+
+
 
 const Profile = () => {
     const { user: currentUser, refreshUser, logout } = useAuth();
     const { identifier } = useParams();
     const navigate = useNavigate();
-    const { posts: allPosts, savedPosts, fetchPosts } = useContent();
+    const { posts: allPosts, savedPosts, fetchPosts, reportContent } = useContent();
     const { addNotification, unreadCount } = useNotifications();
+    const { liveVibes } = useSocket();
+    const { joinVibeSession, sessionHost } = useMusic();
     const [profileUser, setProfileUser] = useState(null);
     const [userPosts, setUserPosts] = useState([]);
     const [userReels, setUserReels] = useState([]);
@@ -35,6 +44,13 @@ const Profile = () => {
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
+    const [isTipModalOpen, setIsTipModalOpen] = useState(false);
+    const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const { blockUser } = useAuth();
+    const { showToast } = useToast();
+
+
 
     const isOwnProfile = !identifier || identifier === currentUser?.username || identifier === currentUser?.email || identifier === currentUser?.id;
 
@@ -214,122 +230,87 @@ const Profile = () => {
         }
     ];
 
-    const { liveVibes } = useSocket();
-    const { joinVibeSession, sessionHost } = useMusic();
 
     const isLive = liveVibes?.has(profileUser.email);
     const isSyncedWithThisUser = sessionHost === profileUser.email;
 
     return (
         <>
-            <div className="profile-container">
+            <div className={`profile-container ${profileUser.unlockedPerks?.includes('void_theme') ? 'void-theme' : ''}`}>
                 <div className="profile-header-content">
-                    {/* New Integrated Header (One step below top nav) */}
-                    <div className="profile-top-controls">
-                        <div className="controls-left">
+                    {/* Profile Banner Area */}
+                    <div className="profile-banner-section">
+                        {profileUser.bannerUrl ? (
+                            <img src={getImageUrl(profileUser.bannerUrl, 'banner')} alt="" className="profile-banner-img" />
+                        ) : (
+                            <div className="profile-banner-placeholder"></div>
+                        )}
+
+                        {/* Overlay Controls on Banner */}
+                        <div className="banner-overlay-controls">
                             {!isOwnProfile && (
-                                <button
-                                    className="nav-btn-back"
-                                    onClick={() => navigate(-1)}
-                                >
+                                <button className="banner-icon-btn back-btn" onClick={() => navigate(-1)}>
                                     <ArrowLeft size={20} />
                                 </button>
                             )}
-                            <h2 className={`nav-username ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`}>
-                                {profileUser.username}
-                                {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
-                                {profileUser.unlockedPerks?.includes('custom_status') && <Gem className="custom-status-badge" size={18} color="#00ffcc" fill="rgba(0, 255, 204, 0.2)" />}
-                            </h2>
-                            {!isOwnProfile && (
-                                <div className="vibe-match-badge" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', marginLeft: '8px' }}>
-                                    <Heart size={12} fill="#ffab00" />
-                                    {Math.floor(Math.random() * 20) + 80}% Vibe Match
-                                </div>
-                            )}
-                        </div>
-                        <div className="controls-right">
-                            {isOwnProfile ? (
-                                <>
-                                    <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={20} />
-                                    </button>
-                                    <button className="nav-icon-btn settings-btn" onClick={() => navigate('/settings')} title="Settings">
-                                        <SettingsIcon size={20} />
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button className="nav-icon-btn" onClick={() => setShareModalOpen(true)}>
-                                        <Share2 size={20} />
-                                    </button>
-                                    <button className="nav-icon-btn" onClick={() => setShowMoreMenu(!showMoreMenu)}>
-                                        <MoreHorizontal size={20} />
-                                    </button>
-                                    {showMoreMenu && (
-                                        <div className="more-dropdown glass-card">
-                                            <button onClick={async () => {
-                                                setShowMoreMenu(false);
-                                                if (!currentUser) return alert('Login required');
-                                                if (window.confirm(`Are you sure you want to block ${profileUser.username}? Their content will be hidden.`)) {
-                                                    try {
-                                                        const res = await fetch(`${config.API_URL}/api/users/${profileUser.id || profileUser._id}/block`, {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ currentUserId: currentUser.id || currentUser._id })
-                                                        });
-                                                        if (res.ok) {
-                                                            alert('User blocked');
-                                                            await refreshUser();
+                            <div className="banner-actions-right">
+                                {isOwnProfile ? (
+                                    <>
+                                        <button className="banner-icon-btn" onClick={() => setShareModalOpen(true)}>
+                                            <Share2 size={18} />
+                                        </button>
+                                        <button className="banner-icon-btn" onClick={() => navigate('/settings')} title="Settings">
+                                            <SettingsIcon size={18} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button className="banner-icon-btn" onClick={() => setShareModalOpen(true)}>
+                                            <Share2 size={18} />
+                                        </button>
+                                        <button className="banner-icon-btn" onClick={() => setShowMoreMenu(!showMoreMenu)}>
+                                            <MoreHorizontal size={18} />
+                                        </button>
+                                        {showMoreMenu && (
+                                            <div className="more-dropdown glass-card">
+                                                <button onClick={async () => {
+                                                    setShowMoreMenu(false);
+                                                    if (!currentUser) return showToast('Login required', 'info');
+                                                    if (window.confirm(`Are you sure you want to block ${profileUser.username}?`)) {
+                                                        const success = await blockUser(profileUser.id || profileUser._id);
+                                                        if (success) {
+                                                            showToast(`Blocked ${profileUser.username}`, 'success');
                                                             navigate('/');
+                                                        } else {
+                                                            showToast('Failed to block user', 'error');
                                                         }
-                                                    } catch (e) { alert('Failed to block user'); }
-                                                }
-                                            }}>Block User</button>
-                                            <button onClick={async () => {
-                                                setShowMoreMenu(false);
-                                                if (!currentUser) return alert('Login required');
-                                                await fetch(`${config.API_URL}/api/report`, {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({
-                                                        reporterId: currentUser.id || currentUser._id,
-                                                        targetId: profileUser.id || profileUser._id,
-                                                        targetType: 'user',
-                                                        reason: 'spam_or_abuse'
-                                                    })
-                                                });
-                                                alert('User reported');
-                                            }}>Report User</button>
-                                            <button onClick={() => { setShowMoreMenu(false); navigator.clipboard.writeText(window.location.href); alert('Link Copied'); }}>Copy Link</button>
-                                        </div>
-                                    )}
-                                </>
-                            )}
+                                                    }
+                                                }}>Block User</button>
+                                                <button onClick={() => {
+                                                    setShowMoreMenu(false);
+                                                    setIsReportModalOpen(true);
+                                                }}>Report User</button>
+                                                <button onClick={() => { setShowMoreMenu(false); navigator.clipboard.writeText(window.location.href); showToast('Link Copied', 'success'); }}>Copy Profile Link</button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                     {/* Top Row: Avatar + Stats */}
                     <div className="profile-top-row">
-                        <div
-                            className={`profile-avatar-container ${isLive ? 'live' : ''} ${profileUser.activeAvatarFrame ? profileUser.activeAvatarFrame.replace(/_/g, '-') : ''}`}
+                        <UserAvatar
+                            user={{
+                                ...profileUser,
+                                activeAvatarFrame: profileUser.activeAvatarFrame
+                            }}
+                            size="lg"
+                            className="profile-avatar-large"
+                            isStory={false}
+                            isLive={isLive}
                             onClick={() => setIsAvatarOpen(true)}
-                        >
-                            {profileUser.avatar ? (
-                                <img
-                                    src={getImageUrl(profileUser.avatar, 'user')}
-                                    alt={profileUser.username}
-                                    className="profile-avatar-large"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = getImageUrl(null, 'user');
-                                    }}
-                                />
-                            ) : (
-                                <div className="profile-avatar-placeholder">
-                                    {profileUser.username[0].toUpperCase()}
-                                </div>
-                            )}
-                            {isLive && <div className="live-badge-small">Live</div>}
-                        </div>
+                        />
 
                         <div className="profile-stats">
                             {stats.map((stat, i) => (
@@ -347,11 +328,22 @@ const Profile = () => {
 
                     {/* Middle Row: Name + Bio */}
                     <div className="profile-bio-section">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <p className="profile-name" style={{ margin: 0 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <h2 className={`nav-username ${profileUser.unlockedPerks?.includes('gold_name') ? 'gold-username' : ''}`} style={{ fontSize: '1.2rem', marginBottom: '0' }}>
+                                {profileUser.username}
+                                {profileUser.isOfficial && <BadgeCheck size={16} color="var(--color-primary)" fill="var(--color-primary-glow)" />}
+                            </h2>
+                            <p className="profile-name" style={{ margin: 0, opacity: 0.8, fontSize: '0.95rem' }}>
                                 {profileUser.name || profileUser.username}
                             </p>
                         </div>
+                        {profileUser.status && (
+                            <p className="profile-status-text">
+                                <span className="status-quote">“</span>
+                                {profileUser.status}
+                                <span className="status-quote">”</span>
+                            </p>
+                        )}
                         <p className="profile-bio-text">{profileUser.bio}</p>
                         {profileUser.unlockedPerks?.includes('profile_audio') && profileUser.profileThemeUrl && (
                             <div className="profile-theme-song glass-card" style={{ marginTop: '12px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px', borderRadius: '30px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)', border: isPlayingTheme ? '1px solid var(--color-primary)' : '1px solid rgba(255,255,255,0.1)' }} onClick={toggleProfileTheme}>
@@ -379,6 +371,12 @@ const Profile = () => {
                                 <button className="dashboard-link-btn" onClick={() => navigate('/dashboard')}>
                                     Professional Dashboard
                                 </button>
+                                <button className="banner-icon-btn" onClick={() => navigate('/insights')} title="Insights">
+                                    <BarChart2 size={18} />
+                                </button>
+                                <button className="banner-icon-btn" onClick={() => navigate('/achievements')} title="Achievements">
+                                    <Trophy size={18} />
+                                </button>
                             </>
                         ) : (
                             <>
@@ -387,19 +385,46 @@ const Profile = () => {
                                         <Radio size={18} /> Join Vibe
                                     </button>
                                 )}
-                                <button
-                                    className={`follow-btn ${isFollowing ? 'following' : 'primary-btn'}`}
-                                    onClick={handleFollow}
-                                >
-                                    {isFollowing ? 'Following' : 'Follow'}
-                                </button>
                                 <button className="message-btn" onClick={() => navigate(`/messages?user=${profileUser.email}`)}>
                                     Message
+                                </button>
+                                <button className="subscribe-btn primary-btn" onClick={() => setIsSubModalOpen(true)}>
+                                    Subscribe
+                                </button>
+                                <button className="tip-btn banner-icon-btn" onClick={() => setIsTipModalOpen(true)} title="Send Tip">
+                                    <Gem size={20} />
                                 </button>
                             </>
                         )}
                     </div>
                 </div>
+
+                {isSubModalOpen && (
+                    <SubscriptionModal
+                        creator={profileUser}
+                        onClose={() => setIsSubModalOpen(false)}
+                        onSubscribe={async (tier) => {
+                            // Implementation of real subscription API call
+                            showToast(`Subscribed to ${tier.name}!`, 'success');
+                            setIsSubModalOpen(false);
+                            refreshUser();
+                        }}
+                    />
+                )}
+
+
+                {isTipModalOpen && (
+                    <TipModal
+                        recipientEmail={profileUser.email}
+                        recipientUsername={profileUser.username}
+                        onClose={() => setIsTipModalOpen(false)}
+                        onSuccess={(newBalance) => {
+                            showToast(`Success! Tipped @${profileUser.username}`, 'success');
+                            refreshUser(); // Update credit balance in header
+                        }}
+                    />
+                )}
+
 
                 {/* Tabs */}
                 <div className="profile-tabs">
@@ -524,6 +549,23 @@ const Profile = () => {
                     onClose={() => setSelectedPost(null)}
                 />
             )}
+
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                targetType="user"
+                targetId={profileUser.id || profileUser._id}
+                targetOwnerId={profileUser.email}
+                onSubmit={async (data) => {
+                    const success = await reportContent(data);
+                    if (success) {
+                        showToast('User reported. Thank you.', 'success');
+                        setIsReportModalOpen(false);
+                    } else {
+                        showToast('Failed to submit report', 'error');
+                    }
+                }}
+            />
         </>
     );
 };

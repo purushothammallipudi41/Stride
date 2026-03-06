@@ -22,6 +22,14 @@ const UserAvatar = memo(({ user, size = 'md', className = '', showOnline = false
                 <div className={`online-indicator ${user?.isOnline ? 'online' : ''}`} />
             )}
 
+            {isLive && <div className="live-badge-small">Live</div>}
+
+            {user?.status && size === 'lg' && (
+                <div className="profile-status-indicator" title={user.status}>
+                    <div className="status-dot"></div>
+                </div>
+            )}
+
             {activeFrame === 'holographic_ring' && <div className="holo-ring-fx" />}
             {activeFrame === 'neon_frame' && <div className="neon-frame-fx" />}
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Plus } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
 import UserAvatar from '../common/UserAvatar';
 import './StoriesRail.css';
@@ -20,7 +20,7 @@ const StoriesRail = () => {
     }, []);
 
     const handleYourStoryClick = () => {
-        const userStories = stories.filter(s => s.userId === user?.email);
+        const userStories = stories.filter(s => s.userId === (user?.id || user?.email));
         if (userStories.length > 0) {
             setViewingStoryId(userStories[0]._id || userStories[0].id);
         } else {
@@ -29,8 +29,8 @@ const StoriesRail = () => {
         }
     };
 
-    const userStory = stories.find(s => s.userId === user?.email);
-    const otherStories = stories.filter(s => s.userId !== user?.email);
+    const userStory = stories.find(s => s.userId === (user?.id || user?.email));
+    const otherStories = stories.filter(s => s.userId !== (user?.id || user?.email));
 
     return (
         <div className="stories-section">
@@ -39,11 +39,18 @@ const StoriesRail = () => {
                 className="story-card user-story-card"
                 onClick={handleYourStoryClick}
             >
-                <UserAvatar
-                    user={user}
-                    isStory={true}
-                    isViewed={!userStory}
-                />
+                <div className="story-avatar-container">
+                    <UserAvatar
+                        user={user}
+                        isStory={true}
+                        isViewed={!userStory}
+                    />
+                    {!userStory && (
+                        <div className="add-story-badge">
+                            <Plus size={14} color="white" strokeWidth={3} />
+                        </div>
+                    )}
+                </div>
                 <span className="story-username">Your Story</span>
             </div>
 

@@ -12,7 +12,17 @@ export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState(new Set());
     const [liveVibes, setLiveVibes] = useState(new Set());
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
+
+    useEffect(() => {
+        if (socket && user) {
+            socket.on('token-balance-updated', (data) => {
+                console.log('[SOCKET] Token balance update received:', data);
+                refreshUser();
+            });
+            return () => socket.off('token-balance-updated');
+        }
+    }, [socket, user, refreshUser]);
 
     useEffect(() => {
         // Connect to the backend

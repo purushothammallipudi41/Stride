@@ -11,6 +11,8 @@ const SearchPage = () => {
     const [query, setQuery] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // all, users, channels
     const [userResults, setUserResults] = useState([]);
+    const [serverResults, setServerResults] = useState([]);
+    const [messageResults, setMessageResults] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -39,10 +41,12 @@ const SearchPage = () => {
         const debounce = setTimeout(async () => {
             setLoading(true);
             try {
-                const res = await fetch(`${config.API_URL}/api/users/search?q=${encodeURIComponent(query)}`);
+                const res = await fetch(`${config.API_URL}/api/search/global?q=${encodeURIComponent(query)}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setUserResults(data || []);
+                    setUserResults(data.users || []);
+                    setServerResults(data.servers || []);
+                    setMessageResults(data.messages || []);
                 }
             } catch (error) {
                 console.error('Search failed:', error);
@@ -100,7 +104,7 @@ const SearchPage = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '20px' }}>
-                    {['All', 'Users', 'Channels'].map(tab => (
+                    {['All', 'Users', 'Servers', 'Messages'].map(tab => (
                         <div
                             key={tab}
                             onClick={() => setActiveTab(tab.toLowerCase())}
@@ -173,39 +177,61 @@ const SearchPage = () => {
                             </div>
                         )}
 
-                        {/* Channels Section (Mocked for now as backend lacks a dedicated channel search endpoint) */}
-                        {(activeTab === 'all' || activeTab === 'channels') && query.length > 2 && (
-                            <div style={{ marginTop: activeTab === 'all' ? '1rem' : 0 }}>
-                                {activeTab === 'all' && userResults.length > 0 && <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '1rem 0' }} />}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    {['general', 'announcements', 'lounge', 'dev-chat'].filter(c => c.includes(query.toLowerCase())).map(channel => (
-                                        <div
-                                            key={channel}
-                                            onClick={() => navigate('/servers/0')}
-                                            className="search-result-item"
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '15px',
-                                                padding: '12px',
-                                                background: 'rgba(255,255,255,0.03)',
-                                                borderRadius: '12px',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                border: '1px solid rgba(255,255,255,0.05)'
-                                            }}
-                                        >
-                                            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Hash size={24} color="var(--color-primary)" />
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>#{channel}</div>
-                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Official Stride Server</div>
-                                            </div>
-                                            <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
+                        {/* Servers Section */}
+                        {(activeTab === 'all' || activeTab === 'servers') && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {serverResults.map(server => (
+                                    <div
+                                        key={server._id || server.id}
+                                        onClick={() => navigate(`/servers/${server.id}`)}
+                                        className="search-result-item"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '15px',
+                                            padding: '12px',
+                                            background: 'rgba(255,255,255,0.03)',
+                                            borderRadius: '12px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            border: '1px solid rgba(255,255,255,0.05)'
+                                        }}
+                                    >
+                                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                            {server.icon ? <img src={server.icon} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Hash size={24} color="var(--color-primary)" />}
                                         </div>
-                                    ))}
-                                </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white' }}>{server.name}</div>
+                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{server.description || 'Striders Community'}</div>
+                                        </div>
+                                        <ArrowLeft style={{ transform: 'rotate(180deg)', opacity: 0.5 }} size={20} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Messages Section */}
+                        {(activeTab === 'all' || activeTab === 'messages') && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {messageResults.map(msg => (
+                                    <div
+                                        key={msg._id || msg.id}
+                                        onClick={() => navigate(`/servers/${msg.serverId}/${msg.channelId}`)}
+                                        style={{
+                                            padding: '12px',
+                                            background: 'rgba(255,255,255,0.02)',
+                                            borderRadius: '12px',
+                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-primary)' }}>{msg.username}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{msg.time}</div>
+                                        </div>
+                                        <div style={{ color: 'white', fontSize: '0.95rem' }}>{msg.text}</div>
+                                    </div>
+                                ))}
                             </div>
                         )}
 

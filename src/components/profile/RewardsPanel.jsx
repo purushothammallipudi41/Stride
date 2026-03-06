@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useHaptics } from '../../context/HapticContext';
 import { Sparkles, Gift, Shield, Star, Award, Zap, Disc, MessageSquare, Music } from 'lucide-react';
+import Lottie from 'lottie-react';
 import config from '../../config';
 import './RewardsPanel.css';
 
 const RewardsPanel = () => {
     const { user, refreshUser } = useAuth();
     const { showToast } = useToast();
+    const { vibrateSuccess, vibrateError } = useHaptics();
     const [claiming, setClaiming] = useState(false);
+    const [showCelebration, setShowCelebration] = useState(false);
 
     // Mock shop items
     const shopItems = [
@@ -32,9 +36,13 @@ const RewardsPanel = () => {
 
             if (res.ok) {
                 const data = await res.json();
+                vibrateSuccess();
+                setShowCelebration(true);
+                setTimeout(() => setShowCelebration(false), 3000);
                 showToast(`Claimed ${data.amount} Vibe Tokens!`, 'success');
                 await refreshUser();
             } else {
+                vibrateError();
                 const err = await res.json();
                 showToast(err.error || 'Failed to claim', 'error');
             }
@@ -67,9 +75,11 @@ const RewardsPanel = () => {
             });
 
             if (res.ok) {
+                vibrateSuccess();
                 showToast(`Unlocked ${item.name}!`, 'success');
                 await refreshUser();
             } else {
+                vibrateError();
                 const err = await res.json();
                 showToast(err.error || 'Failed to purchase', 'error');
             }
@@ -129,6 +139,45 @@ const RewardsPanel = () => {
                 </div>
             </div>
 
+            {/* AI Missions */}
+            <div className="ai-missions-section glass-card">
+                <div className="missions-header">
+                    <h3 className="section-title"><Sparkles size={20} className="pulse-purple" /> AI Vibe Missions</h3>
+                    <span className="ai-badge">AI POWERED</span>
+                </div>
+                <p className="section-subtitle">Earn bonus VT by being a positive part of the community.</p>
+
+                <div className="missions-list">
+                    <div className="mission-card">
+                        <div className="mission-info">
+                            <div className="mission-icon"><MessageSquare size={18} /></div>
+                            <div className="mission-details">
+                                <h4>Vibe Builder</h4>
+                                <p>Send 5 positive messages in any channel today.</p>
+                            </div>
+                        </div>
+                        <div className="mission-reward">
+                            <span>+50 VT</span>
+                            <button className="claim-mission-btn disabled" disabled>In Progress</button>
+                        </div>
+                    </div>
+
+                    <div className="mission-card">
+                        <div className="mission-info">
+                            <div className="mission-icon"><Zap size={18} /></div>
+                            <div className="mission-details">
+                                <h4>Audio Enthusiast</h4>
+                                <p>Stay in an Audio Space for 15 minutes.</p>
+                            </div>
+                        </div>
+                        <div className="mission-reward">
+                            <span>+100 VT</span>
+                            <button className="claim-mission-btn primary-btn" onClick={() => handleClaimDaily()}>Claim</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Achievements Log */}
             <div className="achievements-section glass-card">
                 <h3 className="section-title"><Award size={20} /> Recent Achievements</h3>
@@ -146,6 +195,25 @@ const RewardsPanel = () => {
                     </div>
                 </div>
             </div>
+
+            {showCelebration && (
+                <div style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '300px',
+                    height: '300px',
+                    zIndex: 1000,
+                    pointerEvents: 'none'
+                }}>
+                    <Lottie
+                        animationData={null} // We would pass the JSON here
+                        loop={false}
+                        path="https://assets10.lottiefiles.com/packages/lf20_u4yrau.json"
+                    />
+                </div>
+            )}
         </div>
     );
 };

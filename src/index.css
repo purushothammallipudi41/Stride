@@ -65,8 +65,8 @@
   --transition-fast: all 0.2s ease;
 
   /* Component Specific */
-  --sidebar-bg: linear-gradient(to bottom, #050505, #000);
-  --sidebar-mobile-bg: rgba(8, 8, 8, 0.85);
+  --sidebar-bg: transparent;
+  --sidebar-mobile-bg: rgba(8, 8, 8, 0.5);
   --nav-hover-bg: rgba(255, 255, 255, 0.05);
   --create-btn-border: #000;
 
@@ -92,8 +92,8 @@
   --glass-border: rgba(0, 0, 0, 0.1);
 
   /* Light Theme Component Specific */
-  --sidebar-bg: #fff;
-  --sidebar-mobile-bg: rgba(255, 255, 255, 0.85);
+  --sidebar-bg: transparent;
+  --sidebar-mobile-bg: rgba(255, 255, 255, 0.5);
   --nav-hover-bg: rgba(0, 0, 0, 0.05);
   --create-btn-border: #fff;
 
@@ -112,13 +112,32 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--color-bg);
+  background: radial-gradient(circle at center, #0f0c29, #302b63, #24243e) !important;
   color: var(--color-text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  /* overflow: hidden; Removed to allow natural document flow if needed, but keeping x hidden */
-  /* App-like feel */
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 40px),
+    radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 30px),
+    radial-gradient(white, rgba(255, 255, 255, .1) 2px, transparent 40px);
+  background-size: 550px 550px, 350px 350px, 250px 250px;
+  background-position: 0 0, 40px 60px, 130px 270px;
+  opacity: 0.3;
+  animation: starsMoving 100s linear infinite;
+  pointer-events: none;
+  z-index: -1;
 }
 
 a {
@@ -181,21 +200,22 @@ button:active {
 /* App Shell Layout */
 .app-layout {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   flex-direction: row;
+  background: transparent;
 }
 
 .main-layout-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
 }
 
 .main-layout-content.full-width {
-  width: 100vw;
+  width: 100%;
 }
 
 .main-content {
@@ -203,11 +223,9 @@ button:active {
   display: block;
   /* Changed from flex to block to fix children sticky behavior */
   position: relative;
-  height: calc(100vh - var(--player-height));
-  overflow-y: auto;
+  min-height: calc(100vh - var(--player-height));
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  background: transparent;
 }
 
 /* UI Patterns */
@@ -223,6 +241,8 @@ button:active {
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
 }
 
 .glass-blur {
@@ -265,7 +285,47 @@ button:active {
 }
 
 .animate-slide-up {
-  animation: var(--animate-slide-up);
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter {
+  animation: pageEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.primary-btn {
+  background: var(--color-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-fast);
+  box-shadow: 0 4px 15px var(--color-primary-glow);
+}
+
+.primary-btn:hover {
+  background: #9366f2;
+  box-shadow: 0 6px 20px var(--color-primary-glow);
+  transform: translateY(-1px);
+}
+
+.primary-btn:active {
+  transform: translateY(1px) scale(0.98);
 }
 
 /* Loading Spinner */
@@ -305,11 +365,13 @@ button:active {
   }
 
   .main-content {
+    padding-top: 60px;
     padding-bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
     height: 100vh;
   }
 
   .full-width .main-content {
+    padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
 
