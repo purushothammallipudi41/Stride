@@ -40,8 +40,8 @@ const UserListModal = ({ title, userIds, onClose }) => {
     }, [userIds]);
 
     const filteredUsers = users.filter(user =>
-        (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleUserClick = (username) => {

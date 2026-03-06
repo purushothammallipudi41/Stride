@@ -2,7 +2,6 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import config from '../config';
 import { useNotifications } from './NotificationContext';
 import { useAuth } from './AuthContext';
-import offlineSync from '../utils/OfflineSyncService';
 
 const ContentContext = createContext();
 
@@ -11,29 +10,13 @@ export const useContent = () => useContext(ContentContext);
 export const ContentProvider = ({ children }) => {
     const [posts, setPosts] = useState([]);
     const [stories, setStories] = useState([]);
-    const [hasMore, setHasMore] = useState(true);
-    const [loadingPosts, setLoadingPosts] = useState(false);
     const { addNotification } = useNotifications();
     const { user } = useAuth();
 
     const fetchPosts = async (params = {}) => {
-        setLoadingPosts(true);
-
-        // Opportunistic load from cache if first page and not appending
-        if (!params.skip && !params.append) {
-            const cached = await offlineSync.getCachedPosts();
-            if (cached.length > 0 && posts.length === 0) {
-                setPosts(cached);
-                console.log('[OfflineSync] Loaded from cache');
-            }
-        }
-
         try {
             const queryParams = new URLSearchParams();
             if (user) queryParams.append('viewerId', user.id || user._id);
-
-            const limit = params.limit || 10;
-            const skip = params.skip || 0;
 
             Object.entries(params).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) queryParams.append(key, value);
@@ -42,33 +25,16 @@ export const ContentProvider = ({ children }) => {
             const res = await fetch(`${config.API_URL}/api/posts?${queryParams.toString()}`);
             if (res.ok) {
                 const data = await res.json();
-
-                if (data.length < limit) {
-                    setHasMore(false);
-                } else {
-                    setHasMore(true);
-                }
-
-                if (params.append) {
-                    setPosts(prev => {
-                        const existingIds = new Set(prev.map(p => p._id || p.id));
-                        const newPosts = data.filter(p => !existingIds.has(p._id || p.id));
-                        const updatedPosts = [...prev, ...newPosts];
-                        // Cache the combined set
-                        if (!params.skip) offlineSync.cachePosts(updatedPosts);
-                        return updatedPosts;
-                    });
-                } else if (!params.type && !params.username) {
+                // If it's a specialized fetch (profile/reels), we don't want to overwrite the main feed
+                // unless we are purposefuly refreshing it.
+                if (!params.type && !params.username) {
                     setPosts(data);
-                    offlineSync.cachePosts(data);
                 }
                 return data;
             }
         } catch (error) {
             console.error('Failed to fetch posts:', error);
             return [];
-        } finally {
-            setLoadingPosts(false);
         }
     };
 
@@ -88,17 +54,7 @@ export const ContentProvider = ({ children }) => {
     }, [user?.id, user?._id]);
 
     const addPost = async (postData) => {
-        // Optimistic update
-        const tempId = `temp-${Date.now()}`;
-        const optimisticPost = { ...postData, _id: tempId, isOptimistic: true, timestamp: new Date().toISOString() };
-        setPosts(prev => [optimisticPost, ...prev]);
-
         try {
-            if (!navigator.onLine) {
-                await offlineSync.queueAction('add_post', '/api/posts', 'POST', postData);
-                return true;
-            }
-
             const res = await fetch(`${config.API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -107,14 +63,14 @@ export const ContentProvider = ({ children }) => {
 
             if (res.ok) {
                 const savedPost = await res.json();
-                setPosts(prev => prev.map(p => p._id === tempId ? savedPost : p));
+                setPosts(prev => [savedPost, ...prev]);
                 return true;
             }
             return false;
         } catch (error) {
             console.error('Failed to add post:', error);
-            await offlineSync.queueAction('add_post', '/api/posts', 'POST', postData);
-            return true;
+            // Fallback for offline/development if needed, but we want real sync
+            return false;
         }
     };
 
@@ -127,7 +83,7 @@ export const ContentProvider = ({ children }) => {
             });
 
             if (res.ok) {
-                await fetchStories();
+                await fetchStories(); // Refresh stories rail
                 return true;
             }
             return false;
@@ -152,6 +108,7 @@ export const ContentProvider = ({ children }) => {
                     (post._id || post.id) === postId ? { ...post, likes } : post
                 ));
 
+                // Notification Logic: Only alert if NOT liking own post
                 if (likes.includes(userEmail) && matchedPost && (matchedPost.userId !== userEmail && matchedPost.userEmail !== userEmail)) {
                     addNotification({
                         type: 'like',
@@ -194,6 +151,7 @@ export const ContentProvider = ({ children }) => {
                     return post;
                 }));
 
+                // Notification Logic
                 if (matchedPost && (matchedPost.userId !== user.email && matchedPost.userEmail !== user.email)) {
                     addNotification({
                         type: 'comment',
@@ -259,6 +217,7 @@ export const ContentProvider = ({ children }) => {
                 body: JSON.stringify({ text: newText })
             });
             if (res.ok) {
+                const { comment } = await res.json();
                 setPosts(prev => prev.map(post => {
                     if ((post._id || post.id) === postId) {
                         return {
@@ -299,7 +258,6 @@ export const ContentProvider = ({ children }) => {
             return post;
         }));
     };
-
     const editPost = async (postId, newCaption) => {
         try {
             const res = await fetch(`${config.API_URL}/api/posts/${postId}`, {
@@ -311,6 +269,7 @@ export const ContentProvider = ({ children }) => {
                 })
             });
             if (res.ok) {
+                const data = await res.json();
                 setPosts(prev => prev.map(p =>
                     (p._id || p.id) === postId ? { ...p, caption: newCaption } : p
                 ));
@@ -323,6 +282,7 @@ export const ContentProvider = ({ children }) => {
         }
     };
 
+
     const deletePost = async (postId) => {
         try {
             const res = await fetch(`${config.API_URL}/api/posts/${postId}`, {
@@ -331,9 +291,11 @@ export const ContentProvider = ({ children }) => {
                 body: JSON.stringify({ userId: user?.email })
             });
             if (res.ok) {
+                console.log('Post deleted successfully, updating state for ID:', postId);
                 setPosts(prev => prev.filter(p => String(p._id || p.id) !== String(postId)));
                 return true;
             }
+            console.warn('Deletion failed on server for ID:', postId);
             return false;
         } catch (error) {
             console.error('Failed to delete post:', error);
@@ -343,6 +305,7 @@ export const ContentProvider = ({ children }) => {
 
     const [savedPosts, setSavedPosts] = useState([]);
 
+    // Load saved posts from local storage on init
     useEffect(() => {
         const saved = localStorage.getItem('vibestream_saved_posts');
         if (saved) setSavedPosts(JSON.parse(saved));
@@ -362,24 +325,6 @@ export const ContentProvider = ({ children }) => {
         });
     };
 
-    const reportContent = async (reportData) => {
-        try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const res = await fetch(`${config.API_URL}/api/posts/reports`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(reportData)
-            });
-            return res.ok;
-        } catch (error) {
-            console.error('[REPORT] Failed to submit:', error);
-            return false;
-        }
-    };
-
     return (
         <ContentContext.Provider value={{
             posts,
@@ -397,10 +342,7 @@ export const ContentProvider = ({ children }) => {
             fetchStories,
             deletePost,
             editPost,
-            toggleSavePost,
-            reportContent,
-            hasMore,
-            loadingPosts
+            toggleSavePost
         }}>
             {children}
         </ContentContext.Provider>

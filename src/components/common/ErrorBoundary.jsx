@@ -11,21 +11,6 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        // Persistent logging for post-crash retrieval
-        try {
-            const crashLog = {
-                timestamp: new Date().toISOString(),
-                error: error.toString(),
-                stack: error.stack,
-                info: errorInfo.componentStack
-            };
-            const logs = JSON.parse(localStorage.getItem('stride_crash_logs') || '[]');
-            logs.push(crashLog);
-            localStorage.setItem('stride_crash_logs', JSON.stringify(logs.slice(-5)));
-        } catch (e) {
-            console.error("Failed to log crash to localStorage", e);
-        }
-
         console.error("Uncaught error:", error, errorInfo);
     }
 

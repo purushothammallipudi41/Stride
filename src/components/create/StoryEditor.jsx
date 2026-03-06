@@ -23,7 +23,6 @@ const StoryEditor = ({ mediaSrc, mediaType, onFinish, onCancel }) => {
     const canvasRef = useRef(null);
     const contextRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
-    const [isEnhancing, setIsEnhancing] = useState(false);
 
     // Text Layer State
     const [texts, setTexts] = useState([]); // Array of { id, text, x, y, color, fontSize }
@@ -124,20 +123,6 @@ const StoryEditor = ({ mediaSrc, mediaType, onFinish, onCancel }) => {
         dragItem.current = null;
     };
 
-    const aiEnhance = async () => {
-        setIsEnhancing(true);
-        // Simple logic: suggest a random filter for now, or use context if available
-        // In a real app, this could send the image to an AI vision model
-        const suggestions = FILTERS.filter(f => f.value !== 'none');
-        const picked = suggestions[Math.floor(Math.random() * suggestions.length)];
-
-        setTimeout(() => {
-            setActiveFilter(picked.value);
-            setIsEnhancing(false);
-            setActiveTool('filter');
-        }, 1000);
-    };
-
 
     const handleSave = async () => {
         try {
@@ -231,9 +216,6 @@ const StoryEditor = ({ mediaSrc, mediaType, onFinish, onCancel }) => {
                     </button>
                     <button className={`icon-btn ${activeTool === 'sticker' ? 'active' : ''}`} onClick={() => setActiveTool(activeTool === 'sticker' ? null : 'sticker')}>
                         <Smile />
-                    </button>
-                    <button className={`icon-btn magic-enhance ${isEnhancing ? 'sparkle' : ''}`} onClick={aiEnhance}>
-                        <Wand2 size={20} />
                     </button>
                 </div>
                 <button className="done-btn" onClick={handleSave}>Done</button>

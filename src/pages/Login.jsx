@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Mail, Lock, Key, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -28,20 +28,8 @@ const Login = () => {
     const [resetCode, setResetCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
-    // 2FA State
-    const [requires2FA, setRequires2FA] = useState(false);
-    const [twoFactorToken, setTwoFactorToken] = useState('');
-    const [pendingEmail, setPendingEmail] = useState('');
-
-    const { login, register, accounts, validate2FA } = useAuth();
+    const { login, register } = useAuth();
     const navigate = useNavigate();
-
-    const [biometricAvailable, setBiometricAvailable] = useState(false);
-
-    useEffect(() => {
-        // Biometrics removed for stability
-    }, []);
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,12 +46,7 @@ const Login = () => {
                     setSuccessMessage('Verification code sent to your email!');
                 }
             } else {
-                const res = await login({ identifier, password }, rememberMe);
-                if (res && res.requires2FA) {
-                    setRequires2FA(true);
-                    setPendingEmail(res.email);
-                    return;
-                }
+                await login({ identifier, password }, rememberMe);
                 navigate('/');
             }
         } catch (err) {
@@ -73,8 +56,6 @@ const Login = () => {
                 setVerificationEmail(err.email || identifier); // Fallback to identifier if email not in error
                 setShowVerification(true);
                 setError('Please verify your email to continue.');
-            } else if (err.message === 'Server returned an invalid response format.') {
-                setError('The server is currently unavailable (404/500). Please ensure your backend is running.');
             } else {
                 setError(err.message || 'Authentication failed. Please check your network or credentials.');
             }
@@ -183,20 +164,6 @@ const Login = () => {
         }
     };
 
-    const handle2FAChallenge = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        try {
-            await validate2FA(pendingEmail, twoFactorToken, rememberMe);
-            navigate('/');
-        } catch (err) {
-            setError(err.message || 'Invalid 2FA token');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     return (
         <div className="login-container">
             <div className="login-glass-card">
@@ -235,7 +202,7 @@ const Login = () => {
                     </div>
                 )}
 
-                {!showVerification && forgotPasswordStep === 0 && !requires2FA ? (
+                {!showVerification && forgotPasswordStep === 0 ? (
                     <form className="login-form" onSubmit={handleSubmit}>
                         {isRegistering && (
                             <>
@@ -337,7 +304,6 @@ const Login = () => {
                                 isRegistering ? 'Sign Up' : 'Sign In'
                             )}
                         </button>
-
                     </form>
                 ) : forgotPasswordStep === 1 ? (
                     <form className="login-form" onSubmit={handleForgotPassword}>
@@ -396,36 +362,6 @@ const Login = () => {
                             Back
                         </button>
                     </form>
-                ) : requires2FA ? (
-                    <form className="login-form" onSubmit={handle2FAChallenge}>
-                        <div style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#ccc', fontSize: '0.9rem' }}>
-                            <div className="flex-center" style={{ marginBottom: '1rem' }}>
-                                <Shield size={48} color="#6C5DD3" style={{ opacity: 0.8 }} />
-                            </div>
-                            Two-Factor Authentication is enabled.<br />
-                            Enter the code from your authenticator app.
-                        </div>
-                        <div className="input-group">
-                            <Key size={20} className="input-icon" />
-                            <input
-                                type="text"
-                                placeholder="6-digit token"
-                                value={twoFactorToken}
-                                onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                required
-                                maxLength={6}
-                                style={{ letterSpacing: '4px', fontSize: '1.2rem', textAlign: 'center' }}
-                                disabled={isLoading}
-                                autoFocus
-                            />
-                        </div>
-                        <button type="submit" className="login-btn" disabled={isLoading}>
-                            {isLoading ? <Activity className="animate-spin" size={20} /> : 'Verify Identity'}
-                        </button>
-                        <button type="button" className="text-link-btn" onClick={() => setRequires2FA(false)} style={{ marginTop: '1rem', width: '100%', textAlign: 'center' }}>
-                            Cancel
-                        </button>
-                    </form>
                 ) : (
                     <form className="login-form" onSubmit={handleVerify}>
                         <div style={{ textAlign: 'center', marginBottom: '1rem', color: '#ccc', fontSize: '0.9rem' }}>
@@ -464,27 +400,24 @@ const Login = () => {
                             </button>
                         </div>
                     </form>
-                )
-                }
+                )}
 
-                {
-                    !showVerification && (
-                        <div className="login-footer">
-                            <span>{isRegistering ? 'Already have an account? ' : "Don't have an account? "}</span>
-                            <button className="text-link-btn" onClick={() => setIsRegistering(!isRegistering)}>
-                                {isRegistering ? 'Sign In' : 'Register'}
-                            </button>
-                        </div>
-                    )
-                }
+                {!showVerification && (
+                    <div className="login-footer">
+                        <span>{isRegistering ? 'Already have an account? ' : "Don't have an account? "}</span>
+                        <button className="text-link-btn" onClick={() => setIsRegistering(!isRegistering)}>
+                            {isRegistering ? 'Sign In' : 'Register'}
+                        </button>
+                    </div>
+                )}
                 <div className="legal-links" style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
                     <a href="/legal/terms" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</a>
                     <span style={{ margin: '0 8px' }}>•</span>
                     <a href="/legal/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
                 </div>
                 <div className="version-tag">v1.4.3</div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

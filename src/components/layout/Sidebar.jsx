@@ -1,17 +1,12 @@
 import { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Music, Film, User, Activity, Hash, Plus, Heart, Globe, Compass, Users, Mic2, BarChart2, Trophy } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Home, Music, Film, User, Activity, Hash, Plus, Heart, Globe } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
-import { useAuth } from '../../context/AuthContext';
-import StreakBadge from '../common/StreakBadge';
-import UserAvatar from '../common/UserAvatar';
 import CreateModal from '../create/CreateModal';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { unreadCount } = useNotifications();
-    const { user } = useAuth();
-    const navigate = useNavigate();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const location = useLocation();
 
@@ -20,13 +15,12 @@ const Sidebar = () => {
     );
 
     const navItems = [
-        { icon: Home, label: 'Home', path: '/', mobileHide: false },
-        { icon: Music, label: 'Explore', path: '/explore', mobileHide: false },
-        { icon: Film, label: 'Reels', path: '/reels', mobileHide: true },
-        { icon: Mic2, label: 'Spaces', path: '/spaces', mobileHide: true },
-        { icon: Globe, label: 'Articles', path: '/articles', mobileHide: true },
-        { icon: Users, label: 'Communities', path: '/servers/explore', mobileHide: false },
-        { icon: User, label: 'Profile', path: '/profile', mobileHide: false },
+        { icon: Home, label: 'Home', path: '/' },
+        { icon: Music, label: 'Explore', path: '/explore' },
+        { icon: Film, label: 'Reels', path: '/reels' },
+
+        { icon: Globe, label: 'Servers', path: '/servers' },
+        { icon: User, label: 'Profile', path: '/profile' },
     ];
 
     return (
@@ -47,7 +41,7 @@ const Sidebar = () => {
                                 key={item.path}
                                 to={item.path}
                                 end={item.path === '/'}
-                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' || item.mobileHide ? 'mobile-hide' : ''}`}
+                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                             >
                                 <div style={{ position: 'relative' }}>
                                     <item.icon size={24} />
@@ -75,7 +69,7 @@ const Sidebar = () => {
                                 key={item.path}
                                 to={item.path}
                                 end={item.path === '/'}
-                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' || item.mobileHide ? 'mobile-hide' : ''}`}
+                                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} ${item.label === 'Notifications' ? 'mobile-hide' : ''}`}
                             >
                                 <div style={{ position: 'relative' }}>
                                     <item.icon size={24} />
@@ -88,16 +82,6 @@ const Sidebar = () => {
                 </nav>
 
                 <div className="sidebar-footer">
-                    {user && (
-                        <div className="user-profile-summary" onClick={() => navigate('/profile')}>
-                            <UserAvatar user={user} size="sm" />
-                            <div className="user-details">
-                                <span className="user-name">{user.name || user.username}</span>
-                                <span className="user-handle">@{user.username}</span>
-                            </div>
-                            <StreakBadge size="sm" />
-                        </div>
-                    )}
                 </div>
             </aside>
 

@@ -2,13 +2,9 @@ import { useState, useEffect } from 'react';
 import { X, Copy, Hash, Volume2, Check, Shield, User, Trash2, ArrowLeft, Plus, Search, Gamepad2, GraduationCap, Book, Users, Palette, Trees, Lock, ChevronUp, ChevronDown, Smile } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useServer } from '../../context/ServerContext';
-import { useAuth } from '../../context/AuthContext';
-import { QRCodeCanvas } from 'qrcode.react';
 import { getImageUrl } from '../../utils/imageUtils';
 import config from '../../config';
-import AnalyticsDashboard from './AnalyticsDashboard';
-import './ServerInteractions.css';
-import './AnalyticsDashboard.css';
+import './ServerInteractions.css'; // Re-use existing modal styles or add new ones
 
 // --- Emoji/Symbol Picker Component ---
 const EmojiSymbolPicker = ({ onSelect, onClose }) => {
@@ -82,134 +78,31 @@ export const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, 
 // --- Invite People Modal ---
 export const InviteModal = ({ isOpen, onClose, serverName }) => {
     const { showToast } = useToast();
-    const { user: currentUser } = useAuth();
-    const { servers } = useServer();
-    const [inviteLink, setInviteLink] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [expiresIn, setExpiresIn] = useState('7d');
-    const [maxUses, setMaxUses] = useState(0); // 0 = unlimited
-
-    const serverData = servers.find(s => s.name === serverName);
-
-    const generateInvite = async () => {
-        if (!serverData) return;
-        setLoading(true);
-        try {
-            // Map duration to date
-            let expiresAt = null;
-            if (expiresIn !== 'never') {
-                const now = new Date();
-                if (expiresIn === '30m') now.setMinutes(now.getMinutes() + 30);
-                else if (expiresIn === '1h') now.setHours(now.getHours() + 1);
-                else if (expiresIn === '6h') now.setHours(now.getHours() + 6);
-                else if (expiresIn === '12h') now.setHours(now.getHours() + 12);
-                else if (expiresIn === '1d') now.setDate(now.getDate() + 1);
-                else if (expiresIn === '7d') now.setDate(now.getDate() + 7);
-                expiresAt = now.toISOString();
-            }
-
-            const res = await fetch(`${config.API_URL}/api/servers/${serverData.id}/invites`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    creatorId: currentUser?.id || currentUser?._id,
-                    expiresAt,
-                    maxUses: maxUses || null
-                })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setInviteLink(`${window.location.origin}/invite/${data.code}`);
-            } else {
-                showToast('Failed to generate invite link', 'error');
-            }
-        } catch (e) {
-            showToast('Connection error', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (isOpen && serverData) {
-            generateInvite();
-        }
-    }, [isOpen, expiresIn, maxUses]);
+    const inviteLink = `https://stride.app/invite/${(serverName || '').toLowerCase().replace(/\s/g, '-')}-${Math.floor(Math.random() * 1000)}`;
 
     const handleCopy = () => {
-        if (!inviteLink) return;
         navigator.clipboard.writeText(inviteLink);
         showToast('Invite link copied to clipboard!', 'success');
     };
 
     return (
         <ModalWrapper isOpen={isOpen} onClose={onClose} title={`Invite friends to ${serverName}`}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                            Share this link with others to grant them access to this server.
-                        </p>
-                        <div style={{ display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            <input
-                                type="text"
-                                readOnly
-                                value={loading ? 'Generating...' : inviteLink}
-                                style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', padding: '0 8px', fontSize: '0.9rem', outline: 'none' }}
-                            />
-                            <button onClick={handleCopy} className="primary-btn" style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem' }} disabled={loading}>
-                                Copy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="invite-settings glass-card" style={{ padding: '15px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase' }}>Expire After</label>
-                            <select
-                                value={expiresIn}
-                                onChange={(e) => setExpiresIn(e.target.value)}
-                                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '8px', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
-                            >
-                                <option value="30m">30 Minutes</option>
-                                <option value="1h">1 Hour</option>
-                                <option value="6h">6 Hours</option>
-                                <option value="12h">12 Hours</option>
-                                <option value="1d">1 Day</option>
-                                <option value="7d">7 Days</option>
-                                <option value="never">Never</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase' }}>Max Uses</label>
-                            <select
-                                value={maxUses}
-                                onChange={(e) => setMaxUses(parseInt(e.target.value))}
-                                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '8px', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
-                            >
-                                <option value={0}>Unlimited</option>
-                                <option value={1}>1 Use</option>
-                                <option value={5}>5 Uses</option>
-                                <option value={10}>10 Uses</option>
-                                <option value={25}>25 Uses</option>
-                                <option value={50}>50 Uses</option>
-                                <option value={100}>100 Uses</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {inviteLink && !loading && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                        <div style={{ background: 'white', padding: '10px', borderRadius: '12px' }}>
-                            <QRCodeCanvas value={inviteLink} size={150} level="M" />
-                        </div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Scan QR code to join</span>
-                    </div>
-                )}
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                Share this link with others to grant them access to this server.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <input
+                    type="text"
+                    readOnly
+                    value={inviteLink}
+                    style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', padding: '0 8px', fontSize: '0.9rem', outline: 'none' }}
+                />
+                <button onClick={handleCopy} className="primary-btn" style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem' }}>
+                    Copy
+                </button>
+            </div>
+            <div style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Your invite link expires in 7 days.
             </div>
         </ModalWrapper>
     );
@@ -551,12 +444,6 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
     const [serverChannels, setServerChannels] = useState(server?.channels || []);
     const [serverCategories, setServerCategories] = useState(server?.categories || []);
     const [readOnlyChannels, setReadOnlyChannels] = useState(server?.readOnlyChannels || []);
-    const [isPublic, setIsPublic] = useState(server?.isPublic || false);
-    const [serverDescription, setServerDescription] = useState(server?.description || '');
-    const [serverCategory, setServerCategory] = useState(server?.category || 'Social');
-    const [serverTags, setServerTags] = useState(server?.tags?.join(', ') || '');
-    const [blacklistedKeywords, setBlacklistedKeywords] = useState(server?.blacklistedKeywords?.join(', ') || '');
-    const [subscriptionTiers, setSubscriptionTiers] = useState(server?.subscriptionTiers || []);
     const [showEmojiFor, setShowEmojiFor] = useState(null); // { type: 'channel' | 'category', index: number }
 
     const [roles, setRoles] = useState([]);
@@ -565,40 +452,12 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
     // Confirmation Modal State
     const [confirmModalState, setConfirmModalState] = useState({ isOpen: false, type: null, data: null });
 
-    const [revenueData, setRevenueData] = useState(null);
-    const [loadingRevenue, setLoadingRevenue] = useState(false);
-    const [subscribers, setSubscribers] = useState([]);
-
     useEffect(() => {
         if (isOpen && server?.id !== undefined) {
-            fetchMembers(server.id).then(data => {
-                const members = data || [];
-                setServerMembers(members);
-                // Extract subscribers for the monetization tab
-                setSubscribers(members.filter(m => m.subscription));
-            });
+            fetchMembers(server.id).then(data => setServerMembers(data || []));
             fetchRoles(server.id).then(data => setRoles(Array.isArray(data) ? data : []));
         }
     }, [isOpen, server?.id, fetchMembers, fetchRoles]);
-
-    useEffect(() => {
-        if (activeTab === 'Monetization' && server?.id !== undefined) {
-            setLoadingRevenue(true);
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            fetch(`${config.API_URL}/api/servers/${server.id}/revenue`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    setRevenueData(data);
-                    setLoadingRevenue(false);
-                })
-                .catch(err => {
-                    console.error("Revenue fetch failed", err);
-                    setLoadingRevenue(false);
-                });
-        }
-    }, [activeTab, server?.id]);
 
     const handleAddMemberToRole = async (member) => {
         if (!editingRole) return;
@@ -621,14 +480,8 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
             setServerChannels(server.channels || []);
             setServerCategories(server.categories || []);
             setReadOnlyChannels(server.readOnlyChannels || []);
-            setIsPublic(server.isPublic || false);
-            setServerDescription(server.description || '');
-            setServerCategory(server.category || 'Social');
-            setServerTags(server.tags?.join(', ') || '');
-            setBlacklistedKeywords(server.blacklistedKeywords?.join(', ') || '');
             setVerificationLevel(server.verificationLevel || 'None');
             setExplicitContentFilter(server.explicitContentFilter || 'Scan members');
-            setSubscriptionTiers(server.subscriptionTiers || []);
         }
     }, [server, isOpen]);
 
@@ -648,14 +501,8 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
                 channels: serverChannels,
                 categories: serverCategories,
                 readOnlyChannels: readOnlyChannels,
-                isPublic: isPublic,
-                description: serverDescription,
-                category: serverCategory,
-                tags: serverTags.split(',').map(t => t.trim()).filter(Boolean),
-                blacklistedKeywords: blacklistedKeywords.split(',').map(k => k.trim()).filter(Boolean),
                 verificationLevel: verificationLevel,
-                explicitContentFilter: explicitContentFilter,
-                subscriptionTiers: subscriptionTiers
+                explicitContentFilter: explicitContentFilter
             });
             onClose();
         }
@@ -746,7 +593,7 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
             <div className="server-settings-container" style={{ display: 'flex', height: '100%', minHeight: '520px' }}>
                 <div className="settings-sidebar" style={{ width: '220px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '10px', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ padding: '0 12px 12px', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{server?.name || 'Server'} Settings</div>
-                    {['Overview', 'Discovery', 'Insights', 'Channels', 'Categories', 'Roles', 'Moderation', 'Monetization', 'Members Management'].map(tab => (
+                    {['Overview', 'Channels', 'Categories', 'Roles', 'Moderation', 'Members Management'].map(tab => (
                         <div
                             key={tab}
                             onClick={() => { setActiveTab(tab); setEditingRole(null); }}
@@ -854,252 +701,6 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
                                                 Save Changes
                                             </button>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : activeTab === 'Insights' ? (
-                            <AnalyticsDashboard serverId={server?.id} />
-                        ) : activeTab === 'Monetization' ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '10px' }}>
-                                <div style={{ background: 'var(--color-primary-soft)', padding: '20px', borderRadius: '12px', border: '1px solid var(--color-primary-faint)' }}>
-                                    <h4 style={{ margin: 0, color: 'var(--color-primary)' }}>Vibe Prime Creator Economy</h4>
-                                    <p style={{ margin: '8px 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
-                                        Reward your community with exclusive tiers. Members subscribe using Vibe Tokens, and 100% of the tokens go directly to your balance.
-                                    </p>
-                                </div>
-
-                                {/* Revenue Summary Dashboard */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Revenue</label>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '5px' }}>
-                                            <div style={{ width: '20px', height: '20px', background: 'var(--color-primary)', borderRadius: '50%', color: 'black', fontSize: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>V</div>
-                                            {revenueData?.summary?.totalRevenue || 0}
-                                        </div>
-                                    </div>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Subscribers</label>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'white', marginTop: '5px' }}>
-                                            {subscribers.length}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Simple Revenue Chart */}
-                                {revenueData?.dailyData?.length > 0 && (
-                                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '15px', display: 'block' }}>Revenue (Last 7 Days)</label>
-                                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '100px', paddingBottom: '20px' }}>
-                                            {revenueData.dailyData.map((day, idx) => (
-                                                <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                                                    <div
-                                                        style={{
-                                                            width: '100%',
-                                                            height: `${(day.revenue / (revenueData.summary.totalRevenue || 1)) * 100}%`,
-                                                            minHeight: '2px',
-                                                            background: 'var(--color-primary)',
-                                                            borderRadius: '4px 4px 0 0',
-                                                            opacity: 0.6 + (idx * 0.05)
-                                                        }}
-                                                        title={`${day._id}: ${day.revenue} tokens`}
-                                                    />
-                                                    <span style={{ fontSize: '0.5rem', color: 'var(--text-muted)' }}>{day._id.split('-').slice(1).join('/')}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Subscribers List */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Subscribers</label>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
-                                        {subscribers.length === 0 ? (
-                                            <div style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                                                <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>No active subscribers yet.</p>
-                                            </div>
-                                        ) : (
-                                            subscribers.map((sub, idx) => (
-                                                <div key={idx} style={{ background: 'rgba(255,255,255,0.04)', padding: '10px 15px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <img src={sub.avatar || 'https://via.placeholder.com/32'} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{sub.nickname}</div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--color-primary)' }}>{sub.subscription.tierName}</div>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                                        Expires: {new Date(sub.subscription.expiresAt).toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Tier Configuration</label>
-
-                                    {subscriptionTiers.length === 0 && (
-                                        <div style={{ padding: '30px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                                            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>No subscription tiers created yet.</p>
-                                        </div>
-                                    )}
-
-                                    {subscriptionTiers.map((tier, idx) => (
-                                        <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 120px', gap: '15px', marginBottom: '15px' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>LEVEL</label>
-                                                    <input
-                                                        type="number"
-                                                        value={tier.level || 1}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...subscriptionTiers];
-                                                            newTiers[idx].level = parseInt(e.target.value) || 1;
-                                                            setSubscriptionTiers(newTiers);
-                                                        }}
-                                                        className="premium-input-small"
-                                                        style={{ width: '100%', padding: '8px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>TIER NAME</label>
-                                                    <input
-                                                        type="text"
-                                                        value={tier.name}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...subscriptionTiers];
-                                                            newTiers[idx].name = e.target.value;
-                                                            setSubscriptionTiers(newTiers);
-                                                        }}
-                                                        className="premium-input-small"
-                                                        style={{ width: '100%', padding: '8px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>TOKEN COST</label>
-                                                    <input
-                                                        type="number"
-                                                        value={tier.cost}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...subscriptionTiers];
-                                                            newTiers[idx].cost = parseInt(e.target.value) || 0;
-                                                            setSubscriptionTiers(newTiers);
-                                                        }}
-                                                        className="premium-input-small"
-                                                        style={{ width: '100%', padding: '8px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>PERKS (COMMA SEPARATED)</label>
-                                                <input
-                                                    type="text"
-                                                    value={tier.perks?.join(', ') || ''}
-                                                    onChange={(e) => {
-                                                        const newTiers = [...subscriptionTiers];
-                                                        newTiers[idx].perks = e.target.value.split(',').map(p => p.trim());
-                                                        setSubscriptionTiers(newTiers);
-                                                    }}
-                                                    placeholder="E.g. VIP Role, Private Channels..."
-                                                    className="premium-input-small"
-                                                    style={{ width: '100%', padding: '8px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }}
-                                                />
-                                            </div>
-
-                                            <button
-                                                onClick={() => setSubscriptionTiers(subscriptionTiers.filter((_, i) => i !== idx))}
-                                                style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '5px' }}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    <button
-                                        onClick={() => setSubscriptionTiers([...subscriptionTiers, { level: subscriptionTiers.length + 1, name: 'Bronze Vibe', cost: 100, perks: ['Exclusive Role'], badgeColor: '#cd7f32' }])}
-                                        className="outline-btn"
-                                        style={{ width: '100%', padding: '12px', border: '1px dashed var(--color-primary)', background: 'transparent', color: 'var(--color-primary)', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600 }}
-                                    >
-                                        <Plus size={18} /> Create New Tier
-                                    </button>
-                                </div>
-
-                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
-                                    <button onClick={handleSave} className="primary-btn" style={{ padding: '10px 24px', borderRadius: '8px' }}>Save Monetization</button>
-                                </div>
-                            </div>
-                        ) : activeTab === 'Discovery' ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '10px' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                        <div>
-                                            <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Public Discovery</h4>
-                                            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Allow anyone to find and join this server in the Communities explore section.</p>
-                                        </div>
-                                        <div
-                                            onClick={() => setIsPublic(!isPublic)}
-                                            style={{
-                                                width: '50px', height: '26px', borderRadius: '13px',
-                                                background: isPublic ? 'var(--vibe-accent)' : 'rgba(255,255,255,0.1)',
-                                                position: 'relative', cursor: 'pointer', transition: 'all 0.3s ease'
-                                            }}
-                                        >
-                                            <div style={{
-                                                width: '20px', height: '20px', borderRadius: '50%', background: 'white',
-                                                position: 'absolute', top: '3px', left: isPublic ? '27px' : '3px',
-                                                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                                            }} />
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', opacity: isPublic ? 1 : 0.5, pointerEvents: isPublic ? 'auto' : 'none', transition: 'opacity 0.3s' }}>
-                                        <div>
-                                            <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>SERVER DESCRIPTION</label>
-                                            <textarea
-                                                value={serverDescription}
-                                                onChange={(e) => setServerDescription(e.target.value)}
-                                                placeholder="Tell potential members what your community is all about..."
-                                                maxLength={200}
-                                                style={{ width: '100%', height: '80px', padding: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: 'white', fontSize: '0.9rem', outline: 'none', resize: 'none' }}
-                                            />
-                                            <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>{serverDescription.length}/200</div>
-                                        </div>
-
-                                        <div style={{ display: 'flex', gap: '20px' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>CATEGORY</label>
-                                                <select
-                                                    value={serverCategory}
-                                                    onChange={(e) => setServerCategory(e.target.value)}
-                                                    style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: 'white', fontSize: '0.9rem', outline: 'none' }}
-                                                >
-                                                    {['Gaming', 'Music', 'Tech', 'Entertainment', 'Social', 'Other'].map(cat => (
-                                                        <option key={cat} value={cat} style={{ background: '#1a1a24' }}>{cat}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ display: 'block', color: 'var(--text-secondary)', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>TAGS (COMMA SEPARATED)</label>
-                                                <input
-                                                    type="text"
-                                                    value={serverTags}
-                                                    onChange={(e) => setServerTags(e.target.value)}
-                                                    placeholder="gaming, chill, music..."
-                                                    style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: 'white', fontSize: '0.9rem', outline: 'none' }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end' }}>
-                                        <button
-                                            onClick={handleSave}
-                                            className="primary-btn"
-                                            style={{ padding: '10px 24px', borderRadius: '4px', fontWeight: 600 }}
-                                        >
-                                            Save Discovery Settings
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1311,17 +912,6 @@ export const ServerSettingsModal = ({ isOpen, onClose, server, onDelete, onUpdat
                                         ))}
                                     </div>
                                 </section>
-                                <section>
-                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '12px' }}>Keyword Blacklist</div>
-                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>Messages containing these words will be blocked automatically. Comma-separated.</p>
-                                    <textarea
-                                        value={blacklistedKeywords}
-                                        onChange={(e) => setBlacklistedKeywords(e.target.value)}
-                                        placeholder="badword1, badword2..."
-                                        className="premium-input"
-                                        style={{ width: '100%', minHeight: '80px', padding: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }}
-                                    />
-                                </section>
                             </div>
                         ) : activeTab === 'Roles' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -1494,114 +1084,6 @@ export const ServerProfileModal = ({ isOpen, onClose, serverName, currentNicknam
                         Save Changes
                     </button>
                 )}
-            </div>
-        </ModalWrapper>
-    );
-};
-
-// --- Subscribe to Vibe Prime Modal ---
-export const SubscribeModal = ({ isOpen, onClose, server, onSubscribe }) => {
-    const { user, updateTokens } = useAuth();
-    const { showToast } = useToast();
-    const [loading, setLoading] = useState(false);
-
-    const handleSubscribe = async (tier) => {
-        if (!user) return;
-        if ((user.vibeTokens || 0) < tier.cost) {
-            showToast("Not enough Vibe Tokens!", "error");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const res = await fetch(`${config.API_URL}/api/servers/${server.id}/subscribe`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ tierName: tier.name }) // email handled by backend session
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                showToast(`Successfully joined ${tier.name}!`, "success");
-                updateTokens(data.newBalance);
-                if (onSubscribe) onSubscribe(tier);
-                onClose();
-            } else {
-                showToast(data.error || "Subscription failed", "error");
-            }
-        } catch (err) {
-            showToast("Connection error", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (!server) return null;
-
-    return (
-        <ModalWrapper isOpen={isOpen} onClose={onClose} title={`Join ${server.name} Vibe Prime`}>
-            <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                    <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Unlock Exclusive Perks</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '8px' }}>
-                        Support the creator and get special badges and access!
-                    </p>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    {server.subscriptionTiers && server.subscriptionTiers.length > 0 ? (
-                        [...server.subscriptionTiers].sort((a, b) => (a.level || 1) - (b.level || 1)).map((tier, idx) => {
-                            const currentSubscription = user?.activeSubscriptions?.find(sub => sub.serverId === server.id);
-                            const isCurrentTier = currentSubscription?.tierName === tier.name;
-                            const isLowerTier = currentSubscription && (currentSubscription.tierLevel || 1) > (tier.level || 1);
-
-                            return (
-                                <div key={idx} className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${isCurrentTier ? tier.badgeColor : tier.badgeColor + '44'}`, background: isCurrentTier ? `${tier.badgeColor}15` : `${tier.badgeColor}08`, transition: 'all 0.3s ease' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <h4 style={{ margin: 0, color: tier.badgeColor, fontSize: '1.1rem' }}>{tier.name}</h4>
-                                            {isCurrentTier && <span style={{ fontSize: '0.65rem', background: tier.badgeColor, color: '#fff', padding: '2px 6px', borderRadius: '12px', fontWeight: 'bold' }}>CURRENT TIER</span>}
-                                        </div>
-                                        <ul style={{ margin: '10px 0 0', paddingLeft: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                            {tier.perks?.map((perk, i) => <li key={i}>{perk}</li>)}
-                                        </ul>
-                                        <div style={{ marginTop: '12px', fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-                                            {tier.cost} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>Tokens/mo</span>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: '15px' }}>
-                                        {isCurrentTier ? (
-                                            <button className="primary-btn" style={{ background: 'transparent', border: `1px solid ${tier.badgeColor}`, color: tier.badgeColor, cursor: 'default' }} disabled>Subscribed</button>
-                                        ) : isLowerTier ? (
-                                            <button className="primary-btn" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-muted)', cursor: 'default' }} disabled>Included in your Tier</button>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleSubscribe(tier)}
-                                                disabled={loading}
-                                                className="primary-btn"
-                                                style={{ background: tier.badgeColor, filter: loading ? 'grayscale(1)' : 'none', boxShadow: `0 4px 12px ${tier.badgeColor}40` }}
-                                            >
-                                                {loading ? 'Processing...' : (currentSubscription ? 'Upgrade' : 'Subscribe')}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            This server hasn't set up Vibe Prime tiers yet. Check back soon!
-                        </div>
-                    )}
-                </div>
-
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                    Subscriptions renew automatically every 30 days if you have enough tokens.
-                </div>
             </div>
         </ModalWrapper>
     );

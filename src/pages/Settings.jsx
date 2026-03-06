@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X, ChevronRight, Music, Monitor } from 'lucide-react';
+import { UserPlus, LogOut, Shield, Bell, Globe, Moon, Check, Mail, Key, Activity, BadgeCheck, X, ChevronRight, Music } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import VerificationModal from '../components/profile/VerificationModal';
-import BotDashboard from '../components/profile/BotDashboard';
-import LanguageSwitcher from '../components/common/LanguageSwitcher';
 import config from '../config';
 import { uploadToCloudinary } from '../utils/cloudinaryUtils';
 import './Settings.css';
@@ -17,22 +15,6 @@ const Settings = () => {
     const [isPrivate, setIsPrivate] = useState(user?.isPrivate || false);
     const [language, setLanguage] = useState('English');
 
-    // 2FA State
-    const { setup2FA, verify2FA, disable2FA, refreshUser } = useAuth();
-    const [is2FAEnabled, setIs2FAEnabled] = useState(user?.isTwoFactorEnabled || false);
-    const [show2FASetup, setShow2FASetup] = useState(false);
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const [setupSecret, setSetupSecret] = useState('');
-    const [setupToken, setSetupToken] = useState('');
-    const [showDisable2FA, setShowDisable2FA] = useState(false);
-    const [disableToken, setDisableToken] = useState('');
-    const [is2FALoading, setIs2FALoading] = useState(false);
-    const [twoFactorError, setTwoFactorError] = useState('');
-
-    // Session State
-    const [sessions, setSessions] = useState([]);
-    const [isLoadingSessions, setIsLoadingSessions] = useState(false);
-
     // Verification State
     const [verificationCode, setVerificationCode] = useState('');
     const [showVerificationInput, setShowVerificationInput] = useState(false);
@@ -41,59 +23,9 @@ const Settings = () => {
 
     // Blue Tick Verification
     const [showBlueTickModal, setShowBlueTickModal] = useState(false);
-    const [showBotDashboard, setShowBotDashboard] = useState(false);
 
     // Profile Audio
     const [uploadingAudio, setUploadingAudio] = useState(false);
-
-    useEffect(() => {
-        if (user?.email) {
-            fetchSessions();
-        }
-    }, [user?.email]);
-
-    const fetchSessions = async () => {
-        setIsLoadingSessions(true);
-        try {
-            const res = await fetch(`${config.API_URL}/api/auth/sessions?email=${user.email}`);
-            if (res.ok) {
-                const data = await res.json();
-                setSessions(data);
-            }
-        } catch (e) {
-            console.error("Failed to fetch sessions", e);
-        } finally {
-            setIsLoadingSessions(false);
-        }
-    };
-
-    const handleRevokeSession = async (sessionId) => {
-        try {
-            const res = await fetch(`${config.API_URL}/api/auth/sessions/${sessionId}`, { method: 'DELETE' });
-            if (res.ok) {
-                setSessions(prev => prev.filter(s => s._id !== sessionId));
-            }
-        } catch (e) {
-            alert("Failed to revoke session");
-        }
-    };
-
-    const handleClearOtherSessions = async () => {
-        if (!window.confirm("Are you sure you want to log out from all other devices?")) return;
-        try {
-            const currentToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const res = await fetch(`${config.API_URL}/api/auth/sessions/clear`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, exceptToken: currentToken })
-            });
-            if (res.ok) {
-                fetchSessions();
-            }
-        } catch (e) {
-            alert("Failed to clear sessions");
-        }
-    };
 
     const handleLogout = () => {
         logout();
@@ -202,67 +134,6 @@ const Settings = () => {
         } catch (e) {
             setVerificationStatus('error');
             setVerificationMsg(e.message || 'Invalid code');
-        }
-    };
-
-    const handleStart2FASetup = async () => {
-        setIs2FALoading(true);
-        setTwoFactorError('');
-        try {
-            const res = await setup2FA(user.email);
-            if (res.qrCodeUrl) {
-                setQrCodeUrl(res.qrCodeUrl);
-                setSetupSecret(res.secret);
-                setShow2FASetup(true);
-            } else {
-                throw new Error(res.error || 'Failed to start 2FA setup');
-            }
-        } catch (e) {
-            setTwoFactorError(e.message);
-        } finally {
-            setIs2FALoading(false);
-        }
-    };
-
-    const handleVerify2FASetup = async () => {
-        if (setupToken.length !== 6) return;
-        setIs2FALoading(true);
-        setTwoFactorError('');
-        try {
-            const res = await verify2FA(user.email, setupToken);
-            if (res.success) {
-                setIs2FAEnabled(true);
-                setShow2FASetup(false);
-                setSetupToken('');
-                await refreshUser();
-            } else {
-                throw new Error(res.error || 'Invalid verification token');
-            }
-        } catch (e) {
-            setTwoFactorError(e.message);
-        } finally {
-            setIs2FALoading(false);
-        }
-    };
-
-    const handleDisable2FA = async () => {
-        if (disableToken.length !== 6) return;
-        setIs2FALoading(true);
-        setTwoFactorError('');
-        try {
-            const res = await disable2FA(user.email, disableToken);
-            if (res.success) {
-                setIs2FAEnabled(false);
-                setShowDisable2FA(false);
-                setDisableToken('');
-                await refreshUser();
-            } else {
-                throw new Error(res.error || 'Invalid token');
-            }
-        } catch (e) {
-            setTwoFactorError(e.message);
-        } finally {
-            setIs2FALoading(false);
         }
     };
 
@@ -552,173 +423,6 @@ const Settings = () => {
                             </div>
                             <div className={`toggle-switch ${notificationsEnabled ? 'active' : ''}`}></div>
                         </div>
-
-                        {/* 2FA Section */}
-                        <div className="settings-item-column">
-                            <div
-                                className="settings-item"
-                                onClick={() => is2FAEnabled ? setShowDisable2FA(true) : handleStart2FASetup()}
-                                style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '4px' }}
-                            >
-                                <div className="settings-item-left">
-                                    <Shield size={20} color={is2FAEnabled ? 'var(--color-success)' : 'inherit'} />
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <span>Two-Factor Authentication</span>
-                                        <span style={{ fontSize: '0.75rem', color: is2FAEnabled ? 'var(--color-success)' : 'var(--color-text-light)' }}>
-                                            {is2FAEnabled ? 'Enabled' : 'Secure your account'}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="settings-item-right">
-                                    <ChevronRight size={18} />
-                                </div>
-                            </div>
-
-                            {show2FASetup && (
-                                <div className="2fa-setup-panel" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginTop: '10px' }}>
-                                    <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                                        <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--color-text-light)' }}>
-                                            Scan this QR code with your authenticator app (like Google Authenticator or Authy).
-                                        </p>
-                                        <img src={qrCodeUrl} alt="2FA QR Code" style={{ background: 'white', padding: '10px', borderRadius: '8px', width: '200px', height: '200px' }} />
-                                        <div style={{ marginTop: '1rem' }}>
-                                            <code style={{ background: 'rgba(0,0,0,0.3)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{setupSecret}</code>
-                                        </div>
-                                    </div>
-                                    <div className="input-group" style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-                                        <label style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>Enter 6-digit code</label>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <input
-                                                type="text"
-                                                placeholder="000000"
-                                                maxLength={6}
-                                                value={setupToken}
-                                                onChange={e => setSetupToken(e.target.value.replace(/\D/g, ''))}
-                                                style={{
-                                                    flex: 1,
-                                                    background: 'var(--color-bg)',
-                                                    border: '1px solid var(--color-border)',
-                                                    borderRadius: '8px',
-                                                    padding: '10px',
-                                                    color: 'white',
-                                                    textAlign: 'center',
-                                                    letterSpacing: '4px',
-                                                    fontSize: '1.1rem'
-                                                }}
-                                            />
-                                            <button
-                                                className="primary-btn"
-                                                onClick={handleVerify2FASetup}
-                                                disabled={is2FALoading || setupToken.length !== 6}
-                                                style={{ padding: '0 20px', borderRadius: '8px' }}
-                                            >
-                                                Verify
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {twoFactorError && <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '8px' }}>{twoFactorError}</p>}
-                                    <button
-                                        className="text-btn"
-                                        onClick={() => setShow2FASetup(false)}
-                                        style={{ width: '100%', marginTop: '1rem', opacity: 0.6 }}
-                                    >
-                                        Cancel Setup
-                                    </button>
-                                </div>
-                            )}
-
-                            {showDisable2FA && (
-                                <div className="2fa-setup-panel" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginTop: '10px' }}>
-                                    <p style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--color-text-light)' }}>
-                                        Enter your 6-digit authenticator code to disable 2FA.
-                                    </p>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <input
-                                            type="text"
-                                            placeholder="000000"
-                                            maxLength={6}
-                                            value={disableToken}
-                                            onChange={e => setDisableToken(e.target.value.replace(/\D/g, ''))}
-                                            style={{
-                                                flex: 1,
-                                                background: 'var(--color-bg)',
-                                                border: '1px solid var(--color-border)',
-                                                borderRadius: '8px',
-                                                padding: '10px',
-                                                color: 'white',
-                                                textAlign: 'center',
-                                                letterSpacing: '4px',
-                                                fontSize: '1.1rem'
-                                            }}
-                                        />
-                                        <button
-                                            className="danger-btn"
-                                            onClick={handleDisable2FA}
-                                            disabled={is2FALoading || disableToken.length !== 6}
-                                            style={{ padding: '0 20px', borderRadius: '8px' }}
-                                        >
-                                            Disable
-                                        </button>
-                                    </div>
-                                    {twoFactorError && <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '8px' }}>{twoFactorError}</p>}
-                                    <button
-                                        className="text-btn"
-                                        onClick={() => setShowDisable2FA(false)}
-                                        style={{ width: '100%', marginTop: '1rem', opacity: 0.6 }}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Session Management Section */}
-                        <div className="settings-group-header" style={{ marginTop: '2rem', marginBottom: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
-                            <h4 style={{ color: 'var(--color-text-light)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active Sessions</h4>
-                        </div>
-                        <div className="sessions-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {isLoadingSessions ? (
-                                <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.6 }}>Loading sessions...</div>
-                            ) : sessions.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '1rem', opacity: 0.6 }}>No active sessions found.</div>
-                            ) : (
-                                <>
-                                    {sessions.map(session => (
-                                        <div key={session._id} className="session-item" style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: session.token === (localStorage.getItem('token') || sessionStorage.getItem('token')) ? '1px solid rgba(108, 93, 211, 0.3)' : '1px solid transparent' }}>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ background: 'rgba(255,255,255,0.05)', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {session.userAgent?.toLowerCase().includes('mobile') || session.userAgent?.toLowerCase().includes('android') || session.userAgent?.toLowerCase().includes('iphone') ? <Activity size={20} /> : <Monitor size={20} />}
-                                                </div>
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>
-                                                        {session.device || 'Unknown Device'}
-                                                        {session.token === (localStorage.getItem('token') || sessionStorage.getItem('token')) && <span style={{ marginLeft: '8px', fontSize: '0.7rem', color: '#6C5DD3', background: 'rgba(108, 93, 211, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>This Device</span>}
-                                                    </span>
-                                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>{session.ip} • Last active: {new Date(session.lastActive).toLocaleDateString()}</span>
-                                                </div>
-                                            </div>
-                                            {session.token !== (localStorage.getItem('token') || sessionStorage.getItem('token')) && (
-                                                <button
-                                                    onClick={() => handleRevokeSession(session._id)}
-                                                    style={{ background: 'rgba(255, 71, 87, 0.1)', color: '#ff4757', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}
-                                                >
-                                                    Revoke
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                    {sessions.length > 1 && (
-                                        <button
-                                            className="text-btn danger"
-                                            onClick={handleClearOtherSessions}
-                                            style={{ color: '#ff4757', marginTop: '8px', fontSize: '0.85rem', width: 'fit-content' }}
-                                        >
-                                            Sign out from all other devices
-                                        </button>
-                                    )}
-                                </>
-                            )}
-                        </div>
                     </div>
                 </div>
 
@@ -740,17 +444,12 @@ const Settings = () => {
                 <div className="settings-group">
                     <h3>Preferences</h3>
                     <div className="settings-list">
-                        <div className="settings-item" id="settings-language-row">
+                        <div className="settings-item" onClick={changeLanguage}>
                             <div className="settings-item-left">
                                 <Globe size={20} />
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <span>Language & Region</span>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>Choose your preferred language</span>
-                                </div>
+                                <span>Language</span>
                             </div>
-                            <div className="settings-item-right">
-                                <LanguageSwitcher />
-                            </div>
+                            <span className="setting-value">{language}</span>
                         </div>
                         <div className="settings-item" onClick={toggleDarkMode}>
                             <div className="settings-item-left">
@@ -781,21 +480,6 @@ const Settings = () => {
                 </div>
 
                 <div className="settings-group">
-                    <h3>Developer & Bots</h3>
-                    <div className="settings-list">
-                        <div className="settings-item" onClick={() => setShowBotDashboard(true)}>
-                            <div className="settings-item-left">
-                                <Activity size={20} color="var(--color-primary)" />
-                                <span>Bot Management</span>
-                            </div>
-                            <div className="settings-item-right">
-                                <ChevronRight size={18} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="settings-group">
                     <div className="settings-list">
                         <div className="settings-item danger-item" onClick={handleLogout}>
                             <div className="settings-item-left">
@@ -814,8 +498,7 @@ const Settings = () => {
             </div>
 
             <VerificationModal isOpen={showBlueTickModal} onClose={() => setShowBlueTickModal(false)} />
-            {showBotDashboard && <BotDashboard user={user} onClose={() => setShowBotDashboard(false)} />}
-        </div>
+        </div >
     );
 };
 

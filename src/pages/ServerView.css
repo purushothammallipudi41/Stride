@@ -1,45 +1,9 @@
-/* Vibe Prime Banner */
-.vibe-prime-compact-banner {
-    margin: 10px;
-    padding: 12px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.vibe-prime-compact-banner:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.vibe-prime-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.vibe-prime-logo span {
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    background: linear-gradient(to right, #60a5fa, #a855f7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
 .server-layout-root {
     display: flex;
     height: 100vh;
     width: 100%;
+    background-color: #000;
     overflow: hidden;
-    background-color: var(--bg-primary);
 }
 
 .server-view-main {
@@ -272,41 +236,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.sidebar-voice-participants {
-    margin-left: 32px;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.voice-participant-mini {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.voice-participant-mini:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.voice-participant-mini img {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.voice-participant-mini span {
-    font-size: 12px;
-    color: #949BA4;
-    font-weight: 500;
 }
 
 .unread-dot-badge {

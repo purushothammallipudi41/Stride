@@ -6,9 +6,8 @@ import {
 } from 'recharts';
 import {
     TrendingUp, Users, Eye, Heart, MessageCircle, ArrowLeft,
-    Award, Zap, ChevronRight, BarChart3, Info, Gem, History
+    Award, Zap, ChevronRight, BarChart3, Info
 } from 'lucide-react';
-
 import { useAuth } from '../context/AuthContext';
 import config from '../config';
 import './CreatorDashboard.css';
@@ -23,51 +22,10 @@ const CreatorDashboard = () => {
         const fetchAnalytics = async () => {
             if (!user?.email) return;
             try {
-                const token = localStorage.getItem('token');
-                const [growthRes, engagementRes, topRes, earningsRes] = await Promise.all([
-                    fetch(`${config.API_URL}/api/analytics/server/0/growth`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`${config.API_URL}/api/analytics/posts/engagement`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`${config.API_URL}/api/analytics/content/top`),
-                    fetch(`${config.API_URL}/api/creator/earnings`, { headers: { Authorization: `Bearer ${token}` } })
-                ]);
-
-
-                if (growthRes.ok && engagementRes.ok && topRes.ok && earningsRes.ok) {
-                    const growth = await growthRes.json();
-                    const engagement = await engagementRes.json();
-                    const top = await topRes.json();
-                    const earnings = await earningsRes.json();
-
-
-                    // Calculate totals from engagement list
-                    const totalLikes = engagement.reduce((acc, p) => acc + (p.likes || 0), 0);
-                    const totalComments = engagement.reduce((acc, p) => acc + (p.comments || 0), 0);
-                    const totalViews = engagement.reduce((acc, p) => acc + (p.views || 0), 0);
-                    const avgEngagement = engagement.length
-                        ? (engagement.reduce((acc, p) => acc + parseFloat(p.engagementRate || 0), 0) / engagement.length).toFixed(1)
-                        : 0;
-
-                    setData({
-                        summary: {
-                            totalViews,
-                            avgEngagement,
-                            totalLikes,
-                            totalComments,
-                            totalEarnings: earnings.total,
-                            tokenBalance: user.vibeTokens || 0
-                        },
-                        earningsHistory: earnings.history || [],
-                        reachData: growth.length > 0
-                            ? growth.map(g => ({ name: new Date(g.date).toLocaleDateString('en-US', { weekday: 'short' }), reach: g.members }))
-                            : [{ name: 'Mon', reach: 0 }, { name: 'Tue', reach: 0 }, { name: 'Wed', reach: 0 }],
-                        postPerformance: top.map(p => ({
-                            title: p.caption || 'Media Post',
-                            views: p.views || 0,
-                            likes: p.likesCount || 0,
-                            comments: p.commentsCount || 0
-                        }))
-                    });
-
+                const res = await fetch(`${config.API_URL}/api/users/${user.email}/analytics`);
+                if (res.ok) {
+                    const analyticsData = await res.json();
+                    setData(analyticsData);
                 }
             } catch (e) {
                 console.error('Failed to fetch analytics', e);
@@ -134,16 +92,15 @@ const CreatorDashboard = () => {
                     </div>
                     <div className="stat-card glass-card">
                         <div className="stat-icon-wrap community">
-                            <Gem size={24} color="#fcd34d" />
+                            <Users size={24} />
                         </div>
                         <div className="stat-main">
-                            <h3>{data.summary.totalEarnings.toLocaleString()}</h3>
-                            <p>Total Tokens Earned</p>
+                            <h3>{data.summary.totalLikes.toLocaleString()}</h3>
+                            <p>Total Likes</p>
                         </div>
-                        <div className="stat-trend up">Ledger</div>
+                        <div className="stat-trend down">-4.1%</div>
                     </div>
                 </div>
-
 
                 {/* 2. Reach Chart */}
                 <div className="chart-section glass-card">
@@ -204,33 +161,30 @@ const CreatorDashboard = () => {
 
                     <div className="milestones glass-card">
                         <div className="section-header">
-                            <div className="title-wrap">
-                                <History size={20} />
-                                <h2>Recent Earnings</h2>
+                            <h2>Creator Milestones</h2>
+                        </div>
+                        <div className="milestone-list">
+                            <div className="milestone-item achieved">
+                                <div className="m-icon"><Award size={20} /></div>
+                                <div className="m-text">
+                                    <h4>First 1K Views</h4>
+                                    <p>Achieved on Mon</p>
+                                </div>
+                            </div>
+                            <div className="milestone-item locked">
+                                <div className="m-icon"><TrendingUp size={20} /></div>
+                                <div className="m-text">
+                                    <h4>Growth Master</h4>
+                                    <p>Reach 10K total views</p>
+                                </div>
                             </div>
                         </div>
-                        <div className="earnings-history-list">
-                            {data.earningsHistory.map((tx, i) => (
-                                <div key={i} className="earnings-item animate-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                                    <div className="tx-info">
-                                        <span className={`tx-type-tag ${tx.type}`}>{tx.type.replace('_', ' ')}</span>
-                                        <h4>{tx.description}</h4>
-                                        <p>{new Date(tx.timestamp).toLocaleDateString()}</p>
-                                    </div>
-                                    <div className="tx-amount">
-                                        +{tx.amount} 🪙
-                                    </div>
-                                </div>
-                            ))}
-                            {data.earningsHistory.length === 0 && (
-                                <div className="empty-state mini">
-                                    <p>No earnings yet. Keep vibing!</p>
-                                </div>
-                            )}
-                        </div>
+                        <button className="pro-tips-btn">
+                            <Info size={16} />
+                            Get Creator Pro Tips
+                        </button>
                     </div>
                 </div>
-
             </main>
         </div>
     );

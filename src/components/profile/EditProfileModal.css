@@ -1,38 +1,17 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    backdrop-filter: blur(8px);
-}
-
 .edit-profile-modal {
-    width: 95%;
+    width: 100%;
+    width: 100%;
     max-width: 500px;
-    max-height: 90vh;
-    padding: 0;
+    padding: 2rem;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
 }
 
 .edit-profile-modal .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
-    z-index: 10;
+    margin-bottom: 2rem;
 }
 
 .edit-profile-modal h3 {
@@ -85,20 +64,6 @@
     transform: translateY(-2px);
 }
 
-.edit-profile-form {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    flex: 1;
-}
-
-.form-body {
-    padding: 2rem;
-    overflow-y: auto;
-    flex: 1;
-}
-
 .edit-profile-form .form-group {
     margin-bottom: 1.5rem;
 }
@@ -131,12 +96,7 @@
 .modal-actions {
     display: flex;
     gap: 1rem;
-    padding: 1.5rem 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
-    z-index: 10;
-    flex-shrink: 0;
+    margin-top: 2rem;
 }
 
 .modal-actions button {
@@ -162,62 +122,4 @@
 
 .modal-actions button:hover {
     transform: translateY(-2px);
-}
-/* AI Identity Extensions */
-.ai-assist-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(124, 58, 237, 0.1);
-    border: 1px solid rgba(124, 58, 237, 0.3);
-    border-radius: 6px;
-    color: #c084fc;
-    font-size: 0.75rem;
-    padding: 2px 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.ai-assist-btn:hover {
-    background: rgba(124, 58, 237, 0.2);
-    border-color: #c084fc;
-}
-
-.theme-lab {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 10px;
-}
-
-.theme-input-group {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.theme-input-group input {
-    flex: 1;
-}
-
-.generate-theme-btn {
-    background: #7c3aed;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.generate-theme-btn:hover {
-    background: #6d28d9;
-    transform: scale(1.05);
-}
-
-.generate-theme-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }

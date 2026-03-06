@@ -31,16 +31,6 @@ export const getImageUrl = (path, type = 'post') => {
         } else if (assetType === 'post') {
             // Feed images: Max width 800, keep aspect ratio
             transforms = 'w_800,c_limit,q_auto,f_auto';
-        } else if (assetType === 'blur') {
-            // Tiny, very blurry placeholder
-            transforms = 'w_20,h_20,c_fill,e_blur:1000,q_auto:low,f_auto';
-        } else if (assetType === 'placeholder') {
-            // Low quality placeholder
-            transforms = 'w_400,c_limit,q_auto:eco,f_auto';
-        } else if (assetType === 'banner') {
-
-            // Banners: Max width 1200, optimized for 16:9
-            transforms = 'w_1200,c_limit,q_auto,f_auto';
         } else if (assetType === 'reel') {
             // Video/Reels: Auto format
             transforms = 'q_auto,f_auto';
@@ -67,9 +57,8 @@ export const getImageUrl = (path, type = 'post') => {
         return optimizeCloudinaryUrl(fullExtUrl, type);
     }
 
-    // If it's a relative path, and doesn't start with / (which implies local public asset), prepend backend URL
-    if (path.startsWith('/')) return path;
-
-    const cleanPath = path;
+    // If it's a relative path, prepend backend URL and static uploads folder
+    // Ensure we don't double-slash
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     return `${config.API_URL}/uploads/${cleanPath}`;
 };

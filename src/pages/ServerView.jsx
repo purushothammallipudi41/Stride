@@ -1,57 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { useServer } from '../context/ServerContext';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
-import { useSecurity } from '../context/SecurityContext';
-
 import {
     Hash, Settings, Bell, Search, Menu, Users, ArrowLeft, Volume2,
     ChevronDown, ChevronRight, ChevronUp, ChevronLeft, Pin, Gift,
     HelpCircle, Video, ClipboardList, BadgeCheck, UserPlus, X, Lock,
-    Heart, MessageCircle, Image as ImageIcon, Radio, BookOpen
+    Heart, MessageCircle, Image as ImageIcon
 } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
-import ThreadSidebar from '../components/chat/ThreadSidebar';
 import { ServerMenu, MembersList, SearchModal } from '../components/server/ServerInteractions';
-import {
-    CreateChannelModal, ServerSettingsModal, InviteModal,
-    ServerProfileModal, ChannelSettingsModal, ConfirmationModal,
-    SubscribeModal
-} from '../components/server/ServerModals';
+import { CreateChannelModal, ServerSettingsModal, InviteModal, ServerProfileModal, ChannelSettingsModal, ConfirmationModal } from '../components/server/ServerModals';
 import VoiceChannel from '../components/server/VoiceChannel';
 import LiveStage from '../components/server/LiveStage';
 import { useNotifications } from '../context/NotificationContext';
-import { useVoice } from '../context/VoiceContext';
 import './ServerView.css';
 
 import MediaGallery from '../components/server/MediaGallery';
 
 const ServerView = () => {
-    const { t } = useTranslation();
     const { serverId } = useParams();
-    const { servers, fetchMembers, fetchRoles, fetchMessages, sendServerMessage, deleteServerMessage, editServerMessage, reactToServerMessage, createChannel, deleteChannel, leaveServer, deleteServer, updateServer, updateServerProfile, toggleMobileSidebar, assignRole, loading: serversLoading, updateMessage, addReaction } = useServer();
+    const { servers, fetchMembers, fetchRoles, fetchMessages, sendServerMessage, deleteServerMessage, editServerMessage, createChannel, deleteChannel, leaveServer, deleteServer, updateServer, updateServerProfile, toggleMobileSidebar, assignRole, loading: serversLoading } = useServer();
     const navigate = useNavigate();
     const { user } = useAuth();
     const { socket } = useSocket();
     const { showToast } = useToast();
     const { unreadCount } = useNotifications();
-    const { voiceParticipants } = useVoice();
-    const { encryptMessage, decryptMessage } = useSecurity();
 
-
-    const [localServer, setLocalServer] = useState(null);
-    const server = localServer || servers.find(s => s.id === parseInt(serverId)) || servers.find(s => s._id === serverId);
-
-    console.log('[ServerView] Current serverId:', serverId, 'Found server:', server);
-    console.log('[ServerView] All servers in context:', servers);
+    const server = servers.find(s => s.id === parseInt(serverId));
 
     const [activeChannel, setActiveChannel] = useState(null);
-    const activeChannelName = activeChannel
-        ? (typeof activeChannel === 'string' ? activeChannel : activeChannel?.name ?? '')
-        : null;
     const [messages, setMessages] = useState([]);
     const [members, setMembers] = useState([]);
     const [roles, setRoles] = useState([]);
@@ -73,23 +53,12 @@ const ServerView = () => {
     const [showMuteMenu, setShowMuteMenu] = useState(false);
     const [showChannelSettings, setShowChannelSettings] = useState(false);
     const [editingChannel, setEditingChannel] = useState(null);
-    const [activeThread, setActiveThread] = useState(null);
-    const [showSubscribe, setShowSubscribe] = useState(false);
     const [readOnlyChannels, setReadOnlyChannels] = useState({}); // { channelName: boolean }
     const [categoryList, setCategoryList] = useState([]);
     const [channelSearch, setChannelSearch] = useState('');
     const [selectedUserForProfile, setSelectedUserForProfile] = useState(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, data: null });
     const [hasInitialSelected, setHasInitialSelected] = useState(false);
-
-    const { fetchServer } = useServer();
-
-    useEffect(() => {
-        if (!server && serverId) {
-            console.log('[ServerView] Server not found in context, fetching directly...');
-            fetchServer(serverId).then(setLocalServer);
-        }
-    }, [serverId, servers]);
 
     useEffect(() => {
         if (server) {
@@ -146,21 +115,10 @@ const ServerView = () => {
         if (server && activeChannel) {
             setLoading(true);
             const loadMessages = async () => {
-                const data = await fetchMessages(serverId, activeChannelName);
-
-                // Decrypt messages if server is encrypted
-                const decryptedMessages = await Promise.all(data.map(async (msg) => {
-                    if (msg.isE2EE && msg.text && server.isEncrypted) {
-                        const decrypted = await decryptMessage(msg.text, null, serverId);
-                        return { ...msg, text: decrypted };
-                    }
-                    return msg;
-                }));
-
-                setMessages(decryptedMessages);
+                const data = await fetchMessages(serverId, activeChannel);
+                setMessages(data);
                 setLoading(false);
             };
-
             loadMessages();
         }
     }, [serverId, activeChannel]);
@@ -168,63 +126,24 @@ const ServerView = () => {
     useEffect(() => {
         if (!socket || !serverId || !activeChannel) return;
 
-        const roomName = `server_${serverId}_${activeChannelName}`;
-        socket.emit('join-server-channel', { serverId, channelId: activeChannelName });
+        const roomName = `server_${serverId}_${activeChannel}`;
+        socket.emit('join-server-channel', { serverId, channelId: activeChannel });
 
         const handleNewMessage = (msg) => {
             console.log('[SOCKET] New server message received:', msg);
-            if (msg.channelId === activeChannelName && parseInt(msg.serverId) === parseInt(serverId)) {
-                // If it's a threaded message, don't show it in the main channel list
-                if (msg.threadParentId) return;
-
-                const processMessage = async () => {
-                    let finalMsg = msg;
-                    if (msg.isE2EE && server.isEncrypted) {
-                        const decrypted = await decryptMessage(msg.text, null, serverId);
-                        finalMsg = { ...msg, text: decrypted };
-                    }
-
-                    setMessages(prev => {
-                        if (prev.find(m => (m._id === finalMsg._id || m.id === finalMsg.id))) return prev;
-                        return [...prev, finalMsg];
-                    });
-                };
-
-                processMessage();
+            if (msg.channelId === activeChannel && parseInt(msg.serverId) === parseInt(serverId)) {
+                setMessages(prev => {
+                    if (prev.find(m => (m._id === msg._id || m.id === msg.id))) return prev;
+                    return [...prev, msg];
+                });
             }
-
-        };
-
-        const handleThreadUpdate = ({ threadId, replyCount }) => {
-            setMessages(prev => prev.map(m => {
-                if (m._id === threadId || m.id === threadId) {
-                    return { ...m, replyCount: (m.replyCount || 0) + replyCount };
-                }
-                return m;
-            }));
-        };
-
-        const handleReactionUpdate = (updatedMsg) => {
-            if (updatedMsg.channelId === activeChannelName && parseInt(updatedMsg.serverId) === parseInt(serverId)) {
-                setMessages(prev => prev.map(m => (m._id === updatedMsg._id || m.id === updatedMsg._id) ? updatedMsg : m));
-            }
-        };
-
-        const handlePollUpdate = (updatedMsg) => {
-            setMessages(prev => prev.map(m => (m._id === updatedMsg._id || m.id === updatedMsg._id) ? updatedMsg : m));
         };
 
         socket.on('new-server-message', handleNewMessage);
-        socket.on('message-reaction-update', handleReactionUpdate);
-        socket.on('poll-update', handlePollUpdate);
-        socket.on('thread-update', handleThreadUpdate);
 
         return () => {
             socket.off('new-server-message', handleNewMessage);
-            socket.off('message-reaction-update', handleReactionUpdate);
-            socket.off('poll-update', handlePollUpdate);
-            socket.off('thread-update', handleThreadUpdate);
-            socket.emit('leave-server-channel', { serverId, channelId: activeChannelName });
+            socket.emit('leave-server-channel', { serverId, channelId: activeChannel });
         };
     }, [socket, serverId, activeChannel]);
 
@@ -278,7 +197,7 @@ const ServerView = () => {
         // Persist to backend
         const success = await updateServer(serverId, { categories: newList });
         if (success) {
-            showToast(t('servers.movedCategory', { name: moved.name, direction }), 'success');
+            showToast(`Moved ${moved.name} ${direction}`, 'success');
         }
     };
 
@@ -327,78 +246,44 @@ const ServerView = () => {
             userAvatar: user.avatar,
             text,
             type,
-            poll: type === 'poll' ? extraData : null,
             replyTo: extraData?.replyTo || null
         };
-
-        // Encrypt message if server is encrypted and it's a text/important message
-        if (server.isEncrypted && (type === 'text' || type === 'important')) {
-            const encryptedText = await encryptMessage(text, null, serverId);
-            if (encryptedText !== text) {
-                msgData.text = encryptedText;
-                msgData.isE2EE = true;
-            }
-        }
-
-        const newMsg = await sendServerMessage(serverId, activeChannelName, msgData);
-        if (newMsg) {
-            // Decrypt local display if needed
-            let displayMsg = newMsg;
-            if (newMsg.isE2EE) {
-                const decrypted = await decryptMessage(newMsg.text, null, serverId);
-                displayMsg = { ...newMsg, text: decrypted };
-            }
-            setMessages(prev => [...prev, displayMsg]);
-        }
+        const newMsg = await sendServerMessage(serverId, activeChannel, msgData);
+        if (newMsg) setMessages(prev => [...prev, newMsg]);
     };
 
-
-    const togglePin = async (msg) => {
-        const success = await updateMessage(serverId, activeChannelName, msg.id || msg._id, { isPinned: !msg.isPinned });
-        if (success) {
-            setMessages(prev => prev.map(m => (m.id === msg.id || m._id === msg._id) ? { ...m, isPinned: !m.isPinned } : m));
-            showToast(msg.isPinned ? t('servers.unpinned') : t('servers.pinned'), 'success');
-        }
+    const handlePinMessage = (msg) => {
+        setMessages(prev => prev.map(m => (m.id === msg.id || m._id === msg._id) ? { ...m, isPinned: !m.isPinned } : m));
+        showToast(msg.isPinned ? 'Unpinned' : 'Pinned', 'success');
     };
 
-    const onDeleteMessage = async (msgId) => {
-        const success = await deleteServerMessage(serverId, activeChannelName, msgId);
+    const handleDeleteMessage = async (msg) => {
+        const msgId = msg._id || msg.id;
+        const success = await deleteServerMessage(serverId, activeChannel, msgId);
         if (success) {
             setMessages(prev => prev.filter(m => (m._id || m.id) !== msgId));
-            showToast(t('servers.msgDeleted'), 'success');
+            showToast('Message deleted', 'success');
         } else {
-            showToast(t('servers.failDeleteMsg'), 'error');
+            showToast('Failed to delete message', 'error');
         }
     };
 
-    const onUpdateMessage = async (messageId, newText) => {
-        const updatedMsg = await editServerMessage(serverId, activeChannelName, messageId, newText);
+    const handleEditMessage = async (messageId, newText) => {
+        const updatedMsg = await editServerMessage(serverId, activeChannel, messageId, newText);
         if (updatedMsg) {
             setMessages(prev => prev.map(m => (m._id || m.id) === messageId ? { ...m, text: newText, isEdited: true } : m));
-            showToast(t('servers.msgUpdated'), 'success');
+            showToast('Message updated', 'success');
         } else {
-            showToast(t('servers.failEditMsg'), 'error');
+            showToast('Failed to edit message', 'error');
         }
     };
 
-    const onReply = (msg) => {
-        showToast(t('servers.replyToDemo', { username: msg.username }), 'info');
-    };
-
-    const onAddReaction = async (messageId, emoji) => {
-        const res = await reactToServerMessage(serverId, activeChannelName, messageId, emoji, user.email);
-        if (!res) {
-            showToast(t('servers.failAddReaction'), 'error');
-        }
+    const handleReplyMessage = (msg) => {
+        showToast(`Reply to ${msg.username} (Demo)`, 'info');
     };
 
     const handleMute = (duration) => {
-        const text = duration === -1
-            ? t('servers.muteOptions.untilOffStatus')
-            : t('servers.muteOptions.durationStatus', {
-                duration,
-                unit: duration === 1 ? t('common.hour') : (duration === 24 ? t('common.day') : (duration === 168 ? t('common.days') : t('common.hours')))
-            });
+        const text = duration === -1 ? 'Notifications muted until you turn them back on' : `Notifications muted for ${duration} ${duration === 1 ? 'hour' : 'hours'}`;
         showToast(text, 'info');
         setShowMuteMenu(false);
     };
@@ -415,14 +300,12 @@ const ServerView = () => {
     const isAdmin = server.admins?.includes(user?.email) || server.ownerId === user?.username || user?.username === 'purushotham_mallipudi';
 
     const activeChatData = {
-        serverId: parseInt(serverId),
-        username: `# ${activeChannelName}`,
+        username: `# ${activeChannel}`,
         messages: messages.map(m => ({
             ...m,
             isMe: m.userEmail === user?.email,
             senderName: m.username,
             senderAvatar: m.userAvatar,
-            userTier: m.userTier || null,
             gif: m.type === 'gif' ? m.text : null
         }))
     };
@@ -441,27 +324,17 @@ const ServerView = () => {
                                 {server.name}
                                 {(server.id === 0 || server.isVerified) && <BadgeCheck size={16} fill="var(--color-primary)" color="white" />}
                             </h2>
-                            <div className="server-stats-sub">{(server.members?.length || members?.length || 0).toLocaleString()} {t('servers.members')} • {t('servers.community')}</div>
+                            <div className="server-stats-sub">{(server.members?.length || members?.length || 0).toLocaleString()} Members • Community</div>
                         </div>
                         <ChevronDown size={20} className={showMenu ? 'rotated' : ''} onClick={() => setShowMenu(!showMenu)} />
                     </div>
-
-                    {server.subscriptionTiers && server.subscriptionTiers.length > 0 && (
-                        <div className="vibe-prime-compact-banner" onClick={() => setShowSubscribe(true)}>
-                            <div className="vibe-prime-logo">
-                                <BadgeCheck size={14} fill="var(--color-primary)" color="white" />
-                                <span>{t('servers.vibePrime')}</span>
-                            </div>
-                            <ChevronRight size={14} />
-                        </div>
-                    )}
 
                     <div className="server-search-container">
                         <div className="search-bar-styled">
                             <Search size={16} />
                             <input
                                 type="text"
-                                placeholder={t('common.search')}
+                                placeholder="Search"
                                 value={channelSearch}
                                 onChange={(e) => setChannelSearch(e.target.value)}
                                 style={{
@@ -478,28 +351,22 @@ const ServerView = () => {
                             <ImageIcon
                                 size={20}
                                 onClick={() => { setShowMediaGallery(true); setActiveChannel(null); }}
-                                title={t('servers.mediaGallery')}
+                                title="Media Gallery"
                                 style={{ cursor: 'pointer', color: showMediaGallery ? 'var(--color-primary)' : 'inherit' }}
                             />
-                            <BookOpen
-                                size={20}
-                                onClick={() => navigate(`/servers/${serverId}/wiki`)}
-                                title={t('servers.serverWiki')}
-                                style={{ cursor: 'pointer' }}
-                            />
                             {hasPermission('createInvite') && (
-                                <UserPlus size={20} onClick={() => setShowInvite(true)} title={t('servers.invitePeople')} style={{ cursor: 'pointer' }} />
+                                <UserPlus size={20} onClick={() => setShowInvite(true)} title="Invite People" style={{ cursor: 'pointer' }} />
                             )}
                             <div style={{ position: 'relative' }}>
-                                <Bell size={20} onClick={() => setShowMuteMenu(!showMuteMenu)} style={{ cursor: 'pointer', color: showMuteMenu ? 'var(--color-primary)' : 'inherit' }} title={t('servers.muteNotifications')} />
+                                <Bell size={20} onClick={() => setShowMuteMenu(!showMuteMenu)} style={{ cursor: 'pointer', color: showMuteMenu ? 'var(--color-primary)' : 'inherit' }} />
                                 {showMuteMenu && (
                                     <div className="mute-dropdown-menu glass-card animate-slide-up">
-                                        <div className="menu-header">{t('servers.muteNotifications')}</div>
-                                        <button onClick={() => handleMute(1)}>{t('servers.muteOptions.1hour')}</button>
-                                        <button onClick={() => handleMute(8)}>{t('servers.muteOptions.8hours')}</button>
-                                        <button onClick={() => handleMute(24)}>{t('servers.muteOptions.1day')}</button>
-                                        <button onClick={() => handleMute(168)}>{t('servers.muteOptions.7days')}</button>
-                                        <button onClick={() => handleMute(-1)}>{t('servers.muteOptions.untilOff')}</button>
+                                        <div className="menu-header">Mute Notifications</div>
+                                        <button onClick={() => handleMute(1)}>1 Hour</button>
+                                        <button onClick={() => handleMute(8)}>8 Hours</button>
+                                        <button onClick={() => handleMute(24)}>1 Day</button>
+                                        <button onClick={() => handleMute(168)}>7 Days</button>
+                                        <button onClick={() => handleMute(-1)}>Until I turn it back on</button>
                                     </div>
                                 )}
                             </div>
@@ -510,7 +377,7 @@ const ServerView = () => {
                         {categoryList
                             .map(cat => ({
                                 ...cat,
-                                channels: cat.channels.filter(ch => (typeof ch === 'string' ? ch : ch?.name ?? '').toLowerCase().includes(channelSearch.toLowerCase()))
+                                channels: cat.channels.filter(ch => ch.toLowerCase().includes(channelSearch.toLowerCase()))
                             }))
                             .filter(cat => cat.channels.length > 0)
                             .map((cat, idx) => (
@@ -543,12 +410,12 @@ const ServerView = () => {
                                                     className="channel-gear-icon"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        const action = prompt(t("servers.categoryActionPrompt"));
+                                                        const action = prompt("Category: Type 'rename' or 'delete'");
                                                         if (action === 'rename') {
-                                                            const newName = prompt(t("servers.newNamePrompt"));
-                                                            if (newName) showToast(t("servers.renamedCategory", { newName }), 'success');
+                                                            const newName = prompt("New name:");
+                                                            if (newName) showToast(`Renamed to ${newName}`, 'success');
                                                         } else if (action === 'delete') {
-                                                            if (window.confirm(t("servers.deleteCategoryConfirm"))) showToast(t("servers.deletedCategory"), 'success');
+                                                            if (window.confirm("Delete category?")) showToast("Deleted", 'success');
                                                         }
                                                     }}
                                                 />
@@ -559,46 +426,28 @@ const ServerView = () => {
                                         const chName = typeof channel === 'string' ? channel : channel.name;
                                         const activeName = typeof activeChannel === 'string' ? activeChannel : activeChannel?.name;
                                         return (
-                                            <React.Fragment key={chName}>
-                                                <div
-                                                    className={`channel-pill ${activeName === chName ? 'active' : ''}`}
-                                                    onClick={() => { setActiveChannel(channel); setShowMediaGallery(false); }}
-                                                >
-                                                    <div className="channel-icon-wrapper">
-                                                        {getChannelIcon(channel)}
-                                                    </div>
-                                                    <span className="channel-name-text">{chName}</span>
-                                                    {hasPermission('manageChannels') && (
-                                                        <Settings
-                                                            size={14}
-                                                            className="channel-gear-icon"
-                                                            style={{ marginLeft: 'auto' }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setEditingChannel(channel);
-                                                                setShowChannelSettings(true);
-                                                            }}
-                                                        />
-                                                    )}
+                                            <div
+                                                key={chName}
+                                                className={`channel-pill ${activeName === chName ? 'active' : ''}`}
+                                                onClick={() => { setActiveChannel(channel); setShowMediaGallery(false); }}
+                                            >
+                                                <div className="channel-icon-wrapper">
+                                                    {getChannelIcon(channel)}
                                                 </div>
-
-                                                {/* Render Voice Participants */}
-                                                {(() => {
-                                                    const fullId = `${server.id}-${chName}`;
-                                                    const participants = voiceParticipants[fullId] || [];
-                                                    if (participants.length === 0) return null;
-                                                    return (
-                                                        <div className="sidebar-voice-participants">
-                                                            {participants.map(p => (
-                                                                <div key={p.socketId} className="voice-participant-mini">
-                                                                    <img src={p.avatar} alt="" />
-                                                                    <span>{p.username}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </React.Fragment>
+                                                <span className="channel-name-text">{chName}</span>
+                                                {hasPermission('manageChannels') && (
+                                                    <Settings
+                                                        size={14}
+                                                        className="channel-gear-icon"
+                                                        style={{ marginLeft: 'auto' }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingChannel(channel);
+                                                            setShowChannelSettings(true);
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -612,7 +461,7 @@ const ServerView = () => {
                             </div>
                             <div className="mini-names">
                                 <div className="mini-display-name">{displayName}</div>
-                                <div className="mini-status">{t('common.online')}</div>
+                                <div className="mini-status">Online</div>
                             </div>
                         </div>
                         <div className="user-bar-actions">
@@ -650,13 +499,13 @@ const ServerView = () => {
                                     <div className="header-icon-wrapper">
                                         {activeChannel && getChannelIcon(activeChannel)}
                                     </div>
-                                    <h3>{activeChannelName || t('servers.welcome')}</h3>
+                                    <h3>{activeChannel || "Welcome"}</h3>
                                 </div>
                                 <div className="header-right">
                                     <Pin size={20} className="clickable-icon" onClick={() => setShowPinned(true)} />
                                     <Users size={20} className="clickable-icon" onClick={() => setShowMembers(!showMembers)} />
                                     <div className="search-input-pill" onClick={() => setShowSearch(true)}>
-                                        <span>{t('common.search')}</span>
+                                        <span>Search</span>
                                         <Search size={16} />
                                     </div>
                                 </div>
@@ -670,7 +519,7 @@ const ServerView = () => {
                                 ) : !activeChannel ? (
                                     <div className="flex-center h-full flex-col text-muted" style={{ color: '#949BA4', gap: '16px' }}>
                                         <Hash size={48} style={{ opacity: 0.5 }} />
-                                        <p>{t('servers.selectChannel')}</p>
+                                        <p>Select a channel to start chatting</p>
                                     </div>
                                 ) : (
                                     <ChatWindow
@@ -680,27 +529,16 @@ const ServerView = () => {
                                         showLocation={false}
                                         isAdmin={isAdmin}
                                         canManageMessages={hasPermission('manageMessages')}
-                                        isReadOnly={readOnlyChannels[activeChannelName] || (server.readOnlyChannels && server.readOnlyChannels.includes(activeChannelName))}
+                                        isReadOnly={readOnlyChannels[activeChannel] || (server.readOnlyChannels && server.readOnlyChannels.includes(activeChannel))}
                                         canPostInReadOnly={isAdmin || hasPermission('administrator')}
-                                        onPin={togglePin}
-                                        onDelete={onDeleteMessage}
-                                        onEdit={onUpdateMessage}
-                                        onReply={onReply}
-                                        onReact={onAddReaction}
+                                        onPin={handlePinMessage}
+                                        onDelete={handleDeleteMessage}
+                                        onEdit={handleEditMessage}
+                                        onReply={handleReplyMessage}
                                         onAvatarClick={handleAvatarClick}
-                                        onOpenThread={(msg) => setActiveThread(msg)}
-                                        isDirect={false}
                                     />
                                 )}
                             </div>
-                            {activeThread && (
-                                <ThreadSidebar
-                                    serverId={serverId}
-                                    channelId={activeChannelName}
-                                    threadId={activeThread._id || activeThread.id}
-                                    onClose={() => setActiveThread(null)}
-                                />
-                            )}
                         </>
                     )}
                 </div>
@@ -720,7 +558,7 @@ const ServerView = () => {
                 onLeave={async () => {
                     const success = await leaveServer(server.id, user.email);
                     if (success) {
-                        showToast(t('servers.leftServer'), 'success');
+                        showToast('Left server', 'success');
                         navigate('/');
                     }
                 }}
@@ -812,13 +650,13 @@ const ServerView = () => {
                     if (updated) {
                         const success = await updateServer(serverId, updates);
                         if (success) {
-                            showToast(t('servers.updatedChannel', { name }), 'success');
+                            showToast(`Updated #${name}`, 'success');
                             if (name !== editingChannel && activeChannel === editingChannel) {
                                 setActiveChannel(name);
                             }
                         } else {
                             console.error('[ChannelUpdate] PATCH failed');
-                            showToast(t('servers.failUpdateChannel'), 'error');
+                            showToast('Failed to update channel', 'error');
                         }
                     }
                     setShowChannelSettings(false);
@@ -826,7 +664,7 @@ const ServerView = () => {
                 onDelete={async () => {
                     const success = await deleteChannel(serverId, editingChannel);
                     if (success) {
-                        showToast(t('servers.deletedChannel', { name: editingChannel }), 'success');
+                        showToast(`Deleted #${editingChannel}`, 'success');
                         setShowChannelSettings(false);
                         // If we deleted the active channel, switch to another one
                         if (activeChannel === editingChannel) {
@@ -835,7 +673,7 @@ const ServerView = () => {
                             else navigate('/');
                         }
                     } else {
-                        showToast(t('servers.failDeleteChannel'), 'error');
+                        showToast('Failed to delete channel', 'error');
                     }
                 }}
             />
@@ -885,18 +723,11 @@ const ServerView = () => {
                 message={deleteConfirmation?.message}
                 onConfirm={deleteConfirmation?.action}
             />
-
-            <SubscribeModal
-                isOpen={showSubscribe}
-                onClose={() => setShowSubscribe(false)}
-                server={server}
-            />
         </div>
     );
 };
 
 const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignRole }) => {
-    const { t } = useTranslation();
     const { showToast } = useToast();
     const userRoles = roles.filter(r => user.roles?.includes(r._id) || user.roles?.includes(r.id));
     const availableRoles = roles.filter(r => !user.roles?.includes(r._id) && !user.roles?.includes(r.id));
@@ -920,7 +751,7 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>{t('servers.roles')}</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Roles</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                             {userRoles.map(role => (
                                 <div key={role._id || role.id} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px', border: `1px solid ${role.color || 'var(--text-muted)'}40` }}>
@@ -933,7 +764,7 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
                                     onClick={() => setShowRolePicker(!showRolePicker)}
                                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
                                 >
-                                    {t('servers.addRole')}
+                                    + Add Role
                                 </button>
                             )}
                         </div>
@@ -947,10 +778,10 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
                                             onClick={async () => {
                                                 const success = await onAssignRole(role._id || role.id);
                                                 if (success) {
-                                                    showToast(t('servers.addedRole', { name: role.name }), 'success');
+                                                    showToast(`Added role ${role.name}`, 'success');
                                                     setShowRolePicker(false);
                                                 } else {
-                                                    showToast(t('servers.failAddRole', { name: role.name }), 'error');
+                                                    showToast(`Failed to add role ${role.name}`, 'error');
                                                 }
                                             }}
                                             className="menu-item"
@@ -962,7 +793,7 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
                                     ))
                                 ) : (
                                     <div style={{ padding: '8px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                        {t('servers.noRolesAvailable')}
+                                        No roles available to add.
                                     </div>
                                 )}
                             </div>
@@ -979,7 +810,7 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
                                 if (targetUser) window.location.href = `/messages?user=${targetUser}`;
                             }}
                         >
-                            {t('common.message')}
+                            Message
                         </button>
                     </div>
                 </div>
@@ -989,21 +820,20 @@ const UserProfileModal = ({ user, onClose, roles = [], canManageRoles, onAssignR
 };
 
 const PinnedMessagesModal = ({ isOpen, onClose, messages }) => {
-    const { t } = useTranslation();
     if (!isOpen) return null;
     return (
         <div className="search-modal-overlay animate-slide-up" onClick={onClose} style={{ zIndex: 11000 }}>
             <div className="search-modal glass-card" onClick={e => e.stopPropagation()} style={{ width: '480px', maxHeight: '70vh', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                        <Pin size={20} /> {t('servers.pinnedMessages')}
+                        <Pin size={20} /> Pinned Messages
                     </h3>
                     <button className="icon-btn" onClick={onClose} style={{ color: 'var(--text-muted)' }}><X size={20} /></button>
                 </div>
                 <div style={{ padding: '16px', overflowY: 'auto', maxHeight: 'calc(70vh - 80px)' }} className="premium-scrollbar">
                     {messages.length === 0 ? (
                         <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
-                            {t('servers.noPinnedMessages')}
+                            No pinned messages yet.
                         </div>
                     ) : (
                         messages.map(msg => (

@@ -12,25 +12,12 @@ export const ServerProvider = ({ children }) => {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     useEffect(() => {
-        console.log('[ServerContext] Fetching servers from:', `${config.API_URL}/api/servers`);
         fetch(`${config.API_URL}/api/servers`)
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                console.log('[ServerContext] Fetched servers:', data);
-                if (Array.isArray(data)) {
-                    setServers(data);
-                } else {
-                    console.error("[ServerContext] Fetched servers data is not an array:", data);
-                    setServers([]);
-                }
+                setServers(data);
             })
-            .catch(err => {
-                console.error("[ServerContext] Failed to fetch servers:", err);
-                setServers([]);
-            })
+            .catch(err => console.error("Failed to fetch servers:", err))
             .finally(() => setLoading(false));
     }, []);
 
@@ -73,17 +60,6 @@ export const ServerProvider = ({ children }) => {
         }
     };
 
-    const fetchThreadMessages = async (serverId, channelId, threadId) => {
-        try {
-            const res = await fetch(`${config.API_URL}/api/server-threads/${serverId}/${threadId}`);
-            if (res.ok) return await res.json();
-            return { parent: null, replies: [] };
-        } catch (err) {
-            console.error("Failed to fetch thread messages:", err);
-            return { parent: null, replies: [] };
-        }
-    };
-
     const deleteServerMessage = async (serverId, channelId, messageId) => {
         try {
             const res = await fetch(`${config.API_URL}/api/servers/${serverId}/messages/${channelId}/${messageId}`, {
@@ -106,20 +82,6 @@ export const ServerProvider = ({ children }) => {
             return await res.json();
         } catch (err) {
             console.error("Failed to edit server message:", err);
-            return null;
-        }
-    };
-
-    const reactToServerMessage = async (serverId, channelId, messageId, emoji, userEmail) => {
-        try {
-            const res = await fetch(`${config.API_URL}/api/servers/${serverId}/messages/${channelId}/${messageId}/react`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emoji, userEmail })
-            });
-            return await res.json();
-        } catch (err) {
-            console.error("Failed to react to server message:", err);
             return null;
         }
     };
@@ -161,20 +123,6 @@ export const ServerProvider = ({ children }) => {
         } catch (err) {
             console.error("Failed to leave server:", err);
             return false;
-        }
-    };
-
-    const fetchServer = async (serverId) => {
-        try {
-            const res = await fetch(`${config.API_URL}/api/servers/${serverId}`);
-            if (res.ok) {
-                const data = await res.json();
-                return data;
-            }
-            return null;
-        } catch (err) {
-            console.error("Failed to fetch server details:", err);
-            return null;
         }
     };
 
@@ -235,8 +183,7 @@ export const ServerProvider = ({ children }) => {
     const fetchMembers = async (serverId) => {
         try {
             const res = await fetch(`${config.API_URL}/api/servers/${serverId}/members`);
-            const data = await res.json();
-            return Array.isArray(data) ? data : [];
+            return await res.json();
         } catch (err) {
             console.error("Failed to fetch members:", err);
             return [];
@@ -246,8 +193,7 @@ export const ServerProvider = ({ children }) => {
     const fetchRoles = async (serverId) => {
         try {
             const res = await fetch(`${config.API_URL}/api/servers/${serverId}/roles`);
-            const data = await res.json();
-            return Array.isArray(data) ? data : [];
+            return await res.json();
         } catch (err) {
             console.error("Failed to fetch roles:", err);
             return [];
@@ -328,13 +274,10 @@ export const ServerProvider = ({ children }) => {
     const value = {
         servers,
         addServer,
-        fetchServer,
         fetchMessages,
-        fetchThreadMessages,
         sendServerMessage,
         deleteServerMessage,
         editServerMessage,
-        reactToServerMessage,
         createChannel,
         deleteChannel,
         leaveServer,

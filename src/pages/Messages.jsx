@@ -6,9 +6,7 @@ import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
-import { useSecurity } from '../context/SecurityContext';
-
+import { ArrowLeft } from 'lucide-react';
 
 const Messages = () => {
     const { user } = useAuth();
@@ -21,11 +19,8 @@ const Messages = () => {
     const [messages, setMessages] = useState([]);
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [peerPublicKeys, setPeerPublicKeys] = useState({});
 
     const { socket } = useSocket();
-    const { encryptMessage, decryptMessage, isE2EEEnabled } = useSecurity();
-
 
     const fetchData = async () => {
         if (!user) return;
@@ -38,12 +33,8 @@ const Messages = () => {
 
             if (usersRes.ok && messagesRes.ok && convosRes.ok) {
                 const usersData = await usersRes.json();
-                let messagesData = await messagesRes.json();
+                const messagesData = await messagesRes.json();
                 const convosData = await convosRes.json();
-
-                // Decrypt history
-                messagesData = await decryptBatch(messagesData, usersData);
-
                 setAllUsers(usersData);
                 setMessages(messagesData);
                 setConversations(convosData);
@@ -55,36 +46,6 @@ const Messages = () => {
         }
     };
 
-    const getPeerPublicKey = async (email) => {
-        // Handled by SecurityContext internally now, but keeping for direct fetch if needed
-        if (peerPublicKeys[email]) return peerPublicKeys[email];
-        try {
-            const res = await fetch(`${config.API_URL}/api/users/${email}/public-key`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data.publicKey) {
-                    setPeerPublicKeys(prev => ({ ...prev, [email]: data.publicKey }));
-                    return data.publicKey;
-                }
-            }
-        } catch (err) { }
-        return null;
-    };
-
-
-    const decryptBatch = async (msgs) => {
-        const decrypted = await Promise.all(msgs.map(async (m) => {
-            if (m.text && m.text.includes('"encrypted":true')) {
-                const otherEmail = m.from === user.email ? m.to : m.from;
-                const decryptedText = await decryptMessage(m.text, otherEmail);
-                return { ...m, text: decryptedText, isE2EE: true };
-            }
-            return m;
-        }));
-        return decrypted;
-    };
-
-
     useEffect(() => {
         fetchData();
     }, [user]);
@@ -93,27 +54,16 @@ const Messages = () => {
     useEffect(() => {
         if (!socket) return;
 
-        const handleNewMessage = async (newMessage) => {
-            const otherEmail = newMessage.from === user.email ? newMessage.to : newMessage.from;
-            let pubKey = peerPublicKeys[otherEmail];
-            if (!pubKey) pubKey = await getPeerPublicKey(otherEmail);
-
-            let decryptedMsg = newMessage;
-            if (newMessage.text && newMessage.text.includes('"encrypted":true')) {
-                const decryptedText = await decryptMessage(newMessage.text, otherEmail);
-                decryptedMsg = { ...newMessage, text: decryptedText, isE2EE: true };
-            }
-
-
+        const handleNewMessage = (newMessage) => {
             setMessages(prev => {
-                if (prev.find(m => m._id === decryptedMsg._id)) return prev;
-                return [...prev, decryptedMsg];
+                if (prev.find(m => m._id === newMessage._id)) return prev;
+                return [...prev, newMessage];
             });
 
             // Emit delivered status back to sender
-            if (decryptedMsg.from !== user.email) {
+            if (newMessage.from !== user.email) {
                 socket.emit('message-delivered', {
-                    messageId: decryptedMsg._id,
+                    messageId: newMessage._id,
                     fromId: user.id
                 });
             }
@@ -121,20 +71,7 @@ const Messages = () => {
             // Re-fetch conversations to update last message preview / ordering
             fetch(`${config.API_URL}/api/conversations/${user.email}`)
                 .then(res => res.json())
-                .then(async (data) => {
-                    // Pre-decrypt last message if possible
-                    const enriched = await Promise.all(data.map(async (c) => {
-                        if (c.lastMessage?.text?.includes('"encrypted":true')) {
-                            const oEmail = c.participants.find(p => p !== user.email);
-                            let pk = peerPublicKeys[oEmail] || await getPeerPublicKey(oEmail);
-                            if (pk) {
-                                c.lastMessage.text = await encryptionService.decrypt(c.lastMessage.text, pk);
-                            }
-                        }
-                        return c;
-                    }));
-                    setConversations(enriched);
-                })
+                .then(data => setConversations(data))
                 .catch(err => console.error('Failed to update convos:', err));
         };
 
@@ -144,18 +81,12 @@ const Messages = () => {
             ));
         };
 
-        const handlePollUpdate = (updatedMsg) => {
-            setMessages(prev => prev.map(m => (m._id === updatedMsg._id || m.id === updatedMsg._id) ? updatedMsg : m));
-        };
-
         socket.on('receive-message', handleNewMessage);
         socket.on('msg-status-update', handleStatusUpdate);
-        socket.on('poll-update', handlePollUpdate);
 
         return () => {
             socket.off('receive-message', handleNewMessage);
             socket.off('msg-status-update', handleStatusUpdate);
-            socket.off('poll-update', handlePollUpdate);
         };
     }, [socket, user]);
 
@@ -227,32 +158,15 @@ const Messages = () => {
         return 0;
     });
 
-    const activeChat = chats.find(c => c.id === activeChatId);
-
     const handleSendMessage = async (text, type = 'text', extraData = null) => {
-        if (!activeChatId || !user || !activeChat) return;
-
-        const targetEmail = activeChat.email || activeChatId;
-
-        let finalOutput = text;
-        let isE2EE = false;
-
-        if (type === 'text') {
-            const encrypted = await encryptMessage(text, targetEmail);
-            if (encrypted !== text) {
-                finalOutput = encrypted;
-                isE2EE = true;
-            }
-        }
-
+        if (!activeChatId || !user) return;
 
         const messageBody = {
             from: user.email,
-            to: targetEmail,
-            text: finalOutput,
+            to: activeChatId,
+            text,
             type,
-            sharedContent: type === 'poll' ? extraData : (type !== 'text' ? extraData : null),
-            poll: type === 'poll' ? extraData : null,
+            sharedContent: type !== 'text' ? extraData : null,
             replyTo: extraData?.replyTo || null,
             timestamp: new Date().toISOString()
         };
@@ -278,28 +192,6 @@ const Messages = () => {
             }
         } catch (error) {
             console.error('Failed to send message:', error);
-        }
-    };
-
-    const handleDeleteMessage = async (msg) => {
-        const msgId = msg._id || msg.id;
-        try {
-            const res = await fetch(`${config.API_URL}/api/messages/${msgId}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-                setMessages(prev => prev.filter(m => (m._id || m.id) !== msgId));
-                // Notify via socket so other user sees it deleted too
-                if (socket) {
-                    socket.emit('delete-direct-message', {
-                        messageId: msgId,
-                        to: activeChat.email
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Failed to delete message:', error);
         }
     };
 
@@ -330,6 +222,8 @@ const Messages = () => {
         }
     };
 
+    const activeChat = chats.find(c => c.id === activeChatId);
+
     if (loading) return <div className="page-container flex-center" style={{ color: 'white' }}>Loading chats...</div>;
 
     return (
@@ -344,9 +238,7 @@ const Messages = () => {
             <ChatWindow
                 activeChat={activeChat || null}
                 onSendMessage={handleSendMessage}
-                onDelete={handleDeleteMessage}
                 onBack={() => setActiveChatId(null)}
-                isDirect={true}
             />
         </div>
     );

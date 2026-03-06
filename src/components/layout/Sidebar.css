@@ -89,35 +89,34 @@
 
 @media (max-width: 640px) {
     .sidebar {
-        width: calc(100% - 32px);
-        height: 70px;
+        width: calc(100% - 40px);
+        height: 72px;
         position: fixed;
-        bottom: 24px;
-        left: 16px;
+        bottom: 32px;
+        left: 20px;
         top: auto;
         flex-direction: row;
-        border-radius: 35px;
-        padding: 0 8px;
+        border-radius: 36px;
+        padding: 0 16px;
 
         /* Ultra-Premium Glassmorphism */
-        background: rgba(10, 10, 15, 0.85);
-        backdrop-filter: blur(24px) saturate(200%);
-        -webkit-backdrop-filter: blur(24px) saturate(200%);
+        background: rgba(15, 15, 20, 0.7);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-        /* Refined Multi-layered "Physical" Depth */
+        /* Multi-layered "Physical" Depth */
         box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.5),
-            0 10px 20px rgba(0, 0, 0, 0.3),
-            inset 0 1px 1px rgba(255, 255, 255, 0.1),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+            0 20px 50px rgba(0, 0, 0, 0.6),
+            0 10px 20px rgba(0, 0, 0, 0.4),
+            inset 0 1px 2px rgba(255, 255, 255, 0.15),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 
         justify-content: space-between;
         align-items: center;
         z-index: 1000;
 
         /* Subtle Edge Animation */
-        overflow: visible;
-        /* Changed to visible for floating center button */
+        overflow: hidden;
     }
 
     .sidebar.mobile-hide-forced {
@@ -182,8 +181,6 @@
         justify-content: space-around;
         align-items: center;
         height: 100%;
-        gap: 8px;
-        /* Slight gap between items */
     }
 
     .nav-item {
@@ -260,8 +257,8 @@
     }
 
     .nav-item svg {
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -277,20 +274,20 @@
     }
 
     .create-icon-wrapper {
-        width: 56px;
-        height: 56px;
-        background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-        border-radius: 50%;
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow:
-            0 8px 20px rgba(130, 87, 229, 0.4),
-            inset 0 2px 4px rgba(255, 255, 255, 0.3);
-        transform: translateY(-20px);
-        /* Make it float above the bar */
-        border: 2px solid rgba(255, 255, 255, 0.15);
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            0 10px 25px rgba(130, 87, 229, 0.5),
+            inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        /* Aligned with other icons */
+        transform: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
     }
 
@@ -306,7 +303,7 @@
     }
 
     .create-btn:active .create-icon-wrapper {
-        transform: translateY(-16px) scale(0.95);
+        transform: translateY(-16px) scale(0.9);
         box-shadow: 0 4px 15px rgba(130, 87, 229, 0.3);
     }
 
@@ -320,48 +317,5 @@
         border-radius: 0 !important;
         box-shadow: none !important;
         border: none !important;
-    }
-
-    .sidebar-footer {
-        padding-top: var(--spacing-lg);
-        border-top: 1px solid var(--color-border);
-        margin-top: var(--spacing-md);
-    }
-
-    .user-profile-summary {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: var(--transition-smooth);
-    }
-
-    .user-profile-summary:hover {
-        background: var(--nav-hover-bg);
-    }
-
-    .user-details {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .user-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--color-text-primary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .user-handle {
-        font-size: 0.8rem;
-        color: var(--color-text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 }

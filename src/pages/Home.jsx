@@ -1,9 +1,8 @@
 import { useState, useRef, memo } from 'react';
-import { Heart, Search, RefreshCw, MessageCircle, Plus, ShoppingBag } from 'lucide-react';
+import { Heart, Search, RefreshCw, MessageCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
-import ActivityFeed from '../components/feed/ActivityFeed';
 import CreateModal from '../components/create/CreateModal';
 import { useNotifications } from '../context/NotificationContext';
 import { useContent } from '../context/ContentContext';
@@ -81,9 +80,6 @@ const Home = memo(() => {
                 </div>
 
                 <div className="header-actions">
-                    <div className="notification-btn glass-card" onClick={() => navigate('/marketplace')} title="Vibe Marketplace">
-                        <ShoppingBag size={18} className="header-icon" />
-                    </div>
                     <div className="notification-btn glass-card" onClick={() => navigate('/messages')}>
                         <MessageCircle size={18} className="header-icon" />
                     </div>
@@ -93,7 +89,6 @@ const Home = memo(() => {
                     </div>
                 </div>
             </header>
-
             <div className="home-content">
                 <div
                     className={`pull-to-refresh-indicator ${refreshing ? 'refreshing' : ''}`}
@@ -112,10 +107,6 @@ const Home = memo(() => {
                 </div>
                 <StoriesRail />
                 <Feed />
-                <div className="home-activity-section">
-                    <div className="home-activity-header">What's New</div>
-                    <ActivityFeed />
-                </div>
             </div>
 
             <CreateModal
