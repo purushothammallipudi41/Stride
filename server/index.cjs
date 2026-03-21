@@ -834,7 +834,7 @@ app.post('/api/signup', async (req, res) => {
 
         res.json({ success: true, message: 'Account created successfully!' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, message: `Server Error: ${err.message}` });
     }
 });
 
