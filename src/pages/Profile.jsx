@@ -16,7 +16,7 @@ const Profile = () => {
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const targetUser = username || currentUser.username || 'admin';
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users/${targetUser}/profile`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${targetUser}`)
             .then(res => res.json())
             .then(data => {
                 setUser(data);
@@ -48,7 +48,7 @@ const Profile = () => {
     const handleFollow = async () => {
         try {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users/${user._id}/follow`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${user.username}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ currentUserId: currentUser._id })
@@ -97,8 +97,8 @@ const Profile = () => {
 
     const handleUpdateProfile = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users/${user.username}/profile`, {
-                method: 'PUT',
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editData)
             });
