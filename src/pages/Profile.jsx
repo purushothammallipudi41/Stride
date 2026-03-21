@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
@@ -90,10 +91,10 @@ const Profile = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editData, setEditData] = useState({ name: '', bio: '', avatar: '', banner: '' });
 
-    const openEditModal = () => {
+    const openEditModal = useCallback(() => {
         setEditData({ name: user.name || '', bio: user.bio || '', avatar: user.avatar || '', banner: user.banner || '' });
         setIsEditModalOpen(true);
-    };
+    }, [user]);
 
     const handleFileChange = (e, field) => {
         const file = e.target.files[0];
@@ -105,6 +106,15 @@ const Profile = () => {
             reader.readAsDataURL(file);
         }
     };
+
+    const location = useLocation();
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (location.search.includes('edit=true') && user && isOwnProfile && !isEditModalOpen) {
+            openEditModal();
+        }
+    }, [location.search, user, isOwnProfile, isEditModalOpen, openEditModal]);
 
     const handleUpdateProfile = async () => {
         try {
@@ -134,20 +144,7 @@ const Profile = () => {
     return (
         <div className="ig-profile-container">
             {/* Top Header */}
-            <PageHeader 
-                title={user.username} 
-                rightElement={
-                    isOwnProfile ? (
-                        <button 
-                            className="settings-btn" 
-                            onClick={openEditModal}
-                            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer' }}
-                        >
-                            <Settings size={28} />
-                        </button>
-                    ) : null
-                }
-            />
+            <PageHeader title={user.username} />
 
             {/* Profile Info */}
             <div className="ig-profile-bio-block">

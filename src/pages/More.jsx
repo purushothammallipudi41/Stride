@@ -20,7 +20,7 @@ const More = () => {
         { icon: Film, title: 'Reels', desc: 'Watch short-form video content', path: '/reels', color: '#f59e0b' },
         { icon: Music2, title: 'Music', desc: 'Listen to your personalized feed', path: '/music', color: '#3b82f6' },
         { icon: Hash, title: 'Servers', desc: 'Jump into live audio spaces', path: '/servers', color: '#6366f1' },
-        { icon: Settings, title: 'Settings', desc: 'Manage your app preferences', path: '/settings', color: '#a855f7' },
+        { icon: Settings, title: 'Settings', desc: 'Manage your app preferences', path: '/profile?edit=true', color: '#a855f7' },
         isAuthenticated ? 
         { icon: LogOut, title: 'Logout', desc: 'Sign out of your account', action: 'logout', color: '#ef4444' } :
         { icon: LogIn, title: 'Login', desc: 'Sign in to your account', path: '/login', color: '#8b5cf6' }
