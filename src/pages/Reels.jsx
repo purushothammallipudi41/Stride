@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import ReelItem from '../components/reels/ReelItem';
-import PageHeader from '../components/layout/PageHeader';
 import '../components/reels/Reels.css';
 
 const Reels = () => {
@@ -48,9 +47,6 @@ const Reels = () => {
 
     return (
         <div className="reels-container" ref={containerRef}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 100 }}>
-                <PageHeader title="Reels" />
-            </div>
             {reelsData.map(video => (
                 <div key={video.id} className="reel-item-wrapper" data-id={video.id}>
                     <ReelItem video={video} isActive={activeReelId === video.id} />
