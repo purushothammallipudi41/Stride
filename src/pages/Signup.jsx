@@ -43,22 +43,16 @@ const Signup = () => {
             const data = await response.json();
 
             if (data.success) {
-                // 2. Trigger Verification Code
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: formData.email })
-                });
-
                 // 3. Link user data for session
                 localStorage.setItem('user', JSON.stringify({
                     username: formData.username,
                     email: formData.email,
-                    avatar: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'
+                    avatar: `https://i.pravatar.cc/150?u=${formData.username}`
                 }));
 
-                // 4. Navigate to Verification
-                navigate('/verify', { state: { email: formData.email } });
+                // 4. Bypass Verification & Login Directly
+                localStorage.setItem('isAuthenticated', 'true');
+                navigate('/');
             } else {
                 setError(data.message || 'Signup failed. Please try again.');
             }
