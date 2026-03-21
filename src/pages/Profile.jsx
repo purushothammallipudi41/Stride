@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
@@ -9,6 +9,8 @@ import './Profile.css';
 
 const Profile = () => {
     const { username } = useMusic();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('posts');
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +100,13 @@ const Profile = () => {
         setIsEditModalOpen(true);
     }, [user]);
 
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        if (location.search.includes('edit=true')) {
+            navigate('/profile', { replace: true });
+        }
+    };
+
     const handleFileChange = (e, field) => {
         const file = e.target.files[0];
         if (file) {
@@ -108,8 +117,6 @@ const Profile = () => {
             reader.readAsDataURL(file);
         }
     };
-
-    const location = useLocation();
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,7 +135,7 @@ const Profile = () => {
             const data = await res.json();
             if (data.success) {
                 setUser(data.user);
-                setIsEditModalOpen(false);
+                closeEditModal();
             } else {
                 console.error("Failed to update:", data.message);
             }
@@ -268,7 +275,7 @@ const Profile = () => {
                     <div className="ig-modal-glass">
                         <div className="ig-modal-header">
                             <h2>Edit Profile</h2>
-                            <button className="ig-modal-close" onClick={() => setIsEditModalOpen(false)}>✕</button>
+                            <button className="ig-modal-close" onClick={closeEditModal}>✕</button>
                         </div>
                         <div className="ig-modal-body">
                             
@@ -304,7 +311,7 @@ const Profile = () => {
 
                         </div>
                         <div className="ig-modal-footer">
-                            <button className="ig-btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                            <button className="ig-btn-cancel" onClick={closeEditModal}>Cancel</button>
                             <button className="ig-btn-save" onClick={handleUpdateProfile}>Save Changes</button>
                         </div>
                     </div>
