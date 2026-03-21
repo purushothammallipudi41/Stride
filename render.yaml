@@ -29,7 +29,7 @@ services:
         fromService:
           name: stride-backend
           type: web
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
       - key: NODE_VERSION
         value: "20.11.1"
     routes:
