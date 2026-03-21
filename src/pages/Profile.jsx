@@ -137,9 +137,15 @@ const Profile = () => {
             <PageHeader 
                 title={user.username} 
                 rightElement={
-                    <button className="settings-btn" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-primary)' }}>
-                        <Settings size={28} />
-                    </button>
+                    isOwnProfile ? (
+                        <button 
+                            className="settings-btn" 
+                            onClick={openEditModal}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer' }}
+                        >
+                            <Settings size={28} />
+                        </button>
+                    ) : null
                 }
             />
 
