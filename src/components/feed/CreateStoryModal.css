@@ -1,5 +1,5 @@
 .story-modal-overlay {
-    background: rgba(0, 0, 0, 0.98) !important;
+    background: linear-gradient(45deg, var(--theme-primary), var(--theme-accent)) !important;
     backdrop-filter: blur(25px) !important;
     display: flex;
     align-items: center;
@@ -166,7 +166,52 @@
     transform: none;
 }
 
+.story-preview-main.text-mode-bg {
+    background: linear-gradient(135deg, var(--theme-accent), #7928ca);
+}
+
+.empty-preview-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.story-text-input {
+    width: 80%;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    font-family: var(--font-header);
+    resize: none;
+    outline: none;
+}
+
+.story-text-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.opacity-20 {
+    opacity: 0.2;
+}
+
 @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.9) translateY(20px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }
