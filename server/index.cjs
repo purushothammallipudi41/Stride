@@ -8,7 +8,6 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 // Models
 const User = require('./models/User.cjs');
@@ -30,6 +29,7 @@ const connectDB = async () => {
         let uri = process.env.MONGODB_URI;
         if (!uri) {
             console.log('INFO: No MONGODB_URI found. Starting MongoMemoryServer for local development...');
+            const { MongoMemoryServer } = require('mongodb-memory-server');
             const mongoServer = await MongoMemoryServer.create();
             uri = mongoServer.getUri();
         }
