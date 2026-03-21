@@ -1,0 +1,17 @@
+.smart-avatar-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary, linear-gradient(135deg, #8b5cf6, #ec4899));
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.smart-avatar-img {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

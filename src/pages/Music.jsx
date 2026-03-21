@@ -1,0 +1,425 @@
+import { useState, useEffect } from 'react';
+import { Play, Pause, Music, SkipBack, SkipForward, Share2, Plus, DollarSign, Award } from 'lucide-react';
+
+
+
+
+import { useMusic } from '../hooks/useMusic';
+
+import { useUI } from '../hooks/useUI';
+// albums and allSongs will be loaded from the context or locally via fetch
+import Visualizer from '../components/music/Visualizer';
+import PageHeader from '../components/layout/PageHeader';
+import './Music.css';
+
+import { useNavigate } from 'react-router-dom';
+
+
+const formatTime = (seconds) => {
+    if (!seconds) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
+const MusicPage = () => {
+    const navigate = useNavigate();
+    const { addNotification } = useUI();
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { 
+        currentTrack, 
+        isPlaying, 
+        togglePlay, 
+        playTrack, 
+        analyzer,
+        nextTrack,
+        prevTrack,
+        progress,
+        setProgress,
+        playlists,
+        createPlaylist,
+        addToPlaylist,
+        isPublicSession,
+        togglePublicSession
+    } = useMusic();
+
+
+
+    const [albums, setAlbums] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+
+    const handleTip = async (e, song) => {
+        e.stopPropagation();
+        const amount = prompt(`Enter tip amount for ${song.artist || 'Artist'}:`, "5.00");
+        if (!amount || isNaN(amount)) return;
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/monetization/tip`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    fromId: user._id, 
+                    toId: song.user?._id || user._id, 
+                    amount: parseFloat(amount),
+                    trackId: song.id 
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                addNotification({ title: 'Tip Sent!', message: `You sent $${amount} to ${song.artist}`, type: 'success' });
+            }
+        } catch (err) {
+            console.error("Tip failed:", err);
+        }
+    };
+
+    const [isSearching, setIsSearching] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newPlaylistName, setNewPlaylistName] = useState('');
+    const [addingToPlaylist, setAddingToPlaylist] = useState(null); // track being added
+
+
+
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/albums`)
+            .then(res => res.json())
+            .then(data => {
+                setAlbums(data);
+            })
+            .catch(err => {
+                console.error("Failed to fetch albums:", err);
+            });
+    }, []);
+
+    const handleSearch = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        if (query.length > 2) {
+            setIsSearching(true);
+            const { searchTracks } = await import('../services/audiusService');
+            const tracks = await searchTracks(query);
+            setSearchResults(tracks);
+            setIsSearching(false);
+        } else {
+            setSearchResults([]);
+        }
+    };
+
+
+    const handlePlayAlbum = (album) => {
+        if (album.songs && album.songs.length > 0) {
+            playTrack({ ...album.songs[0], cover: album.cover });
+        }
+    };
+
+    const handlePlaySong = (song) => {
+        if (currentTrack?.id === song.id) {
+            togglePlay();
+        } else {
+            playTrack(song);
+        }
+    };
+
+    const handleShareSong = async (e, song) => {
+        e.stopPropagation();
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: song.title,
+                    text: `Check out ${song.title} by ${song.artist} on Stride!`,
+                    url: window.location.href,
+                });
+            } catch (err) {
+                console.error("Share failed:", err);
+            }
+        } else {
+            const shareUrl = `${window.location.origin}/track/${song.id}`;
+            navigator.clipboard.writeText(shareUrl);
+            addNotification({ title: 'Link Copied', message: 'Vibe link copied to clipboard!', type: 'info' });
+        }
+    };
+
+    const handleCreatePlaylist = async () => {
+
+        if (!newPlaylistName) return;
+        await createPlaylist({ name: newPlaylistName, tracks: [] });
+        setNewPlaylistName('');
+        setShowCreateModal(false);
+        addNotification({ title: 'Playlist Created', message: `"${newPlaylistName}" is ready for vibes.`, type: 'success' });
+    };
+
+
+    return (
+        <div className="music-page" style={{ paddingBottom: '80px' }}>
+            <PageHeader title="Music" />
+            
+            {/* ── Search Bar ── */}
+            <div className="music-search-container">
+                <input 
+                    type="text" 
+                    placeholder="Search Audius tracks..." 
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    className="music-search-input"
+                />
+                {isSearching && <div className="search-spinner">Searching...</div>}
+            </div>
+
+            {/* ── Search Results ── */}
+            {searchResults.length > 0 && (
+                <section className="music-section search-results">
+                    <h3>Search Results</h3>
+                    <div className="songs-list">
+                        {searchResults.map((song, idx) => (
+                            <div
+                                key={song.id}
+                                className={`song-row${currentTrack?.id === song.id ? ' active' : ''}`}
+                                onClick={() => playTrack(song)}
+                            >
+                                <span className="song-num">{idx + 1}</span>
+                                <div className="song-info">
+                                    <span className="song-title">{song.title}</span>
+                                    <span className="song-artist">{song.user?.name || 'Audius Artist'}</span>
+                                </div>
+                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
+                                    <Share2 size={16} />
+                                </button>
+                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
+                                    <Plus size={16} />
+                                </button>
+                            </div>
+
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* ── Hero Now-Playing ── */}
+            <div className="now-playing-hero">
+                {currentTrack?.cover ? (
+                    <img className="hero-cover" src={currentTrack.cover} alt={currentTrack.title} />
+                ) : (
+                    <div className="hero-cover-placeholder" />
+                )}
+                <div className="hero-info">
+                    <div className="hero-header-row">
+                        <p className="hero-label">Now Playing</p>
+                        <button 
+                            className={`broadcast-toggle ${isPublicSession ? 'active' : ''}`}
+                            onClick={togglePublicSession}
+                            title={isPublicSession ? "Broadcast Live" : "Private Session"}
+                        >
+                            <span className="dot" />
+                            {isPublicSession ? 'LIVE' : 'PRIVATE'}
+                        </button>
+                    </div>
+                    <h2 className="hero-title">{currentTrack?.title ?? 'No track selected'}</h2>
+
+                    <p className="hero-artist">{currentTrack?.artist ?? '—'}</p>
+                    
+                    <div className="hero-progress-container">
+                        <span className="time">{formatTime(progress)}</span>
+                        <div 
+                            className="hero-progress-bar" 
+                            onClick={(e) => {
+                                if (!currentTrack?.duration) return;
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                const percentage = x / rect.width;
+                                setProgress(percentage * currentTrack.duration);
+                            }}
+                        >
+                            <div 
+                                className="hero-progress-fill" 
+                                style={{ width: `${(progress / (currentTrack?.duration || 1)) * 100}%` }}
+                            ></div>
+                        </div>
+                        <span className="time">{formatTime(currentTrack?.duration)}</span>
+                    </div>
+
+                    <div className="hero-controls">
+                        <button className="control-btn" onClick={prevTrack}><SkipBack size={24} /></button>
+                        <button className={`hero-play-btn ${isPlaying ? 'playing' : ''}`} onClick={togglePlay}>
+                            {isPlaying
+                                ? <Pause size={28} fill="black" />
+                                : <Play size={28} fill="black" style={{ marginLeft: 4 }} />}
+                        </button>
+                        <button className="control-btn" onClick={nextTrack}><SkipForward size={24} /></button>
+                    </div>
+                    
+                    <div className="hero-visualizer-container">
+                        <Visualizer analyzer={analyzer} isPlaying={isPlaying} />
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Albums ── */}
+            <section className="music-section">
+                <h3>Albums</h3>
+                <div className="albums-grid">
+                    {albums.map(album => (
+                        <div
+                            key={album.id}
+                            className="album-card"
+                            onClick={() => handlePlayAlbum(album)}
+                        >
+                            <div className="album-thumb">
+                                <img src={album.cover} alt={album.title} />
+                                <div className="album-thumb-overlay">
+                                    <div className="album-play-icon">
+                                        <Play size={20} fill="white" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="album-meta">
+                                <span className="album-name">{album.title}</span>
+                                <span className="album-artist">{album.artist}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ── Playlists ── */}
+            <section className="music-section">
+                <div className="section-header">
+                    <h3>My Playlists</h3>
+                    <button className="create-playlist-btn" onClick={() => setShowCreateModal(true)}>
+                        <Plus size={16} /> Create
+                    </button>
+                </div>
+                <div className="albums-grid">
+                    {playlists.map(playlist => (
+                        <div
+                            key={playlist._id}
+                            className="album-card playlist-card"
+                            onClick={() => navigate(`/playlist/${playlist._id}`)}
+                        >
+                            <div className="album-thumb">
+                                {playlist.thumbnail ? (
+                                    <img src={playlist.thumbnail} alt={playlist.name} />
+                                ) : (
+                                    <div className="playlist-thumb-placeholder">
+                                        <Music size={40} />
+                                    </div>
+                                )}
+                                {playlist.isCollaborative && <div className="collab-badge">Collab</div>}
+                            </div>
+                            <div className="album-meta">
+                                <span className="album-name">{playlist.name}</span>
+                                <span className="album-artist">{playlist.tracks?.length || 0} tracks</span>
+                            </div>
+                        </div>
+                    ))}
+                    {playlists.length === 0 && (
+                        <div className="empty-playlists" onClick={() => setShowCreateModal(true)}>
+                            <Plus size={32} />
+                            <p>Build your first vibe</p>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ── All Songs ── */}
+            <section className="music-section">
+                <h3>All Songs</h3>
+                <div className="songs-list">
+                    {albums.flatMap(al => al.songs || []).map((song, idx) => {
+                        const isActive = currentTrack?.id === song.id;
+                        return (
+                            <div
+                                key={song.id}
+                                className={`song-row${isActive ? ' active' : ''}`}
+                                onClick={() => handlePlaySong(song)}
+                            >
+                                <span className="song-num">
+                                    {isActive && isPlaying
+                                        ? <Music size={14} />
+                                        : idx + 1}
+                                </span>
+                                <img className="song-cover" src={song.cover || albums.find(a => a.id === song.albumId)?.cover} alt={song.title} />
+                                <div className="song-info">
+                                    <span className="song-title">{song.title}</span>
+                                    <span className="song-artist">{song.artist}</span>
+                                </div>
+                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
+                                    <Share2 size={16} />
+                                </button>
+                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
+                                    <Plus size={16} />
+                                </button>
+                                <button className="song-tip-btn" onClick={(e) => handleTip(e, song)} title="Tip Artist">
+                                    <DollarSign size={14} />
+                                </button>
+                                <button className="song-collect-btn" onClick={(e) => { e.stopPropagation(); addNotification({ title: 'Collected!', message: `You've added this digital collectible to your safe.`, type: 'success' }); }} title="Collect Track">
+                                    <Award size={14} />
+                                </button>
+
+
+                                <span className="song-duration">{formatTime(song.duration)}</span>
+                            </div>
+
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* ── Create Playlist Modal ── */}
+            {showCreateModal && (
+                <div className="playlist-modal-overlay" onClick={() => setShowCreateModal(false)}>
+                    <div className="playlist-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <h3>Create New Playlist</h3>
+                        <p>Give your collection a name and start collaborating.</p>
+                        <input 
+                            type="text" 
+                            placeholder="Vibe Name (e.g. Late Night Runs)" 
+                            value={newPlaylistName}
+                            onChange={(e) => setNewPlaylistName(e.target.value)}
+                            autoFocus
+                            onKeyDown={e => e.key === 'Enter' && handleCreatePlaylist()}
+                        />
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                            <button className="confirm-btn" onClick={handleCreatePlaylist} disabled={!newPlaylistName}>Create Playlist</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Add to Playlist Modal ── */}
+            {addingToPlaylist && (
+                <div className="playlist-modal-overlay" onClick={() => setAddingToPlaylist(null)}>
+                    <div className="playlist-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <h3>Add to Playlist</h3>
+                        <p>Select a collection for "{addingToPlaylist.title}"</p>
+                        <div className="playlists-select-list">
+                            {playlists.map(p => (
+                                <button 
+                                    key={p._id} 
+                                    className="select-playlist-item"
+                                    onClick={() => {
+                                        addToPlaylist(p._id, addingToPlaylist);
+                                        setAddingToPlaylist(null);
+                                        addNotification({ title: 'Added to Playlist', message: `Added to ${p.name}`, type: 'success' });
+                                    }}
+                                >
+                                    <Music size={16} /> {p.name}
+                                </button>
+                            ))}
+                            <button className="select-playlist-item create-new" onClick={() => { setAddingToPlaylist(null); setShowCreateModal(true); }}>
+                                <Plus size={16} /> Create New Playlist...
+                            </button>
+                        </div>
+                        <button className="cancel-btn full-width" onClick={() => setAddingToPlaylist(null)}>Cancel</button>
+                    </div>
+                </div>
+            )}
+
+
+        </div>
+    );
+};
+
+export default MusicPage;

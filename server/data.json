@@ -1,0 +1,417 @@
+{
+  "servers": [
+    {
+      "id": 1,
+      "name": "Lo-Fi Lounge",
+      "icon": "🎧",
+      "channels": [
+        "general",
+        "music-sharing",
+        "voice-chat"
+      ],
+      "members": 120
+    },
+    {
+      "id": 2,
+      "name": "Producer's Hub",
+      "icon": "🎹",
+      "channels": [
+        "general",
+        "collabs",
+        "feedback"
+      ],
+      "members": 85
+    },
+    {
+      "id": 1773818061620,
+      "name": "Sync Circle",
+      "icon": "S",
+      "channels": [
+        "general"
+      ],
+      "members": 1
+    }
+  ],
+  "users": {
+    "default_user": {
+      "username": "alex_walker",
+      "name": "Alexander Walker",
+      "bio": "Music explorer, beat maker, and stride chaser. Always looking for the next sound.",
+      "avatar": "https://i.pravatar.cc/150?u=alex_walker",
+      "posts": [
+        {
+          "id": "p1",
+          "content": "Just found this amazing lo-fi track!",
+          "contentUrl": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&q=80",
+          "likes": 12,
+          "comments": 2,
+          "timestamp": "2h ago"
+        },
+        {
+          "id": "p2",
+          "content": "Stride is fire 🔥",
+          "contentUrl": "https://images.unsplash.com/photo-1459749411177-042180ceea72?w=800&q=80",
+          "likes": 45,
+          "comments": 8,
+          "timestamp": "1d ago"
+        }
+      ],
+      "favorites": [],
+      "followers": 1240,
+      "following": 890
+    },
+    "stride_official": {
+      "username": "stride_official",
+      "name": "Stride Official",
+      "bio": "The future of music social networking. Join the rhythm.",
+      "avatar": "https://ui-avatars.com/api/?name=Stride+Official&background=8b5cf6&color=fff",
+      "followers": 50000,
+      "following": 120,
+      "posts": []
+    },
+    "apple_user": {
+      "username": "apple_user",
+      "name": "Apple User",
+      "bio": "Enthusiastic music listener and stride explorer.",
+      "avatar": "https://i.pravatar.cc/150?u=apple_user",
+      "followers": 151,
+      "following": 85,
+      "posts": [],
+      "hasUnreadNotifications": false,
+      "hasUnreadMessages": false
+    },
+    "admin": {
+      "username": "admin",
+      "name": "Stride Admin",
+      "bio": "Building the future of sound.",
+      "avatar": "https://i.pravatar.cc/150?u=stride_admin",
+      "followers": 999,
+      "following": 1,
+      "posts": [],
+      "notifications": [
+        {
+          "id": 1773999883001,
+          "type": "message",
+          "from": "apple_user",
+          "content": "sent you a message: \"Hi Sarah!...\"",
+          "time": "Just now"
+        }
+      ],
+      "hasUnreadMessages": true
+    }
+  },
+  "feed": [
+    {
+      "id": 1,
+      "username": "alex_stride",
+      "name": "Alex Stride",
+      "content": "Midnight Horizons is such a mood. 🌌",
+      "caption": "Midnight Horizons is such a mood. 🌌",
+      "contentUrl": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80",
+      "avatar": "https://i.pravatar.cc/150?u=alex_stride",
+      "likes": 1235,
+      "comments": 5,
+      "time": "5m"
+    },
+    {
+      "id": 2,
+      "username": "sarah_beats",
+      "name": "Sarah Jenkins",
+      "content": "Anyone down for a collab? Working on some new techno vibes. 🎹",
+      "caption": "Anyone down for a collab? Working on some new techno vibes. 🎹",
+      "contentUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
+      "avatar": "https://i.pravatar.cc/150?u=sarah_beats",
+      "likes": 875,
+      "comments": 12,
+      "time": "15m"
+    },
+    {
+      "id": 3,
+      "username": "dj_neon",
+      "name": "Marcus Vibe",
+      "content": "The festival season is almost here! 🎧",
+      "caption": "The festival season is almost here! 🎧",
+      "contentUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=80",
+      "avatar": "https://i.pravatar.cc/150?u=dj_neon",
+      "likes": 2453,
+      "comments": 82,
+      "time": "1h"
+    },
+    {
+      "id": 4,
+      "username": "stride_official",
+      "name": "Stride Official",
+      "content": "New features dropping soon. Stay in the rhythm. 🚀",
+      "caption": "New features dropping soon. Stay in the rhythm. 🚀",
+      "contentUrl": "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=80",
+      "avatar": "https://ui-avatars.com/api/?name=Stride+Official&background=8b5cf6&color=fff",
+      "likes": 5000,
+      "comments": 150,
+      "time": "2h"
+    }
+  ],
+
+  "stories": [
+    {
+      "id": 1,
+      "username": "dj_neon",
+      "name": "Marcus Vibe",
+      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&q=80",
+      "contentUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
+      "type": "image"
+    },
+    {
+      "id": 2,
+      "username": "lofi_girl",
+      "name": "Sarah Jenkins",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80",
+      "contentUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
+      "type": "image"
+    },
+    {
+      "id": 3,
+      "username": "the_weekseeker",
+      "name": "Alex Stride",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&q=80",
+      "contentUrl": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
+      "type": "image"
+    },
+    {
+      "id": 4,
+      "username": "luna_sol",
+      "name": "Maya Moon",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&q=80",
+      "contentUrl": "https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80",
+      "type": "image"
+    }
+  ],
+  "genres": [
+    {
+      "id": "g1",
+      "name": "Pop",
+      "color": "#ec4899"
+    },
+    {
+      "id": "g2",
+      "name": "Hip-Hop",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "g3",
+      "name": "Rock",
+      "color": "#ef4444"
+    },
+    {
+      "id": "g4",
+      "name": "Electronic",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "g5",
+      "name": "R&B",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "g6",
+      "name": "Jazz",
+      "color": "#10b981"
+    },
+    {
+      "id": "g7",
+      "name": "Indie",
+      "color": "#6366f1"
+    },
+    {
+      "id": "g8",
+      "name": "Classical",
+      "color": "#8b5cf6"
+    }
+  ],
+  "languages": [
+    {
+      "id": "l1",
+      "name": "English"
+    },
+    {
+      "id": "l2",
+      "name": "Spanish"
+    },
+    {
+      "id": "l3",
+      "name": "Korean"
+    },
+    {
+      "id": "l4",
+      "name": "Hindi"
+    },
+    {
+      "id": "l5",
+      "name": "Japanese"
+    },
+    {
+      "id": "l6",
+      "name": "French"
+    },
+    {
+      "id": "l7",
+      "name": "Telugu"
+    },
+    {
+      "id": "l8",
+      "name": "Kannada"
+    },
+    {
+      "id": "l9",
+      "name": "Tamil"
+    }
+  ],
+  "artists": [
+    {
+      "id": "a1",
+      "name": "Alex Stride",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=60"
+    },
+    {
+      "id": "a2",
+      "name": "Marcus Vibe",
+      "image": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&q=60"
+    },
+    {
+      "id": "a3",
+      "name": "Maya Moon",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=60"
+    },
+    {
+      "id": "a4",
+      "name": "Bass Drop",
+      "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=60"
+    },
+    {
+      "id": "a5",
+      "name": "Acoustic Soul",
+      "image": "https://images.unsplash.com/photo-1520333789090-1afc82db536a?w=400&auto=format&fit=crop&q=60"
+    }
+  ],
+  "albums": [
+    {
+      "id": "al1",
+      "title": "Midnight Horizons",
+      "artist": "Alex Stride",
+      "cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=60",
+      "songs": [
+        {
+          "id": "s1",
+          "title": "Start Again",
+          "duration": 210,
+          "artist": "Alex Stride"
+        },
+        {
+          "id": "s2",
+          "title": "City Lights",
+          "duration": 195,
+          "artist": "Alex Stride"
+        }
+      ]
+    },
+    {
+      "id": "al2",
+      "title": "Electric Soul",
+      "artist": "Marcus Vibe",
+      "cover": "https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=400&q=60",
+      "songs": [
+        {
+          "id": "s4",
+          "title": "Voltage",
+          "duration": 180,
+          "artist": "Marcus Vibe"
+        }
+      ]
+    }
+  ],
+  "communities": [
+    {
+      "id": 1,
+      "name": "Techno Tribe",
+      "members": "12.4k",
+      "category": "Music",
+      "image": "https://images.unsplash.com/photo-1574433230641-591574cd66ac?w=800&q=80",
+      "description": "The ultimate hub for techno enthusiasts."
+    }
+  ],
+  "reels": [
+    {
+      "id": 1,
+      "username": "maya_moon",
+      "name": "Maya Moon",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&q=80",
+      "description": "Learning this new choreo! 💃 #dance #viral",
+      "music": "Original Audio - Maya Moon",
+      "likes": 45200,
+      "comments": 1200,
+      "url": "https://assets.mixkit.co/videos/preview/mixkit-girl-dancing-in-front-of-a-club-4432-large.mp4"
+    },
+    {
+      "id": 2,
+      "username": "alex_walker",
+      "name": "Alex Walker",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&q=80",
+      "description": "Sunset in Santorini 🌅 Take me back.",
+      "music": "Golden Hour - JVKE",
+      "likes": 120000,
+      "comments": 3400,
+      "url": "https://assets.mixkit.co/videos/preview/mixkit-scenic-view-of-a-mountain-lake-and-mountains-4424-large.mp4"
+    }
+  ],
+  "chat_threads": [
+    {
+      "id": 1,
+      "username": "sarah_beats",
+      "name": "Sarah Jenkins",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80",
+      "lastMessage": "Hi Sarah!",
+      "time": "Just now",
+      "messages": [
+        {
+          "text": "Hey! Are you going to the M83 concert?",
+          "username": "Sarah Jenkins",
+          "isMe": false,
+          "time": "10:28 AM"
+        },
+        {
+          "text": "Yes! Can't wait.",
+          "username": "admin",
+          "isMe": true,
+          "time": "10:29 AM"
+        },
+        {
+          "text": "See you at the concert!",
+          "username": "Sarah Jenkins",
+          "isMe": false,
+          "time": "10:30 AM"
+        },
+        {
+          "text": "Hi Sarah!",
+          "username": "apple_user",
+          "time": "15:14",
+          "type": "text",
+          "id": 1773999883001,
+          "isMe": false,
+          "timestamp": 1773999883001
+        }
+      ]
+    }
+  ],
+  "articles": [
+    {
+      "id": 1,
+      "title": "The Future of Spatial Audio in 2024",
+      "excerpt": "How multi-dimensional sound is changing the way we consume music.",
+      "author": "Marcus Vibe",
+      "date": "March 15, 2024",
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1558403135-c5a401897d74?w=800&q=80",
+      "reads": "5.2k",
+      "shares": "1.1k"
+    }
+  ]
+}
