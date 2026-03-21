@@ -1,27 +1,33 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { X, Send, Camera, Music, Image as ImageIcon, Type } from 'lucide-react';
 import './CreateStoryModal.css';
 
 const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
-    const [previewImage, setPreviewImage] = React.useState(null);
-    const [textMode, setTextMode] = React.useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [textMode, setTextMode] = useState(false);
+    const cameraInputRef = useRef(null);
+    const galleryInputRef = useRef(null);
 
     if (!isOpen) return null;
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+                setTextMode(false);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleGalleryClick = () => {
-        const mockImages = [
-            'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1000&q=80',
-            'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=100',
-            'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=100'
-        ];
-        const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
-        setPreviewImage(randomImage);
-        setTextMode(false);
+        galleryInputRef.current.click();
     };
 
     const handleCameraClick = () => {
-        setPreviewImage('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1000&q=80');
-        setTextMode(false);
+        cameraInputRef.current.click();
     };
 
     const handleTextMode = () => {
@@ -68,14 +74,29 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                 </div>
 
                 <div className="story-bottom-actions">
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        ref={galleryInputRef} 
+                        style={{ display: 'none' }} 
+                        onChange={handleFileChange} 
+                    />
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment" 
+                        ref={cameraInputRef} 
+                        style={{ display: 'none' }} 
+                        onChange={handleFileChange} 
+                    />
                     <div className="story-options-pills">
                         <button className="pill-btn" onClick={handleCameraClick}><Camera size={18} /><span>Camera</span></button>
                         <button className="pill-btn" onClick={handleGalleryClick}><ImageIcon size={18} /><span>Gallery</span></button>
                     </div>
                     <button 
                         className="instagram-share-btn text-gradient-bg" 
-                        onClick={onConfirm}
-                        disabled={isUploading}
+                        onClick={() => onConfirm(previewImage)}
+                        disabled={isUploading || (!previewImage && !textMode)}
                     >
                         {isUploading ? "Sharing..." : "Share to Story"}
                         <Send size={18} />

@@ -41,7 +41,7 @@ const StoriesRail = () => {
         setIsCreateModalOpen(true);
     };
 
-    const handleConfirmUpload = async () => {
+    const handleConfirmUpload = async (contentUrl) => {
         if (username === 'guest') return;
 
         setIsUploading(true);
@@ -50,7 +50,8 @@ const StoriesRail = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: username
+                    username,
+                    contentUrl
                 })
             });
             if (response.ok) {
