@@ -34,11 +34,16 @@ const Login = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Bypass verification code step
+        // Send verification code before navigating
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token', data.token);
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/');
+        navigate('/verify', { state: { email } });
       } else {
         setError(data.message || 'Login failed. Please check your credentials.');
       }
