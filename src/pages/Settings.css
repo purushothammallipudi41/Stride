@@ -1,157 +1,294 @@
-.settings-container {
+.premium-settings-container {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
-    padding-bottom: 80px;
-    color: var(--color-text-primary);
+    padding-bottom: 120px; /* leaves room for bottom dock */
+    color: white;
+    background-color: transparent;
+    font-family: inherit;
 }
 
-.settings-content {
-    padding: 20px;
+.premium-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px;
+}
+
+.premium-settings-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #b886ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.premium-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.premium-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.premium-settings-scroll {
+    padding: 0 20px;
     display: flex;
     flex-direction: column;
     gap: 32px;
 }
 
-.settings-section h3 {
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-text-muted);
-    margin-bottom: 12px;
-    padding-left: 8px;
+.ps-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.settings-list {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+.ps-section-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #a855f7; /* Matching the purple theme */
+    margin: 0 0 4px 0;
+    padding-left: 4px;
+}
+
+/* Account Card Structure */
+.ps-account-card {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
     border-radius: 16px;
     overflow: hidden;
 }
 
-.settings-item {
+.ps-account-info-row {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    cursor: pointer;
+}
+
+.ps-account-avatar-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+    margin-right: 16px;
+}
+
+.ps-account-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #000;
+}
+
+.ps-account-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ps-account-details h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.ps-account-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.ps-check-icon {
+    color: #a855f7;
+}
+
+.ps-account-divider {
+    height: 1px;
+    background: dashed rgba(255, 255, 255, 0.1);
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    margin: 0 16px;
+}
+
+.ps-add-account-btn {
+    width: 100%;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ps-add-account-btn svg {
+    color: #a855f7;
+}
+
+.ps-add-account-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* List Groups */
+.ps-list-group {
+    background: #111111; /* Extremely dark grey */
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.ps-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px;
     cursor: pointer;
-    transition: background 0.2s;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
 }
 
-.settings-item:last-child {
+.ps-list-item:last-child {
     border-bottom: none;
 }
 
-.settings-item:hover {
-    background: rgba(255, 255, 255, 0.06);
+.ps-list-item:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
-.settings-item-left {
+.ps-item-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+}
+
+.ps-icon-purple {
+    color: #a855f7;
+}
+
+.ps-icon-muted {
+    color: #888888;
+}
+
+.ps-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ps-item-title {
     font-size: 0.95rem;
     font-weight: 500;
 }
 
-.settings-icon {
-    color: var(--color-primary);
+.ps-item-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.settings-chevron {
-    color: var(--color-text-muted);
+.ps-item-value {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.settings-logout-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 16px;
-    font-size: 1rem;
+/* Upload Button */
+.ps-upload-btn {
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.settings-logout-btn:hover {
-    background: rgba(239, 68, 68, 0.15);
-    transform: translateY(-2px);
+/* Dropdown styling */
+.ps-dropdown {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.settings-footer {
-    text-align: center;
-    margin-top: 24px;
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
+.ps-dropdown span {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-/* Custom Toggle Switch */
-.switch {
+/* Custom Toggle Switch for Premium Settings */
+.ps-switch {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 24px;
+    width: 48px;
+    height: 26px;
 }
 
-.switch input { 
+.ps-switch input { 
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.slider {
+.ps-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
     transition: .3s;
 }
 
-.slider:before {
+.ps-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 20px;
+    width: 20px;
     left: 3px;
     bottom: 3px;
     background-color: white;
     transition: .3s;
 }
 
-input:checked + .slider {
-    background-color: var(--color-primary);
+input:checked + .ps-slider {
+    background-color: #a855f7;
 }
 
-input:checked + .slider:before {
-    transform: translateX(20px);
+input:checked + .ps-slider:before {
+    transform: translateX(22px);
 }
 
-.slider.round {
-    border-radius: 24px;
+.ps-slider.round {
+    border-radius: 26px;
 }
 
-.slider.round:before {
+.ps-slider.round:before {
     border-radius: 50%;
-}
-
-.back-btn {
-    background: transparent;
-    border: none;
-    color: var(--color-text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 8px;
 }

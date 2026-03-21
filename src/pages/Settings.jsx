@@ -1,85 +1,213 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Bell, Shield, User, LogOut, ChevronRight } from 'lucide-react';
-import PageHeader from '../components/layout/PageHeader';
+import { 
+    X, UserPlus, Music, Circle, BadgeCheck, Shield, Bell, 
+    Activity, Globe, Moon, Check 
+} from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
     const navigate = useNavigate();
     const [theme, setTheme] = useState('dark');
     const [notifications, setNotifications] = useState(true);
+    const [privateAccount, setPrivateAccount] = useState(false);
+    
+    // Attempt to load user from localStorage
+    const [user, setUser] = useState({
+        name: 'Purushotham Mallipudi',
+        email: 'purushothammallipudi41@gmail.com',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
+    });
 
-    const handleLogout = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('isAuthenticated');
-        navigate('/login');
-    };
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+            setUser({
+                name: storedUser.name || storedUser.username || 'User',
+                email: storedUser.email || 'No email provided',
+                avatar: storedUser.avatar || 'https://www.gravatar.com/avatar/0?d=mp'
+            });
+        }
+    }, []);
 
     return (
-        <div className="settings-container animate-fade-in">
-            <PageHeader 
-                title="Settings" 
-                leftElement={<button className="back-btn" onClick={() => navigate(-1)}><ArrowLeft size={24} /></button>}
-            />
-            
-            <div className="settings-content">
-                <div className="settings-section">
-                    <h3>Account</h3>
-                    <div className="settings-list">
-                        <div className="settings-item" onClick={() => navigate('/profile?edit=true')}>
-                            <div className="settings-item-left">
-                                <User size={20} className="settings-icon" />
-                                <span>Edit Profile</span>
-                            </div>
-                            <ChevronRight size={18} className="settings-chevron" />
-                        </div>
-                        <div className="settings-item">
-                            <div className="settings-item-left">
-                                <Shield size={20} className="settings-icon" />
-                                <span>Privacy & Security</span>
-                            </div>
-                            <ChevronRight size={18} className="settings-chevron" />
-                        </div>
-                    </div>
-                </div>
+        <div className="premium-settings-container animate-fade-in">
+            <div className="premium-settings-header">
+                <h1>Settings</h1>
+                <button className="premium-close-btn" onClick={() => navigate(-1)}>
+                    <X size={20} />
+                </button>
+            </div>
 
-                <div className="settings-section">
-                    <h3>Preferences</h3>
-                    <div className="settings-list">
-                        <div className="settings-item toggle-item">
-                            <div className="settings-item-left">
-                                <Moon size={20} className="settings-icon" />
-                                <span>Dark Mode</span>
-                            </div>
-                            <label className="switch">
-                                <input type="checkbox" checked={theme === 'dark'} onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
-                                <span className="slider round"></span>
-                            </label>
-                        </div>
-                        <div className="settings-item toggle-item">
-                            <div className="settings-item-left">
-                                <Bell size={20} className="settings-icon" />
-                                <span>Push Notifications</span>
-                            </div>
-                            <label className="switch">
-                                <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} />
-                                <span className="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="settings-section">
-                    <button className="settings-logout-btn" onClick={handleLogout}>
-                        <LogOut size={20} />
-                        <span>Log Out</span>
-                    </button>
+            <div className="premium-settings-scroll">
+                
+                {/* ACCOUNT SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Account</h3>
                     
-                    <div className="settings-footer">
-                        <p>Stride v1.0.0</p>
+                    <div className="ps-account-card">
+                        <div className="ps-account-info-row" onClick={() => navigate('/profile?edit=true')}>
+                            <div className="ps-account-avatar-wrapper">
+                                <img src={user.avatar} alt="Profile" className="ps-account-avatar" />
+                            </div>
+                            <div className="ps-account-details">
+                                <h4>{user.name}</h4>
+                                <p>{user.email}</p>
+                            </div>
+                            <Check size={20} className="ps-check-icon" />
+                        </div>
+                        <div className="ps-account-divider"></div>
+                        <button className="ps-add-account-btn">
+                            <UserPlus size={18} />
+                            <span>Add Account</span>
+                        </button>
                     </div>
                 </div>
+
+                {/* PROFILE CUSTOMIZATION SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Profile Customization</h3>
+                    <div className="ps-list-group">
+                        
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Music size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Profile Theme Song</span>
+                                    <span className="ps-item-subtitle">No track set</span>
+                                </div>
+                            </div>
+                            <button className="ps-upload-btn">Upload</button>
+                        </div>
+
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Circle size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Avatar Frame</span>
+                                    <span className="ps-item-subtitle">Gold Frame</span>
+                                </div>
+                            </div>
+                            <div className="ps-dropdown">
+                                Golden Frame <span>v</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                {/* ACCOUNT SECURITY SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Account Security</h3>
+                    <div className="ps-list-group">
+                        
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <BadgeCheck size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Get Verified (Official)</span>
+                                </div>
+                            </div>
+                            <Check size={20} className="ps-check-icon" />
+                        </div>
+
+                        <div className="ps-list-item toggle-row">
+                            <div className="ps-item-left">
+                                <Shield size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Private Account</span>
+                                </div>
+                            </div>
+                            <label className="ps-switch">
+                                <input type="checkbox" checked={privateAccount} onChange={() => setPrivateAccount(!privateAccount)} />
+                                <span className="ps-slider round"></span>
+                            </label>
+                        </div>
+
+                        <div className="ps-list-item toggle-row">
+                            <div className="ps-item-left">
+                                <Bell size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Notifications</span>
+                                </div>
+                            </div>
+                            <label className="ps-switch">
+                                <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} />
+                                <span className="ps-slider round"></span>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                {/* PROMOTIONS SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Promotions</h3>
+                    <div className="ps-list-group">
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Activity size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Ads Manager</span>
+                                </div>
+                            </div>
+                            <span className="ps-item-value">Manage your ads</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PREFERENCES SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Preferences</h3>
+                    <div className="ps-list-group">
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Globe size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Language</span>
+                                </div>
+                            </div>
+                            <span className="ps-item-value">English</span>
+                        </div>
+
+                        <div className="ps-list-item toggle-row">
+                            <div className="ps-item-left">
+                                <Moon size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Dark Mode</span>
+                                </div>
+                            </div>
+                            <label className="ps-switch">
+                                <input type="checkbox" checked={theme === 'dark'} onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
+                                <span className="ps-slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ABOUT & LEGAL SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">About & Legal</h3>
+                    <div className="ps-list-group">
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Shield size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Terms of Service</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Shield size={22} className="ps-icon-muted" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Privacy Policy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );
