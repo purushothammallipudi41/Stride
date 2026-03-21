@@ -191,7 +191,8 @@ const sendEmail = async (to, subject, html) => {
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -878,11 +879,11 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/profile/update', async (req, res) => {
-    const { username, name, bio, avatar } = req.body;
+    const { username, name, bio, avatar, banner } = req.body;
     try {
         const updatedUser = await User.findOneAndUpdate(
             { username },
-            { name, bio, avatar },
+            { name, bio, avatar, banner },
             { new: true }
         );
         if (updatedUser) {

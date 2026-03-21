@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Grid, Film, User, Plus, Settings, DollarSign } from 'lucide-react';
+import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
@@ -88,11 +88,22 @@ const Profile = () => {
 
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editData, setEditData] = useState({ name: '', bio: '', avatar: '' });
+    const [editData, setEditData] = useState({ name: '', bio: '', avatar: '', banner: '' });
 
     const openEditModal = () => {
-        setEditData({ name: user.name || '', bio: user.bio || '', avatar: user.avatar || '' });
+        setEditData({ name: user.name || '', bio: user.bio || '', avatar: user.avatar || '', banner: user.banner || '' });
         setIsEditModalOpen(true);
+    };
+
+    const handleFileChange = (e, field) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditData(prev => ({ ...prev, [field]: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleUpdateProfile = async () => {
@@ -102,9 +113,13 @@ const Profile = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editData)
             });
-            const updatedUser = await res.json();
-            setUser(updatedUser);
-            setIsEditModalOpen(false);
+            const data = await res.json();
+            if (data.success) {
+                setUser(data.user);
+                setIsEditModalOpen(false);
+            } else {
+                console.error("Failed to update:", data.message);
+            }
         } catch (err) {
             console.error("Failed to update profile:", err);
         }
@@ -244,37 +259,50 @@ const Profile = () => {
                 ))}
             </div>
 
-            {/* Edit Profile Modal */}
+            {/* Premium Glassmorphic Edit Profile Modal */}
             {isEditModalOpen && (
-                <div className="edit-modal-overlay">
-                    <div className="edit-modal-content">
-                        <h2>Edit Profile</h2>
-                        <div className="edit-field">
-                            <label>Name</label>
-                            <input 
-                                type="text" 
-                                value={editData.name} 
-                                onChange={e => setEditData({...editData, name: e.target.value})} 
-                            />
+                <div className="ig-modal-overlay">
+                    <div className="ig-modal-glass">
+                        <div className="ig-modal-header">
+                            <h2>Edit Profile</h2>
+                            <button className="ig-modal-close" onClick={() => setIsEditModalOpen(false)}>✕</button>
                         </div>
-                        <div className="edit-field">
-                            <label>Bio</label>
-                            <textarea 
-                                value={editData.bio} 
-                                onChange={e => setEditData({...editData, bio: e.target.value})} 
-                            />
+                        <div className="ig-modal-body">
+                            
+                            {/* Banner Upload */}
+                            <div className="ig-edit-field ig-file-field">
+                                <label>Profile Banner</label>
+                                <div className="ig-upload-preview banner-preview" onClick={() => document.getElementById('banner-upload').click()}>
+                                    {editData.banner ? <img src={editData.banner} alt="Banner Preview" className="preview-img" /> : <div className="ig-upload-placeholder"><Image size={24}/></div>}
+                                    <div className="ig-upload-overlay"><Upload size={20} /> <span>Change Banner</span></div>
+                                </div>
+                                <input id="banner-upload" type="file" accept="image/*" onChange={e => handleFileChange(e, 'banner')} style={{ display: 'none' }} />
+                            </div>
+
+                            {/* Avatar Upload */}
+                            <div className="ig-edit-field ig-file-field">
+                                <label>Profile Picture</label>
+                                <div className="ig-upload-preview avatar-preview" onClick={() => document.getElementById('avatar-upload').click()}>
+                                    {editData.avatar ? <img src={editData.avatar} alt="Avatar Preview" className="preview-img" /> : <div className="ig-upload-placeholder"><Camera size={24}/></div>}
+                                    <div className="ig-upload-overlay"><Upload size={24} /></div>
+                                </div>
+                                <input id="avatar-upload" type="file" accept="image/*" onChange={e => handleFileChange(e, 'avatar')} style={{ display: 'none' }} />
+                            </div>
+
+                            <div className="ig-edit-field">
+                                <label>Name</label>
+                                <input type="text" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} placeholder="Your display name" />
+                            </div>
+                            
+                            <div className="ig-edit-field">
+                                <label>Bio</label>
+                                <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value})} placeholder="Tell the community about yourself..." rows={3} />
+                            </div>
+
                         </div>
-                        <div className="edit-field">
-                            <label>Avatar URL</label>
-                            <input 
-                                type="text" 
-                                value={editData.avatar} 
-                                onChange={e => setEditData({...editData, avatar: e.target.value})} 
-                            />
-                        </div>
-                        <div className="modal-actions">
-                            <button className="cancel-btn" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
-                            <button className="save-btn" onClick={handleUpdateProfile}>Save</button>
+                        <div className="ig-modal-footer">
+                            <button className="ig-btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                            <button className="ig-btn-save" onClick={handleUpdateProfile}>Save Changes</button>
                         </div>
                     </div>
                 </div>
