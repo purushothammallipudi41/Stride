@@ -30,6 +30,8 @@ services:
           name: stride-backend
           type: web
           property: host
+      - key: NODE_VERSION
+        value: "20.11.1"
     routes:
       - type: rewrite
         source: /*
