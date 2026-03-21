@@ -1,4 +1,4 @@
-import './patch-bigint.js';
+import './patch-bigint.cjs';
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 

@@ -31,4 +31,4 @@ Stride is a modern, high-performance music and social streaming platform.
 
 ## BigInt Serialization
 
-This project includes a global patch for `BigInt` serialization. If you encounter `TypeError: Do not know how to serialize a BigInt`, ensure that `patch-bigint.js` is imported at the top of your entry point.
+This project includes a global patch for `BigInt` serialization. If you encounter `TypeError: Do not know how to serialize a BigInt`, ensure that `patch-bigint.cjs` is imported at the top of your entry point.

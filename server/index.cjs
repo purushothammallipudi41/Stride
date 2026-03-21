@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('../patch-bigint.js');
+require('../patch-bigint.cjs');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
