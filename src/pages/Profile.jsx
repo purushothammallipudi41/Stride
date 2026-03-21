@@ -14,7 +14,8 @@ const Profile = () => {
     const [isFollowing, setIsFollowing] = useState(false);
 
     const loadProfile = useCallback(() => {
-        const targetUser = username || 'admin';
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const targetUser = username || currentUser.username || 'admin';
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users/${targetUser}/profile`)
             .then(res => res.json())
             .then(data => {
