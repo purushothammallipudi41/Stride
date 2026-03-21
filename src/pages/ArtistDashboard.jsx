@@ -1,123 +1,155 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Users, DollarSign, Play, ArrowUpRight, Award } from 'lucide-react';
+import { TrendingUp, DollarSign, Headphones, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import { useMusic } from '../hooks/useMusic';
 import './ArtistDashboard.css';
 
 const ArtistDashboard = () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const [stats, setStats] = useState({ totalListens: 0, totalTips: 0, followerGrowth: 0 });
-    const [recentTransactions, setRecentTransactions] = useState([]);
-    const [topTracks, setTopTracks] = useState([]);
+    const { username } = useMusic();
+    const [stats, setStats] = useState({
+        totalPlays: 0,
+        totalTips: 0,
+        monthlyListeners: 0,
+        followers: 0,
+        trend: '0%'
+    });
+
+    const [recentTips, setRecentTips] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/artist/stats/${user.username}`);
-                const data = await res.json();
-                
-                // Aggregating mock/real stats
-                const totalListens = data.stats.reduce((acc, curr) => acc + curr.listens, 0);
-                const totalTips = data.stats.reduce((acc, curr) => acc + curr.tips, 0);
-                
-                setStats({
-                    totalListens: totalListens || 1240, // Mock fallback if empty
-                    totalTips: totalTips || 45.50,
-                    followerGrowth: 12
-                });
-                setRecentTransactions(data.recentTransactions || []);
-                setTopTracks(data.stats.sort((a, b) => b.listens - a.listens).slice(0, 5));
-                setIsLoading(false);
-            } catch (err) {
-                console.error("Dashboard fetch error:", err);
-                setIsLoading(false);
-            }
-        };
-        fetchStats();
-    }, [user.username]);
+        // Simulate API fetch
+        const timer = setTimeout(() => {
+            setStats({
+                totalPlays: 124500,
+                totalTips: 450.25,
+                monthlyListeners: 18200,
+                followers: 5430,
+                trend: '+12%'
+            });
+            setRecentTips([
+                { id: 1, user: 'MusicLover', amount: 5.00, date: '2m ago' },
+                { id: 2, user: 'StrideFan1', amount: 20.00, date: '15m ago' },
+                { id: 3, user: 'BeatMaker', amount: 10.00, date: '1h ago' },
+            ]);
+            setIsLoading(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, []);
 
-    if (isLoading) return <div className="loading-screen">Syncing your vibe metrics...</div>;
+    // Simple SVG Sparkline Data
+    const playData = [30, 45, 35, 60, 50, 85, 70];
+    
+    if (isLoading) return <div className="flex-center" style={{ height: '80vh' }}><div className="loading-spinner" /></div>;
 
     return (
         <div className="dashboard-container">
-            <PageHeader title="Artist Dashboard" />
+            <PageHeader title={`Artist Dashboard — Welcome back, ${username || 'Artist'}`} />
             
-            <div className="stats-grid">
-                <div className="stat-card glass-card">
-                    <div className="stat-icon-wrapper listens">
-                        <Play size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <h3>{stats.totalListens.toLocaleString()}</h3>
-                        <p>Total Listens</p>
-                        <span className="trend positive"><ArrowUpRight size={14} /> 8.4%</span>
-                    </div>
-                </div>
-
-                <div className="stat-card glass-card">
-                    <div className="stat-icon-wrapper tips">
-                        <DollarSign size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <h3>${stats.totalTips.toFixed(2)}</h3>
-                        <p>Earnings 💰</p>
-                        <span className="trend positive"><ArrowUpRight size={14} /> 12.1%</span>
+            <div className="dashboard-grid">
+                {/* Stats Cards */}
+                <div className="stats-card glass-panel">
+                    <div className="stats-icon plays"><Headphones size={24} /></div>
+                    <div className="stats-info">
+                        <span className="stats-label">Total Plays</span>
+                        <h2 className="stats-value">{stats.totalPlays.toLocaleString()}</h2>
+                        <span className="stats-trend positive"><ChevronUp size={16} /> {stats.trend}</span>
                     </div>
                 </div>
 
-                <div className="stat-card glass-card">
-                    <div className="stat-icon-wrapper followers">
-                        <Users size={24} />
+                <div className="stats-card glass-panel">
+                    <div className="stats-icon revenue"><DollarSign size={24} /></div>
+                    <div className="stats-info">
+                        <span className="stats-label">Total Earnings</span>
+                        <h2 className="stats-value">${stats.totalTips.toLocaleString()}</h2>
+                        <span className="stats-trend positive"><ChevronUp size={16} /> +8.4%</span>
                     </div>
-                    <div className="stat-info">
-                        <h3>{stats.followerGrowth}%</h3>
-                        <p>Weekly Growth</p>
-                        <span className="trend positive"><Award size={14} /> Top 5%</span>
+                </div>
+
+                <div className="stats-card glass-panel">
+                    <div className="stats-icon listeners"><Users size={24} /></div>
+                    <div className="stats-info">
+                        <span className="stats-label">Monthly Listeners</span>
+                        <h2 className="stats-value">{stats.monthlyListeners.toLocaleString()}</h2>
+                        <span className="stats-trend positive"><ChevronUp size={16} /> +5.2%</span>
                     </div>
                 </div>
             </div>
 
             <div className="dashboard-main-grid">
-                <section className="dashboard-section glass-card">
-                    <div className="section-header">
-                        <h3>Top Performing Tracks</h3>
-                        <TrendingUp size={20} className="text-primary" />
+                {/* Plays Chart */}
+                <div className="chart-panel glass-panel">
+                    <div className="panel-header">
+                        <h3>Plays Overview</h3>
+                        <div className="time-filters">
+                            <button className="active">7D</button>
+                            <button>1M</button>
+                            <button>1Y</button>
+                        </div>
                     </div>
-                    <div className="track-stats-list">
-                        {topTracks.length > 0 ? topTracks.map(track => (
-                            <div key={track.trackId} className="track-stat-row">
-                                <div className="track-info">
-                                    <span className="track-name">{track.trackId}</span>
-                                    <div className="mini-progress-bg">
-                                        <div className="mini-progress-fill" style={{ width: `${(track.listens / 2000) * 100}%` }} />
+                    <div className="chart-container">
+                        <svg viewBox="0 0 400 150" className="plays-chart">
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--theme-primary)" stopOpacity="0.4" />
+                                    <stop offset="100%" stopColor="var(--theme-primary)" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path 
+                                d={`M 0 150 ${playData.map((d, i) => `L ${(i / (playData.length-1)) * 400} ${150 - d}`).join(' ')} L 400 150 Z`}
+                                fill="url(#chartGradient)"
+                            />
+                            <path 
+                                d={playData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${(i / (playData.length-1)) * 400} ${150 - d}`).join(' ')}
+                                fill="none"
+                                stroke="var(--theme-primary)"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                            />
+                            {/* Chart Points */}
+                            {playData.map((d, i) => (
+                                <circle 
+                                    key={i}
+                                    cx={(i / (playData.length-1)) * 400} 
+                                    cy={150 - d} 
+                                    r="4" 
+                                    fill="var(--theme-primary)" 
+                                />
+                            ))}
+                        </svg>
+                        <div className="chart-labels">
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recent Tips */}
+                <div className="tips-panel glass-panel">
+                    <div className="panel-header">
+                        <h3>Recent Tips</h3>
+                    </div>
+                    <div className="tips-list">
+                        {recentTips.map(tip => (
+                            <div key={tip.id} className="tip-item">
+                                <div className="tip-user-info">
+                                    <div className="tip-avatar">{tip.user[0]}</div>
+                                    <div>
+                                        <div className="tip-username">{tip.user}</div>
+                                        <div className="tip-date">{tip.date}</div>
                                     </div>
                                 </div>
-                                <span className="listens-count">{track.listens}</span>
-                            </div>
-                        )) : (
-                            <div className="empty-state">No track data yet. Keep creating!</div>
-                        )}
-                    </div>
-                </section>
-
-                <section className="dashboard-section glass-card">
-                    <div className="section-header">
-                        <h3>Recent Support</h3>
-                        <DollarSign size={20} className="text-accent" />
-                    </div>
-                    <div className="transactions-list">
-                        {recentTransactions.map(tx => (
-                            <div key={tx._id} className="transaction-row">
-                                <span className="tx-user">@{tx.from?.username}</span>
-                                <span className="tx-type">{tx.type}</span>
-                                <span className="tx-amount">+${tx.amount.toFixed(2)}</span>
+                                <div className="tip-amount text-gradient">${tip.amount.toFixed(2)}</div>
                             </div>
                         ))}
-                        {recentTransactions.length === 0 && (
-                            <div className="empty-state">No transactions yet.</div>
-                        )}
                     </div>
-                </section>
+                    <button className="view-all-btn">View All Transactions</button>
+                </div>
             </div>
         </div>
     );

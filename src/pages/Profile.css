@@ -564,3 +564,84 @@
     filter: brightness(1.1);
     transform: scale(1.02);
 }
+/* Gifting Modal & Button Styles */
+.gift-btn {
+    background: linear-gradient(45deg, #f59e0b, #d97706);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.gift-btn:hover {
+    background: linear-gradient(45deg, #fbbf24, #f59e0b) !important;
+}
+
+.gift-modal {
+    max-width: 400px;
+}
+
+.gift-intro {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 24px;
+}
+
+.frame-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.frame-option-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.frame-option-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-4px);
+}
+
+.frame-option-card.active {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--color-primary);
+}
+
+.frame-preview-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frame-preview-circle .inner-circle {
+    width: 80%;
+    height: 80%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.frame-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.frame-price {
+    font-size: 0.85rem;
+    color: #10b981;
+    font-weight: 800;
+}
+
+.gift-confirm-btn {
+    background: linear-gradient(45deg, #10b981, #059669);
+    width: 100%;
+}

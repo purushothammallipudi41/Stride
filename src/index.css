@@ -18,6 +18,12 @@
   --color-accent: #ec4899;
   --color-accent-glow: rgba(236, 72, 153, 0.5);
   
+  /* Dynamic Theme Overrides (Will be injected via JS) */
+  --theme-primary: var(--color-primary);
+  --theme-accent: var(--color-accent);
+  --theme-primary-glow: var(--color-primary-glow);
+  --theme-accent-glow: var(--color-accent-glow);
+
   --color-success: #10b981;
   --color-danger: #ef4444;
 
@@ -107,9 +113,9 @@ h1, h2, h3, h4, .font-header {
 
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--color-primary);
+  border-color: var(--theme-primary);
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--color-primary-glow);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--theme-primary-glow);
 }
 
 /* Premium Navigation Links */
@@ -129,15 +135,15 @@ h1, h2, h3, h4, .font-header {
 }
 
 .nav-link.active {
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--color-primary);
+  background: rgba(139, 92, 246, 0.1); /* Keep base for now or use var */
+  color: var(--theme-primary);
   border: 1px solid rgba(139, 92, 246, 0.2);
   box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
 }
 
 /* Text Gradient - Perfectly matching the Logo 'S' */
 .text-gradient {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-accent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -145,8 +151,8 @@ h1, h2, h3, h4, .font-header {
 }
 
 .text-gradient-bg {
-  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(45deg, var(--theme-primary), var(--theme-accent));
+  box-shadow: 0 4px 15px var(--theme-primary-glow);
 }
 
 .icon-gradient {

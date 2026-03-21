@@ -100,6 +100,7 @@ const Post = ({ post }) => {
                         alt={post.username} 
                         size={32} 
                         className="post-avatar" 
+                        frame={post.avatarFrame || 'none'}
                     />
                     <div className="user-details">
                         <span className="username">{post.username}</span>

@@ -8,8 +8,9 @@ const Feed = ({ type = 'foryou' }) => {
 
     const loadFeed = useCallback(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const url = type === 'following' 
-            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/following?userId=${user._id}`
+        const userId = user._id || user.id || user.username;
+        const url = type === 'following' && userId && userId !== 'guest'
+            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/following?userId=${userId}`
             : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed`;
 
         fetch(url)

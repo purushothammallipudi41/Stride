@@ -1,5 +1,5 @@
 require('dotenv').config();
-BigInt.prototype.toJSON = function () { return this.toString(); };
+require('../patch-bigint.js');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -203,6 +203,7 @@ const io = new Server(server, {
 });
 
 const DATA_FILE = path.join(__dirname, 'data.json');
+let stories = []; // In-memory stories store for simplified dev
 
 // Helper to read data
 const readData = () => {
@@ -314,14 +315,74 @@ app.get('/api/profile/:username', async (req, res) => {
 app.get('/api/feed', async (req, res) => {
     try {
         const posts = await Post.find().sort({ createdAt: -1 });
-        res.json(posts);
+        
+        // Enhance posts with user data (like avatarFrame)
+        const enhancedPosts = await Promise.all(posts.map(async (post) => {
+            // Find user by username (stored in post.username)
+            const user = await User.findOne({ username: post.username });
+            return {
+                ...post.toObject(),
+                avatarFrame: user ? user.avatarFrame : 'none'
+            };
+        }));
+        
+        res.json(enhancedPosts);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 app.get('/api/stories', async (req, res) => {
-    res.json([]); // Simplified for now
+    try {
+        // Return existing stories
+        res.json(stories);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/stories', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const user = await User.findOne({ username });
+        
+        const newStory = {
+            id: Date.now().toString(),
+            username,
+            avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${username}`,
+            contentUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
+            createdAt: new Date()
+        };
+        
+        stories.unshift(newStory);
+        // Keep stories fresh (e.g., last 24h)
+        if (stories.length > 20) stories.pop();
+
+        io.emit('content_updated', { type: 'story', data: newStory });
+        res.json(newStory);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/reels', async (req, res) => {
+    try {
+        const data = readData();
+        const reels = data.reels || [];
+        
+        // Enhance reels with user data (like avatarFrame)
+        const enhancedReels = await Promise.all(reels.map(async (reel) => {
+            const user = await User.findOne({ username: reel.username });
+            return {
+                ...reel,
+                avatarFrame: user ? user.avatarFrame : 'none'
+            };
+        }));
+        
+        res.json(enhancedReels);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.post('/api/feed', async (req, res) => {
@@ -352,10 +413,12 @@ app.post('/api/feed/:id/like', async (req, res) => {
             await post.save();
             
             // Notification for post owner
+            const liker = await User.findOne({ username: 'Stridy' }); // Placeholder for authenticated user
             await Notification.create({
                 user: post.username,
                 type: 'like',
-                from: 'admin',
+                from: liker ? liker.username : 'someone',
+                senderFrame: liker ? liker.avatarFrame : 'none',
                 content: 'liked your post',
                 time: 'Just now'
             });
@@ -388,10 +451,12 @@ app.post('/api/profile/:username/follow', async (req, res) => {
         const user = await User.findOneAndUpdate({ username }, { $inc: { followers: 1 }, hasUnreadNotifications: true }, { new: true });
         
         if (user) {
+            const follower = await User.findOne({ username: 'Stridy' }); // Placeholder
             await Notification.create({
                 user: username,
                 type: 'follow',
-                from: 'admin',
+                from: follower ? follower.username : 'someone',
+                senderFrame: follower ? follower.avatarFrame : 'none',
                 content: 'started following you',
                 time: 'Just now'
             });
@@ -879,11 +944,11 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/profile/update', async (req, res) => {
-    const { username, name, bio, avatar, banner } = req.body;
+    const { username, name, bio, avatar, avatarFrame, banner } = req.body;
     try {
         const updatedUser = await User.findOneAndUpdate(
             { username },
-            { name, bio, avatar, banner },
+            { name, bio, avatar, avatarFrame, banner },
             { new: true }
         );
         if (updatedUser) {
@@ -938,7 +1003,7 @@ app.post('/api/favorites/:username', (req, res) => {
 app.post('/api/monetization/tip', async (req, res) => {
     const { fromId, toId, amount, trackId } = req.body;
     try {
-        const tx = new Transaction({ from: fromId, to: toId, amount, trackId });
+        const tx = new Transaction({ from: fromId, to: toId, amount, trackId, type: 'tip' });
         await tx.save();
 
         // Update Analytics
@@ -951,6 +1016,43 @@ app.post('/api/monetization/tip', async (req, res) => {
         }
 
         res.json({ success: true, transaction: tx });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/monetization/gift-frame', async (req, res) => {
+    const { fromId, toId, frameType, amount } = req.body;
+    try {
+        const tx = new Transaction({ from: fromId, to: toId, amount, type: 'gift' });
+        await tx.save();
+
+        // Update recipient's avatar frame
+        const updatedUser = await User.findByIdAndUpdate(toId, { avatarFrame: frameType }, { new: true });
+
+        // Broadcast the gift and create notification
+        const sender = await User.findById(fromId);
+        const recipient = await User.findById(toId);
+        
+        if (recipient && sender) {
+            await Notification.create({
+                user: recipient.username,
+                type: 'gift',
+                from: sender.username,
+                senderFrame: sender.avatarFrame || 'none',
+                content: `gifted you a ${frameType} avatar frame!`,
+                time: 'Just now'
+            });
+            await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
+        }
+
+        io.emit('global_event', {
+            type: 'FRAME_GIFTED',
+            data: { from: sender?.username || fromId, to: recipient?.username || toId, frameType },
+            timestamp: Date.now()
+        });
+
+        res.json({ success: true, user: updatedUser, transaction: tx });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1027,10 +1129,12 @@ io.on('connection', (socket) => {
             const recipient = roomId.replace('chat_', '');
             await User.findOneAndUpdate({ username: recipient }, { hasUnreadMessages: true });
             
+            const sender = await User.findOne({ username: message.username });
             await Notification.create({
                 user: recipient,
                 type: 'message',
                 from: message.username,
+                senderFrame: sender ? sender.avatarFrame : 'none',
                 content: `sent you a message: "${(message.text || 'attachment').substring(0, 20)}..."`,
                 time: 'Just now'
             });
@@ -1085,6 +1189,11 @@ io.on('connection', (socket) => {
 
     socket.on('request_sync', ({ roomId, requester }) => {
         socket.to(roomId).emit('sync_requested', { requester });
+    });
+
+    socket.on('playback_update', ({ username, track, isPlaying }) => {
+        userActivity.set(socket.id, { username, track, isPlaying, lastUpdate: Date.now() });
+        io.emit('user_activity_updated', { username, track, isPlaying });
     });
 
     socket.on('join_community', (communityId) => {

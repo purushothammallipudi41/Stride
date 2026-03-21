@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import socket from '../../services/socket';
+import CreateStoryModal from './CreateStoryModal';
 import './StoriesRail.css';
 
 const StoriesRail = () => {
     const [friendStories, setFriendStories] = useState([]);
     const [hasStory, setHasStory] = useState(false);
     const [activeStory, setActiveStory] = useState(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const username = user.username || 'guest';
 
     const loadStories = () => {
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stories`)
@@ -30,21 +36,31 @@ const StoriesRail = () => {
         return () => socket.off('content_updated', handleUpdate);
     }, []);
 
-    const handleAddStory = async () => {
-        const confirmed = window.confirm("Upload to your story?");
-        if (confirmed) {
-            try {
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stories`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: "hotham_user"
-                    })
-                });
+    const handleAddStory = (e) => {
+        if (e) e.stopPropagation();
+        setIsCreateModalOpen(true);
+    };
+
+    const handleConfirmUpload = async () => {
+        if (username === 'guest') return;
+
+        setIsUploading(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username
+                })
+            });
+            if (response.ok) {
                 setHasStory(true);
-            } catch (err) {
-                console.error("Failed to post story:", err);
+                setIsCreateModalOpen(false);
             }
+        } catch (err) {
+            console.error("Failed to post story:", err);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -55,6 +71,7 @@ const StoriesRail = () => {
                 <div className={`story-avatar-container ${hasStory ? 'has-story' : ''}`}>
                     {/* Placeholder for user's actual avatar */}
                     <div className="user-avatar-placeholder" />
+                    
                     {!hasStory && (
                         <div className="add-story-badge">
                             <Plus size={14} color="white" strokeWidth={3} />
@@ -73,6 +90,13 @@ const StoriesRail = () => {
                     <span className="story-username">{story.username}</span>
                 </div>
             ))}
+
+            <CreateStoryModal 
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onConfirm={handleConfirmUpload}
+                isUploading={isUploading}
+            />
 
             {/* Story Viewer Modal */}
             {activeStory && (

@@ -196,7 +196,7 @@
         display: none;
     }
 
-    .create-btn {
+    .sidebar .create-btn {
         margin: 0;
         padding: 0;
         width: 48px;
@@ -205,9 +205,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-        box-shadow: 0 0 15px var(--color-primary-glow);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%) !important;
+        box-shadow: 0 0 15px var(--color-primary-glow) !important;
         flex-shrink: 0;
+        border: none;
+        color: white;
     }
 
     .create-btn span {

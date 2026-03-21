@@ -1,19 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Image, X, Check, CheckCheck, Music } from 'lucide-react';
+import { Send, Phone, Video, Image, X, Check, CheckCheck, Music, Mic, Pause, Play } from 'lucide-react';
 import socket from '../../services/socket';
 import { getTrendingGifs, searchGifs } from '../../services/giphyService';
 import { useMusic } from '../../hooks/useMusic';
+import Avatar from '../common/Avatar';
+import TrackCard from './TrackCard';
 import './Chat.css';
 
 const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser }) => {
-    const { playTrack, currentTrack, isPlaying } = useMusic();
+    const { currentTrack } = useMusic();
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
     const [gifSearch, setGifSearch] = useState('');
     const [gifs, setGifs] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
     const typingTimeoutRef = useRef(null);
+
+    useEffect(() => {
+        let interval;
+        if (isRecording) {
+            interval = setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isRecording]);
 
     useEffect(() => {
         const fetchGifs = async () => {
@@ -120,10 +134,11 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser }) => {
             <div className="chat-header">
                 <div className="chat-user-info">
                     <div className="avatar-preview">
-                        <img 
-                            src={activeChat.avatar || `https://i.pravatar.cc/150?u=${activeChat.username}`} 
+                        <Avatar 
+                            src={activeChat.avatar} 
                             alt="Avatar" 
-                            className="chat-avatar-img" 
+                            size={40} 
+                            frame={activeChat.avatarFrame || 'none'}
                         />
                         <div className="status-indicator online" />
                     </div>
@@ -145,19 +160,14 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser }) => {
                             {msg.type === 'gif' ? (
                                 <img src={msg.gif} alt="GIF" className="chat-gif" />
                             ) : msg.type === 'music' ? (
-                                <div className="music-message-card" onClick={() => msg.track && playTrack(msg.track)}>
-                                    <div className="music-icon-bubble">
-                                        {currentTrack?.id === msg.track?.id && isPlaying ? (
-                                            <div className="playing-pulse" />
-                                        ) : (
-                                            <Music size={18} />
-                                        )}
+                                <TrackCard track={msg.track} isMe={msg.isMe} />
+                            ) : msg.type === 'voice' ? (
+                                <div className="voice-message">
+                                    <div className="voice-play-btn"><Play size={16} /></div>
+                                    <div className="voice-waveform">
+                                        {[...Array(15)].map((_, i) => <span key={i} className="v-bar" style={{ height: `${(i % 5 + 2) * 15}%` }} />)}
                                     </div>
-                                    <div className="music-card-info">
-                                        <span className="shared-label">Shared a track</span>
-                                        <span className="track-name">{msg.track?.title || msg.text}</span>
-                                        <span className="track-artist">{msg.track?.artist || 'Audius Artist'}</span>
-                                    </div>
+                                    <span className="voice-duration">0:12</span>
                                 </div>
                             ) : (
                                 msg.text
@@ -211,14 +221,35 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser }) => {
                 <button className="chat-action-btn" onClick={handleSendMusic}>
                     <Music size={22} className="text-gradient" />
                 </button>
-                <input 
-                    type="text" 
-                    placeholder="Type a message..." 
-                    className="chat-input" 
-                    value={msgText}
-                    onChange={handleInputChange}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
-                />
+                <div className="input-wrapper">
+                    {isRecording ? (
+                        <div className="recording-ui">
+                            <div className="recording-pulse" />
+                            <span>Recording... 0:0{recordingTime}</span>
+                            <button className="cancel-rec" onClick={() => setIsRecording(false)}>Cancel</button>
+                        </div>
+                    ) : (
+                        <input 
+                            type="text" 
+                            placeholder="Type a message..." 
+                            className="chat-input" 
+                            value={msgText}
+                            onChange={handleInputChange}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
+                        />
+                    )}
+                </div>
+                {!msgText.trim() && (
+                    <button 
+                        className={`chat-action-btn ${isRecording ? 'recording' : ''}`} 
+                        onClick={() => {
+                            if (!isRecording) setRecordingTime(0);
+                            setIsRecording(!isRecording);
+                        }}
+                    >
+                        <Mic size={22} color={isRecording ? '#ef4444' : 'currentColor'} />
+                    </button>
+                )}
                 <button 
                     className="send-btn" 
                     onClick={handleSendText} 

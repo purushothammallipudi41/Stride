@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useServer } from '../hooks/useServer';
+import { useActivity } from '../hooks/useActivity';
 
 
 import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2 } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
+import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
 
 import './ServerView.css';
@@ -12,10 +14,15 @@ import './ServerView.css';
 const CommunityView = () => {
     const { communityId } = useParams();
     const { servers, joinCommunity } = useServer();
+    const { isUserListening } = useActivity();
     const [activeChannel, setActiveChannel] = useState('general');
+    const [showModTools, setShowModTools] = useState(false);
     
     const community = servers.find(s => s._id === communityId);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    const userRole = community?.roles?.find(r => r.user === user.username)?.role || (community?.owner === user._id ? 'owner' : 'member');
+    const isMod = userRole === 'owner' || userRole === 'mod';
 
     useEffect(() => {
         if (communityId) {
@@ -33,6 +40,17 @@ const CommunityView = () => {
         await joinCommunity(communityId, user._id);
     };
 
+    const handlePromote = async (memberId) => {
+        alert(`Promoting member ${memberId} in ${community.name}... (Backend Logic Stub)`);
+        // In a real app, this would be an API call to update community roles
+    };
+
+    const handleKick = async (memberId) => {
+        if(window.confirm("Are you sure you want to kick this member?")) {
+            alert(`Kicking member ${memberId} from ${community.name}... (Backend Logic Stub)`);
+        }
+    };
+
     const channels = [
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
@@ -46,9 +64,12 @@ const CommunityView = () => {
         <div className="discord-layout animate-fade-in">
             {/* 1. Channel Sidebar (Discord-style) */}
             <div className="channel-sidebar">
-                <header className="server-header" onClick={() => console.log("Server Settings")}>
+                <header className="server-header">
                     <h2 className="server-name">{community.name}</h2>
-                    <MoreVertical size={18} opacity={0.6} />
+                    <div className="server-header-actions">
+                        {isMod && <Settings size={18} className="icon-btn" onClick={() => setShowModTools(true)} />}
+                        <MoreVertical size={18} opacity={0.6} />
+                    </div>
                 </header>
 
                 <div className="channel-list">
@@ -68,7 +89,13 @@ const CommunityView = () => {
                 <div className="user-pod">
                     <div className="user-pod-info">
                         <div className="user-pod-avatar">
-                            <img src={user.avatar || 'https://i.pravatar.cc/150'} alt="" />
+                            <Avatar 
+                                src={user.avatar} 
+                                alt="" 
+                                size={32} 
+                                frame={user.avatarFrame || 'none'}
+                                isListening={isUserListening(user.username)}
+                            />
                             <div className="status-indicator online"></div>
                         </div>
                         <div className="user-pod-meta">
@@ -145,9 +172,13 @@ const CommunityView = () => {
                     {community.members?.map((m, i) => (
                         <div key={i} className="member-item">
                             <div className="member-avatar-wrapper">
-                                <div className="m-avatar" style={{background: `hsl(${i * 40}, 70%, 50%)`}}>
-                                    {m.username?.[0] || 'U'}
-                                </div>
+                                <Avatar 
+                                    src={m.username?.[0] || 'U'} 
+                                    alt="" 
+                                    size={32} 
+                                    frame={m.avatarFrame || 'none'}
+                                    isListening={isUserListening(m.username)}
+                                />
                                 <div className="status-indicator online"></div>
                             </div>
                             <span className="member-name">User {i + 1}</span>
@@ -155,6 +186,31 @@ const CommunityView = () => {
                     ))}
                 </div>
             </div>
+            {/* Moderation Modal */}
+            {showModTools && (
+                <div className="modal-overlay" onClick={() => setShowModTools(false)}>
+                    <div className="glass-panel mod-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Community Management</h3>
+                            <button onClick={() => setShowModTools(false)}>✕</button>
+                        </div>
+                        <div className="mod-content">
+                            <h4>Members ({community.members?.length || 0})</h4>
+                            <div className="mod-member-list">
+                                {community.members?.map(m => (
+                                    <div key={m._id} className="mod-member-item">
+                                        <span>{m.username}</span>
+                                        <div className="mod-actions">
+                                            <button className="mod-btn promote" onClick={() => handlePromote(m._id)}>Promote</button>
+                                            <button className="mod-btn kick" onClick={() => handleKick(m._id)}>Kick</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

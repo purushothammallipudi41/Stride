@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
     X, UserPlus, Music, Circle, BadgeCheck, Shield, Bell, 
     Activity, Globe, Moon, Check 
 } from 'lucide-react';
+import Avatar from '../components/common/Avatar';
 import './Settings.css';
 
 const Settings = () => {
@@ -12,23 +13,53 @@ const Settings = () => {
     const [notifications, setNotifications] = useState(true);
     const [privateAccount, setPrivateAccount] = useState(false);
     
-    // Attempt to load user from localStorage
-    const [user, setUser] = useState({
-        name: 'Purushotham Mallipudi',
-        email: 'purushothammallipudi41@gmail.com',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
+    const [user, setUser] = useState(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                return {
+                    name: parsed.name || parsed.username || 'User',
+                    email: parsed.email || 'No email provided',
+                    avatar: parsed.avatar || 'https://www.gravatar.com/avatar/0?d=mp',
+                    avatarFrame: parsed.avatarFrame || 'none',
+                    username: parsed.username || ''
+                };
+            }
+        } catch {
+            // ignore
+        }
+        return {
+            name: 'Purushotham Mallipudi',
+            email: 'purushothammallipudi41@gmail.com',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+            avatarFrame: 'none',
+            username: ''
+        };
     });
 
-    useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser) {
-            setUser({
-                name: storedUser.name || storedUser.username || 'User',
-                email: storedUser.email || 'No email provided',
-                avatar: storedUser.avatar || 'https://www.gravatar.com/avatar/0?d=mp'
+    const handleFrameSwitch = async (e) => {
+        const newFrame = e.target.value;
+        const previousFrame = user.avatarFrame;
+        setUser(prev => ({ ...prev, avatarFrame: newFrame })); // Optimistic update
+        
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user.username, avatarFrame: newFrame })
             });
+            const data = await res.json();
+            if (data.success) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            } else {
+                setUser(prev => ({ ...prev, avatarFrame: previousFrame })); // Revert on failure
+            }
+        } catch (err) {
+            console.error("Failed to update avatar frame:", err);
+            setUser(prev => ({ ...prev, avatarFrame: previousFrame })); // Revert on failure
         }
-    }, []);
+    };
 
     return (
         <div className="premium-settings-container animate-fade-in">
@@ -47,9 +78,12 @@ const Settings = () => {
                     
                     <div className="ps-account-card">
                         <div className="ps-account-info-row" onClick={() => navigate('/profile?edit=true')}>
-                            <div className="ps-account-avatar-wrapper">
-                                <img src={user.avatar} alt="Profile" className="ps-account-avatar" />
-                            </div>
+                            <Avatar 
+                                src={user.avatar} 
+                                alt="Profile" 
+                                size={48} 
+                                frame={user.avatarFrame || 'none'}
+                            />
                             <div className="ps-account-details">
                                 <h4>{user.name}</h4>
                                 <p>{user.email}</p>
@@ -88,9 +122,17 @@ const Settings = () => {
                                     <span className="ps-item-subtitle">Gold Frame</span>
                                 </div>
                             </div>
-                            <div className="ps-dropdown">
-                                Golden Frame <span>v</span>
-                            </div>
+                            <select 
+                                className="ps-dropdown" 
+                                value={user.avatarFrame} 
+                                onChange={handleFrameSwitch}
+                                style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
+                            >
+                                <option value="none" style={{ background: '#111' }}>No Frame</option>
+                                <option value="gold" style={{ background: '#111' }}>Golden Frame</option>
+                                <option value="neon" style={{ background: '#111' }}>Neon Pulse</option>
+                                <option value="holographic" style={{ background: '#111' }}>Holographic</option>
+                            </select>
                         </div>
 
                     </div>

@@ -15,12 +15,6 @@ const Sidebar = () => {
         { icon: Menu, label: 'More', path: '/more' },
     ];
 
-    const handleItemClick = (e, item) => {
-        if (item.action === 'create') {
-            e.preventDefault();
-            openCreateModal();
-        }
-    };
 
     return (
         <aside className="sidebar">
@@ -33,19 +27,39 @@ const Sidebar = () => {
             </div>
 
             <nav className="sidebar-nav">
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.label}
-                        to={item.path || '#'}
-                        className={({ isActive }) => `nav-item ${item.path && isActive ? 'active' : ''} ${item.action === 'create' ? 'create-nav-item' : ''}`}
-                        onClick={(e) => handleItemClick(e, item)}
-                    >
-                        <div className="nav-icon-wrapper">
-                            <item.icon size={24} />
-                        </div>
-                        <span className="nav-label">{item.label}</span>
-                    </NavLink>
-                ))}
+                {navItems.map((item) => {
+                    const isCreate = item.action === 'create';
+                    const linkContent = (
+                        <>
+                            <div className="nav-icon-wrapper">
+                                <item.icon size={24} />
+                            </div>
+                            <span className="nav-label">{item.label}</span>
+                        </>
+                    );
+
+                    if (isCreate) {
+                        return (
+                            <button
+                                key={item.label}
+                                className="nav-item create-btn"
+                                onClick={openCreateModal}
+                            >
+                                {linkContent}
+                            </button>
+                        );
+                    }
+
+                    return (
+                        <NavLink
+                            key={item.label}
+                            to={item.path || '#'}
+                            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                        >
+                            {linkContent}
+                        </NavLink>
+                    );
+                })}
             </nav>
 
 

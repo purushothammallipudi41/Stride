@@ -1,3 +1,8 @@
+if (typeof BigInt !== 'undefined' && !BigInt.prototype.toJSON) {
+  BigInt.prototype.toJSON = function () {
+    return this.toString();
+  };
+}
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

@@ -392,3 +392,87 @@
     font-size: 0.85rem;
     color: var(--color-text-muted);
 }
+.mod-modal {
+    width: 90%;
+    max-width: 500px;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-solid);
+}
+
+.mod-content h4 {
+    margin-bottom: 20px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+}
+
+.mod-member-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mod-member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mod-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.mod-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mod-btn.promote {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.mod-btn.promote:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+.mod-btn.kick {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.mod-btn.kick:hover {
+    background: var(--color-danger);
+    color: white;
+}
+
+.server-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-btn {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}

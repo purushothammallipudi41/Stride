@@ -4,6 +4,7 @@ import { useUI } from './hooks/useUI';
 import { MusicProvider } from './context/MusicContext';
 import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
+import { ActivityProvider } from './context/ActivityContext';
 
 // Pages
 import Home from './pages/Home';
@@ -37,10 +38,15 @@ const AppContent = () => {
 
   useEffect(() => {
     if (!isAuthenticated && !isPublicPath) {
-      // We don't force redirect here to allow guest browsing if needed, 
-      // but the user asked "where is the login page", implying they want to see it.
-      // If we want a strict auth app, we'd uncomment:
-      // navigate('/login');
+      // Redirect or handle guest state
+    }
+    
+    // Apply dynamic theme if user has custom accent color
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.accentColor) {
+      document.documentElement.style.setProperty('--theme-primary', user.accentColor);
+      document.documentElement.style.setProperty('--theme-accent', user.accentColor + '80'); // 50% opacity for accent
+      document.documentElement.style.setProperty('--theme-primary-glow', user.accentColor + '40');
     }
   }, [isAuthenticated, isPublicPath]);
 
@@ -80,13 +86,15 @@ const AppContent = () => {
 function App() {
   return (
     <MusicProvider>
-      <ServerProvider>
-        <UIProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </UIProvider>
-      </ServerProvider>
+      <ActivityProvider>
+        <ServerProvider>
+          <UIProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </UIProvider>
+        </ServerProvider>
+      </ActivityProvider>
     </MusicProvider>
   );
 }

@@ -173,9 +173,14 @@ export const MusicProvider = ({ children }) => {
                 progress: audioRef.current.currentTime,
                 isPlaying: newState
             });
+            socket.emit('playback_update', {
+                username,
+                track: currentTrack,
+                isPlaying: newState
+            });
             return newState;
         });
-    }, [currentTrack]);
+    }, [currentTrack, username]);
 
 
 
@@ -233,6 +238,12 @@ export const MusicProvider = ({ children }) => {
                     roomId: 'listening_party',
                     track: fallbackTrack,
                     progress: 0,
+                    isPlaying: true
+                });
+
+                socket.emit('playback_update', {
+                    username,
+                    track: fallbackTrack,
                     isPlaying: true
                 });
 

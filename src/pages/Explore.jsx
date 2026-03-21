@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useActivity } from '../hooks/useActivity';
 
 import { Search, X, Film, Layers } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import Avatar from '../components/common/Avatar';
 import './Explore.css';
 
 const Explore = () => {
     const navigate = useNavigate();
+    const { isUserListening, getUserTrack } = useActivity();
     const [searchQuery, setSearchQuery] = useState('');
 
     const [isSearching, setIsSearching] = useState(false);
@@ -116,12 +119,19 @@ const Explore = () => {
                             <div className="user-results-list">
                                 {userResults.map(user => (
                                     <div key={user._id} className="user-result-card">
-                                        <div className="user-avatar-wrapper">
-                                            <img src={user.avatar || `https://i.pravatar.cc/150?u=${user.username}`} alt={user.username} />
-                                        </div>
+                                        <Avatar 
+                                            src={user.avatar} 
+                                            alt={user.username} 
+                                            size={40} 
+                                            frame={user.avatarFrame || 'none'}
+                                            isListening={isUserListening(user.username)}
+                                        />
                                         <div className="user-meta">
                                             <span className="user-name">{user.name}</span>
                                             <span className="user-handle">@{user.username}</span>
+                                            {isUserListening(user.username) && (
+                                                <span className="user-listening-status">Listening to {getUserTrack(user.username)?.title}</span>
+                                            )}
                                         </div>
                                         <button className="view-profile-btn" onClick={() => navigate(`/profile/${user.username}`)}>
                                             View

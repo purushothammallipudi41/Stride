@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, Heart, UserPlus, MessageSquare, Music } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import Avatar from '../components/common/Avatar';
 import { useMusic } from '../hooks/useMusic';
 import socket from '../services/socket';
 
@@ -30,7 +31,7 @@ const Notifications = () => {
 
         // Listen for real-time notification triggers
         const handleUpdate = (event) => {
-            if (event.type === 'like' || event.type === 'follow' || event.type === 'message') {
+            if (event.type === 'like' || event.type === 'follow' || event.type === 'message' || event.type === 'gift') {
                 fetchNotifications();
             }
         };
@@ -48,9 +49,10 @@ const Notifications = () => {
         switch (type) {
             case 'like': return <Heart size={20} className="text-red-500" fill="currentColor" />;
             case 'follow': return <UserPlus size={20} className="text-blue-500" />;
-            case 'message': return <MessageSquare size={20} className="text-purple-500" />;
-            case 'music': return <Music size={20} className="text-orange-500" />;
-            default: return <Bell size={20} />;
+            case 'message': return <MessageSquare size={14} className="text-purple-500" fill="currentColor" />;
+            case 'gift': return <Music size={14} className="text-yellow-500" fill="currentColor" />;
+            case 'music': return <Music size={14} className="text-orange-500" />;
+            default: return <Bell size={14} />;
         }
     };
 
@@ -68,20 +70,33 @@ const Notifications = () => {
                         <div key={notif.id} className="notification-item animate-fade-in" style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '12px',
+                            gap: '16px',
                             padding: '16px 0',
                             borderBottom: '1px solid rgba(255,255,255,0.05)'
                         }}>
-                            <div className="notif-icon-wrapper" style={{
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.05)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {getIcon(notif.type)}
+                            <div className="notif-avatar-wrapper" style={{ position: 'relative' }}>
+                                <Avatar 
+                                    src={notif.from?.[0] || '?'} 
+                                    alt={notif.from} 
+                                    size={44} 
+                                    frame={notif.senderFrame || 'none'}
+                                />
+                                <div className="notif-badge" style={{
+                                    position: 'absolute',
+                                    bottom: '-2px',
+                                    right: '-2px',
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: 'var(--color-surface)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '2px solid var(--color-bg-primary)',
+                                    zIndex: 5
+                                }}>
+                                    {getIcon(notif.type)}
+                                </div>
                             </div>
                             <div className="notif-content" style={{ flex: 1 }}>
                                 <p style={{ fontSize: '0.95rem', margin: 0, color: 'var(--color-text-primary)' }}>

@@ -5,6 +5,10 @@ const CommunitySchema = new mongoose.Schema({
     description: { type: String },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    roles: [{
+        user: { type: String, required: true }, // username
+        role: { type: String, enum: ['owner', 'mod', 'member'], default: 'member' }
+    }],
     avatar: { type: String },
     banner: { type: String },
     isPrivate: { type: Boolean, default: false },

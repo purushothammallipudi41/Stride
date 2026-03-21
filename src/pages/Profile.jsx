@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image } from 'lucide-react';
+import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
+import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
 import './Profile.css';
 
@@ -93,10 +94,18 @@ const Profile = () => {
 
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editData, setEditData] = useState({ name: '', bio: '', avatar: '', banner: '' });
+    const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+    const [selectedFrame, setSelectedFrame] = useState('gold');
+    const [editData, setEditData] = useState({ name: '', bio: '', avatar: '', banner: '', accentColor: '' });
 
     const openEditModal = useCallback(() => {
-        setEditData({ name: user.name || '', bio: user.bio || '', avatar: user.avatar || '', banner: user.banner || '' });
+        setEditData({ 
+            name: user.name || '', 
+            bio: user.bio || '', 
+            avatar: user.avatar || '', 
+            banner: user.banner || '', 
+            accentColor: user.accentColor || '#8b5cf6' 
+        });
         setIsEditModalOpen(true);
     }, [user]);
 
@@ -119,9 +128,11 @@ const Profile = () => {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         if (location.search.includes('edit=true') && user && isOwnProfile && !isEditModalOpen) {
-            openEditModal();
+            const timer = setTimeout(() => {
+                openEditModal();
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [location.search, user, isOwnProfile, isEditModalOpen, openEditModal]);
 
@@ -135,12 +146,40 @@ const Profile = () => {
             const data = await res.json();
             if (data.success) {
                 setUser(data.user);
+                // Update local storage to reflect theme changes immediately
+                localStorage.setItem('user', JSON.stringify(data.user));
                 closeEditModal();
+                // Refresh to apply CSS variables in App.jsx
+                window.location.reload(); 
             } else {
                 console.error("Failed to update:", data.message);
             }
         } catch (err) {
             console.error("Failed to update profile:", err);
+        }
+    };
+
+    const handleGiftFrame = async () => {
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/monetization/gift-frame`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    fromId: currentUser._id, 
+                    toId: user._id, 
+                    frameType: selectedFrame,
+                    amount: 50.0
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setUser(data.user);
+                setIsGiftModalOpen(false);
+                alert(`You gifted a ${selectedFrame} frame to ${user.username}!`);
+            }
+        } catch (err) {
+            console.error("Gifting failed:", err);
         }
     };
 
@@ -160,9 +199,13 @@ const Profile = () => {
                 </div>
                 
                 <div className="ig-bio-top-row">
-                    <div className="ig-avatar-wrapper">
-                        <img src={user.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} alt="Profile" className="ig-avatar" />
-                    </div>
+                    <Avatar 
+                        src={user?.avatar} 
+                        alt="Profile" 
+                        size={80} 
+                        className="ig-avatar-actual" 
+                        frame={user?.avatarFrame || 'none'}
+                    />
                     <div className="ig-stats-row">
                         <div className="ig-stat">
                             <span className="ig-stat-num">{user.posts?.length || 0}</span>
@@ -219,6 +262,7 @@ const Profile = () => {
                             </button>
                             <button className="ig-action-btn-main">Message</button>
                             <button className="ig-action-btn-main tip-btn" onClick={handleTip}><DollarSign size={16} /> Tip</button>
+                            <button className="ig-action-btn-main gift-btn" onClick={() => setIsGiftModalOpen(true)}><Sparkles size={16} /> Gift Frame</button>
 
                         </>
                     )}
@@ -304,15 +348,66 @@ const Profile = () => {
                                 <input type="text" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} placeholder="Your display name" />
                             </div>
                             
-                            <div className="ig-edit-field">
+                             <div className="ig-edit-field">
                                 <label>Bio</label>
                                 <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value})} placeholder="Tell the community about yourself..." rows={3} />
                             </div>
+
+                            {user.avatarFrame !== 'none' && (
+                                <div className="ig-edit-field">
+                                    <label>Premium Accent Color</label>
+                                    <div className="theme-picker">
+                                        {['#8b5cf6', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map(color => (
+                                            <div 
+                                                key={color} 
+                                                className={`color-swatch ${editData.accentColor === color ? 'active' : ''}`}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => setEditData({...editData, accentColor: color})}
+                                            />
+                                        ))}
+                                    </div>
+                                    <p className="field-hint">Your selection will change the app's glow and highlights.</p>
+                                </div>
+                            )}
 
                         </div>
                         <div className="ig-modal-footer">
                             <button className="ig-btn-cancel" onClick={closeEditModal}>Cancel</button>
                             <button className="ig-btn-save" onClick={handleUpdateProfile}>Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Premium Gifting Modal */}
+            {isGiftModalOpen && (
+                <div className="ig-modal-overlay">
+                    <div className="ig-modal-glass gift-modal">
+                        <div className="ig-modal-header">
+                            <h2>Gift a Premium Frame</h2>
+                            <button className="ig-modal-close" onClick={() => setIsGiftModalOpen(false)}>✕</button>
+                        </div>
+                        <div className="ig-modal-body">
+                            <p className="gift-intro">Surprise {user.username} with a premium profile look!</p>
+                            
+                            <div className="frame-options-grid">
+                                {['gold', 'neon', 'holographic'].map(frame => (
+                                    <div 
+                                        key={frame} 
+                                        className={`frame-option-card ${selectedFrame === frame ? 'active' : ''}`}
+                                        onClick={() => setSelectedFrame(frame)}
+                                    >
+                                        <div className={`frame-preview-circle avatar-frame-${frame}`}>
+                                            <div className="inner-circle" />
+                                        </div>
+                                        <span className="frame-label">{frame.charAt(0).toUpperCase() + frame.slice(1)}</span>
+                                        <span className="frame-price">$50.00</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="ig-modal-footer">
+                            <button className="ig-btn-cancel" onClick={() => setIsGiftModalOpen(false)}>Cancel</button>
+                            <button className="ig-btn-save gift-confirm-btn" onClick={handleGiftFrame}>Confirm Gift</button>
                         </div>
                     </div>
                 </div>

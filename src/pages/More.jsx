@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Compass, Globe, BookOpen, Film, Music2, Hash, Settings, Layout, Plus, LogOut, LogIn } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
+import Avatar from '../components/common/Avatar';
 import { useUI } from '../hooks/useUI';
 import './More.css';
 
@@ -48,7 +49,12 @@ const More = () => {
             <div className="more-page animate-fade-in" style={{ paddingTop: '20px' }}>
                 {user && (
                     <div className="user-welcome glass-card" style={{ margin: '0 20px 24px', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <img src={user.avatar} alt="Avatar" style={{ width: '48px', height: '48px', borderRadius: '50%' }} />
+                        <Avatar 
+                            src={user.avatar} 
+                            alt="Avatar" 
+                            size={48} 
+                            frame={user.avatarFrame || 'none'}
+                        />
                         <div>
                             <h2 style={{ fontSize: '1.2rem', margin: 0 }}>Welcome back, {user.name || user.username}!</h2>
                             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>{user.email}</p>

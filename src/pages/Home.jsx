@@ -39,14 +39,9 @@ const Home = () => {
                     </section>
                 </div>
 
-                {/* Right Column: Social Discovery & Activity */}
+                {/* Right Column: Social Activity */}
                 <aside className="side-column">
                     <FriendsActivity />
-                    <div className="discovery-prompt">
-                        <h4>Discovery</h4>
-                        <p>Explore communities based on your vibes</p>
-                        <button className="explore-btn">Explore</button>
-                    </div>
                 </aside>
             </div>
 
@@ -67,10 +62,7 @@ const Home = () => {
                 .feed-tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-primary); }
                 .feed-tab:hover { color: var(--color-text-primary); }
 
-                .discovery-prompt { padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
-                .discovery-prompt h4 { margin-top: 0; margin-bottom: 8px; font-size: 0.9rem; }
-                .discovery-prompt p { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 16px; }
-                .explore-btn { width: 100%; padding: 8px; border-radius: 8px; background: var(--color-primary); border: none; color: white; font-weight: 600; cursor: pointer; }
+                .feed-tab:hover { color: var(--color-text-primary); }
             `}} />
         </div>
     );

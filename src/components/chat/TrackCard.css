@@ -1,0 +1,152 @@
+.track-card {
+    width: 280px;
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.track-card.active {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 20px var(--theme-primary-glow);
+}
+
+.track-card-main {
+    display: flex;
+    gap: 16px;
+}
+
+.track-card-artwork {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.track-card-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.artwork-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.track-card-artwork:hover .artwork-overlay {
+    opacity: 1;
+}
+
+.track-card-artwork:hover img {
+    transform: scale(1.1);
+}
+
+.track-card.active .artwork-overlay {
+    opacity: 1;
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.track-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.track-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--theme-primary);
+    margin-bottom: 4px;
+}
+
+.track-title {
+    font-size: 1rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+}
+
+.track-artist {
+    font-size: 0.85rem;
+    margin: 2px 0 0 0;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.waveform-animation {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+    margin-top: 8px;
+}
+
+.waveform-animation .bar {
+    width: 3px;
+    background: var(--theme-primary);
+    border-radius: 1px;
+    animation: wave-bounce 1s infinite alternate;
+}
+
+.waveform-animation .bar:nth-child(2) { animation-delay: 0.1s; height: 100%; }
+.waveform-animation .bar:nth-child(3) { animation-delay: 0.2s; height: 60%; }
+.waveform-animation .bar:nth-child(4) { animation-delay: 0.3s; height: 80%; }
+
+@keyframes wave-bounce {
+    0% { height: 20%; }
+    100% { height: 100%; }
+}
+
+.track-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 2px;
+}
+
+.action-btn:hover {
+    color: var(--color-text-primary);
+}
+
+.track-duration {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: monospace;
+}

@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare, Share2, Music2, Volume2, VolumeX, Sparkles, Link2, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useMusic } from '../../hooks/useMusic';
+import Avatar from '../common/Avatar';
 import './Reels.css';
 
 const ReelItem = ({ video, isActive }) => {
@@ -122,9 +123,12 @@ const ReelItem = ({ video, isActive }) => {
                 {/* Bottom Left Content */}
                 <div className="reel-content-bottom-left">
                     <div className="reel-user-row">
-                        <div className="reel-avatar-ring">
-                            <img src={video.avatar || 'https://www.gravatar.com/avatar/0?d=mp'} alt="avatar" />
-                        </div>
+                        <Avatar 
+                            src={video.avatar} 
+                            alt="avatar" 
+                            size={40} 
+                            frame={video.avatarFrame || 'none'}
+                        />
                         <h3 className="reel-username" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${video.username}`); }}>
                             {video.username}
                         </h3>
