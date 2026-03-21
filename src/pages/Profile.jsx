@@ -14,6 +14,8 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
 
+    const isOwnProfile = (username || 'admin') === (user?.username);
+
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const targetUser = username || currentUser.username || 'admin';
@@ -138,8 +140,6 @@ const Profile = () => {
 
     if (isLoading) return <div className="loading-screen">Resonating...</div>;
     if (!user) return <div className="error-screen">User not found</div>;
-
-    const isOwnProfile = (username || 'admin') === user.username;
 
     return (
         <div className="ig-profile-container">
