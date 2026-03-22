@@ -59,34 +59,9 @@ const MusicPage = () => {
 
 
 
-    const [albums, setAlbums] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
-    const handleTip = async (e, song) => {
-        e.stopPropagation();
-        const amount = prompt(`Enter tip amount for ${song.artist || 'Artist'}:`, "5.00");
-        if (!amount || isNaN(amount)) return;
-
-        try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/monetization/tip`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    fromId: user._id, 
-                    toId: song.user?._id || user._id, 
-                    amount: parseFloat(amount),
-                    trackId: song.id 
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                addNotification({ title: 'Tip Sent!', message: `You sent $${amount} to ${song.artist}`, type: 'success' });
-            }
-        } catch (err) {
-            console.error("Tip failed:", err);
-        }
-    };
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
@@ -94,16 +69,6 @@ const MusicPage = () => {
     const [newPlaylistName, setNewPlaylistName] = useState('');
     const [addingToPlaylist, setAddingToPlaylist] = useState(null);
 
-    useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/albums`)
-            .then(res => res.json())
-            .then(data => {
-                setAlbums(data);
-            })
-            .catch(err => {
-                console.error("Failed to fetch albums:", err);
-            });
-    }, []);
 
     const handleSearch = async (e) => {
         const query = e.target.value;
@@ -120,11 +85,6 @@ const MusicPage = () => {
     };
 
 
-    const handlePlayAlbum = (album) => {
-        if (album.songs && album.songs.length > 0) {
-            playTrack({ ...album.songs[0], cover: album.cover });
-        }
-    };
 
     const handlePlaySong = (song) => {
         if (currentTrack?.id === song.id) {
