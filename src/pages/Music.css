@@ -145,8 +145,9 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 40px;
+    justify-content: space-evenly;
+    gap: 20px;
+    overflow-y: auto;
 }
 
 .expanded-cover-container {
@@ -159,9 +160,11 @@
 
 .expanded-cover {
     width: 100%;
-    max-width: 320px;
+    max-width: 280px;
+    aspect-ratio: 1;
     border-radius: 8px;
     box-shadow: 0 12px 64px rgba(0,0,0,0.8);
+    object-fit: cover;
 }
 
 .expanded-info {
