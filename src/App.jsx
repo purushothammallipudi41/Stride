@@ -24,6 +24,7 @@ import Communities from './pages/Communities';
 import Servers from './pages/Servers';
 import ServerView from './pages/ServerView';
 import PlaylistView from './pages/PlaylistView';
+import Articles from './pages/Articles';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -74,6 +75,7 @@ const AppContent = () => {
           <Route path="/servers" element={<Servers />} />
           <Route path="/community/:communityId" element={<ServerView />} />
           <Route path="/playlist/:id" element={<PlaylistView />} />
+          <Route path="/articles" element={<Articles />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
