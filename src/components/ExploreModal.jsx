@@ -1,5 +1,4 @@
-import React from 'react';
-import { X, Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag } from 'lucide-react';
+import { X, Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag, Music2, Settings, Layout, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUI } from '../hooks/useUI';
 import './ExploreModal.css';
@@ -15,8 +14,11 @@ const ExploreModal = () => {
         { id: 'spaces', icon: Radio, label: 'Spaces', path: '/servers' },
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
+        { id: 'dashboard', icon: Layout, label: 'Artist Dashboard', path: '/artist-dashboard' },
+        { id: 'music', icon: Music2, label: 'Music', path: '/music' },
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '#' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '#' },
+        { id: 'settings', icon: Settings, label: 'Settings', path: '/settings' },
     ];
 
     const handleNavigate = (path) => {
@@ -24,6 +26,14 @@ const ExploreModal = () => {
             navigate(path);
             closeExplorer();
         }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAuthenticated');
+        navigate('/login');
+        closeExplorer();
     };
 
     return (
@@ -66,6 +76,12 @@ const ExploreModal = () => {
                             <ShoppingBag size={24} />
                         </div>
                         <span>Marketplace</span>
+                    </div>
+                    <div className="explore-item-card logout" onClick={handleLogout}>
+                        <div className="item-icon-wrapper">
+                            <LogOut size={24} />
+                        </div>
+                        <span>Logout</span>
                     </div>
                 </div>
             </div>

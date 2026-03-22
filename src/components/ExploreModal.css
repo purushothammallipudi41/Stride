@@ -57,6 +57,7 @@
 .text-gradient {
     background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -174,11 +175,20 @@
 }
 
 .explore-footer {
-    margin-top: 12px;
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
 }
 
-.explore-item-card.marketplace {
-    width: 100px;
+.explore-item-card.marketplace, .explore-item-card.logout {
+    flex: 1;
+    max-width: 120px;
+}
+
+.explore-item-card.logout:hover .item-icon-wrapper {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .animate-scale-in {
