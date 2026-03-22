@@ -1,24 +1,28 @@
-import { useState, useEffect } from 'react';
-import { Bell, Heart, UserPlus, MessageSquare, Music } from 'lucide-react';
-import PageHeader from '../components/layout/PageHeader';
+import { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, Check, ChevronRight, Heart, UserPlus, MessageSquare, Music, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
-import { useMusic } from '../hooks/useMusic';
+import { useUI } from '../hooks/useUI';
 import socket from '../services/socket';
+import './Notifications.css';
 
 const Notifications = () => {
-    const { username, markNotifsRead } = useMusic();
+    const navigate = useNavigate();
+    const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
+    const username = userProfile.username || 'guest';
+    const { resetNotifications } = useUI();
     const [notifications, setNotifications] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!username) return;
-        markNotifsRead();
+        resetNotifications();
 
         const fetchNotifications = () => {
             fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/${username}`)
                 .then(res => res.json())
                 .then(data => {
-                    setNotifications(data);
+                    setNotifications(data.notifications || []);
                     setIsLoading(false);
                 })
                 .catch(err => {
@@ -29,9 +33,8 @@ const Notifications = () => {
 
         fetchNotifications();
 
-        // Listen for real-time notification triggers
         const handleUpdate = (event) => {
-            if (event.type === 'like' || event.type === 'follow' || event.type === 'message' || event.type === 'gift') {
+            if (['like', 'follow', 'message', 'gift', 'comment'].includes(event.type)) {
                 fetchNotifications();
             }
         };
@@ -43,89 +46,94 @@ const Notifications = () => {
             socket.off('content_updated', handleUpdate);
             socket.off('new_private_message', fetchNotifications);
         };
-    }, [username, markNotifsRead]);
+    }, [username, resetNotifications]);
+
+    const groupedNotifications = useMemo(() => {
+        const groups = {
+            'Now': [],
+            'Today': [],
+            'This Week': [],
+            'This Month': []
+        };
+
+        notifications.forEach(n => {
+            if (n.time?.includes('m') || n.time?.includes('s')) groups['Now'].push(n);
+            else if (n.time?.includes('h')) groups['Today'].push(n);
+            else if (n.time?.includes('d')) groups['This Week'].push(n);
+            else groups['This Month'].push(n);
+        });
+
+        return Object.entries(groups).filter(([, items]) => items.length > 0);
+    }, [notifications]);
 
     const getIcon = (type) => {
         switch (type) {
-            case 'like': return <Heart size={20} className="text-red-500" fill="currentColor" />;
-            case 'follow': return <UserPlus size={20} className="text-blue-500" />;
-            case 'message': return <MessageSquare size={14} className="text-purple-500" fill="currentColor" />;
-            case 'gift': return <Music size={14} className="text-yellow-500" fill="currentColor" />;
-            case 'music': return <Music size={14} className="text-orange-500" />;
+            case 'like': return <Heart size={14} fill="#ff3b30" color="#ff3b30" />;
+            case 'follow': return <UserPlus size={14} />;
             default: return <Bell size={14} />;
         }
     };
 
+    if (isLoading) return <div className="loading-screen">Intercepting waves...</div>;
+
     return (
-        <div className="page-container" style={{ background: 'var(--color-bg-primary)', minHeight: '100vh' }}>
-            <PageHeader title="Activity" />
-            
-            <div className="notifications-list" style={{ padding: '10px 16px' }}>
-                {isLoading ? (
-                    <div className="flex-center" style={{ height: '50vh' }}>
-                        <div className="loading-spinner" />
-                    </div>
-                ) : notifications.length > 0 ? (
-                    notifications.map((notif) => (
-                        <div key={notif.id} className="notification-item animate-fade-in" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px',
-                            padding: '16px 0',
-                            borderBottom: '1px solid rgba(255,255,255,0.05)'
-                        }}>
-                            <div className="notif-avatar-wrapper" style={{ position: 'relative' }}>
-                                <Avatar 
-                                    src={notif.from?.[0] || '?'} 
-                                    alt={notif.from} 
-                                    size={44} 
-                                    frame={notif.senderFrame || 'none'}
-                                />
-                                <div className="notif-badge" style={{
-                                    position: 'absolute',
-                                    bottom: '-2px',
-                                    right: '-2px',
-                                    width: '20px',
-                                    height: '20px',
-                                    borderRadius: '50%',
-                                    background: 'var(--color-surface)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '2px solid var(--color-bg-primary)',
-                                    zIndex: 5
-                                }}>
-                                    {getIcon(notif.type)}
+        <div className="notifications-container">
+            <header className="notifications-header">
+                <ChevronLeft size={28} onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} />
+                <h1 className="notifications-title">Notifications</h1>
+            </header>
+
+            <div className="follow-requests-section" onClick={() => navigate('/follow-requests')}>
+                <Avatar src={notifications[0]?.fromAvatar || '/default-avatar.png'} size={44} />
+                <div className="follow-requests-content">
+                    <span className="follow-requests-title">Follow requests</span>
+                    <span className="follow-requests-sub">manikantaaconstructions and others</span>
+                </div>
+                <div className="new-indicator-dot" />
+                <ChevronRight size={20} color="var(--color-text-secondary)" />
+            </div>
+
+            <div className="caught-up-section">
+                <div className="caught-up-icon">
+                    <Check size={32} strokeWidth={3} />
+                </div>
+                <span style={{ fontWeight: 600 }}>You're all caught up</span>
+                <span style={{ fontSize: '0.85rem', color: '#3797f0' }}>See new activity for {username}</span>
+            </div>
+
+            <div className="notifications-list">
+                {groupedNotifications.map(([group, items]) => (
+                    <div key={group} className="time-group">
+                        <div className="time-group-header">{group}</div>
+                        {items.map(notif => (
+                            <div key={notif.id} className="notification-item-v2">
+                                <div className="notif-v2-avatar-group">
+                                    <Avatar src={notif.fromAvatar} size={44} frame={notif.senderFrame} />
+                                    <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#000', borderRadius: '50%', padding: 2, border: '2px solid var(--color-bg-primary)' }}>
+                                        {getIcon(notif.type)}
+                                    </div>
                                 </div>
+                                <div className="notif-v2-main-text">
+                                    <span className="notif-v2-username">{notif.from}</span>
+                                    {` ${notif.content || 'is following you'}`}
+                                    <span className="notif-v2-time">{notif.time || '4d'}</span>
+                                </div>
+                                {notif.type === 'like' || notif.type === 'comment' ? (
+                                    <div className="notif-v2-media-preview">
+                                        <img src={notif.postImage || 'https://picsum.photos/100'} alt="post preview" />
+                                    </div>
+                                ) : (
+                                    <button className="notif-v2-action-btn">Follow</button>
+                                )}
                             </div>
-                            <div className="notif-content" style={{ flex: 1 }}>
-                                <p style={{ fontSize: '0.95rem', margin: 0, color: 'var(--color-text-primary)' }}>
-                                    <span style={{ fontWeight: 700 }}>{notif.from}</span> {notif.content}
-                                </p>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>{notif.time}</span>
-                            </div>
-                            {notif.type === 'follow' && (
-                                <button className="follow-btn-small" style={{
-                                    background: 'var(--color-accent)',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '6px 16px',
-                                    borderRadius: '8px',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 600
-                                }}>Follow back</button>
-                            )}
-                        </div>
-                    ))
-                ) : (
-                    <div className="flex-center" style={{ height: '60vh', flexDirection: 'column', gap: '20px', textAlign: 'center' }}>
-                         <div className="glass-panel" style={{ padding: '40px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)' }}>
-                            <Bell size={64} className="text-gradient" />
-                        </div>
-                        <h2 className="text-gradient">No Activity Yet</h2>
-                        <p style={{ color: 'var(--color-text-secondary)', maxWidth: '280px' }}>
-                            When people like your tracks or follow you, you'll see it here.
-                        </p>
+                        ))}
+                    </div>
+                ))}
+
+                {notifications.length === 0 && (
+                    <div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>
+                        <Bell size={48} style={{ marginBottom: '16px' }} />
+                        <p>No new notifications yet.</p>
                     </div>
                 )}
             </div>
