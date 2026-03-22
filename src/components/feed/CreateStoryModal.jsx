@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X, Send, Camera, Music, Image as ImageIcon, Type } from 'lucide-react';
 import './CreateStoryModal.css';
 
@@ -24,6 +24,12 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
 
     if (!isOpen) return null;
 
+    useEffect(() => {
+        if (isCameraActive && stream && videoRef.current) {
+            videoRef.current.srcObject = stream;
+        }
+    }, [isCameraActive, stream]);
+
     const startCamera = async () => {
         try {
             const newStream = await navigator.mediaDevices.getUserMedia({ 
@@ -33,9 +39,6 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
             setIsCameraActive(true);
             setTextMode(false);
             setPreviewImage(null);
-            if (videoRef.current) {
-                videoRef.current.srcObject = newStream;
-            }
         } catch (err) {
             console.error("Camera access error:", err);
             // Fallback to file input if webcam fails
