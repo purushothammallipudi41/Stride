@@ -29,9 +29,10 @@ import PlaylistView from './pages/PlaylistView';
 import Sidebar from './components/layout/Sidebar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
+import ExploreModal from './components/ExploreModal';
 
 const AppContent = () => {
-  const { isCreateModalOpen } = useUI();
+  const { isCreateModalOpen, isExplorerOpen } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
@@ -79,6 +80,7 @@ const AppContent = () => {
       </main>
       <GlobalNotifications />
       {isCreateModalOpen && <CreatePostModal />}
+      {isExplorerOpen && <ExploreModal />}
     </div>
   );
 };

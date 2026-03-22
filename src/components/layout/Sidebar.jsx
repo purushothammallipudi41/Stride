@@ -4,7 +4,10 @@ import { useUI } from '../../hooks/useUI';
 import './Sidebar.css';
 
 const Sidebar = () => {
-    const { openCreateModal } = useUI();
+    const { openCreateModal, openExploreModal } = useUI();
+    // useUI might have openExplorer or openExploreModal, let me check my context edit.
+    // I added openExplorer.
+    const { openCreateModal, openExplorer } = useUI();
 
     const navItems = [
 
@@ -12,7 +15,7 @@ const Sidebar = () => {
         { icon: Compass, label: 'Explore', path: '/explore' },
         { icon: Plus, label: 'Create', action: 'create' },
         { icon: User, label: 'Profile', path: '/profile' },
-        { icon: Menu, label: 'More', path: '/more' },
+        { icon: Menu, label: 'More', action: 'explore' },
     ];
 
 

@@ -4,6 +4,7 @@ import socket from '../services/socket';
 
 export const UIProvider = ({ children }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isExplorerOpen, setIsExplorerOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
     const [unreadMessages, setUnreadMessages] = useState(0);
@@ -52,6 +53,9 @@ export const UIProvider = ({ children }) => {
     const openCreateModal = () => setIsCreateModalOpen(true);
     const closeCreateModal = () => setIsCreateModalOpen(false);
 
+    const openExplorer = () => setIsExplorerOpen(true);
+    const closeExplorer = () => setIsExplorerOpen(false);
+
     const removeNotification = useCallback((id) => {
         setNotifications(prev => prev.filter(n => n.id !== id));
     }, []);
@@ -87,6 +91,9 @@ export const UIProvider = ({ children }) => {
         isCreateModalOpen,
         openCreateModal,
         closeCreateModal,
+        isExplorerOpen,
+        openExplorer,
+        closeExplorer,
         notifications,
         addNotification,
         removeNotification,
