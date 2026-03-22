@@ -62,6 +62,23 @@ export const searchTracks = async (query) => {
 };
 
 /**
+ * Searches for users on Audius.
+ */
+export const searchUsers = async (query) => {
+    const host = await selectHost();
+    if (!host) return [];
+    
+    try {
+        const response = await fetch(`${host}/v1/users/search?query=${encodeURIComponent(query)}&app_name=STRIDE`);
+        const data = await response.json();
+        return data.data || [];
+    } catch (error) {
+        console.error("Failed to search users", error);
+        return [];
+    }
+};
+
+/**
  * Gets the stream URL for a specific track ID.
  */
 export const getStreamUrl = async (trackId) => {

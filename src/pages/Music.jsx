@@ -22,6 +22,20 @@ const formatTime = (seconds) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
+const ImageWithFallback = ({ src, alt, className, fallback = '/default-track.png' }) => {
+    const [hasError, setHasError] = useState(false);
+
+    return (
+        <img 
+            key={src}
+            src={hasError || !src ? fallback : src} 
+            alt={alt} 
+            className={className} 
+            onError={() => setHasError(true)}
+        />
+    );
+};
+
 const MusicPage = () => {
     const navigate = useNavigate();
     const { addNotification } = useUI();
@@ -213,7 +227,7 @@ const MusicPage = () => {
                 <div className={`spotify-mini-player ${isExpanded ? 'hidden' : ''}`} onClick={() => setIsExpanded(true)}>
                     <Scrubber />
                     <div className="mini-player-content">
-                        <img src={currentTrack.cover || '/default-track.png'} alt="" className="mini-cover" />
+                        <ImageWithFallback src={currentTrack.cover} alt="" className="mini-cover" />
                         <div className="mini-info">
                             <span className="mini-title">{currentTrack.title}</span>
                             <span className="mini-artist">{currentTrack.artist}</span>
@@ -242,7 +256,7 @@ const MusicPage = () => {
 
                 <div className="modal-body">
                     <div className="expanded-cover-container">
-                        <img src={currentTrack?.cover} alt="" className="expanded-cover shadow-2xl" />
+                        <ImageWithFallback src={currentTrack?.cover} alt="" className="expanded-cover shadow-2xl" />
                     </div>
 
                     <div className="expanded-info">
@@ -290,7 +304,7 @@ const MusicPage = () => {
                             onClick={() => handlePlayAlbum(album)}
                         >
                             <div className="album-thumb">
-                                <img src={album.cover} alt={album.title} />
+                                <ImageWithFallback src={album.cover} alt={album.title} />
                                 <div className="album-thumb-overlay">
                                     <div className="album-play-icon">
                                         <Play size={20} fill="white" />
@@ -323,7 +337,7 @@ const MusicPage = () => {
                                         ? <Music size={14} />
                                         : idx + 1}
                                 </span>
-                                <img className="song-cover" src={song.cover || '/default-track.png'} alt={song.title} />
+                                <ImageWithFallback src={song.cover} className="song-cover" alt={song.title} />
                                 <div className="song-info">
                                     <span className="song-title">{song.title}</span>
                                     <span className="song-artist">{song.artist}</span>
@@ -401,7 +415,11 @@ const MusicPage = () => {
                                         ? <Music size={14} />
                                         : idx + 1}
                                 </span>
-                                <img className="song-cover" src={song.cover || albums.find(a => a.id === song.albumId)?.cover} alt={song.title} />
+                                <ImageWithFallback 
+                                    src={song.cover || albums.find(a => a.id === song.albumId)?.cover} 
+                                    className="song-cover" 
+                                    alt={song.title} 
+                                />
                                 <div className="song-info">
                                     <span className="song-title">{song.title}</span>
                                     <span className="song-artist">{song.artist}</span>
