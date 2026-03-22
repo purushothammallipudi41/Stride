@@ -4,20 +4,15 @@ import { useUI } from '../../hooks/useUI';
 import './Sidebar.css';
 
 const Sidebar = () => {
-    const { openCreateModal, openExploreModal } = useUI();
-    // useUI might have openExplorer or openExploreModal, let me check my context edit.
-    // I added openExplorer.
     const { openCreateModal, openExplorer } = useUI();
 
     const navItems = [
-
         { icon: Home, label: 'Home', path: '/' },
         { icon: Compass, label: 'Explore', path: '/explore' },
         { icon: Plus, label: 'Create', action: 'create' },
         { icon: User, label: 'Profile', path: '/profile' },
         { icon: Menu, label: 'More', action: 'explore' },
     ];
-
 
     return (
         <aside className="sidebar">
@@ -32,6 +27,7 @@ const Sidebar = () => {
             <nav className="sidebar-nav">
                 {navItems.map((item) => {
                     const isCreate = item.action === 'create';
+                    const isExplore = item.action === 'explore';
                     const linkContent = (
                         <>
                             <div className="nav-icon-wrapper">
@@ -47,6 +43,18 @@ const Sidebar = () => {
                                 key={item.label}
                                 className="nav-item create-btn"
                                 onClick={openCreateModal}
+                            >
+                                {linkContent}
+                            </button>
+                        );
+                    }
+
+                    if (isExplore) {
+                        return (
+                            <button
+                                key={item.label}
+                                className="nav-item"
+                                onClick={openExplorer}
                             >
                                 {linkContent}
                             </button>
