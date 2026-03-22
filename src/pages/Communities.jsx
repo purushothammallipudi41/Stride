@@ -1,111 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2, Plus, Search, Globe, ArrowUpRight } from 'lucide-react';
-import PageHeader from '../components/layout/PageHeader';
-import Avatar from '../components/common/Avatar';
+import React, { useState } from 'react';
+import { ChevronLeft, Search, Users, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './Communities.css';
 
 const Communities = () => {
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('for-you');
     const [searchTerm, setSearchTerm] = useState('');
-    const [communities, setCommunities] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
-    useEffect(() => {
-        const fetchCommunities = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities`);
-                const data = await response.json();
-                setCommunities(data);
-            } catch (err) {
-                console.error('Communities error:', err);
-                setError('Failed to load communities. Please check back later.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchCommunities();
-    }, []);
 
-    const filteredCommunities = communities.filter(c => 
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        (c.category && c.category.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const tabs = [
+        { id: 'for-you', label: 'For You' },
+        { id: 'all', label: 'All' },
+        { id: 'gaming', label: 'Gaming' },
+        { id: 'music', label: 'Music' },
+        { id: 'tech', label: 'Tech' },
+    ];
 
-    if (isLoading) return (
-        <div className="discovery-loading">
-            <Loader2 className="animate-spin" size={40} />
-            <p>Fetching the tribes...</p>
-        </div>
-    );
-
-    if (error) return (
-        <div className="discovery-error glass-panel">
-            <p>{error}</p>
-            <button onClick={() => window.location.reload()} className="retry-btn">Retry</button>
-        </div>
-    );
+    const featuredCommunity = {
+        name: 'Stride Official',
+        description: 'A community on Stride',
+        members: 0,
+        category: 'Social',
+        verified: true,
+        image: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800&auto=format&fit=crop&q=60'
+    };
 
     return (
-        <div className="communities-page animate-fade-in">
-            <PageHeader 
-                title="Communities" 
-                rightElement={
-                    <button className="create-community-btn text-gradient-bg" style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
-                        <Plus size={16} style={{ marginRight: '4px' }} /> Create
-                    </button>
-                } 
-            />
-            <div style={{ padding: '0 16px' }}>
-                <p className="page-subtitle" style={{ marginTop: '16px', marginBottom: '24px' }}>Find your tribe and build something amazing together.</p>
+        <div className="communities-discover-container animate-fade-in">
+            <header className="discover-header">
+                <button className="back-btn-icon" onClick={() => navigate(-1)}>
+                    <ChevronLeft size={24} />
+                </button>
+                <div className="title-group">
+                    <h1>Discover Communities</h1>
+                    <p>Find and join vibrant servers on Stride</p>
+                </div>
+            </header>
 
-            <div className="communities-search glass-panel">
-                <Search size={20} className="search-icon" />
-                <input 
-                    type="text" 
-                    placeholder="Search by name or category..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+            <div className="search-filter-section">
+                <div className="discover-search-wrapper">
+                    <Search size={20} className="search-icon" />
+                    <input 
+                        type="text" 
+                        placeholder="Search communities..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <nav className="discover-tabs">
+                    {tabs.map(tab => (
+                        <button 
+                            key={tab.id}
+                            className={`discover-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            {tab.id === 'for-you' && <span className="sparkle">✦</span>} {tab.label}
+                        </button>
+                    ))}
+                </nav>
             </div>
 
-            <section className="featured-section">
-                <div className="section-header">
-                    <h2>Trending Now</h2>
-                    <a href="#all" className="view-all">View All</a>
-                </div>
-                <div className="communities-grid">
-                    {filteredCommunities.map(community => (
-                        <div key={community.id || community._id} className="community-card glass-panel hover-card">
-                            <div className="card-image-v2">
-                                <Avatar 
-                                    src={community.avatar || community.image} 
-                                    alt={community.name} 
-                                    size={80} 
-                                />
-                                {community.category && <span className="category-badge">{community.category}</span>}
+            <main className="discover-content">
+                <div className="featured-community-card glass-panel">
+                    <div className="community-banner" style={{ backgroundImage: `url(${featuredCommunity.image})` }}>
+                        <div className="banner-overlay"></div>
+                    </div>
+                    <div className="community-card-info">
+                        <div className="community-avatar-large">
+                            <Users size={32} />
+                        </div>
+                        <div className="community-details">
+                            <div className="name-row">
+                                <h3>{featuredCommunity.name}</h3>
+                                {featuredCommunity.verified && <ShieldCheck size={18} className="verified-icon" />}
                             </div>
-                            <div className="card-content">
-                                <div className="card-info">
-                                    <h3>{community.name}</h3>
-                                    <div className="member-count">
-                                        <Globe size={14} />
-                                        <span>{community.members?.length || community.members || 0} members</span>
-                                    </div>
+                            <p>{featuredCommunity.description}</p>
+                            <div className="community-meta">
+                                <div className="meta-item">
+                                    <div className="online-dot"></div>
+                                    <span>{featuredCommunity.members} members</span>
                                 </div>
-                                <p className="community-desc">{community.description}</p>
-                                <div className="card-actions">
-                                    <button className="join-btn">Join Tribe</button>
-                                    <button className="preview-btn"><ArrowUpRight size={18} /></button>
-                                </div>
+                                <span className="category-label">{featuredCommunity.category}</span>
                             </div>
                         </div>
-                    ))}
+                        <button className="open-community-btn">Open</button>
+                    </div>
                 </div>
-            </section>
-            </div>
+            </main>
         </div>
     );
 };
-
 
 export default Communities;
