@@ -91,9 +91,73 @@
     color: var(--color-text-muted);
 }
 
-.chat-item-action {
-    color: var(--color-text-secondary);
+.chat-header-user:hover {
     opacity: 0.8;
+}
+
+.account-switcher-dropdown {
+    position: absolute;
+    top: 60px;
+    left: 16px;
+    width: 280px;
+    background-color: #262626;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    padding: 8px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.account-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.account-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.account-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.account-sub {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.account-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+.add-account-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.account-item.secondary {
+    color: #3797f0;
+    font-weight: 600;
 }
 
 /* Chat Window */
