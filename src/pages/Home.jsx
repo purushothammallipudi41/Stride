@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
 import Topbar from '../components/layout/Topbar';
-import FriendsActivity from '../components/social/FriendsActivity';
 import './Home.css';
 
 const Home = () => {
@@ -38,21 +37,14 @@ const Home = () => {
                         <Feed type={feedType} />
                     </section>
                 </div>
-
-                {/* Right Column: Social Activity */}
-                <aside className="side-column">
-                    <FriendsActivity />
-                </aside>
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .home-page-v2 { max-width: 1200px; margin: 0 auto; padding: 20px; }
-                .home-layout { display: flex; gap: 32px; }
+                .home-page-v2 { max-width: 800px; margin: 0 auto; padding: 20px; }
+                .home-layout { display: flex; justify-content: center; }
                 .main-column { flex: 1; max-width: 630px; }
-                .side-column { width: 320px; display: flex; flex-direction: column; gap: 24px; }
                 
                 @media (max-width: 1000px) {
-                    .side-column { display: none; }
                     .home-page-v2 { padding: 0; }
                     .main-column { max-width: 100%; }
                 }

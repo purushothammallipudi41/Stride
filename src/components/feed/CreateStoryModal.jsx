@@ -14,6 +14,14 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
 
+    useEffect(() => {
+        if (isCameraActive && stream && videoRef.current) {
+            videoRef.current.srcObject = stream;
+        }
+    }, [isCameraActive, stream]);
+
+    if (!isOpen) return null;
+
     // Mock tracks from data.json context
     const mockTracks = [
         { id: 's1', title: 'Start Again', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&q=80' },
@@ -21,14 +29,6 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
         { id: 's4', title: 'Voltage', artist: 'Marcus Vibe', cover: 'https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=100&q=80' },
         { id: 's3', title: 'Midnight Horizons', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=60' }
     ];
-
-    if (!isOpen) return null;
-
-    useEffect(() => {
-        if (isCameraActive && stream && videoRef.current) {
-            videoRef.current.srcObject = stream;
-        }
-    }, [isCameraActive, stream]);
 
     const startCamera = async () => {
         try {
