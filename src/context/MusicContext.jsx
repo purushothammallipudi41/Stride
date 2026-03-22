@@ -142,26 +142,7 @@ export const MusicProvider = ({ children }) => {
     }, []);
 
     const initAnalyzer = useCallback(() => {
-        if (analyzerRef.current) return analyzerRef.current;
-        
-        try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const ctx = new AudioContext();
-            const analyzer = ctx.createAnalyser();
-            const source = ctx.createMediaElementSource(audioRef.current);
-            
-            source.connect(analyzer);
-            analyzer.connect(ctx.destination);
-            
-            analyzer.fftSize = 256;
-            
-            audioContextRef.current = ctx;
-            analyzerRef.current = analyzer;
-            return analyzer;
-        } catch (e) {
-            console.error("Failed to init analyzer", e);
-            return null;
-        }
+        return null;
     }, []);
 
     const togglePlay = useCallback(() => {
@@ -189,7 +170,6 @@ export const MusicProvider = ({ children }) => {
 
     const playTrack = useCallback(async (track) => {
         // Init analyzer on first play if not already done
-        initAnalyzer();
         if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
         }
