@@ -129,7 +129,8 @@ const Notifications = () => {
                 )}
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default Notifications;

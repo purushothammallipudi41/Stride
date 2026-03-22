@@ -25,9 +25,10 @@ const formatTime = (seconds) => {
 const MusicPage = () => {
     const navigate = useNavigate();
     const { addNotification } = useUI();
-
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
     const { 
+        allSongs,
         currentTrack, 
         isPlaying, 
         togglePlay, 
@@ -39,9 +40,7 @@ const MusicPage = () => {
         setProgress,
         playlists,
         createPlaylist,
-        addToPlaylist,
-        isPublicSession,
-        togglePublicSession
+        addToPlaylist
     } = useMusic();
 
 
@@ -75,12 +74,11 @@ const MusicPage = () => {
         }
     };
 
+    const [isExpanded, setIsExpanded] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newPlaylistName, setNewPlaylistName] = useState('');
-    const [addingToPlaylist, setAddingToPlaylist] = useState(null); // track being added
-
-
+    const [addingToPlaylist, setAddingToPlaylist] = useState(null);
 
     useEffect(() => {
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/albums`)
@@ -142,7 +140,6 @@ const MusicPage = () => {
     };
 
     const handleCreatePlaylist = async () => {
-
         if (!newPlaylistName) return;
         await createPlaylist({ name: newPlaylistName, tracks: [] });
         setNewPlaylistName('');
@@ -150,12 +147,29 @@ const MusicPage = () => {
         addNotification({ title: 'Playlist Created', message: `"${newPlaylistName}" is ready for vibes.`, type: 'success' });
     };
 
+    const Scrubber = ({ isLarge }) => (
+        <div 
+            className={`scrubber-container ${isLarge ? 'large' : ''}`}
+            onClick={(e) => {
+                e.stopPropagation();
+                if (!currentTrack?.duration) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = x / rect.width;
+                setProgress(percentage * currentTrack.duration);
+            }}
+        >
+            <div 
+                className="scrubber-fill" 
+                style={{ width: `${(progress / (currentTrack?.duration || 1)) * 100}%` }}
+            />
+        </div>
+    );
 
     return (
-        <div className="music-page" style={{ paddingBottom: '80px' }}>
+        <div className="music-page" style={{ paddingBottom: '140px' }}>
             <PageHeader title="Music" />
             
-            {/* ── Search Bar ── */}
             <div className="music-search-container">
                 <input 
                     type="text" 
@@ -167,7 +181,6 @@ const MusicPage = () => {
                 {isSearching && <div className="search-spinner">Searching...</div>}
             </div>
 
-            {/* ── Search Results ── */}
             {searchResults.length > 0 && (
                 <section className="music-section search-results">
                     <h3>Search Results</h3>
@@ -190,67 +203,78 @@ const MusicPage = () => {
                                     <Plus size={16} />
                                 </button>
                             </div>
-
                         ))}
                     </div>
                 </section>
             )}
 
-            {/* ── Hero Now-Playing ── */}
-            <div className="now-playing-hero">
-                {currentTrack?.cover ? (
-                    <img className="hero-cover" src={currentTrack.cover} alt={currentTrack.title} />
-                ) : (
-                    <div className="hero-cover-placeholder" />
-                )}
-                <div className="hero-info">
-                    <div className="hero-header-row">
-                        <p className="hero-label">Now Playing</p>
-                        <button 
-                            className={`broadcast-toggle ${isPublicSession ? 'active' : ''}`}
-                            onClick={togglePublicSession}
-                            title={isPublicSession ? "Broadcast Live" : "Private Session"}
-                        >
-                            <span className="dot" />
-                            {isPublicSession ? 'LIVE' : 'PRIVATE'}
-                        </button>
-                    </div>
-                    <h2 className="hero-title">{currentTrack?.title ?? 'No track selected'}</h2>
-
-                    <p className="hero-artist">{currentTrack?.artist ?? '—'}</p>
-                    
-                    <div className="hero-progress-container">
-                        <span className="time">{formatTime(progress)}</span>
-                        <div 
-                            className="hero-progress-bar" 
-                            onClick={(e) => {
-                                if (!currentTrack?.duration) return;
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                const x = e.clientX - rect.left;
-                                const percentage = x / rect.width;
-                                setProgress(percentage * currentTrack.duration);
-                            }}
-                        >
-                            <div 
-                                className="hero-progress-fill" 
-                                style={{ width: `${(progress / (currentTrack?.duration || 1)) * 100}%` }}
-                            ></div>
+            {/* Spotify-style MiniPlayer */}
+            {currentTrack && (
+                <div className={`spotify-mini-player ${isExpanded ? 'hidden' : ''}`} onClick={() => setIsExpanded(true)}>
+                    <Scrubber />
+                    <div className="mini-player-content">
+                        <img src={currentTrack.cover || '/default-track.png'} alt="" className="mini-cover" />
+                        <div className="mini-info">
+                            <span className="mini-title">{currentTrack.title}</span>
+                            <span className="mini-artist">{currentTrack.artist}</span>
                         </div>
-                        <span className="time">{formatTime(currentTrack?.duration)}</span>
+                        <div className="mini-controls" onClick={e => e.stopPropagation()}>
+                            <button className="mini-play-btn" onClick={togglePlay}>
+                                {isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Spotify-style Expanded Model */}
+            <div className={`spotify-expanded-modal ${isExpanded ? 'active' : ''}`}>
+                <div className="modal-bg-gradient" style={{ backgroundImage: `url(${currentTrack?.cover})` }} />
+                <div className="modal-header">
+                    <button className="close-btn" onClick={() => setIsExpanded(false)}>
+                        <Music size={20} />
+                    </button>
+                    <div className="modal-header-info">
+                        <span className="header-label">PLAYING FROM ALBUM</span>
+                        <span className="header-name">{currentTrack?.title || 'Unknown'}</span>
+                    </div>
+                </div>
+
+                <div className="modal-body">
+                    <div className="expanded-cover-container">
+                        <img src={currentTrack?.cover} alt="" className="expanded-cover shadow-2xl" />
                     </div>
 
-                    <div className="hero-controls">
-                        <button className="control-btn" onClick={prevTrack}><SkipBack size={24} /></button>
-                        <button className={`hero-play-btn ${isPlaying ? 'playing' : ''}`} onClick={togglePlay}>
-                            {isPlaying
-                                ? <Pause size={28} fill="black" />
-                                : <Play size={28} fill="black" style={{ marginLeft: 4 }} />}
-                        </button>
-                        <button className="control-btn" onClick={nextTrack}><SkipForward size={24} /></button>
-                    </div>
-                    
-                    <div className="hero-visualizer-container">
-                        <Visualizer analyzer={analyzer} isPlaying={isPlaying} />
+                    <div className="expanded-info">
+                        <div className="title-row">
+                            <div>
+                                <h1 className="expanded-title">{currentTrack?.title}</h1>
+                                <p className="expanded-artist">{currentTrack?.artist}</p>
+                            </div>
+                            <button className="heart-btn"><Plus size={24} /></button>
+                        </div>
+
+                        <div className="expanded-progress-section">
+                            <Scrubber isLarge />
+                            <div className="time-row">
+                                <span>{formatTime(progress)}</span>
+                                <span>{formatTime(currentTrack?.duration)}</span>
+                            </div>
+                        </div>
+
+                        <div className="expanded-controls">
+                            <button className="secondary-ctrl"><Music size={20} /></button>
+                            <button className="main-ctrl" onClick={prevTrack}><SkipBack size={32} fill="currentColor" /></button>
+                            <button className="play-ctrl" onClick={togglePlay}>
+                                {isPlaying ? <Pause size={48} fill="black" /> : <Play size={48} fill="black" style={{ marginLeft: 4 }} />}
+                            </button>
+                            <button className="main-ctrl" onClick={nextTrack}><SkipForward size={32} fill="currentColor" /></button>
+                            <button className="secondary-ctrl"><Share2 size={20} /></button>
+                        </div>
+
+                        <div className="modal-visualizer">
+                            <Visualizer analyzer={analyzer} isPlaying={isPlaying} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -279,6 +303,44 @@ const MusicPage = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* ── Trending on Audius ── */}
+            <section className="music-section">
+                <h3>Trending on Audius</h3>
+                <div className="songs-list">
+                    {allSongs.slice(0, 10).map((song, idx) => {
+                        const isActive = currentTrack?.id === song.id;
+                        return (
+                            <div
+                                key={song.id}
+                                className={`song-row${isActive ? ' active' : ''}`}
+                                onClick={() => handlePlaySong(song)}
+                            >
+                                <span className="song-num">
+                                    {isActive && isPlaying
+                                        ? <Music size={14} />
+                                        : idx + 1}
+                                </span>
+                                <img className="song-cover" src={song.cover || '/default-track.png'} alt={song.title} />
+                                <div className="song-info">
+                                    <span className="song-title">{song.title}</span>
+                                    <span className="song-artist">{song.artist}</span>
+                                </div>
+                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
+                                    <Share2 size={16} />
+                                </button>
+                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
+                                    <Plus size={16} />
+                                </button>
+                                <span className="song-duration">{formatTime(song.duration)}</span>
+                            </div>
+                        );
+                    })}
+                    {allSongs.length === 0 && (
+                        <div className="loading-inline">Discovering vibes on Audius...</div>
+                    )}
                 </div>
             </section>
 

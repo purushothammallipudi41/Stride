@@ -3,157 +3,242 @@
     animation: fadeIn 0.8s ease-out;
 }
 
-/* ── Hero Now-Playing Card ── */
-.now-playing-hero {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    background: var(--color-surface);
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    backdrop-filter: blur(var(--glass-blur));
-    border: var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    margin-bottom: 48px;
-    box-shadow: var(--shadow-premium);
-    position: relative;
+/* ── Spotify Mini Player ── */
+.spotify-mini-player {
+    position: fixed;
+    bottom: 80px;
+    left: 8px;
+    right: 8px;
+    height: 56px;
+    background: rgba(25, 25, 25, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
     overflow: hidden;
-}
-
-.now-playing-hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, var(--color-primary-glow), transparent 60%);
-    pointer-events: none;
-}
-
-.hero-cover {
-    width: 140px;
-    height: 140px;
-    border-radius: var(--radius-lg);
-    object-fit: cover;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1;
-}
-
-.hero-cover-placeholder {
-    width: 140px;
-    height: 140px;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-    z-index: 1;
-}
-
-.hero-info {
-    flex: 1;
-    z-index: 1;
-}
-
-.hero-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--color-primary);
-    font-weight: 800;
-    margin-bottom: 8px;
-    font-family: var(--font-header);
-}
-
-.hero-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    font-family: var(--font-header);
-    margin-bottom: 4px;
-    letter-spacing: -0.02em;
-}
-
-.hero-artist {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    margin-bottom: 24px;
-}
-
-/* Progress Bar */
-.hero-progress-container {
+    z-index: 1000;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    max-width: 500px;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
 }
 
-.hero-progress-bar {
-    flex: 1;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-full);
+.spotify-mini-player.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+}
+
+.scrubber-container {
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
 }
 
-.hero-progress-fill {
+.scrubber-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-    box-shadow: 0 0 10px var(--color-primary-glow);
+    background: #fff;
     transition: width 0.1s linear;
 }
 
-.time {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    font-family: var(--font-body);
-    min-width: 40px;
-}
-
-/* Controls */
-.hero-controls {
+.mini-player-content {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 32px;
+    padding: 0 12px;
+    gap: 12px;
 }
 
-.control-btn {
+.mini-cover {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.mini-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mini-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-artist {
+    font-size: 0.75rem;
     color: var(--color-text-secondary);
-    transition: all 0.2s ease;
+}
+
+.mini-play-btn {
+    background: transparent;
+    border: none;
+    color: white;
     cursor: pointer;
 }
 
-.control-btn:hover {
-    color: #fff;
-    transform: scale(1.1);
+/* ── Spotify Expanded Modal ── */
+.spotify-expanded-modal {
+    position: fixed;
+    inset: 0;
+    background: #121212;
+    z-index: 9999;
+    padding: 16px 24px 48px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.3, 0, 0, 1);
 }
 
-.hero-play-btn {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: #fff;
-    color: #000;
+.spotify-expanded-modal.active {
+    transform: translateY(0);
+}
+
+.modal-bg-gradient {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) brightness(0.4);
+    opacity: 0.6;
+    z-index: -1;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.modal-header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.header-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.6);
+}
+
+.header-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 8px;
+}
+
+.modal-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 40px;
+}
+
+.expanded-cover-container {
+    width: 100%;
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
 }
 
-.hero-play-btn:hover {
-    transform: scale(1.1) translateY(-2px);
-    box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+.expanded-cover {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 8px;
+    box-shadow: 0 12px 64px rgba(0,0,0,0.8);
 }
 
-.hero-visualizer-container {
-    position: absolute;
-    bottom: 32px;
-    right: 32px;
-    width: 200px;
-    height: 60px;
-    opacity: 0.8;
+.expanded-info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expanded-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.expanded-artist {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.heart-btn {
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+.expanded-progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.scrubber-container.large {
+    height: 4px;
+    border-radius: 2px;
+}
+
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.expanded-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+}
+
+.main-ctrl, .secondary-ctrl {
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+.play-ctrl {
+    width: 72px;
+    height: 72px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.modal-visualizer {
+    height: 40px;
+    opacity: 0.4;
+    margin-top: 20px;
 }
 
 /* ── Section ── */
