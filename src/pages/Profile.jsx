@@ -96,10 +96,11 @@ const Profile = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
     const [selectedFrame, setSelectedFrame] = useState('gold');
-    const [editData, setEditData] = useState({ name: '', bio: '', avatar: '', banner: '', accentColor: '' });
+    const [editData, setEditData] = useState({ username: '', name: '', bio: '', avatar: '', banner: '', accentColor: '' });
 
     const openEditModal = useCallback(() => {
         setEditData({ 
+            username: user.username,
             name: user.name || '', 
             bio: user.bio || '', 
             avatar: user.avatar || '', 
