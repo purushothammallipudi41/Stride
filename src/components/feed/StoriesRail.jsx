@@ -41,7 +41,7 @@ const StoriesRail = () => {
         setIsCreateModalOpen(true);
     };
 
-    const handleConfirmUpload = async (contentUrl) => {
+    const handleConfirmUpload = async (contentUrl, musicTrack) => {
         if (username === 'guest') return;
 
         setIsUploading(true);
@@ -51,7 +51,8 @@ const StoriesRail = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username,
-                    contentUrl
+                    contentUrl,
+                    musicTrack
                 })
             });
             if (response.ok) {
@@ -93,6 +94,7 @@ const StoriesRail = () => {
             ))}
 
             <CreateStoryModal 
+                key={isCreateModalOpen}
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onConfirm={handleConfirmUpload}

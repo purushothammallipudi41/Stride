@@ -170,6 +170,139 @@
     background: linear-gradient(135deg, var(--theme-accent), #7928ca);
 }
 
+.music-sticker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    min-width: 180px;
+    border: 1px solid var(--theme-accent);
+}
+
+.sticker-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.sticker-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.sticker-title {
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.sticker-artist {
+    color: #6b7280;
+    font-size: 0.75rem;
+}
+
+.remove-sticker {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.music-picker-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    height: 60%;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.music-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.music-picker-header h3 {
+    color: #1f2937;
+    margin: 0;
+}
+
+.close-picker {
+    background: #f3f4f6;
+    border: none;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.tracks-list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.track-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.track-item:hover {
+    background: #f9fafb;
+}
+
+.track-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.track-details {
+    flex: 1;
+}
+
+.track-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.artist-name {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
 .webcam-preview {
     width: 100%;
     height: 100%;
@@ -193,11 +326,12 @@
 }
 
 .empty-preview-placeholder {
+    width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .placeholder-content {

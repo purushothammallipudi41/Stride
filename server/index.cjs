@@ -343,7 +343,7 @@ app.get('/api/stories', async (req, res) => {
 
 app.post('/api/stories', async (req, res) => {
     try {
-        const { username, contentUrl } = req.body;
+        const { username, contentUrl, musicTrack } = req.body;
         const user = await User.findOne({ username });
         
         const newStory = {
@@ -351,6 +351,7 @@ app.post('/api/stories', async (req, res) => {
             username,
             avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${username}`,
             contentUrl: contentUrl || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
+            musicTrack: musicTrack || null,
             createdAt: new Date()
         };
         

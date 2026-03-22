@@ -6,11 +6,21 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [textMode, setTextMode] = useState(false);
     const [isCameraActive, setIsCameraActive] = useState(false);
+    const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
+    const [selectedTrack, setSelectedTrack] = useState(null);
     const [stream, setStream] = useState(null);
     const cameraInputRef = useRef(null);
     const galleryInputRef = useRef(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+
+    // Mock tracks from data.json context
+    const mockTracks = [
+        { id: 's1', title: 'Start Again', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&q=80' },
+        { id: 's2', title: 'City Lights', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&q=80' },
+        { id: 's4', title: 'Voltage', artist: 'Marcus Vibe', cover: 'https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=100&q=80' },
+        { id: 's3', title: 'Midnight Horizons', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=60' }
+    ];
 
     if (!isOpen) return null;
 
@@ -87,8 +97,20 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
     };
 
     const handleTextMode = () => {
+        stopCamera();
+        setIsMusicPickerOpen(false);
         setTextMode(!textMode);
-        if (!textMode) setPreviewImage(null);
+        setPreviewImage(null);
+    };
+
+    const handleMusicClick = () => {
+        setIsMusicPickerOpen(true);
+        stopCamera();
+    };
+
+    const selectTrack = (track) => {
+        setSelectedTrack(track);
+        setIsMusicPickerOpen(false);
     };
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -99,7 +121,13 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                 <div className="story-top-actions">
                     <button className="icon-btn-round" onClick={handleClose}><X size={24} /></button>
                     <div className="top-tools">
-                        <button className="icon-btn-round" onClick={() => alert('Music feature coming soon!')}><Music size={20} /></button>
+                        <button 
+                            className="icon-btn-round" 
+                            onClick={handleMusicClick}
+                            style={{ color: selectedTrack ? 'var(--theme-accent)' : 'white' }}
+                        >
+                            <Music size={20} />
+                        </button>
                         <button className="icon-btn-round" onClick={handleTextMode} style={{ color: textMode ? 'var(--theme-accent)' : 'white' }}><Type size={20} /></button>
                     </div>
                 </div>
@@ -121,11 +149,23 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                     
                     <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-                    {previewImage ? (
+                    {selectedTrack && (
+                        <div className="music-sticker">
+                            <img src={selectedTrack.cover} alt="Cover" className="sticker-cover" />
+                            <div className="sticker-info">
+                                <span className="sticker-title">{selectedTrack.title}</span>
+                                <span className="sticker-artist">{selectedTrack.artist}</span>
+                            </div>
+                            <button className="remove-sticker" onClick={() => setSelectedTrack(null)}><X size={14} /></button>
+                        </div>
+                    )}
+
+                    {previewImage && previewImage.startsWith('data:image') ? (
                         <img 
                             src={previewImage} 
                             alt="Story Preview" 
                             className="full-preview-img animate-scale-in"
+                            onError={() => setPreviewImage(null)}
                         />
                     ) : (
                         !isCameraActive && (
@@ -168,13 +208,34 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                     </div>
                     <button 
                         className="instagram-share-btn text-gradient-bg" 
-                        onClick={() => onConfirm(previewImage)}
+                        onClick={() => onConfirm(previewImage, selectedTrack)}
                         disabled={isUploading || (!previewImage && !textMode)}
                     >
                         {isUploading ? "Sharing..." : "Share to Story"}
                         <Send size={18} />
                     </button>
                 </div>
+
+                {isMusicPickerOpen && (
+                    <div className="music-picker-overlay animate-slide-up">
+                        <div className="music-picker-header">
+                            <h3>Choose Music</h3>
+                            <button className="close-picker" onClick={() => setIsMusicPickerOpen(false)}><X size={20} /></button>
+                        </div>
+                        <div className="tracks-list">
+                            {mockTracks.map(track => (
+                                <div key={track.id} className="track-item" onClick={() => selectTrack(track)}>
+                                    <img src={track.cover} alt="Cover" />
+                                    <div className="track-details">
+                                        <div className="track-name">{track.title}</div>
+                                        <div className="artist-name">{track.artist}</div>
+                                    </div>
+                                    <Music size={16} className="opacity-40" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
