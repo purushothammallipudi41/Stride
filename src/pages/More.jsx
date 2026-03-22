@@ -13,18 +13,17 @@ const More = () => {
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
     const menuItems = [
-        { icon: Compass, title: 'Discover', desc: 'Discover new artists and trends', path: '/explore', color: '#8b5cf6' },
-        { icon: Layout, title: 'Artist Dashboard', desc: 'Manage your music and career', path: '/artist-dashboard', color: '#10b981' },
-        { icon: Plus, title: 'Create Post', desc: 'Share your latest beats or thoughts', action: 'create', color: '#f59e0b' },
-        { icon: Globe, title: 'Communities', desc: 'Join groups of like-minded fans', path: '/communities/discover', color: '#ec4899' },
-        { icon: BookOpen, title: 'Articles', desc: 'Read the latest music news', path: '/articles', color: '#10b981' },
-        { icon: Film, title: 'Reels', desc: 'Watch short-form video content', path: '/reels', color: '#f59e0b' },
-        { icon: Music2, title: 'Music', desc: 'Listen to your personalized feed', path: '/music', color: '#3b82f6' },
-        { icon: Hash, title: 'Servers', desc: 'Jump into live audio spaces', path: '/servers', color: '#6366f1' },
+        { icon: Layout, title: 'Artist Dashboard', desc: 'Central hub for music management', path: '/artist-dashboard', color: '#10b981', gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
+        { icon: Globe, title: 'Communities', desc: 'Connect with like-minded fans', path: '/communities/discover', color: '#ec4899', gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' },
+        { icon: BookOpen, title: 'Articles', desc: 'Latest news and industry insights', path: '/articles', color: '#10b981', gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
+        { icon: Film, title: 'Reels', desc: 'Short-form immersive video', path: '/reels', color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
+        { icon: Music2, title: 'Music', desc: 'Your personalized soundscape', path: '/music', color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' },
+        { icon: Hash, title: 'Servers', desc: 'Live audio rooms and chat', path: '/servers', color: '#6366f1', gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' },
+        { icon: Settings, title: 'Settings', desc: 'Tailor your Stride experience', path: '/settings', color: '#a855f7', gradient: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)' },
         { icon: Settings, title: 'Settings', desc: 'Manage your app preferences', path: '/settings', color: '#a855f7' },
         isAuthenticated ? 
-        { icon: LogOut, title: 'Logout', desc: 'Sign out of your account', action: 'logout', color: '#ef4444' } :
-        { icon: LogIn, title: 'Login', desc: 'Sign in to your account', path: '/login', color: '#8b5cf6' }
+        { icon: LogOut, title: 'Logout', desc: 'Securely exit your session', action: 'logout', color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' } :
+        { icon: LogIn, title: 'Login', desc: 'Access your global profile', path: '/login', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }
     ];
 
     const handleItemClick = (item) => {
@@ -62,23 +61,29 @@ const More = () => {
                     </div>
                 )}
                 <div className="more-grid">
-
-                {menuItems.map((item, index) => (
-                    <div 
-                        key={index} 
-                        className="more-card glass-card"
-                        onClick={() => handleItemClick(item)}
-                    >
-                        <div className="more-icon-wrapper" style={{ '--icon-color': item.color }}>
-                            <item.icon size={32} />
+                    {menuItems.map((item, index) => (
+                        <div 
+                            key={index} 
+                            className="more-card-premium"
+                            onClick={() => handleItemClick(item)}
+                            style={{ '--accent-color': item.color, '--item-gradient': item.gradient }}
+                        >
+                            <div className="card-glow"></div>
+                            <div className="card-content">
+                                <div className="more-icon-wrapper-premium">
+                                    <item.icon size={32} />
+                                </div>
+                                <div className="more-info-premium">
+                                    <h3>{item.title}</h3>
+                                    <p>{item.desc}</p>
+                                </div>
+                            </div>
+                            <div className="card-arrow">
+                                <Plus size={20} style={{ transform: 'rotate(45deg)' }} />
+                            </div>
                         </div>
-                        <div className="more-info">
-                            <h3>{item.title}</h3>
-                            <p>{item.desc}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
             </div>
         </>
     );
