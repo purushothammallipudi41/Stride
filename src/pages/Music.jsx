@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Play, Pause, Music, SkipBack, SkipForward, Share2, Plus, DollarSign, Award } from 'lucide-react';
 
 
@@ -39,7 +39,6 @@ const ImageWithFallback = ({ src, alt, className, fallback = '/default-track.png
 const MusicPage = () => {
     const navigate = useNavigate();
     const { addNotification } = useUI();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const { 
         allSongs,
