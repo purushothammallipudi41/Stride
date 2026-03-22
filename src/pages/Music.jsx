@@ -293,32 +293,6 @@ const MusicPage = () => {
                 </div>
             </div>
 
-            {/* ── Albums ── */}
-            <section className="music-section">
-                <h3>Albums</h3>
-                <div className="albums-grid">
-                    {albums.map(album => (
-                        <div
-                            key={album.id}
-                            className="album-card"
-                            onClick={() => handlePlayAlbum(album)}
-                        >
-                            <div className="album-thumb">
-                                <ImageWithFallback src={album.cover} alt={album.title} />
-                                <div className="album-thumb-overlay">
-                                    <div className="album-play-icon">
-                                        <Play size={20} fill="white" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="album-meta">
-                                <span className="album-name">{album.title}</span>
-                                <span className="album-artist">{album.artist}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
 
             {/* ── Trending on Audius ── */}
             <section className="music-section">
@@ -398,53 +372,6 @@ const MusicPage = () => {
                 </div>
             </section>
 
-            {/* ── All Songs ── */}
-            <section className="music-section">
-                <h3>All Songs</h3>
-                <div className="songs-list">
-                    {albums.flatMap(al => al.songs || []).map((song, idx) => {
-                        const isActive = currentTrack?.id === song.id;
-                        return (
-                            <div
-                                key={song.id}
-                                className={`song-row${isActive ? ' active' : ''}`}
-                                onClick={() => handlePlaySong(song)}
-                            >
-                                <span className="song-num">
-                                    {isActive && isPlaying
-                                        ? <Music size={14} />
-                                        : idx + 1}
-                                </span>
-                                <ImageWithFallback 
-                                    src={song.cover || albums.find(a => a.id === song.albumId)?.cover} 
-                                    className="song-cover" 
-                                    alt={song.title} 
-                                />
-                                <div className="song-info">
-                                    <span className="song-title">{song.title}</span>
-                                    <span className="song-artist">{song.artist}</span>
-                                </div>
-                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
-                                    <Share2 size={16} />
-                                </button>
-                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
-                                    <Plus size={16} />
-                                </button>
-                                <button className="song-tip-btn" onClick={(e) => handleTip(e, song)} title="Tip Artist">
-                                    <DollarSign size={14} />
-                                </button>
-                                <button className="song-collect-btn" onClick={(e) => { e.stopPropagation(); addNotification({ title: 'Collected!', message: `You've added this digital collectible to your safe.`, type: 'success' }); }} title="Collect Track">
-                                    <Award size={14} />
-                                </button>
-
-
-                                <span className="song-duration">{formatTime(song.duration)}</span>
-                            </div>
-
-                        );
-                    })}
-                </div>
-            </section>
 
             {/* ── Create Playlist Modal ── */}
             {showCreateModal && (
