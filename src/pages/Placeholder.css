@@ -1,0 +1,23 @@
+.placeholder-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+    color: white;
+}
+
+.placeholder-page h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.placeholder-page p {
+    color: #808080;
+    font-size: 1.1rem;
+}

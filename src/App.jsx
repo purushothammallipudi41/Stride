@@ -25,6 +25,9 @@ import Servers from './pages/Servers';
 import ServerView from './pages/ServerView';
 import PlaylistView from './pages/PlaylistView';
 import Articles from './pages/Articles';
+import Achievements from './pages/Achievements';
+import Insights from './pages/Insights';
+import Marketplace from './pages/Marketplace';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -76,6 +79,9 @@ const AppContent = () => {
           <Route path="/community/:communityId" element={<ServerView />} />
           <Route path="/playlist/:id" element={<PlaylistView />} />
           <Route path="/articles" element={<Articles />} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/marketplace" element={<Marketplace />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
