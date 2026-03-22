@@ -83,17 +83,8 @@ const Notifications = () => {
                 <h1 className="notifications-title">Notifications</h1>
             </header>
 
-            <div className="follow-requests-section" onClick={() => navigate('/follow-requests')}>
-                <Avatar src={notifications[0]?.fromAvatar || '/default-avatar.png'} size={44} />
-                <div className="follow-requests-content">
-                    <span className="follow-requests-title">Follow requests</span>
-                    <span className="follow-requests-sub">manikantaaconstructions and others</span>
-                </div>
-                <div className="new-indicator-dot" />
-                <ChevronRight size={20} color="var(--color-text-secondary)" />
-            </div>
-
-            <div className="caught-up-section">
+            <div className="notifications-content" style={{ paddingTop: '60px' }}>
+                <div className="caught-up-section">
                 <div className="caught-up-icon">
                     <Check size={32} strokeWidth={3} />
                 </div>
