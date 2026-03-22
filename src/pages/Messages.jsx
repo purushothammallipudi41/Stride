@@ -10,6 +10,8 @@ const Messages = () => {
     const [chats, setChats] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { resetMessages } = useUI();
+    const [activeChatId, setActiveChatId] = useState(null);
+    const [typingUsers, setTypingUsers] = useState(new Set());
 
     useEffect(() => {
         resetMessages();
@@ -28,8 +30,6 @@ const Messages = () => {
             });
     }, []);
 
-    const [activeChatId, setActiveChatId] = useState(null);
-    const [typingUsers, setTypingUsers] = useState(new Set());
     const activeChat = chats.find(c => c.id === activeChatId);
 
     useEffect(() => {
@@ -40,9 +40,10 @@ const Messages = () => {
         const handleNewMessage = (msg) => {
             setChats(prevChats => prevChats.map(chat => {
                 if (chat.id === activeChatId) {
+                    const isMe = msg.username === userProfile.username;
                     return {
                         ...chat,
-                        messages: [...chat.messages, { ...msg, isMe: msg.username === userProfile.username }],
+                        messages: [...(chat.messages || []), { ...msg, isMe, id: Date.now() }],
                         lastMessage: msg.text || 'Sent an attachment',
                         time: 'Now'
                     };
@@ -65,39 +66,17 @@ const Messages = () => {
             });
         };
 
-        const handleSeen = ({ messageId, username: seenBy }) => {
-            if (seenBy === userProfile.username) return; // Ignore own seen events
-
-            setChats(prevChats => prevChats.map(chat => {
-                if (chat.id === activeChatId) {
-                    return {
-                        ...chat,
-                        messages: chat.messages.map(m => 
-                            (m.id === messageId || (!messageId && m.username === userProfile.username)) 
-                                ? { ...m, readStatus: true } 
-                                : m
-                        )
-                    };
-                }
-                return chat;
-            }));
-        };
-
         socket.on('new_private_message', handleNewMessage);
         socket.on('user_typing_start', handleTypingStart);
         socket.on('user_typing_stop', handleTypingStop);
-        socket.on('user_message_seen', handleSeen);
 
         return () => {
             socket.off('new_private_message', handleNewMessage);
             socket.off('user_typing_start', handleTypingStart);
             socket.off('user_typing_stop', handleTypingStop);
-            socket.off('user_message_seen', handleSeen);
         };
 
     }, [activeChatId, userProfile.username]);
-
-
 
     const handleSendMessage = (content, type = 'text') => {
         if (!activeChatId) return;
@@ -118,23 +97,43 @@ const Messages = () => {
     if (isLoading) return <div className="loading-screen">Intercepting waves...</div>;
 
     return (
-        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <PageHeader title="Direct Messages" />
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                <ChatList
-                    chats={chats}
-                    activeChatId={activeChatId}
-                    onSelectChat={(chat) => setActiveChatId(chat.id)}
-                    typingUsers={typingUsers}
-                />
-
-                <ChatWindow 
-                    activeChat={activeChat} 
-                    onSendMessage={handleSendMessage}
-                    roomId={`chat_${activeChatId}`}
-                    currentUser={userProfile.username}
-                />
+        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#000' }}>
+            <div className="desktop-only">
+                <PageHeader title="Direct Messages" />
             </div>
+            
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                <div className={`chat-list-wrapper ${activeChatId ? 'hidden-mobile' : ''}`} style={{ flex: activeChatId ? '0 0 350px' : '1' }}>
+                    <ChatList
+                        chats={chats}
+                        activeChatId={activeChatId}
+                        onSelectChat={(chat) => setActiveChatId(chat.id)}
+                        typingUsers={typingUsers}
+                        currentUser={userProfile.username}
+                    />
+                </div>
+
+                <div className={`chat-window-wrapper ${!activeChatId ? 'hidden-mobile' : ''}`} style={{ flex: 1 }}>
+                    <ChatWindow 
+                        activeChat={activeChat} 
+                        onSendMessage={handleSendMessage}
+                        roomId={`chat_${activeChatId}`}
+                        currentUser={userProfile.username}
+                        onBack={() => setActiveChatId(null)}
+                    />
+                </div>
+            </div>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    .hidden-mobile {
+                        display: none !important;
+                    }
+                    .desktop-only {
+                        display: none !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
