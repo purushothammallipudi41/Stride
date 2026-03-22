@@ -12,7 +12,7 @@ import Explore from './pages/Explore';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
-import More from './pages/More';
+
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -65,7 +65,7 @@ const AppContent = () => {
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" />} />
-          <Route path="/more" element={<More />} />
+
           <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
