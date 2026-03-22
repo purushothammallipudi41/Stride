@@ -45,7 +45,11 @@ export const MusicProvider = ({ children }) => {
         return saved ? JSON.parse(saved) : [];
     });
     
-    const audioRef = useRef(new Audio());
+    const audioRef = useRef(null);
+    if (typeof window !== 'undefined' && !audioRef.current) {
+        audioRef.current = new Audio();
+        audioRef.current.crossOrigin = "anonymous";
+    }
     const analyzerRef = useRef(null);
     const audioContextRef = useRef(null);
 
