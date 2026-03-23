@@ -55,16 +55,20 @@ const hydrateFromJSON = async () => {
         const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 
         if (data.servers) {
-            // Convert legacy servers to Communities
-            const communities = data.servers.map(s => ({
-                name: s.name,
-                description: s.description || `The official ${s.name} community.`,
-                owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(), // Default to first user
-                members: [],
-                memberCount: typeof s.members === 'number' ? s.members : 0,
-                avatar: s.icon || '🎧'
-            }));
-            await Community.insertMany(communities);
+            for (const s of data.servers) {
+                const exists = await Community.findOne({ name: s.name });
+                if (!exists) {
+                    console.log(`INFO: Creating missing community: ${s.name}`);
+                    await Community.create({
+                        name: s.name,
+                        description: s.description || `The official ${s.name} community.`,
+                        owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(),
+                        members: [],
+                        memberCount: typeof s.members === 'number' ? s.members : 0,
+                        avatar: s.icon || '🎧'
+                    });
+                }
+            }
         }
 
         if (data.users) {
