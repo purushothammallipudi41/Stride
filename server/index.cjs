@@ -62,7 +62,14 @@ const hydrateFromJSON = async () => {
                 
                 await Community.findOneAndUpdate(
                     { name: s.name },
-                    { $setOnInsert: communityData },
+                    { 
+                        $setOnInsert: { owner: communityData.owner, members: [] },
+                        $set: { 
+                            description: communityData.description,
+                            memberCount: communityData.memberCount,
+                            avatar: communityData.avatar
+                        } 
+                    },
                     { upsert: true, new: true }
                 );
             }
