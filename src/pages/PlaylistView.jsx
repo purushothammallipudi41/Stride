@@ -130,7 +130,7 @@ const PlaylistView = () => {
             )}
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .playlist-view { padding: 80px 40px; }
+                .playlist-view { padding: 0 40px 80px; }
                 .back-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--color-text-muted); cursor: pointer; margin-bottom: 32px; font-weight: 600; }
                 .back-btn:hover { color: white; }
                 

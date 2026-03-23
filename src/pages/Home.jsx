@@ -40,7 +40,7 @@ const Home = () => {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .home-page-v2 { max-width: 800px; margin: 0 auto; padding: 20px; }
+                .home-page-v2 { max-width: 800px; margin: 0 auto; padding: 0 16px 20px; }
                 .home-layout { display: flex; justify-content: center; }
                 .main-column { flex: 1; max-width: 630px; }
                 

@@ -182,6 +182,7 @@
         border-top: 1px solid rgba(255, 255, 255, 0.05);
         box-shadow: none;
         z-index: 1000;
+        overflow: visible; /* Allow buttons to protrude if needed */
     }
 
     @supports (backdrop-filter: blur(10px)) {
@@ -199,17 +200,18 @@
     .sidebar .create-btn {
         margin: 0;
         padding: 0;
-        width: 48px;
-        height: 48px;
+        width: 50px; /* Slightly larger/consistent */
+        height: 50px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%) !important;
-        box-shadow: 0 0 15px var(--color-primary-glow) !important;
+        box-shadow: 0 4px 15px var(--color-primary-glow) !important;
         flex-shrink: 0;
         border: none;
         color: white;
+        transform: translateY(-5px); /* Protrude slightly above the dock like premium apps */
     }
 
     .create-btn span {
@@ -226,12 +228,12 @@
         flex: 1;
         width: 100%;
         overflow-x: auto;
-        overflow-y: hidden;
+        overflow-y: visible; /* Prevent clipping of button and shadow */
         gap: 0;
         justify-content: space-evenly;
         align-items: center;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     .sidebar-nav::-webkit-scrollbar {
@@ -244,10 +246,13 @@
         min-width: 44px;
         height: 44px;
         justify-content: center;
-        border: none;
+        border: none !important;
+        background: transparent !important; /* Force transparent background */
+        box-shadow: none !important;
         margin: 0;
         flex-shrink: 0;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: var(--color-text-secondary);
     }
 
     .nav-item .nav-label {

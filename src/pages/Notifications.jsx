@@ -83,7 +83,7 @@ const Notifications = () => {
                 <h1 className="notifications-title">Notifications</h1>
             </header>
 
-            <div className="notifications-content" style={{ paddingTop: '60px' }}>
+            <div className="notifications-content">
                 <div className="caught-up-section">
                 <div className="caught-up-icon">
                     <Check size={32} strokeWidth={3} />

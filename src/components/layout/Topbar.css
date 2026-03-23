@@ -5,6 +5,8 @@
     justify-content: space-between;
     padding: 0 16px;
     background: var(--color-bg);
+    position: sticky;
+    top: 0;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }

@@ -1,15 +1,21 @@
 .communities-discover-container {
     min-height: 100vh;
-    padding: 24px;
+    padding: 0 24px 24px; /* No top padding */
     background: #0f0f1a;
     color: white;
 }
 
 .discover-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #0f0f1a;
     display: flex;
     gap: 16px;
-    align-items: flex-start;
-    margin-bottom: 32px;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .back-btn-icon {

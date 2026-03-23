@@ -76,7 +76,7 @@ const StoriesRail = () => {
                     <Avatar 
                         src={user.avatar} 
                         alt="Your Story" 
-                        size={56} 
+                        size={72} 
                         isVerified={user.isVerified}
                     />
                     
@@ -96,7 +96,7 @@ const StoriesRail = () => {
                         <Avatar 
                             src={story.avatar} 
                             alt={story.username} 
-                            size={56} 
+                            size={72} 
                             isVerified={story.isVerified}
                         />
                     </div>

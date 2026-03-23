@@ -4,23 +4,17 @@
     justify-content: space-between;
     padding: 12px 16px;
     background: var(--color-bg);
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     height: 60px;
     width: 100%;
 }
 
-/* Add slight glass blur for premium feel */
-@supports (backdrop-filter: blur(10px)) {
-    .mobile-page-header {
-        background: rgba(10, 10, 18, 0.85);
-        -webkit-backdrop-filter: blur(12px);
-        backdrop-filter: blur(12px);
-    }
+/* Solid background for stability */
+.mobile-page-header {
+    background: var(--color-bg);
 }
 
 .back-btn {

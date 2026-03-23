@@ -93,12 +93,12 @@ const Explore = () => {
     return (
         <div className="explore-container">
             <PageHeader title="Discover" />
-            <header className="explore-header-section">
+            <div className="explore-header-section sticky-search">
                 <div className="explore-search-wrapper">
                     <Search size={20} className="search-icon-abs" />
                     <input 
                         type="text" 
-                        placeholder="Search for posts, reels, or people..." 
+                        placeholder="Search..." 
                         value={searchQuery}
                         onChange={handleSearchInput}
                         onKeyDown={handleSearch}
@@ -109,7 +109,7 @@ const Explore = () => {
                         </button>
                     )}
                 </div>
-            </header>
+            </div>
 
             {isSearching || searchQuery ? (
                 <div className="search-results-area animate-fade-in">

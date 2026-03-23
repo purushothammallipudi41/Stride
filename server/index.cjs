@@ -104,15 +104,19 @@ let transporter;
 const createTransporter = async () => {
     // If we have real credentials, try them first
     if (process.env.EMAIL_PASS && process.env.EMAIL_USER) {
-        const port = parseInt(process.env.EMAIL_PORT || "465");
+        const port = parseInt(process.env.EMAIL_PORT || "587"); // Prefer 587 for Render/Cloud
         return nodemailer.createTransport({
             host: process.env.EMAIL_HOST || "smtp.gmail.com",
             port,
-            secure: port === 465,
+            secure: port === 465, // Only true for 465
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
-            }
+            },
+            connectionTimeout: 15000, // 15 seconds
+            greetingTimeout: 15000,   // 15 seconds
+            socketTimeout: 30000,     // 30 seconds
+            pool: true                // Reuse connections
         });
     }
     
@@ -163,9 +167,12 @@ const sendEmail = async (to, subject, html) => {
     let result = await attemptSend(readyTransporter);
 
     if (!result.success && !result.logOnly) {
-        console.error('CRITICAL: Error sending email:', result.error.message);
-        if (result.error.code === 'EAUTH') {
-            console.error('AUTH FAILURE: Gmail credentials failed. Retrying with fallback test account...');
+        const err = result.error;
+        console.error(`CRITICAL: Error sending email to ${to}:`, err.message);
+        console.error(`ERROR CODE: ${err.code}, SYSCALL: ${err.syscall}, COMMAND: ${err.command}`);
+        
+        if (err.code === 'EAUTH' || err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
+            console.error('SMTP FAILURE: Retrying with fallback test account...');
             try {
                 const testAccount = await nodemailer.createTestAccount();
                 const fallbackTransporter = nodemailer.createTransport({

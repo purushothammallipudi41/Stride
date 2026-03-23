@@ -11,7 +11,7 @@ const Sidebar = () => {
         { icon: Compass, label: 'Explore', path: '/explore' },
         { icon: Plus, label: 'Create', action: 'create' },
         { icon: User, label: 'Profile', path: '/profile' },
-        { icon: Menu, label: 'More', action: 'explore' },
+        { icon: Layout, label: 'More', action: 'explore' },
     ];
 
     return (
