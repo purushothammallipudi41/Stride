@@ -61,6 +61,7 @@ const hydrateFromJSON = async () => {
                 description: s.description || `The official ${s.name} community.`,
                 owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(), // Default to first user
                 members: [],
+                memberCount: typeof s.members === 'number' ? s.members : 0,
                 avatar: s.icon || '🎧'
             }));
             await Community.insertMany(communities);

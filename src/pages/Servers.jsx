@@ -71,7 +71,7 @@ const Servers = () => {
                             <h3>{server.name}</h3>
                             <div className="server-members">
                                 <Users size={14} />
-                                <span>{server.members} members</span>
+                                <span>{server.memberCount || server.members?.length || 0} members</span>
                             </div>
                             {latestActivity && (
                                 <div className="server-now-playing">

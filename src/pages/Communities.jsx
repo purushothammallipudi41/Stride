@@ -25,7 +25,7 @@ const Communities = () => {
         id: officialServer?._id || 'stride-official',
         name: officialServer?.name || 'Stride Official',
         description: officialServer?.description || 'A community on Stride',
-        members: officialServer?.members?.length || 0,
+        members: officialServer?.memberCount || officialServer?.members?.length || 0,
         category: 'Social',
         verified: true,
         image: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800&auto=format&fit=crop&q=60'
