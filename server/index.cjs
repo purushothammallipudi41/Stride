@@ -46,32 +46,32 @@ const connectDB = async () => {
 
 const hydrateFromJSON = async () => {
     try {
-        const userCount = await User.countDocuments();
-        const communityCount = await Community.countDocuments();
-        
-        if (userCount > 0 && communityCount > 0) return; // Both hydrated
-        
-        console.log('INFO: Database check: users=' + userCount + ', communities=' + communityCount + '. Hydrating missing data...');
+        console.log('INFO: Starting database hydration check...');
         const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 
+        // 1. Communities / Servers
         if (data.servers) {
             for (const s of data.servers) {
-                const exists = await Community.findOne({ name: s.name });
-                if (!exists) {
-                    console.log(`INFO: Creating missing community: ${s.name}`);
-                    await Community.create({
-                        name: s.name,
-                        description: s.description || `The official ${s.name} community.`,
-                        owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(),
-                        members: [],
-                        memberCount: typeof s.members === 'number' ? s.members : 0,
-                        avatar: s.icon || '🎧'
-                    });
-                }
+                const communityData = {
+                    name: s.name,
+                    description: s.description || `The official ${s.name} community.`,
+                    owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(),
+                    memberCount: typeof s.members === 'number' ? s.members : 0,
+                    avatar: s.icon || '🎧'
+                };
+                
+                await Community.findOneAndUpdate(
+                    { name: s.name },
+                    { $setOnInsert: communityData },
+                    { upsert: true, new: true }
+                );
             }
         }
 
-        if (data.users) {
+        // 2. Users (If empty)
+        const userCount = await User.countDocuments();
+        if (userCount === 0 && data.users) {
+            console.log('INFO: Hydrating users...');
             for (const u of Object.values(data.users)) {
                 const userData = { ...u, password: u.password || 'admin' };
                 if (typeof u.followers === 'number') {
@@ -86,7 +86,10 @@ const hydrateFromJSON = async () => {
             }
         }
 
-        if (data.feed) {
+        // 3. Feed/Posts (If empty)
+        const postCount = await Post.countDocuments();
+        if (postCount === 0 && data.feed) {
+            console.log('INFO: Hydrating feed...');
             for (const p of data.feed) {
                 const userObj = await User.findOne({ username: p.username });
                 const postData = { ...p, user: userObj ? userObj._id : null };
@@ -98,7 +101,7 @@ const hydrateFromJSON = async () => {
             }
         }
 
-        console.log('INFO: Data hydration complete.');
+        console.log('INFO: Data hydration check complete.');
     } catch (err) {
         console.error('ERROR: Data hydration failed:', err.message);
     }
