@@ -47,9 +47,11 @@ const connectDB = async () => {
 const hydrateFromJSON = async () => {
     try {
         const userCount = await User.countDocuments();
-        if (userCount > 0) return; // Already hydrated
-
-        console.log('INFO: Database is empty. Hydrating from data.json...');
+        const communityCount = await Community.countDocuments();
+        
+        if (userCount > 0 && communityCount > 0) return; // Both hydrated
+        
+        console.log('INFO: Database check: users=' + userCount + ', communities=' + communityCount + '. Hydrating missing data...');
         const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 
         if (data.servers) {
