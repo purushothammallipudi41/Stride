@@ -4,12 +4,16 @@
       "id": 1,
       "name": "Lo-Fi Lounge",
       "icon": "🎧",
-      "channels": [
-        "general",
-        "music-sharing",
-        "voice-chat"
-      ],
+      "channels": ["general", "music-sharing", "voice-chat"],
       "members": 120
+    },
+    {
+      "id": "stride-official",
+      "name": "Stride Official",
+      "icon": "🚀",
+      "description": "The official Stride community. Join the rhythm.",
+      "channels": ["announcements", "general", "jukebox-live"],
+      "members": 50000
     },
     {
       "id": 2,
