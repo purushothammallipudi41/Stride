@@ -62,7 +62,7 @@ const Servers = () => {
                     <div
                         key={server.id}
                         className="server-card glass-card"
-                        onClick={() => navigate(`/servers/${server.id}`)}
+                        onClick={() => navigate(`/community/${server._id}`)}
                     >
                         <div className="server-icon-large">
                             {server.icon}

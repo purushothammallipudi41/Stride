@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Search, Users, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useServer } from '../hooks/useServer';
 import './Communities.css';
 
 const Communities = () => {
     const navigate = useNavigate();
+    const { servers } = useServer();
     const [activeTab, setActiveTab] = useState('for-you');
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -16,13 +18,23 @@ const Communities = () => {
         { id: 'tech', label: 'Tech' },
     ];
 
+    // Try to find the real Stride Official community from the backend
+    const officialServer = servers.find(s => s.name === 'Stride Official') || servers[0];
+
     const featuredCommunity = {
-        name: 'Stride Official',
-        description: 'A community on Stride',
-        members: 0,
+        id: officialServer?._id || 'stride-official',
+        name: officialServer?.name || 'Stride Official',
+        description: officialServer?.description || 'A community on Stride',
+        members: officialServer?.members?.length || 0,
         category: 'Social',
         verified: true,
         image: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800&auto=format&fit=crop&q=60'
+    };
+
+    const handleOpenCommunity = () => {
+        if (featuredCommunity.id) {
+            navigate(`/community/${featuredCommunity.id}`);
+        }
     };
 
     return (
@@ -84,7 +96,7 @@ const Communities = () => {
                                 <span className="category-label">{featuredCommunity.category}</span>
                             </div>
                         </div>
-                        <button className="open-community-btn">Open</button>
+                        <button className="open-community-btn" onClick={handleOpenCommunity}>Open</button>
                     </div>
                 </div>
             </main>
