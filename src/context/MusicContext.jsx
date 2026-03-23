@@ -141,10 +141,6 @@ export const MusicProvider = ({ children }) => {
         fetchTracks();
     }, []);
 
-    const initAnalyzer = useCallback(() => {
-        return null;
-    }, []);
-
     const togglePlay = useCallback(() => {
         if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
@@ -247,7 +243,7 @@ export const MusicProvider = ({ children }) => {
             setIsPlaying(false);
             // Optionally try another node here in a real app
         }
-    }, [currentTrack, initAnalyzer, togglePlay, username, isPublicSession]);
+    }, [currentTrack, togglePlay, username, isPublicSession]);
 
 
     const nextTrack = useCallback(() => {

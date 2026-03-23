@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import VerificationBadge from '../common/VerificationBadge';
 import './PageHeader.css';
 
-const PageHeader = ({ title, rightElement }) => {
+const PageHeader = ({ title, isVerified, rightElement }) => {
     const navigate = useNavigate();
 
     return (
@@ -10,7 +11,10 @@ const PageHeader = ({ title, rightElement }) => {
             <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
                 <ChevronLeft className="icon-gradient" size={32} />
             </button>
-            <h1 className="mobile-page-title">{title}</h1>
+            <div className="header-title-container">
+                <h1 className="mobile-page-title">{title}</h1>
+                {isVerified && <VerificationBadge size={16} />}
+            </div>
             <div className="header-right-action">
                 {rightElement || <div style={{ width: 28 }} />}
             </div>

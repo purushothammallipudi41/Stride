@@ -30,7 +30,7 @@
 .reel-video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Prevent violent cropping on desktops */
+    object-fit: cover; /* Immersive HD experience */
     background: #000;
 }
 

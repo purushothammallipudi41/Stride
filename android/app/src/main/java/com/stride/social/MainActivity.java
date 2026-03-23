@@ -1,4 +1,4 @@
-package com.stride.app;
+package com.stride.social;
 
 import com.getcapacitor.BridgeActivity;
 

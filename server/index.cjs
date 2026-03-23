@@ -303,6 +303,7 @@ app.get('/api/profile/:username', async (req, res) => {
                 bio: "Just a music lover on Stride 🎵",
                 followers: 0,
                 following: 0,
+                isVerified: true,
                 avatar: `https://i.pravatar.cc/150?u=${username}`,
                 favorites: []
             });
@@ -322,7 +323,8 @@ app.get('/api/feed', async (req, res) => {
             const user = await User.findOne({ username: post.username });
             return {
                 ...post.toObject(),
-                avatarFrame: user ? user.avatarFrame : 'none'
+                avatarFrame: user ? user.avatarFrame : 'none',
+                isVerified: user ? user.isVerified : false
             };
         }));
         
@@ -376,7 +378,8 @@ app.get('/api/reels', async (req, res) => {
             const user = await User.findOne({ username: reel.username });
             return {
                 ...reel,
-                avatarFrame: user ? user.avatarFrame : 'none'
+                avatarFrame: user ? user.avatarFrame : 'none',
+                isVerified: user ? user.isVerified : false
             };
         }));
         
@@ -801,21 +804,22 @@ app.get('/api/messages', async (req, res) => {
         const chatsMap = new Map();
         
         for (const msg of messages) {
-            // Use a consistent key for the conversation
             const participants = [msg.sender, msg.receiver].sort();
             const chatId = participants.join('-');
             
             if (!chatsMap.has(chatId)) {
-                // Determine the "other" user to show in the chat list
-                // This is a simplification; in a real app, we'd know the current user
-                const otherUser = msg.receiver; // Placeholder logic
+                // In a real app, 'otherUser' is the participant who isn't 'me'
+                // For this demo, we'll just use the receiver if it's not the first participant
+                const otherUserUsername = msg.receiver; 
                 
                 chatsMap.set(chatId, {
                     id: chatId,
-                    username: otherUser,
+                    username: otherUserUsername,
                     messages: [],
                     lastMessage: '',
-                    time: ''
+                    time: '',
+                    avatar: null,
+                    isVerified: false
                 });
             }
             
@@ -824,8 +828,19 @@ app.get('/api/messages', async (req, res) => {
             chat.lastMessage = msg.text || 'Attachment';
             chat.time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
+
+        // Enhance with user details
+        const enrichedChats = await Promise.all(Array.from(chatsMap.values()).map(async (chat) => {
+            const user = await User.findOne({ username: chat.username });
+            return {
+                ...chat,
+                avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${chat.username}`,
+                isVerified: user ? user.isVerified : false,
+                avatarFrame: user ? user.avatarFrame : 'none'
+            };
+        }));
         
-        res.json(Array.from(chatsMap.values()));
+        res.json(enrichedChats);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

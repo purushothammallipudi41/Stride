@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { Heart, MessageCircle, ArrowUpRight, Bookmark, MoreHorizontal } from 'lucide-react';
 import Avatar from '../common/Avatar';
+import VerificationBadge from '../common/VerificationBadge';
 import socket from '../../services/socket';
 import './Post.css';
 
@@ -101,9 +102,11 @@ const Post = ({ post }) => {
                         size={32} 
                         className="post-avatar" 
                         frame={post.avatarFrame || 'none'}
+                        isVerified={post.isVerified}
                     />
-                    <div className="user-details">
+                    <div className="user-details" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span className="username">{post.username}</span>
+                        {post.isVerified && <VerificationBadge size={14} />}
                     </div>
                 </div>
                 <button className="more-btn">
@@ -113,12 +116,26 @@ const Post = ({ post }) => {
 
             <div className="post-media">
                 {!mediaError ? (
-                    <img 
-                        src={post.contentUrl} 
-                        alt="Post content" 
-                        loading="lazy" 
-                        onError={() => setMediaError(true)}
-                    />
+                    post.contentUrl?.endsWith('.mp4') ? (
+                        <video 
+                            src={post.contentUrl} 
+                            controls={false}
+                            autoPlay 
+                            muted 
+                            loop 
+                            playsInline
+                            className="post-video"
+                            style={{ width: '100%', borderRadius: '4px' }}
+                            onError={() => setMediaError(true)}
+                        />
+                    ) : (
+                        <img 
+                            src={post.contentUrl} 
+                            alt="Post content" 
+                            loading="lazy" 
+                            onError={() => setMediaError(true)}
+                        />
+                    )
                 ) : (
                     <div className="post-media-placeholder glass-panel" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                         <span style={{ color: 'var(--color-text-muted)' }}>Vibe unavailable</span>
@@ -152,7 +169,10 @@ const Post = ({ post }) => {
                 </div>
 
                 <div className="post-caption-area">
-                    <span className="caption-username">{post.username}</span>
+                    <div className="caption-header" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', verticalAlign: 'middle', marginRight: '6px' }}>
+                        <span className="caption-username" style={{ margin: 0 }}>{post.username}</span>
+                        {post.isVerified && <VerificationBadge size={12} />}
+                    </div>
                     <span className="caption-text">{post.caption || post.content}</span>
                 </div>
 

@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive files
+*.jks
+*.pem
+*.keystore
+.env
+.env.local
+node_modules/
+.DS_Store

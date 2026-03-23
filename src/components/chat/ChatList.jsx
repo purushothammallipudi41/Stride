@@ -3,6 +3,7 @@ import { ChevronDown, Edit, Camera, UserPlus, Check } from 'lucide-react';
 import Avatar from '../common/Avatar';
 import { useActivity } from '../../hooks/useActivity';
 import { useUI } from '../../hooks/useUI';
+import VerificationBadge from '../common/VerificationBadge';
 import './Chat.css';
 
 const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser }) => {
@@ -67,9 +68,13 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
                                 size={56} 
                                 frame={chat.avatarFrame || 'none'}
                                 isListening={isListening}
+                                isVerified={chat.isVerified}
                             />
                             <div className="chat-item-info">
-                                <span className="chat-item-name">{chat.username}</span>
+                                <div className="chat-item-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span className="chat-item-name">{chat.username}</span>
+                                    {chat.isVerified && <VerificationBadge size={14} />}
+                                </div>
                                 <span className="chat-item-status">
                                     {isTyping ? 'typing...' : chat.lastMessageStatus || `Sent ${chat.time || '10h ago'}`}
                                 </span>

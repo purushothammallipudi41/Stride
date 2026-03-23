@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Phone, Video, Image, ChevronLeft, Mic, Plus, Smile, Camera } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
+import VerificationBadge from '../common/VerificationBadge';
 import './Chat.css';
 
 const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) => {
@@ -59,7 +60,10 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) 
                         frame={activeChat.avatarFrame || 'none'}
                     />
                     <div className="chat-header-info">
-                        <span className="chat-header-name">{activeChat.name || activeChat.username}</span>
+                        <div className="chat-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className="chat-header-name" style={{ margin: 0 }}>{activeChat.name || activeChat.username}</span>
+                            {activeChat.isVerified && <VerificationBadge size={16} />}
+                        </div>
                         <span className="chat-header-sub">{activeChat.username}</span>
                     </div>
                 </div>

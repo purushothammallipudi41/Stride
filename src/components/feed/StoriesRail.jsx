@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import socket from '../../services/socket';
 import CreateStoryModal from './CreateStoryModal';
+import VerificationBadge from '../common/VerificationBadge';
+import Avatar from '../common/Avatar';
 import './StoriesRail.css';
 
 const StoriesRail = () => {
@@ -71,8 +73,12 @@ const StoriesRail = () => {
             {/* User's Add Story Button */}
             <div className="story-item" onClick={handleAddStory}>
                 <div className={`story-avatar-container ${hasStory ? 'has-story' : ''}`}>
-                    {/* Placeholder for user's actual avatar */}
-                    <div className="user-avatar-placeholder" />
+                    <Avatar 
+                        src={user.avatar} 
+                        alt="Your Story" 
+                        size={56} 
+                        isVerified={user.isVerified}
+                    />
                     
                     {!hasStory && (
                         <div className="add-story-badge">
@@ -87,9 +93,17 @@ const StoriesRail = () => {
             {friendStories.map(story => (
                 <div key={story.id} className="story-item" onClick={() => setActiveStory(story)}>
                     <div className="story-avatar-container has-story">
-                        <img src={story.avatar} alt={story.username} className="story-img" />
+                        <Avatar 
+                            src={story.avatar} 
+                            alt={story.username} 
+                            size={56} 
+                            isVerified={story.isVerified}
+                        />
                     </div>
-                    <span className="story-username">{story.username}</span>
+                    <div className="story-username-container" style={{ display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'center' }}>
+                        <span className="story-username" style={{ margin: 0 }}>{story.username}</span>
+                        {story.isVerified && <VerificationBadge size={10} />}
+                    </div>
                 </div>
             ))}
 
@@ -114,6 +128,7 @@ const StoriesRail = () => {
                         <div className="story-viewer-header">
                             <img src={activeStory.avatar} alt={activeStory.username} className="viewer-avatar" />
                             <span className="viewer-username">{activeStory.username}</span>
+                            {activeStory.isVerified && <VerificationBadge size={14} />}
                         </div>
                         <div className="story-viewer-media">
                             <img src={activeStory.contentUrl} alt="Story Content" />

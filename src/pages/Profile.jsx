@@ -6,6 +6,7 @@ import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
 import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
+import VerificationBadge from '../components/common/VerificationBadge';
 import './Profile.css';
 
 const Profile = () => {
@@ -191,7 +192,7 @@ const Profile = () => {
     return (
         <div className="ig-profile-container">
             {/* Top Header */}
-            <PageHeader title={user.username} />
+            <PageHeader title={user.username} isVerified={user.isVerified} />
 
             {/* Profile Info */}
             <div className="ig-profile-bio-block">
@@ -206,6 +207,7 @@ const Profile = () => {
                         size={80} 
                         className="ig-avatar-actual" 
                         frame={user?.avatarFrame || 'none'}
+                        isVerified={user?.isVerified}
                     />
                     <div className="ig-stats-row">
                         <div className="ig-stat">
@@ -224,7 +226,10 @@ const Profile = () => {
                 </div>
 
                 <div className="ig-bio-text-block">
-                    <h3 className="ig-bio-name">{user.name || user.username}</h3>
+                    <div className="ig-bio-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <h3 className="ig-bio-name">{user.name || user.username}</h3>
+                        {user.isVerified && <VerificationBadge size={18} />}
+                    </div>
                     <p className="ig-bio-desc">{user.bio}</p>
                 </div>
 

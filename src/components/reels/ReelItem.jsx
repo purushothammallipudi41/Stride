@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare, Share2, Music2, Volume2, VolumeX, Sparkles, Link2, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useMusic } from '../../hooks/useMusic';
 import Avatar from '../common/Avatar';
+import VerificationBadge from '../common/VerificationBadge';
 import './Reels.css';
 
 const ReelItem = ({ video, isActive }) => {
@@ -129,8 +130,9 @@ const ReelItem = ({ video, isActive }) => {
                             size={40} 
                             frame={video.avatarFrame || 'none'}
                         />
-                        <h3 className="reel-username" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${video.username}`); }}>
+                        <h3 className="reel-username" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${video.username}`); }} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             {video.username}
+                            {video.isVerified && <VerificationBadge size={14} />}
                         </h3>
                         <button 
                             className={`reel-follow-btn ${isFollowing ? 'following' : ''}`}
