@@ -57,7 +57,9 @@ const hydrateFromJSON = async () => {
                     description: s.description || `The official ${s.name} community.`,
                     owner: data.users?.[0]?._id || new mongoose.Types.ObjectId(),
                     memberCount: typeof s.members === 'number' ? s.members : 0,
-                    avatar: s.icon || '🎧'
+                    avatar: s.icon || '🎧',
+                    category: s.name.toLowerCase().includes('music') || s.name.toLowerCase().includes('lo-fi') || s.name.toLowerCase().includes('prod') ? 'Music' : 
+                              s.name.toLowerCase().includes('game') || s.name.toLowerCase().includes('play') ? 'Gaming' : 'Social'
                 };
                 
                 await Community.findOneAndUpdate(

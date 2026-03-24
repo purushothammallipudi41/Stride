@@ -34,6 +34,7 @@ import Sidebar from './components/layout/Sidebar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
+import OnboardingModal from './components/OnboardingModal';
 
 const AppContent = () => {
   const { isCreateModalOpen, isExplorerOpen } = useUI();
@@ -89,6 +90,13 @@ const AppContent = () => {
       <GlobalNotifications />
       {isCreateModalOpen && <CreatePostModal />}
       {isExplorerOpen && <ExploreModal />}
+      <OnboardingModal 
+        isOpen={!localStorage.getItem('onboardingCompleted')} 
+        onClose={() => {
+            localStorage.setItem('onboardingCompleted', 'true');
+            window.location.reload(); // Refresh to ensure state is clean
+        }} 
+      />
     </div>
   );
 };
