@@ -150,21 +150,35 @@ connectDB();
 // Email Configuration
 let transporter;
 const createTransporter = async () => {
-    // If we have real credentials, try them first
+    // Priority 1: Resend (Highly recommended for Render/Production)
+    if (process.env.RESEND_API_KEY) {
+        console.log('INFO: Using Resend as the primary email provider.');
+        return nodemailer.createTransport({
+            host: "smtp.resend.com",
+            port: 465,
+            secure: true,
+            auth: {
+                user: "resend",
+                pass: process.env.RESEND_API_KEY
+            }
+        });
+    }
+
+    // Priority 2: Generic SMTP/Gmail
     if (process.env.EMAIL_PASS && process.env.EMAIL_USER) {
-        const port = parseInt(process.env.EMAIL_PORT || "587"); // Prefer 587 for Render/Cloud
+        const port = parseInt(process.env.EMAIL_PORT || "587");
         return nodemailer.createTransport({
             host: process.env.EMAIL_HOST || "smtp.gmail.com",
             port,
-            secure: port === 465, // Only true for 465
+            secure: port === 465,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
             },
-            connectionTimeout: 15000, // 15 seconds
-            greetingTimeout: 15000,   // 15 seconds
-            socketTimeout: 30000,     // 30 seconds
-            pool: true                // Reuse connections
+            connectionTimeout: 20000, 
+            greetingTimeout: 20000,   
+            socketTimeout: 30000,     
+            pool: true                
         });
     }
     
@@ -245,8 +259,9 @@ const sendEmail = async (to, subject, html) => {
 
 
 const app = express();
+app.set('trust proxy', 1); // Required for express-rate-limit on Render
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for demo/custom icons if needed
+    contentSecurityPolicy: false,
 }));
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
