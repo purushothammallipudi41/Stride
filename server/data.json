@@ -5,7 +5,8 @@
       "name": "Lo-Fi Lounge",
       "icon": "🎧",
       "channels": ["general", "music-sharing", "voice-chat"],
-      "members": 120
+      "members": 120,
+      "tags": ["music", "lo-fi", "chill"]
     },
     {
       "id": "stride-official",
@@ -13,7 +14,8 @@
       "icon": "🚀",
       "description": "The official Stride community. Join the rhythm.",
       "channels": ["announcements", "general", "jukebox-live"],
-      "members": 50000
+      "members": 50000,
+      "tags": ["music", "official", "community"]
     },
     {
       "id": 2,
@@ -24,7 +26,8 @@
         "collabs",
         "feedback"
       ],
-      "members": 85
+      "members": 85,
+      "tags": ["music", "production", "beats"]
     },
     {
       "id": 1773818061620,
@@ -33,7 +36,17 @@
       "channels": [
         "general"
       ],
-      "members": 1
+      "members": 1,
+      "tags": ["sync", "social"]
+    },
+    {
+      "id": "techno-tribe",
+      "name": "Techno Tribe",
+      "icon": "https://images.unsplash.com/photo-1574433230641-591574cd66ac?w=800&q=80",
+      "description": "The ultimate hub for techno enthusiasts.",
+      "channels": ["general"],
+      "members": 12400,
+      "tags": ["music", "techno", "vibe"]
     }
   ],
   "users": {
@@ -353,7 +366,8 @@
       "members": "12.4k",
       "category": "Music",
       "image": "https://images.unsplash.com/photo-1574433230641-591574cd66ac?w=800&q=80",
-      "description": "The ultimate hub for techno enthusiasts."
+      "description": "The ultimate hub for techno enthusiasts.",
+      "tags": ["music", "techno", "vibe"]
     }
   ],
   "reels": [

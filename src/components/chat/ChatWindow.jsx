@@ -5,7 +5,7 @@ import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
 import './Chat.css';
 
-const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) => {
+const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons }) => {
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
     const messagesEndRef = useRef(null);
@@ -47,10 +47,15 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) 
     }
 
     return (
-        <div className="chat-window-v2 animate-fade-in">
+        <div className={`chat-window-v2 animate-fade-in ${isDisabled ? 'disabled' : ''}`}>
             <div className="chat-header-v2">
                 <div className="chat-header-left">
-                    <button className="chat-action-icon" onClick={onBack} style={{ background: 'none', border: 'none', color: '#fff', padding: 0 }}>
+                    <button 
+                        className="chat-action-icon" 
+                        onClick={onBack} 
+                        style={{ background: 'none', border: 'none', color: '#fff', padding: 0 }}
+                        aria-label="Go back"
+                    >
                         <ChevronLeft size={28} />
                     </button>
                     <Avatar 
@@ -64,13 +69,21 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) 
                             <span className="chat-header-name" style={{ margin: 0 }}>{activeChat.name || activeChat.username}</span>
                             {activeChat.isVerified && <VerificationBadge size={16} />}
                         </div>
-                        <span className="chat-header-sub">{activeChat.username}</span>
+                        {activeChat.username && activeChat.username !== (activeChat.name || activeChat.username) && (
+                            <span className="chat-header-sub">{activeChat.username}</span>
+                        )}
                     </div>
                 </div>
-                <div className="chat-header-right">
-                    <Phone size={24} className="chat-action-icon" />
-                    <Video size={24} className="chat-action-icon" />
-                </div>
+                {!hideCallButtons && (
+                    <div className="chat-header-right">
+                        <button className="chat-action-icon-btn" onClick={() => onStartCall && onStartCall('audio')} aria-label="Audio Call">
+                            <Phone size={24} className="chat-action-icon" />
+                        </button>
+                        <button className="chat-action-icon-btn" onClick={() => onStartCall && onStartCall('video')} aria-label="Video Call">
+                            <Video size={24} className="chat-action-icon" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="chat-messages-v2">
@@ -108,26 +121,28 @@ const ChatWindow = ({ activeChat, onSendMessage, roomId, currentUser, onBack }) 
                     </div>
                     <input 
                         type="text" 
-                        placeholder="Message..." 
+                        placeholder={isDisabled ? "Join community to chat" : "Message..."} 
                         className="chat-input-v2" 
                         value={msgText}
                         onChange={handleInputChange}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
+                        disabled={isDisabled}
                     />
                     <div className="chat-input-actions">
                         {msgText.trim() ? (
                             <button 
                                 onClick={handleSendText} 
                                 style={{ background: 'none', border: 'none', color: '#3797f0', fontWeight: '700', fontSize: '1rem', cursor: 'pointer' }}
+                                aria-label="Send Message"
                             >
                                 Send
                             </button>
                         ) : (
                             <>
-                                <Mic size={24} className="chat-action-icon" />
-                                <Image size={24} className="chat-action-icon" />
-                                <Smile size={24} className="chat-action-icon" onClick={() => setShowGifs(!showGifs)} />
-                                <Plus size={24} className="chat-action-icon" />
+                                <button className="chat-action-icon-btn" aria-label="Voice Message"><Mic size={24} className="chat-action-icon" /></button>
+                                <button className="chat-action-icon-btn" aria-label="Send Image"><Image size={24} className="chat-action-icon" /></button>
+                                <button className="chat-action-icon-btn" aria-label="Express with Emoji or GIF" onClick={() => setShowGifs(!showGifs)}><Smile size={24} className="chat-action-icon" /></button>
+                                <button className="chat-action-icon-btn" aria-label="More Options"><Plus size={24} className="chat-action-icon" /></button>
                             </>
                         )}
                     </div>

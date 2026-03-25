@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SEO from '../components/common/SEO';
 import { Play, Pause, Music, SkipBack, SkipForward, Share2, Plus, DollarSign, Award } from 'lucide-react';
 
 
@@ -141,6 +142,10 @@ const MusicPage = () => {
 
     return (
         <div className="music-page" style={{ paddingBottom: '140px' }}>
+            <SEO 
+                title="Music & Playlists" 
+                description="Stream high-quality music from Audius, create collaborative playlists, and vibe with the Stride community." 
+            />
             <PageHeader title="Music" />
             
             <div className="music-search-container">

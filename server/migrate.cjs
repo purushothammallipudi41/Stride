@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('../patch-bigint.cjs');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();

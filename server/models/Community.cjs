@@ -19,9 +19,24 @@ const CommunitySchema = new mongoose.Schema({
         artist: String,
         artwork: String,
         addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        addedByUsername: String,
         votes: { type: Number, default: 0 }
     }],
+    pastQueue: [{
+        trackId: String,
+        title: String,
+        artist: String,
+        artwork: String,
+        playedAt: { type: Date, default: Date.now }
+    }],
+    vibeLeaderboard: [{
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        username: String,
+        points: { type: Number, default: 0 }
+    }],
     tags: [String],
+    primaryColor: { type: String, default: '#8b5cf6' },
+    accentColor: { type: String, default: '#d946ef' },
     timestamp: { type: Date, default: Date.now }
 });
 

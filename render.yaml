@@ -17,6 +17,8 @@ services:
         sync: false
       - key: EMAIL_PASS
         sync: false
+      - key: NODE_VERSION
+        value: "20.11.1"
 
   # Frontend Static Site
   - type: web
@@ -26,6 +28,11 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
+        fromService:
+          name: stride-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_SOCKET_URL
         fromService:
           name: stride-backend
           type: web

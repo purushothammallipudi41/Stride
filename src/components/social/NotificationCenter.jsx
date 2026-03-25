@@ -51,10 +51,11 @@ const NotificationCenter = ({ isOpen, onClose }) => {
 
     const getIcon = (type) => {
         switch (type) {
-            case 'like': return <Heart size={16} fill="var(--color-primary)" />;
-            case 'follow': return <UserPlus size={16} color="var(--color-accent)" />;
-            case 'message': return <MessageSquare size={16} color="var(--color-primary)" />;
-            case 'playlist_invite': return <Music size={16} color="var(--color-accent)" />;
+            case 'like': return <Heart size={16} fill="#ed4956" color="#ed4956" />;
+            case 'follow': return <UserPlus size={16} color="#0095f6" />;
+            case 'message': return <MessageSquare size={16} color="#8b5cf6" />;
+            case 'playlist_invite': return <Music size={16} color="#d946ef" />;
+            case 'gift': return <Plus size={16} color="#fbbf24" />;
             default: return <Bell size={16} />;
         }
     };
@@ -62,37 +63,57 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="notification-popover animate-scale-in" ref={containerRef}>
-            <div className="popover-header">
-                <h3>Notifications</h3>
-                <button className="mark-read-btn" onClick={markAsRead}>
-                    <Check size={16} /> Mark all read
+        <div className="notification-popover-v2 animate-scale-in" ref={containerRef}>
+            <div className="popover-header-v2">
+                <h3>Activity</h3>
+                <button className="mark-read-btn-v2" onClick={markAsRead}>
+                    Mark All as Read
                 </button>
             </div>
             
-            <div className="notifications-list">
+            <div className="notifications-list-v2">
                 {loading ? (
-                    <div className="notif-loading">Silencing the noise...</div>
+                    <div className="notif-loading-v2">
+                        <div className="loading-shimmer"></div>
+                    </div>
                 ) : notifications.length === 0 ? (
-                    <div className="notif-empty">All quiet on the social front.</div>
+                    <div className="notif-empty-v2">
+                        <Heart size={48} opacity={0.2} />
+                        <p>No activity yet. When someone likes your tracks or follows you, you'll see it here.</p>
+                    </div>
                 ) : (
                     notifications.map((notif) => (
-                        <div key={notif._id} className={`notification-item ${notif.readStatus ? 'read' : 'unread'}`}>
-                            <div className="notif-icon-circle">
-                                {getIcon(notif.type)}
+                        <div key={notif._id} className={`notification-item-v2 ${notif.readStatus ? 'read' : 'unread'}`}>
+                            <div className="notif-avatar-v2">
+                                <Avatar 
+                                    src={notif.avatar || `https://i.pravatar.cc/150?u=${notif.from}`} 
+                                    size={44} 
+                                    frame={notif.senderFrame || 'none'} 
+                                />
+                                <div className="notif-type-icon">
+                                    {getIcon(notif.type)}
+                                </div>
                             </div>
-                            <div className="notif-content">
-                                <p><b>{notif.from}</b> {notif.content}</p>
-                                <span className="notif-time">{notif.time}</span>
+                            <div className="notif-content-v2">
+                                <p>
+                                    <span className="notif-username">{notif.from}</span>
+                                    {" "}{notif.content}
+                                    <span className="notif-time-v2">{notif.time}</span>
+                                </p>
                             </div>
-                            {!notif.readStatus && <div className="unread-dot" />}
+                            {notif.type === 'follow' && (
+                                <button className="notif-action-btn follow-btn">Follow</button>
+                            )}
+                            {notif.type === 'message' && (
+                                <button className="notif-action-btn reply-btn" onClick={() => window.location.href='/messages'}>Reply</button>
+                            )}
                         </div>
                     ))
                 )}
             </div>
             
-            <div className="popover-footer" onClick={() => { markAsRead(); window.location.href = '/notifications'; }}>
-                View all activity
+            <div className="popover-footer-v2" onClick={() => { markAsRead(); window.location.href = '/notifications'; }}>
+                View older notifications
             </div>
         </div>
     );

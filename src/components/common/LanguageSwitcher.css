@@ -1,0 +1,35 @@
+.language-switcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.language-switcher:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
+}
+
+.globe-icon {
+    color: var(--color-primary);
+}
+
+.lang-select {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+}
+
+.lang-select option {
+    background: #1a1a1a;
+    color: #fff;
+}

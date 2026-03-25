@@ -1,0 +1,30 @@
+{
+  "common": {
+    "stride": "Stride",
+    "find_your_rhythm": "Find your rhythm",
+    "search": "Search...",
+    "loading": "Loading...",
+    "more": "More"
+  },
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "create": "Create",
+    "profile": "Profile"
+  },
+  "explore": {
+    "trending_hashtags": "Trending Hashtags",
+    "communities": "Communities",
+    "playlists": "Playlists",
+    "people": "People",
+    "search_placeholder": "Search for #hashtags, artists, or communities..."
+  },
+  "jukebox": {
+    "live": "LIVE",
+    "jukebox_live": "Jukebox Live",
+    "add_song": "Add Song",
+    "join_to_add": "Join to Add Beats",
+    "up_next": "UP NEXT",
+    "listeners_count": "{{count}} LISTENING LIVE"
+  }
+}

@@ -1,17 +1,20 @@
 import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../common/LanguageSwitcher';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { openCreateModal, openExplorer } = useUI();
+    const { t } = useTranslation();
 
     const navItems = [
-        { icon: Home, label: 'Home', path: '/' },
-        { icon: Compass, label: 'Explore', path: '/explore' },
-        { icon: Plus, label: 'Create', action: 'create' },
-        { icon: User, label: 'Profile', path: '/profile' },
-        { icon: Layout, label: 'More', action: 'explore' },
+        { icon: Home, label: t('nav.home'), path: '/' },
+        { icon: Compass, label: t('nav.explore'), path: '/explore' },
+        { icon: Plus, label: t('nav.create'), action: 'create' },
+        { icon: User, label: t('nav.profile'), path: '/profile' },
+        { icon: Layout, label: t('common.more'), action: 'explore' },
     ];
 
     return (
@@ -19,8 +22,8 @@ const Sidebar = () => {
             <div className="sidebar-header">
                 <Activity className="logo-icon" size={32} />
                 <div className="logo-container">
-                    <h1 className="logo-text">Stride</h1>
-                    <span className="slogan-text">Find your rhythm</span>
+                    <h1 className="logo-text">{t('common.stride')}</h1>
+                    <span className="slogan-text">{t('common.find_your_rhythm')}</span>
                 </div>
             </div>
 
@@ -43,6 +46,7 @@ const Sidebar = () => {
                                 key={item.label}
                                 className="nav-item create-btn"
                                 onClick={openCreateModal}
+                                aria-label={item.label}
                             >
                                 {linkContent}
                             </button>
@@ -55,6 +59,7 @@ const Sidebar = () => {
                                 key={item.label}
                                 className="nav-item"
                                 onClick={openExplorer}
+                                aria-label={item.label}
                             >
                                 {linkContent}
                             </button>
@@ -66,6 +71,7 @@ const Sidebar = () => {
                             key={item.label}
                             to={item.path || '#'}
                             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                            aria-label={item.label}
                         >
                             {linkContent}
                         </NavLink>
@@ -75,6 +81,7 @@ const Sidebar = () => {
 
 
             <div className="sidebar-footer">
+                <LanguageSwitcher />
             </div>
         </aside>
     );

@@ -1,0 +1,202 @@
+.call-overlay-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    height: 80vh;
+    max-width: 1000px;
+    background: rgba(10, 10, 10, 0.95);
+    z-index: 10000;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.incoming-call-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+
+.caller-avatar {
+    width: 120px;
+    height: 120px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px var(--color-primary-glow);
+}
+
+.caller-info h3 {
+    font-size: 1.8rem;
+    margin: 0;
+    text-align: center;
+}
+
+.caller-info p {
+    color: #999;
+    text-align: center;
+    margin-top: 8px;
+}
+
+.call-actions {
+    display: flex;
+    gap: 30px;
+}
+
+.call-actions button {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: transform 0.2s;
+}
+
+.call-actions button:hover {
+    transform: scale(1.1);
+}
+
+.accept-btn {
+    background: #22c55e;
+}
+
+.reject-btn {
+    background: #ef4444;
+}
+
+.active-call-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.remote-video-container {
+    width: 100%;
+    height: 100%;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remote-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.my-video-container {
+    position: absolute;
+    bottom: 100px;
+    right: 30px;
+    width: 240px;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: #222;
+}
+
+.my-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.calling-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.pulse-circle {
+    width: 100px;
+    height: 100px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.call-controls-bar {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.control-btn.active {
+    background: #ef4444;
+}
+
+.control-btn.end-btn {
+    background: #ef4444;
+}
+
+.control-btn.end-btn:hover {
+    background: #dc2626;
+}
+
+.minimize-call-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.minimize-call-btn:hover {
+    opacity: 1;
+}

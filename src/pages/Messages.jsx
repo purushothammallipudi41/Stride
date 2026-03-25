@@ -94,6 +94,15 @@ const Messages = () => {
         });
     };
 
+    const handleStartCall = (type) => {
+        if (!activeChat) return;
+        socket.emit('start-direct-call', {
+            username: activeChat.username,
+            name: activeChat.name || activeChat.username,
+            type
+        });
+    };
+
     if (isLoading) return <div className="loading-screen">Intercepting waves...</div>;
 
     return (
@@ -117,6 +126,7 @@ const Messages = () => {
                     <ChatWindow 
                         activeChat={activeChat} 
                         onSendMessage={handleSendMessage}
+                        onStartCall={handleStartCall}
                         roomId={`chat_${activeChatId}`}
                         currentUser={userProfile.username}
                         onBack={() => setActiveChatId(null)}

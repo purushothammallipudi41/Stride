@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
 import Topbar from '../components/layout/Topbar';
+import SEO from '../components/common/SEO';
 import './Home.css';
 
 const Home = () => {
@@ -9,6 +10,10 @@ const Home = () => {
 
     return (
         <div className="home-page-v2 animate-fade-in">
+            <SEO 
+                title="Home" 
+                description="Experience the rhythm of Stride. Follow your favorite artists and discover new music in your social feed." 
+            />
             <Topbar />
             
             <div className="home-layout">

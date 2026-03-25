@@ -23,9 +23,10 @@ const Topbar = () => {
                     <button 
                         className={`topbar-btn ${showNotifPopover ? 'active' : ''}`}
                         onClick={() => setShowNotifPopover(!showNotifPopover)}
+                        aria-label="Activity Feed"
                     >
                         <Heart size={24} />
-                        {unreadNotifications > 0 && <span className="notification-badge highlight" />}
+                        {unreadNotifications > 0 && <span className="notification-badge-v2">{unreadNotifications}</span>}
                     </button>
                     <NotificationCenter 
                         isOpen={showNotifPopover} 
@@ -35,9 +36,10 @@ const Topbar = () => {
                 <button 
                     className="topbar-btn"
                     onClick={() => navigate('/messages')}
+                    aria-label="Direct Messages"
                 >
                     <MessageCircle size={24} />
-                    {unreadMessages > 0 && <span className="notification-badge pointer" />}
+                    {unreadMessages > 0 && <span className="notification-badge-v2">{unreadMessages}</span>}
                 </button>
             </div>
         </header>

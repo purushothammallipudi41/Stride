@@ -27,7 +27,7 @@ dist-ssr
 *.jks
 *.pem
 *.keystore
-.env
-.env.local
-node_modules/
-.DS_Store
+# Test Reports
+playwright-report/
+test-results/
+.env*

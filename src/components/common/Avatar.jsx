@@ -3,15 +3,23 @@ import { Music } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
 import './Avatar.css';
 
-const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListening = false, isVerified = false }) => {
+const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListening = false, isVerified = false, isPremium = false }) => {
     // Check if src is an emoji or single/double character
     const isTextAvatar = !src || (typeof src === 'string' && !src.startsWith('http') && src.length <= 4);
+
+    // Monetization Logic: Downgrade premium frames if user is not premium
+    let activeFrame = frame;
+    if (!isPremium && (frame === 'neon' || frame === 'holographic')) {
+        activeFrame = 'gold'; // Downgrade to gold (or could be 'none')
+    }
 
     const style = {
         width: size,
         height: size,
         fontSize: size * 0.45,
     };
+    
+    // ... rest of the code updated to use activeFrame
 
     const renderContent = () => {
         if (isTextAvatar) {
@@ -57,8 +65,8 @@ const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListeni
         </div>
     );
 
-    if (frame && frame !== 'none') {
-        const frameClass = `avatar-frame-${frame}`;
+    if (activeFrame && activeFrame !== 'none') {
+        const frameClass = `avatar-frame-${activeFrame}`;
         return (
             <div className={`avatar-frame-container ${frameClass}`} style={{ width: size + 6, height: size + 6, position: 'relative' }}>
                 {renderContent()}

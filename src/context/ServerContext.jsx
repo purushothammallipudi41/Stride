@@ -17,8 +17,11 @@ export const ServerProvider = ({ children }) => {
         // Fetch existing communities from backend
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities`)
             .then(res => res.json())
-            .then(data => setServers(data))
-            .catch(err => console.error("Failed to fetch communities:", err));
+            .then(data => {
+                console.log("[ServerContext] Fetched servers:", data.length);
+                setServers(data);
+            })
+            .catch(err => console.error("[ServerContext] Failed to fetch communities:", err));
 
 
         socket.on('initial_activity', (activities) => {
@@ -92,12 +95,51 @@ export const ServerProvider = ({ children }) => {
     };
 
 
+    const updateMemberRole = async (communityId, userId, role) => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}/role`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-id': user._id
+                },
+                body: JSON.stringify({ role })
+            });
+            const updatedData = await response.json();
+            if (updatedData.community) {
+                setServers(prev => prev.map(s => s._id === communityId ? updatedData.community : s));
+            }
+            return updatedData;
+        } catch (error) {
+            console.error("Failed to update role:", error);
+        }
+    };
+
+    const kickMember = async (communityId, userId) => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}`, {
+                method: 'DELETE',
+                headers: { 'x-user-id': user._id }
+            });
+            const updatedData = await response.json();
+            if (updatedData.community) {
+                setServers(prev => prev.map(s => s._id === communityId ? updatedData.community : s));
+            }
+            return updatedData;
+        } catch (error) {
+            console.error("Failed to kick member:", error);
+        }
+    };
+
     const value = {
         servers,
         realTimeActivity,
         addCommunity,
-        joinCommunity
-
+        joinCommunity,
+        updateMemberRole,
+        kickMember
     };
 
     return (

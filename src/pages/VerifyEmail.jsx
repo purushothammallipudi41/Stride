@@ -60,6 +60,9 @@ const VerifyEmail = () => {
 
             if (data.success) {
                 // Success! Redirect to home or mark as verified
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.isVerified = true;
+                localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('isAuthenticated', 'true');
                 navigate('/');
             } else {

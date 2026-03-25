@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
     posts: [{ type: mongoose.Schema.Types.Mixed }], // Mixed to handle both ObjectIds and legacy nested objects
     favorites: [{ type: String }], // Array of song IDs or similar
     isVerified: { type: Boolean, default: false },
+    isPremium: { type: Boolean, default: false },
     hasUnreadNotifications: { type: Boolean, default: false },
     hasUnreadMessages: { type: Boolean, default: false }
 }, { timestamps: true });

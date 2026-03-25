@@ -240,18 +240,73 @@
     padding-left: 12px;
 }
 
-.member-item {
+.server-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
+}
+
+.server-back-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
+}
+
+.server-back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-2px);
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .member-item:hover {
     background: rgba(255, 255, 255, 0.05);
+}
+
+.member-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.member-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.member-item:hover .member-actions {
+    opacity: 0.6;
+}
+
+.member-call-icon {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.member-call-icon:hover {
+    color: var(--color-primary);
+}
+
+.chat-window-v2.disabled {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .member-avatar-wrapper {
@@ -469,4 +524,227 @@
 
 .icon-btn:hover {
     opacity: 1;
+}
+
+/* Jukebox Specifics */
+.play-btn-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.play-btn-circle:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--color-primary-glow);
+}
+
+.play-btn-circle.playing {
+    background: var(--color-primary);
+    color: white;
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.jukebox-sync-indicator {
+    padding: 2px 8px;
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    border-radius: 4px;
+    text-transform: uppercase;
+    animation: flash 1.5s infinite;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.sync-status-bar {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text-secondary);
+}
+/* Live Listeners Style */
+.live-listeners-tray {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.tray-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+}
+
+.listener-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.listener-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.listener-pill:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.listener-pill span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Voting UI Style */
+.t-votes-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.t-votes-badge span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    min-width: 20px;
+    text-align: center;
+}
+
+.vote-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-muted);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vote-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.vote-btn.up:hover {
+    color: #10b981;
+    border-color: #10b981;
+}
+/* Leaderboard & History Styles */
+.vibe-leaderboard, .past-vibes {
+    padding: 24px;
+    margin-top: 40px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.leaderboard-list, .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.leaderboard-item, .history-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.leaderboard-item:hover, .history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rank {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    width: 30px;
+}
+
+.l-username { flex: 1; font-weight: 600; font-size: 0.95rem; }
+.l-points { font-weight: 700; color: gold; font-size: 0.85rem; }
+
+.history-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+}
+
+.h-meta { display: flex; flex-direction: column; line-height: 1.2; }
+.h-title { font-size: 0.85rem; font-weight: 600; }
+.h-artist { font-size: 0.75rem; color: var(--color-text-muted); }
+
+.vote-btn.down:hover {
+    color: #ef4444;
+    border-color: #ef4444;
 }

@@ -298,3 +298,336 @@
 .search-results-area .search-category-section:nth-child(1) .user-result-card { animation-delay: 0.1s; }
 .search-results-area .search-category-section:nth-child(2) .user-result-card { animation-delay: 0.2s; }
 .search-results-area .search-category-section:nth-child(3) .user-result-card { animation-delay: 0.3s; }
+/* Explore Tabs */
+.explore-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 12px 16px;
+    background: var(--color-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.explore-tab {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 8px 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.explore-tab.active {
+    color: white;
+}
+
+.explore-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+/* Now Vibing Section */
+.vibing-activity-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.section-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.section-header-row h2 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+}
+
+.vibing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.vibe-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+}
+
+.vibe-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.vibe-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vibe-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.v-username {
+    font-weight: 700;
+    color: white;
+}
+
+.v-detail {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.vibe-track-info {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+}
+
+.v-track-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.v-track-artist {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.join-vibe-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vibe-card:hover .join-vibe-btn {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.empty-vibe-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--color-text-muted);
+}
+
+.pulse-icon-small {
+    color: var(--color-primary);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Explore Tabs */
+.explore-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 12px 16px;
+    background: var(--color-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.explore-tab {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 8px 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.explore-tab.active {
+    color: white;
+}
+
+.explore-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+/* Now Vibing Section */
+.vibing-activity-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.section-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.section-header-row h2 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+}
+
+.vibing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.vibe-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+}
+
+.vibe-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.vibe-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vibe-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.v-username {
+    font-weight: 700;
+    color: white;
+}
+
+.v-detail {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.vibe-track-info {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+}
+
+.v-track-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.v-track-artist {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.join-vibe-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vibe-card:hover .join-vibe-btn {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.empty-vibe-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--color-text-muted);
+}
+
+.pulse-icon-small {
+    color: var(--color-primary);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}

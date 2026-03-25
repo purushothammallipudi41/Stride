@@ -20,36 +20,38 @@
 /* Avatar Frames */
 .avatar-frame-container {
     position: relative;
-    padding: 3px;
+    padding: 4px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
 }
 
 .avatar-frame-gold {
-    background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    background-size: 400% 400%;
-    animation: gold-shimmer 3s ease infinite;
-    box-shadow: 0 0 15px rgba(191, 149, 63, 0.5);
+    background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+    background-size: 200% 200%;
+    animation: gold-shimmer 4s linear infinite;
+    box-shadow: 0 0 20px rgba(191, 149, 63, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .avatar-frame-neon {
-    background: linear-gradient(135deg, #00f2ff, #006aff, #7000ff, #ff00c8);
-    background-size: 300% 300%;
-    animation: neon-pulse 2s linear infinite;
-    box-shadow: 0 0 12px rgba(0, 242, 255, 0.6);
+    background: linear-gradient(135deg, #00f2ff, #7000ff, #00f2ff);
+    background-size: 200% 200%;
+    animation: neon-pulse 3s ease infinite;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.8), 0 0 30px rgba(112, 0, 255, 0.4);
 }
 
 .avatar-frame-holographic {
     background: linear-gradient(
         45deg,
-        #ff9a9e 0%, #fad0c4 9%, #fad0c4 10%, #fbc2eb 21%, #a18cd1 33%, #89f7fe 45%, #66a6ff 57%, #5ee7df 71%, #b490ca 82%, #f6d365 94%, #fda085 100%
+        #ff9a9e 0%, #fecfef 20%, #a18cd1 40%, #89f7fe 60%, #66a6ff 80%, #5ee7df 100%
     );
-    background-size: 600% 600%;
-    animation: holo-shift 5s linear infinite;
-    box-shadow: 0 0 15px rgba(255, 154, 158, 0.4);
+    background-size: 300% 300%;
+    animation: holo-shift 6s linear infinite;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
 }
 
 @keyframes gold-shimmer {
@@ -59,15 +61,15 @@
 }
 
 @keyframes neon-pulse {
-    0% { background-position: 0% 50%; filter: brightness(1); }
-    50% { background-position: 100% 50%; filter: brightness(1.3); }
-    100% { background-position: 0% 50%; filter: brightness(1); }
+    0% { background-position: 0% 50%; filter: brightness(1) drop-shadow(0 0 5px #00f2ff); }
+    50% { background-position: 100% 50%; filter: brightness(1.4) drop-shadow(0 0 15px #7000ff); }
+    100% { background-position: 0% 50%; filter: brightness(1) drop-shadow(0 0 5px #00f2ff); }
 }
 
 @keyframes holo-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+    50% { background-position: 100% 50%; filter: hue-rotate(180deg); }
+    100% { background-position: 0% 50%; filter: hue-rotate(360deg); }
 }
 
 /* Listening Indicator */

@@ -8,6 +8,8 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 // Models
 const User = require('./models/User.cjs');
@@ -21,9 +23,34 @@ const Transaction = require('./models/Transaction.cjs');
 const Message = require('./models/Message.cjs');
 const Notification = require('./models/Notification.cjs');
 const Comment = require('./models/Comment.cjs');
+const VibeAnalytics = require('./models/VibeAnalytics.cjs');
 
 
 // Database Connection
+const logVibeEvent = async (communityId, userId, eventType, metadata = {}) => {
+    try {
+        if (!communityId || !userId) return;
+        
+        // Ensure communityId is an ObjectId
+        const cid = mongoose.isValidObjectId(communityId) ? communityId : null;
+        const uid = mongoose.isValidObjectId(userId) ? userId : null;
+        
+        if (!cid || !uid) {
+            // If they are IDs but not ObjectId type, we might need to find them or just skip
+            // For now, let's assume valid IDs are passed or we skip
+        }
+
+        await VibeAnalytics.create({
+            communityId,
+            userId,
+            eventType,
+            metadata,
+            timestamp: new Date()
+        });
+    } catch (err) {
+        console.error('Analytics Logging Error:', err);
+    }
+};
 const connectDB = async () => {
     try {
         let uri = process.env.MONGODB_URI;
@@ -69,7 +96,9 @@ const hydrateFromJSON = async () => {
                         $set: { 
                             description: communityData.description,
                             memberCount: communityData.memberCount,
-                            avatar: communityData.avatar
+                            avatar: communityData.avatar,
+                            tags: s.tags || [],
+                            category: communityData.category
                         } 
                     },
                     { upsert: true, new: true }
@@ -216,6 +245,14 @@ const sendEmail = async (to, subject, html) => {
 
 
 const app = express();
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for demo/custom icons if needed
+}));
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+});
+app.use('/api/', limiter);
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
@@ -254,7 +291,7 @@ app.get('/api/servers', async (req, res) => {
 
 app.post('/api/servers', async (req, res) => {
     try {
-        const newServer = await ServerModel.create({
+        const newServer = await Community.create({
             ...req.body,
             channels: ["general"],
             members: 1
@@ -267,6 +304,122 @@ app.post('/api/servers', async (req, res) => {
         });
         
         res.json(newServer);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/analytics/community/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const requesterId = req.headers['x-user-id'];
+
+        const community = await Community.findById(id);
+        if (!community) return res.status(404).json({ error: 'Community not found' });
+
+        // Authorization: Requester must be owner or mod
+        const isOwner = community.owner.toString() === requesterId;
+        const requesterRole = community.roles?.find(r => r.user === requesterId)?.role;
+        const isMod = requesterRole === 'mod' || requesterRole === 'owner';
+
+        if (!isOwner && !isMod) {
+            return res.status(403).json({ error: 'Unauthorized: Only moderators or owners can view analytics.' });
+        }
+
+        const now = new Date();
+        const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        const stats = await VibeAnalytics.aggregate([
+            { $match: { communityId: new mongoose.Types.ObjectId(id), timestamp: { $gte: past24h } } },
+            { $group: {
+                _id: "$eventType",
+                count: { $sum: 1 }
+            }}
+        ]);
+
+        const topTracks = await VibeAnalytics.aggregate([
+            { $match: { communityId: new mongoose.Types.ObjectId(id), eventType: 'play' } },
+            { $group: {
+                _id: "$metadata.trackName",
+                plays: { $sum: 1 },
+                artist: { $first: "$metadata.artistName" }
+            }},
+            { $sort: { plays: -1 } },
+            { $limit: 5 }
+        ]);
+
+        res.json({ stats, topTracks });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// RBAC: Update member role
+app.put('/api/communities/:id/members/:userId/role', async (req, res) => {
+    try {
+        const { id, userId } = req.params;
+        const { role } = req.body;
+        const requesterId = req.headers['x-user-id'];
+
+        const community = await Community.findById(id).populate('members');
+        if (!community) return res.status(404).json({ error: 'Community not found' });
+
+        if (community.owner.toString() !== requesterId) {
+            return res.status(403).json({ error: 'Only the owner can change roles.' });
+        }
+
+        const userToUpdate = await User.findById(userId);
+        if (!userToUpdate) return res.status(404).json({ error: 'User not found' });
+
+        // Update or add role
+        let roleEntry = community.roles.find(r => r.user === userToUpdate.username);
+        if (roleEntry) {
+            roleEntry.role = role;
+        } else {
+            community.roles.push({ user: userToUpdate.username, role });
+        }
+
+        await community.save();
+        res.json({ message: 'Role updated', community });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// RBAC: Kick member
+app.delete('/api/communities/:id/members/:userId', async (req, res) => {
+    try {
+        const { id, userId } = req.params;
+        const requesterId = req.headers['x-user-id'];
+
+        const community = await Community.findById(id);
+        if (!community) return res.status(404).json({ error: 'Community not found' });
+
+        const requester = await User.findById(requesterId);
+        const targetUser = await User.findById(userId);
+        
+        if (!requester || !targetUser) return res.status(404).json({ error: 'User not found' });
+
+        // Authorization check
+        const isOwner = community.owner.toString() === requesterId;
+        const requesterRole = community.roles?.find(r => r.user === requester.username)?.role;
+        const targetRole = community.roles?.find(r => r.user === targetUser.username)?.role;
+
+        const canKick = isOwner || (requesterRole === 'mod' && targetRole !== 'mod' && targetUser._id.toString() !== community.owner.toString());
+
+        if (!canKick) {
+            return res.status(403).json({ error: 'Unauthorized to kick this member.' });
+        }
+
+        community.members = community.members.filter(m => m.toString() !== userId);
+        community.roles = community.roles.filter(r => r.user !== targetUser.username);
+        community.memberCount = community.members.length;
+
+        await community.save();
+        
+        io.to(`community_${id}`).emit('member_kicked', { userId, communityId: id });
+        
+        res.json({ message: 'Member kicked', community });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -630,7 +783,9 @@ app.get('/api/search/tag/:tag', async (req, res) => {
 
 app.get('/api/communities', async (req, res) => {
     try {
-        const communities = await Community.find().populate('owner', 'username');
+        const communities = await Community.find()
+            .populate('owner', 'username')
+            .populate('members', 'username avatar avatarFrame');
         res.json(communities);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -654,11 +809,8 @@ app.post('/api/communities/:id/join', async (req, res) => {
         const community = await Community.findById(req.params.id);
         if (!community) return res.status(404).json({ error: "Community not found" });
         
-        if (!community.members.includes(userId)) {
-            community.members.push(userId);
-            await community.save();
-        }
-        res.json(community);
+        const populated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
+        res.json(populated);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -681,7 +833,10 @@ app.post('/api/communities/:id/jukebox', async (req, res) => {
         await community.save();
         
         // Notify members via socket
-        io.to(`community_${req.params.id}`).emit('jukebox_updated', community.jukeboxQueue);
+        io.to(`community_${req.params.id}`).emit('jukebox_updated', { 
+            communityId: req.params.id, 
+            queue: community.jukeboxQueue 
+        });
         
         res.json(community.jukeboxQueue);
     } catch (err) {
@@ -946,13 +1101,17 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-app.post('/api/verify-code', (req, res) => {
+app.post('/api/verify-code', async (req, res) => {
     const { email, code } = req.body;
     const storedCode = verificationCodes.get(email);
 
     // Development bypass or correct code match
     if (code === '000000' || (storedCode && storedCode === code)) {
         verificationCodes.delete(email); // One-time use
+        
+        // Update user status in MongoDB
+        await User.findOneAndUpdate({ email }, { isVerified: true });
+        
         res.json({ success: true, message: 'Email verified successfully!' });
     } else {
         res.status(400).json({ success: false, message: 'Invalid or expired code' });
@@ -1132,6 +1291,9 @@ app.post('/api/analytics/listen', async (req, res) => {
 // Socket.io Logic
 const userActivity = new Map();
 
+const roomOccupancy = new Map(); // roomId -> Set(socket.id)
+const socketToUser = new Map(); // socket.id -> { username, avatar, avatarFrame }
+
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
     socket.emit('initial_activity', Array.from(userActivity.values()));
@@ -1148,7 +1310,38 @@ io.on('connection', (socket) => {
 
     socket.on('join_room', (roomId) => {
         socket.join(roomId);
-        console.log(`User ${socket.id} joined room ${roomId}`);
+        console.log(`Socket ${socket.id} joined room ${roomId}`);
+        
+        // Log Analytics Join Event
+        const userData = socketToUser.get(socket.id);
+        if (userData && roomId.startsWith('community_')) {
+            const communityId = roomId.replace('community_', '');
+            logVibeEvent(communityId, userData._id, 'join');
+        } else if (userData && mongoose.isValidObjectId(roomId)) {
+            // Sometimes roomId is just the ID
+            logVibeEvent(roomId, userData._id, 'join');
+        }
+        
+        if (!roomOccupancy.has(roomId)) roomOccupancy.set(roomId, new Set());
+        roomOccupancy.get(roomId).add(socket.id);
+        
+        // Broadcast updated room members
+        updateRoomMembers(roomId);
+    });
+
+    const updateRoomMembers = (roomId) => {
+        const socketIds = roomOccupancy.get(roomId);
+        if (!socketIds) return;
+        
+        const members = Array.from(socketIds).map(id => socketToUser.get(id)).filter(Boolean);
+        // Deduplicate by username for display
+        const uniqueMembers = Array.from(new Map(members.map(m => [m.username, m])).values());
+        
+        io.to(roomId).emit('room_members_updated', { roomId, members: uniqueMembers });
+    };
+
+    socket.on('register_user', (userData) => {
+        socketToUser.set(socket.id, userData);
     });
 
     socket.on('join_user_room', (username) => {
@@ -1158,17 +1351,26 @@ io.on('connection', (socket) => {
 
     socket.on('private_message', async (payload) => {
         const { roomId, message } = payload;
+        const recipient = roomId.replace('chat_', '');
         try {
             const fullMessage = await Message.create({
                 sender: message.username,
-                receiver: roomId.replace('chat_', ''),
+                receiver: recipient,
                 text: message.text,
                 type: message.type || 'text',
                 timestamp: Date.now()
             });
 
+            // Log Analytics Message Event
+            const senderUser = await User.findOne({ username: message.username });
+            if (senderUser) {
+                // Determine if this is a community chat or private
+                if (roomId.startsWith('community_')) {
+                    logVibeEvent(roomId.replace('community_', ''), senderUser._id, 'message');
+                }
+            }
+
             // Update recipient status
-            const recipient = roomId.replace('chat_', '');
             await User.findOneAndUpdate({ username: recipient }, { hasUnreadMessages: true });
             
             const sender = await User.findOne({ username: message.username });
@@ -1198,6 +1400,29 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('channel_message', async (payload) => {
+        const { roomId, message } = payload;
+        // roomId format: community_ID_channelName
+        try {
+            // In a real app, we'd persist this to a ChannelMessage model
+            // For now, broadcast to the room
+            io.to(roomId).emit('new_channel_message', {
+                ...message,
+                roomId,
+                id: Date.now()
+            });
+
+            // Log activity for the community
+            const communityId = roomId.split('_')[1];
+            const senderUser = await User.findOne({ username: message.username });
+            if (senderUser && communityId) {
+                logVibeEvent(communityId, senderUser._id, 'message');
+            }
+        } catch (err) {
+            console.error('Socket Channel Message Error:', err);
+        }
+    });
+
     socket.on('mark_messages_read', async ({ username }) => {
         try {
             await User.findOneAndUpdate({ username }, { hasUnreadMessages: false });
@@ -1205,6 +1430,31 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Socket Mark Read Error:', err);
         }
+    });
+
+    // ── WebRTC Signaling for Audio/Video Calls ──
+    socket.on('call-user', (data) => {
+        const { userToCall, signalData, from, name } = data;
+        io.to(`user_${userToCall}`).emit('incoming-call', {
+            signal: signalData,
+            from,
+            name
+        });
+    });
+
+    socket.on('answer-call', (data) => {
+        const { to, signal } = data;
+        io.to(`user_${to}`).emit('call-accepted', signal);
+    });
+
+    socket.on('ice-candidate', (data) => {
+        const { to, candidate } = data;
+        io.to(`user_${to}`).emit('ice-candidate', candidate);
+    });
+
+    socket.on('end-call', (data) => {
+        const { to } = data;
+        io.to(`user_${to}`).emit('call-ended');
     });
 
     socket.on('typing_start', ({ roomId, username }) => {
@@ -1230,12 +1480,29 @@ io.on('connection', (socket) => {
     });
 
     socket.on('request_sync', ({ roomId, requester }) => {
-        socket.to(roomId).emit('sync_requested', { requester });
+        socket.to(roomId).emit('sync_requested', { requester, socketId: socket.id });
+        console.log(`Sync requested by ${requester} in room ${roomId}`);
     });
 
     socket.on('playback_update', ({ username, track, isPlaying }) => {
         userActivity.set(socket.id, { username, track, isPlaying, lastUpdate: Date.now() });
         io.emit('user_activity_updated', { username, track, isPlaying });
+
+        // Log Analytics Play Event if in a community
+        const userData = socketToUser.get(socket.id);
+        if (userData && track && isPlaying) {
+            // Find which room the user is in to get communityId
+            roomOccupancy.forEach((sockets, roomId) => {
+                if (sockets.has(socket.id) && (roomId.startsWith('community_') || mongoose.isValidObjectId(roomId))) {
+                    const communityId = roomId.replace('community_', '');
+                    logVibeEvent(communityId, userData._id, 'play', {
+                        trackId: track.id || track.trackId,
+                        trackName: track.name,
+                        artistName: track.artist
+                    });
+                }
+            });
+        }
     });
 
     socket.on('join_community', (communityId) => {
@@ -1244,9 +1511,100 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-
+        const userData = socketToUser.get(socket.id);
+        if (userData) {
+            console.log(`User disconnected: ${userData.username}`);
+            io.emit('user_disconnected', userData.username);
+        }
+        
+        // Remove from all rooms
+        roomOccupancy.forEach((sockets, roomId) => {
+            if (sockets.has(socket.id)) {
+                sockets.delete(socket.id);
+                updateRoomMembers(roomId);
+            }
+        });
+        
+        socketToUser.delete(socket.id);
         userActivity.delete(socket.id);
-        io.emit('user_disconnected', socket.id);
+    });
+
+    socket.on('vote_song', async ({ communityId, trackId, vote }) => {
+        try {
+            const community = await Community.findById(communityId);
+            if (!community) return;
+            
+            const track = community.jukeboxQueue.find(t => t.trackId === trackId || t.id === trackId);
+            if (track) {
+                track.votes = (track.votes || 0) + vote;
+                
+                // Log Analytics Vibe Event
+                const userData = socketToUser.get(socket.id);
+                if (userData) {
+                    logVibeEvent(communityId, userData._id, 'vibe', {
+                        trackId: track.trackId,
+                        trackName: track.name
+                    });
+                }
+                
+                // Award vibe points to the person who added it (if it's an upvote)
+                if (vote > 0 && track.addedBy) {
+                    let entry = community.vibeLeaderboard.find(e => e.user && e.user.toString() === track.addedBy.toString());
+                    if (!entry) {
+                        entry = { user: track.addedBy, username: track.addedByUsername || 'Anonymous', points: 0 };
+                        community.vibeLeaderboard.push(entry);
+                        entry = community.vibeLeaderboard[community.vibeLeaderboard.length - 1];
+                    }
+                    entry.points += 10; // 10 points per upvote
+                    // Sort leaderboard
+                    community.vibeLeaderboard.sort((a, b) => b.points - a.points);
+                }
+
+                // Sort by votes
+                community.jukeboxQueue.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                await community.save();
+                
+                io.to(`community_${communityId}`).emit('jukebox_updated', { 
+                    communityId, 
+                    queue: community.jukeboxQueue,
+                    leaderboard: community.vibeLeaderboard
+                });
+            }
+        } catch (err) {
+            console.error("Vote failed:", err);
+        }
+    });
+
+    socket.on('track_finished', async ({ communityId, track }) => {
+        try {
+            const community = await Community.findById(communityId);
+            if (!community) return;
+
+            // Add to pastQueue
+            community.pastQueue.unshift({
+                trackId: track.trackId || track.id,
+                title: track.title,
+                artist: track.artist,
+                artwork: track.artwork || track.cover
+            });
+            
+            // Keep only last 50
+            if (community.pastQueue.length > 50) {
+                community.pastQueue = community.pastQueue.slice(0, 50);
+            }
+
+            // Remove from current queue
+            community.jukeboxQueue = community.jukeboxQueue.filter(t => (t.trackId || t.id) !== (track.trackId || track.id));
+            
+            await community.save();
+            io.to(`community_${communityId}`).emit('jukebox_updated', { 
+                communityId, 
+                queue: community.jukeboxQueue,
+                pastQueue: community.pastQueue
+            });
+        } catch (err) {
+            console.error("Track finished processing failed:", err);
+        }
     });
 });
 

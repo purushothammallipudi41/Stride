@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import SEO from '../components/common/SEO';
 import ReelItem from '../components/reels/ReelItem';
 import '../components/reels/Reels.css';
 
@@ -47,6 +48,10 @@ const Reels = () => {
 
     return (
         <div className="reels-container" ref={containerRef}>
+            <SEO 
+                title="Reels" 
+                description="Discover short, engaging music videos and creative reels from the Stride community." 
+            />
             {reelsData.map(video => (
                 <div key={video.id} className="reel-item-wrapper" data-id={video.id}>
                     <ReelItem video={video} isActive={activeReelId === video.id} />

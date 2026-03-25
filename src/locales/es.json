@@ -1,0 +1,30 @@
+{
+  "common": {
+    "stride": "Stride",
+    "find_your_rhythm": "Encuentra tu ritmo",
+    "search": "Buscar...",
+    "loading": "Cargando...",
+    "more": "Más"
+  },
+  "nav": {
+    "home": "Inicio",
+    "explore": "Explorar",
+    "create": "Crear",
+    "profile": "Perfil"
+  },
+  "explore": {
+    "trending_hashtags": "Hashtags Tendencia",
+    "communities": "Comunidades",
+    "playlists": "Listas de reproducción",
+    "people": "Gente",
+    "search_placeholder": "Busca #hashtags, artistas o comunidades..."
+  },
+  "jukebox": {
+    "live": "EN VIVO",
+    "jukebox_live": "Jukebox en vivo",
+    "add_song": "Añadir Canción",
+    "join_to_add": "Únete para Añadir Beats",
+    "up_next": "A CONTINUACIÓN",
+    "listeners_count": "{{count}} ESCUCHANDO EN VIVO"
+  }
+}

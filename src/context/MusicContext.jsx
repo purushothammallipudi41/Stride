@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import socket from '../services/socket';
 import { getTrendingTracks, getStreamUrl } from '../services/audiusService';
 import MusicContext from './MusicContextObject';
+import { hapticImpactLight, hapticImpactMedium } from '../services/haptics';
 
 export const MusicProvider = ({ children }) => {
     const getLoggedUsername = () => {
@@ -12,7 +13,13 @@ export const MusicProvider = ({ children }) => {
     const USERNAME = getLoggedUsername();
 
 
-    const [allSongs, setAllSongs] = useState([]);
+    const FALLBACK_TRACKS = [
+        { id: 'f1', title: "Midnight City", artist: "M83", duration: 243, cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=480&q=80" },
+        { id: 'f2', title: "Blinding Lights", artist: "The Weeknd", duration: 200, cover: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=480&q=80" },
+        { id: 'f3', title: "Lofi Study", artist: "Stride Beats", duration: 180, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=480&q=80" }
+    ];
+
+    const [allSongs, setAllSongs] = useState(FALLBACK_TRACKS);
     const [genres, setGenres] = useState([]);
     const [artists, setArtists] = useState([]);
     const [albums, setAlbums] = useState([]);
@@ -37,6 +44,8 @@ export const MusicProvider = ({ children }) => {
     const [playlists, setPlaylists] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [isPublicSession, setIsPublicSession] = useState(false);
+    const [currentRoom, setCurrentRoom] = useState(null); // 'community_ID' or null
+    const [roomListeners, setRoomListeners] = useState([]);
 
 
     
@@ -104,17 +113,71 @@ export const MusicProvider = ({ children }) => {
     }, [username]);
 
 
-    // Listen for global real-time events
+    // Listen for global and sync events
     useEffect(() => {
         socket.on('global_event', (event) => {
             console.log('Global Event received:', event);
-            // We now handle most social notifications in App.jsx / UIContext
+        });
+
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.username) {
+            socket.emit('register_user', {
+                username: user.username,
+                avatar: user.avatar,
+                avatarFrame: user.avatarFrame
+            });
+        }
+
+        socket.on('room_members_updated', ({ roomId, members }) => {
+            if (roomId === currentRoom) {
+               setRoomListeners(members);
+            }
+        });
+
+        socket.on('sync_requested', (data) => {
+            console.log('Sync requested by:', data.requester);
+            if (isPlaying && currentTrack) {
+                socket.emit('sync_playback', {
+                    roomId: currentRoom || 'listening_party',
+                    track: currentTrack,
+                    progress: audioRef.current.currentTime,
+                    isPlaying: true,
+                    sender: socket.id // Identify as the responder
+                });
+            }
+        });
+
+        socket.on('playback_synced', (data) => {
+            console.log('Playback Synced Event:', data);
+            // Only auto-sync if we are in a room and not the sender
+            if (data.sender !== socket.id) {
+                // If it's a new track, load it.
+                if (data.track && data.track.id !== currentTrack?.id) {
+                    setCurrentTrack(data.track);
+                    // If the room was already playing, we should probably start playing too
+                    if (data.isPlaying && !isPlaying) {
+                        setIsPlaying(true);
+                    }
+                }
+                
+                if (audioRef.current && data.progress !== undefined) {
+                    const diff = Math.abs(audioRef.current.currentTime - data.progress);
+                    if (diff > 3) { // 3 second threshold for auto-correction
+                        audioRef.current.currentTime = data.progress;
+                    }
+                    if (data.isPlaying !== undefined && data.isPlaying !== isPlaying) {
+                        setIsPlaying(data.isPlaying);
+                    }
+                }
+            }
         });
 
         return () => {
             socket.off('global_event');
+            socket.off('playback_synced');
+            socket.off('sync_requested');
         };
-    }, []);
+    }, [currentTrack, isPlaying, currentRoom]);
 
 
     // Sync recent to localStorage (keeping local for now as per plan focus on favorites/servers)
@@ -147,8 +210,9 @@ export const MusicProvider = ({ children }) => {
         }
         setIsPlaying(prev => {
             const newState = !prev;
+            const roomId = currentRoom || 'listening_party';
             socket.emit('sync_playback', {
-                roomId: 'listening_party',
+                roomId,
                 track: currentTrack,
                 progress: audioRef.current.currentTime,
                 isPlaying: newState
@@ -160,11 +224,12 @@ export const MusicProvider = ({ children }) => {
             });
             return newState;
         });
-    }, [currentTrack, username]);
+    }, [currentTrack, username, currentRoom]);
 
 
 
     const playTrack = useCallback(async (track) => {
+        hapticImpactLight();
         // Init analyzer on first play if not already done
         if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
@@ -213,8 +278,9 @@ export const MusicProvider = ({ children }) => {
                 audioRef.current.src = streamUrl;
                 audioRef.current.play().catch(e => console.error("Play failed", e));
                 
+                const roomId = currentRoom || 'listening_party';
                 socket.emit('sync_playback', {
-                    roomId: 'listening_party',
+                    roomId,
                     track: fallbackTrack,
                     progress: 0,
                     isPlaying: true
@@ -243,7 +309,7 @@ export const MusicProvider = ({ children }) => {
             setIsPlaying(false);
             // Optionally try another node here in a real app
         }
-    }, [currentTrack, togglePlay, username, isPublicSession]);
+    }, [currentTrack, togglePlay, username, isPublicSession, currentRoom]);
 
 
     const nextTrack = useCallback(() => {
@@ -359,8 +425,9 @@ export const MusicProvider = ({ children }) => {
         setProgress: (time) => {
             setProgress(time);
             audioRef.current.currentTime = time;
+            const roomId = currentRoom || 'listening_party';
             socket.emit('sync_playback', {
-                roomId: 'listening_party',
+                roomId,
                 track: currentTrack,
                 progress: time,
                 isPlaying
@@ -394,7 +461,41 @@ export const MusicProvider = ({ children }) => {
             }
         },
         isPublicSession,
-        togglePublicSession: () => setIsPublicSession(prev => !prev)
+        togglePublicSession: () => setIsPublicSession(prev => !prev),
+        currentRoom,
+        roomListeners,
+        joinMusicRoom: (roomId) => {
+            setCurrentRoom(roomId);
+            socket.emit('join_room', roomId);
+            socket.emit('request_sync', { roomId, requester: username });
+        },
+        leaveMusicRoom: () => {
+            setCurrentRoom(null);
+            setRoomListeners([]);
+        },
+        voteSong: (communityId, trackId, vote) => {
+            hapticImpactMedium();
+            socket.emit('vote_song', { communityId, trackId, vote });
+        },
+        sendBeat: async (targetUsername, track) => {
+            hapticImpactLight();
+            // This is a stub for the Phase 7 direct sharing feature
+            // In a real app, this would emit a socket event or call an API
+            console.log(`Sending beat ${track.title} to ${targetUsername}`);
+            socket.emit('send_message', {
+                to: targetUsername,
+                from: username,
+                text: `🎵 Shared a beat: ${track.title} by ${track.artist}`,
+                attachment: {
+                    type: 'track',
+                    trackId: track.id,
+                    title: track.title,
+                    artist: track.artist,
+                    cover: track.cover
+                }
+            });
+            alert(`Beat shared with ${targetUsername}!`);
+        }
     };
 
 
