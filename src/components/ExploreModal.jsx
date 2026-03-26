@@ -14,7 +14,7 @@ const ExploreModal = () => {
         { id: 'spaces', icon: Radio, label: 'Spaces', path: '/servers' },
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
-        { id: 'dashboard', icon: Layout, label: 'Artist Dashboard', path: '/artist-dashboard' },
+        { id: 'dashboard', icon: Layout, label: 'Dashboard', path: '/artist-dashboard' },
         { id: 'music', icon: Music2, label: 'Music', path: '/music' },
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '/achievements' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '/insights' },
