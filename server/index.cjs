@@ -140,11 +140,10 @@ const hydrateFromJSON = async () => {
             }
         }
 
-        // 4. Reels
-        if (data.reels) {
-            console.log('INFO: Hydrating reels (Force Refresh Pixabay)...');
-            await Post.deleteMany({ type: 'reel' });
-            
+        // 4. Reels (Hydrate if empty)
+        const reelCount = await Post.countDocuments({ type: 'reel' });
+        if (reelCount === 0 && data.reels) {
+            console.log('INFO: Hydrating reels...');
             for (const r of data.reels) {
                 const userObj = await User.findOne({ username: r.username });
                 await Post.create({
