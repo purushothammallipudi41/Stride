@@ -5,8 +5,6 @@ import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sp
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
 import Avatar from '../components/common/Avatar';
-import FrameShop from '../components/profile/FrameShop';
-import GiftFrame from '../components/profile/GiftFrame';
 import SubscribeButton from '../components/profile/SubscribeButton';
 import socket from '../services/socket';
 import VerificationBadge from '../components/common/VerificationBadge';
