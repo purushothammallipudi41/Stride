@@ -2,7 +2,6 @@ import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout 
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '../common/LanguageSwitcher';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -81,7 +80,6 @@ const Sidebar = () => {
 
 
             <div className="sidebar-footer">
-                <LanguageSwitcher />
             </div>
         </aside>
     );

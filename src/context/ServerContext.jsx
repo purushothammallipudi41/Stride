@@ -55,11 +55,18 @@ export const ServerProvider = ({ children }) => {
         });
 
 
+        socket.on('community_updated', ({ communityId, community }) => {
+            console.log("[ServerContext] Community updated:", communityId);
+            setServers(prev => prev.map(s => s._id === communityId ? community : s));
+        });
+
         return () => {
             socket.off('initial_activity');
             socket.off('activity_broadcast');
             socket.off('user_disconnected');
             socket.off('global_event');
+            socket.off('jukebox_updated');
+            socket.off('community_updated');
         };
     }, []);
 

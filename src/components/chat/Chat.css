@@ -362,4 +362,15 @@
     .chat-window-v2.hidden-mobile {
         display: none;
     }
+
+    /* Safe Area Insets for Mobile Headers */
+    .chat-list-header-v2, .chat-header-v2 {
+        padding-top: calc(12px + env(safe-area-inset-top));
+        height: auto;
+        min-height: calc(60px + env(safe-area-inset-top));
+    }
+
+    .account-switcher-dropdown {
+        top: calc(60px + env(safe-area-inset-top));
+    }
 }

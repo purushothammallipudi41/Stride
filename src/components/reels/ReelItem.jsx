@@ -1,9 +1,10 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare, Share2, Music2, Volume2, VolumeX, Sparkles, Link2, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useMusic } from '../../hooks/useMusic';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
+import socket from '../../services/socket';
 import './Reels.css';
 
 const ReelItem = ({ video, isActive }) => {
@@ -11,23 +12,44 @@ const ReelItem = ({ video, isActive }) => {
     const navigate = useNavigate();
     const { analyzer, isPlaying } = useMusic();
     const [isMuted, setIsMuted] = useState(true);
+    const [likes, setLikes] = useState(video.likes || 0);
+    const [viewCount, setViewCount] = useState(video.viewCount || 0);
+    const [commentCount, setCommentCount] = useState(video.comments || 0);
+    const [hasViewed, setHasViewed] = useState(false);
+    
+    // UI Local State
     const [isLiked, setIsLiked] = useState(false);
     const [showHeart, setShowHeart] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [beatScale, setBeatScale] = useState(1);
+    
+    const reelId = video._id || video.id;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     const lastTap = useRef(0);
     const requestRef = useRef();
 
+    // Real-time listener
+    useEffect(() => {
+        const handleUpdate = (event) => {
+            if (event.postId === reelId) {
+                if (event.type === 'like') setLikes(event.likes);
+                if (event.type === 'view') setViewCount(event.viewCount);
+                if (event.type === 'comment') setCommentCount(event.commentCount);
+            }
+        };
+        socket.on('content_updated', handleUpdate);
+        return () => socket.off('content_updated', handleUpdate);
+    }, [reelId]);
+
+    // Beat animation logic
     useEffect(() => {
         const animate = () => {
             if (isPlaying && analyzer) {
                 const dataArray = new Uint8Array(analyzer.frequencyBinCount);
                 analyzer.getByteFrequencyData(dataArray);
-                
                 const lowFreqs = dataArray.slice(0, 10);
                 const average = lowFreqs.reduce((a, b) => a + b, 0) / lowFreqs.length;
-                
                 const scale = 1 + (average / 255) * 0.35;
                 setBeatScale(scale);
             } else {
@@ -35,35 +57,55 @@ const ReelItem = ({ video, isActive }) => {
             }
             requestRef.current = requestAnimationFrame(animate);
         };
-
         requestRef.current = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(requestRef.current);
     }, [isPlaying, analyzer]);
 
+    const trackView = useCallback(async () => {
+        if (hasViewed) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${reelId}/view`, {
+                method: 'POST'
+            });
+            setHasViewed(true);
+        } catch (err) {
+            console.error("Failed to track view:", err);
+        }
+    }, [reelId, hasViewed]);
+
+    useEffect(() => {
+        if (isActive && videoRef.current) {
+            videoRef.current.play().then(() => {
+                trackView();
+            }).catch(err => console.error("Autoplay thwarted:", err));
+        } else if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+            // Don't reset hasViewed here to prevent double views in same session if scrolled back
+        }
+    }, [isActive, trackView]);
+
+    const handleLike = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/${reelId}/like`, {
+                method: 'POST',
+                headers: { 'x-user-username': user.username }
+            });
+            if (res.ok) setIsLiked(true);
+        } catch (err) {
+            console.error("Failed to like reel:", err);
+        }
+    };
+
     const handleDoubleTap = () => {
         const now = Date.now();
         if (now - lastTap.current < 300) {
-            setIsLiked(true);
+            handleLike();
             setShowHeart(true);
             setTimeout(() => setShowHeart(false), 1000);
         }
         lastTap.current = now;
     };
-
-    useEffect(() => {
-        if (isActive && videoRef.current) {
-            (async () => {
-                try {
-                    await videoRef.current.play();
-                } catch {
-                    console.error("Autoplay thwarted");
-                }
-            })();
-        } else if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-        }
-    }, [isActive]);
 
     return (
         <div className="reel-item" onClick={handleDoubleTap}>
@@ -97,16 +139,21 @@ const ReelItem = ({ video, isActive }) => {
                 
                 {/* Right Action Sidebar */}
                 <div className="reel-sidebar-right">
-                    <div className="sidebar-action" onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}>
+                    <div className="sidebar-action" onClick={(e) => { e.stopPropagation(); handleLike(); }}>
                         <div className="heart-wrapper" style={{ transform: `scale(${isLiked ? beatScale : 1})` }}>
                             <Heart size={36} fill={isLiked ? "white" : "none"} color="white" strokeWidth={isLiked ? 0 : 2.5} />
                         </div>
-                        <span className="action-count">{video.likes + (isLiked ? 1 : 0)}</span>
+                        <span className="action-count">{(likes || 0).toLocaleString()}</span>
                     </div>
                     
                     <div className="sidebar-action" onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}>
                         <MessageSquare size={36} color="white" strokeWidth={2.5} />
-                        <span className="action-count">{video.comments}</span>
+                        <span className="action-count">{(commentCount || 0).toLocaleString()}</span>
+                    </div>
+
+                    <div className="sidebar-action" onClick={(e) => { e.stopPropagation(); }}>
+                        <Volume2 size={36} color="white" strokeWidth={2.5} />
+                        <span className="action-count">{(viewCount || 0).toLocaleString()}</span>
                     </div>
                     
                     <div className="sidebar-action" onClick={(e) => e.stopPropagation()}>

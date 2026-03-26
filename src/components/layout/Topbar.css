@@ -1,14 +1,18 @@
 .topbar {
-    height: 60px;
+    height: calc(60px + env(safe-area-inset-top));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
-    background: var(--color-bg);
+    padding: 0 24px;
+    padding-top: env(safe-area-inset-top);
+    background: var(--color-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: var(--glass-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 

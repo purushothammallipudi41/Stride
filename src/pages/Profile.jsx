@@ -43,8 +43,8 @@ const Profile = () => {
         loadProfile();
 
         const handleUpdate = (event) => {
-            if (event.type === 'follow' && event.username === (username || 'admin')) {
-                setUser(prev => ({ ...prev, followers: event.followers }));
+            if (event.type === 'follow' && event.username === (username || JSON.parse(localStorage.getItem('user') || '{}').username)) {
+                setUser(prev => ({ ...prev, followerCount: event.followerCount }));
             }
         };
         socket.on('content_updated', handleUpdate);
@@ -58,11 +58,16 @@ const Profile = () => {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${user.username}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ currentUserId: currentUser._id })
+                body: JSON.stringify({ 
+                    currentUserId: currentUser._id,
+                    followerUsername: currentUser.username
+                })
             });
             const data = await res.json();
-            setIsFollowing(data.following);
-            loadProfile(); // Refresh for follower count
+            if (data.success) {
+                setIsFollowing(true);
+                setUser(prev => ({ ...prev, followerCount: data.followerCount }));
+            }
         } catch (err) {
             console.error("Failed to follow user:", err);
         }
@@ -215,11 +220,11 @@ const Profile = () => {
                             <span className="ig-stat-label">posts</span>
                         </div>
                         <div className="ig-stat">
-                            <span className="ig-stat-num">{user.followers?.length || 0}</span>
+                            <span className="ig-stat-num">{(user.followerCount || 0).toLocaleString()}</span>
                             <span className="ig-stat-label">followers</span>
                         </div>
                         <div className="ig-stat">
-                            <span className="ig-stat-num">{user.following?.length || 0}</span>
+                            <span className="ig-stat-num">{(user.followingCount || 0).toLocaleString()}</span>
                             <span className="ig-stat-label">following</span>
                         </div>
                     </div>

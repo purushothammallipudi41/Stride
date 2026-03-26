@@ -130,13 +130,21 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 8px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-action:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .heart-wrapper {
@@ -224,19 +232,22 @@
 }
 
 .reel-follow-btn {
-    background: transparent;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
     color: white;
-    border: 1.5px solid white;
-    padding: 6px 16px;
-    border-radius: 20px;
+    border: none;
+    padding: 6px 18px;
+    border-radius: var(--radius-full);
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px var(--color-primary-glow);
 }
 
 .reel-follow-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px var(--color-primary-glow);
 }
 
 .reel-follow-btn.following {
@@ -338,15 +349,19 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60%;
-    background: #111;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    height: 65%;
+    background: var(--color-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-top: var(--glass-border);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     z-index: 100;
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.4s cubic-bezier(0.3, 0.8, 0.3, 1);
     pointer-events: auto;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
 }
 
 @keyframes slideUp {

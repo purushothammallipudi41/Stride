@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema({
     likes: { type: Number, default: 0 },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     commentCount: { type: Number, default: 0 },
+    viewCount: { type: Number, default: 0 },
     tags: [String],
     type: { type: String, enum: ['post', 'reel'], default: 'post' },
     music: { type: String, default: "" }

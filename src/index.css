@@ -4,21 +4,21 @@
   /* Premium Palette - Midnight Sunset */
   --color-bg: #030014;
   --color-surface: rgba(18, 18, 26, 0.7);
-  --color-surface-solid: #12121a;
-  --color-surface-hover: rgba(34, 34, 46, 0.8);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-bright: rgba(255, 255, 255, 0.15);
+  --color-surface-solid: #0d0d12;
+  --color-surface-hover: rgba(30, 30, 40, 0.8);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-bright: rgba(255, 255, 255, 0.12);
 
   --color-text-primary: #ffffff;
-  --color-text-secondary: rgba(255, 255, 255, 0.6);
-  --color-text-muted: rgba(255, 255, 255, 0.4);
+  --color-text-secondary: rgba(255, 255, 255, 0.65);
+  --color-text-muted: rgba(255, 255, 255, 0.45);
 
   --color-primary: #8b5cf6;
-  --color-primary-glow: rgba(139, 92, 246, 0.5);
+  --color-primary-glow: rgba(139, 92, 246, 0.4);
   --color-accent: #ec4899;
-  --color-accent-glow: rgba(236, 72, 153, 0.5);
+  --color-accent-glow: rgba(236, 72, 153, 0.4);
   
-  /* Dynamic Theme Overrides (Will be injected via JS) */
+  /* Dynamic Theme Overrides */
   --theme-primary: var(--color-primary);
   --theme-accent: var(--color-accent);
   --theme-primary-glow: var(--color-primary-glow);
@@ -28,24 +28,25 @@
   --color-danger: #ef4444;
 
   /* Typography */
-  --font-header: 'Outfit', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-header: 'Outfit', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
 
   /* Layout */
-  --sidebar-width: 260px;
+  --sidebar-width: 280px;
   --player-height: 90px;
-  --glass-blur: 16px;
+  --glass-blur: 24px;
   --glass-border: 1px solid var(--color-border);
   
   /* Radius */
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
+  --radius-md: 14px;
+  --radius-lg: 32px;
   --radius-full: 9999px;
 
   /* Shadows & Glows */
-  --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-  --glow-primary: 0 0 20px var(--color-primary-glow);
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.6);
+  --glow-primary: 0 0 30px var(--color-primary-glow);
+  --glow-accent: 0 0 30px var(--color-accent-glow);
 }
 
 * {
@@ -212,10 +213,10 @@ h1, h2, h3, h4, .font-header {
 
 /* Mobile Layout Padding Adjustments */
 @media (max-width: 768px) {
-  .app-layout {
-      position: relative;
-      flex-direction: column;
-  }
+    .app-layout {
+        position: relative;
+        flex-direction: column;
+    }
   .main-content {
       padding: 0;
       padding-bottom: 60px; /* Space for the fixed bottom tab bar */

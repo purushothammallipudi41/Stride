@@ -461,9 +461,16 @@ app.delete('/api/communities/:id/members/:userId', async (req, res) => {
 
         await community.save();
         
-        io.to(`community_${id}`).emit('member_kicked', { userId, communityId: id });
+        const updatedCommunity = await Community.findById(id).populate('members', 'username avatar avatarFrame');
         
-        res.json({ message: 'Member kicked', community });
+        io.to(`community_${id}`).emit('member_kicked', { userId, communityId: id });
+        io.emit('community_updated', { 
+            type: 'MEMBER_LEFT', 
+            communityId: id, 
+            community: updatedCommunity 
+        });
+        
+        res.json({ message: 'Member kicked', community: updatedCommunity });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -643,29 +650,32 @@ app.post('/api/feed/:id/like', async (req, res) => {
             await post.save();
             
             // Notification for post owner
-            const liker = await User.findOne({ username: 'Stridy' }); // Placeholder for authenticated user
+            const likerUsername = req.headers['x-user-username'] || 'someone';
             await Notification.create({
                 user: post.username,
                 type: 'like',
-                from: liker ? liker.username : 'someone',
-                senderFrame: liker ? liker.avatarFrame : 'none',
+                from: likerUsername,
+                senderFrame: 'none', // Simple placeholder
                 content: 'liked your post',
                 time: 'Just now'
             });
             await User.findOneAndUpdate({ username: post.username }, { hasUnreadNotifications: true });
 
             // Targeted notification for post author
-            const author = post.username; 
-            if (author) {
-                io.to(`user_${author}`).emit('new_notification', {
-                    type: 'like',
-                    from: 'someone', // In a real app, get from req.user
-                    content: 'liked your post',
-                    postId: post._id
-                });
-            }
+            io.to(`user_${post.username}`).emit('new_notification', {
+                type: 'like',
+                from: likerUsername,
+                content: 'liked your post',
+                postId: post._id
+            });
 
-            io.emit('content_updated', { type: 'like', postId: post._id, likes: post.likes });
+            // Global broadcast for real-time count updates
+            io.emit('content_updated', { 
+                type: 'like', 
+                postId: post._id, 
+                likes: post.likes 
+            });
+            
             res.json({ success: true, likes: post.likes });
         } else {
             res.status(404).json({ success: false, message: 'Post not found' });
@@ -675,34 +685,64 @@ app.post('/api/feed/:id/like', async (req, res) => {
     }
 });
 
+app.post('/api/posts/:id/view', async (req, res) => {
+    try {
+        const post = await Post.findByIdAndUpdate(
+            req.params.id, 
+            { $inc: { viewCount: 1 } }, 
+            { new: true }
+        );
+        if (post) {
+            io.emit('content_updated', { 
+                type: 'view', 
+                postId: post._id, 
+                viewCount: post.viewCount 
+            });
+            res.json({ success: true, viewCount: post.viewCount });
+        } else {
+            res.status(404).json({ error: 'Post not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/profile/:username/follow', async (req, res) => {
     const { username } = req.params;
+    const { followerUsername } = req.body;
     try {
-        const user = await User.findOneAndUpdate({ username }, { $inc: { followers: 1 }, hasUnreadNotifications: true }, { new: true });
+        const targetUser = await User.findOne({ username });
+        if (!targetUser) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // Increment follower count
+        targetUser.followerCount += 1;
+        targetUser.hasUnreadNotifications = true;
+        await targetUser.save();
         
-        if (user) {
-            const follower = await User.findOne({ username: 'Stridy' }); // Placeholder
-            await Notification.create({
-                user: username,
-                type: 'follow',
-                from: follower ? follower.username : 'someone',
-                senderFrame: follower ? follower.avatarFrame : 'none',
-                content: 'started following you',
-                time: 'Just now'
-            });
+        // Create notification
+        await Notification.create({
+            user: username,
+            type: 'follow',
+            from: followerUsername || 'someone',
+            content: 'started following you',
+            time: 'Just now'
+        });
 
-            // Targeted notification for followed user
-            io.to(`user_${username}`).emit('new_notification', {
-                type: 'follow',
-                from: 'someone',
-                content: 'started following you'
-            });
+        // Targeted notification for followed user
+        io.to(`user_${username}`).emit('new_notification', {
+            type: 'follow',
+            from: followerUsername || 'someone',
+            content: 'started following you'
+        });
 
-            io.emit('content_updated', { type: 'follow', username, followers: user.followers });
-            res.json({ success: true, followers: user.followers });
-        } else {
-            res.status(404).json({ success: false, message: 'User not found' });
-        }
+        // Global broadcast for real-time count updates
+        io.emit('content_updated', { 
+            type: 'follow', 
+            username: username, 
+            followerCount: targetUser.followerCount 
+        });
+
+        res.json({ success: true, followerCount: targetUser.followerCount });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -856,8 +896,25 @@ app.post('/api/communities/:id/join', async (req, res) => {
         const community = await Community.findById(req.params.id);
         if (!community) return res.status(404).json({ error: "Community not found" });
         
-        const populated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
-        res.json(populated);
+        if (!community.members.some(id => id.toString() === userId.toString())) {
+            community.members.push(userId);
+            community.memberCount = community.members.length;
+            await community.save();
+            
+            const updated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
+            
+            // Broadcast to everyone that a member joined
+            io.emit('community_updated', { 
+                type: 'MEMBER_JOINED', 
+                communityId: req.params.id, 
+                community: updated 
+            });
+            
+            res.json(updated);
+        } else {
+            const populated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
+            res.json(populated);
+        }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1159,6 +1216,20 @@ app.post('/api/verify-code', async (req, res) => {
         // Update user status in MongoDB
         await User.findOneAndUpdate({ email }, { isVerified: true });
         
+        // Send Success Email
+        const successHtml = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #6366f1;">Account Verified! 🚀</h2>
+                <p>Hello,</p>
+                <p>Your Stride account has been successfully verified. You now have full access to all features, including posting, messaging, and joining communities.</p>
+                <p>Welcome to the rhythm!</p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.8em; color: #666;">
+                    If you didn't perform this action, please contact support immediately.
+                </div>
+            </div>
+        `;
+        sendEmail(email, 'Account Successfully Verified - Stride', successHtml);
+        
         res.json({ success: true, message: 'Email verified successfully!' });
     } else {
         res.status(400).json({ success: false, message: 'Invalid or expired code' });
@@ -1179,7 +1250,8 @@ app.post('/api/login', async (req, res) => {
                 user: {
                     username: foundUser.username,
                     email: foundUser.email,
-                    avatar: foundUser.avatar
+                    avatar: foundUser.avatar,
+                    isVerified: foundUser.isVerified
                 },
                 token: 'mock-jwt-token-stride-' + Date.now()
             });

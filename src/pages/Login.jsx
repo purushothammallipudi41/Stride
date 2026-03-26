@@ -34,16 +34,22 @@ const Login = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Send verification code before navigating
-        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token', data.token);
-        navigate('/verify', { state: { email } });
+
+        // Check if user is already verified
+        if (data.user.isVerified) {
+          localStorage.setItem('isAuthenticated', 'true');
+          navigate('/');
+        } else {
+          // Send verification code before navigating
+          await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: data.user.email })
+          });
+          navigate('/verify', { state: { email: data.user.email } });
+        }
       } else {
         setError(data.message || 'Login failed. Please check your credentials.');
       }

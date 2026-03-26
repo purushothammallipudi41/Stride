@@ -13,7 +13,7 @@
     background: var(--color-bg-primary);
     position: sticky;
     top: 0;
-    height: 60px;
+    height: calc(60px + env(safe-area-inset-top));
     z-index: 100;
 }
 
@@ -110,6 +110,6 @@
 
 @media (max-width: 768px) {
     .notifications-header {
-        padding-top: 40px; /* Account for status bar */
+        padding-top: env(safe-area-inset-top);
     }
 }

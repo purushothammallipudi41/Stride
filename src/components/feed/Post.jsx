@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { Heart, MessageCircle, ArrowUpRight, Bookmark, MoreHorizontal } from 'lucide-react';
 import Avatar from '../common/Avatar';
@@ -8,29 +8,45 @@ import './Post.css';
 
 const Post = ({ post }) => {
     const [likes, setLikes] = useState(post.likes || 0);
+    const [viewCount, setViewCount] = useState(post.viewCount || 0);
     const [comments, setComments] = useState([]);
-    const [commentCount, setCommentCount] = useState(post.commentCount || post.comments || 0);
+    const [commentCount, setCommentCount] = useState(post.commentCount || (Array.isArray(post.comments) ? post.comments.length : 0));
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [mediaError, setMediaError] = useState(false);
-
+    const [hasViewed, setHasViewed] = useState(false);
+    
+    const postId = post._id || post.id;
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const postRef = useRef(null);
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${post.id || post._id}/comments`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/comments`);
             const data = await res.json();
             setComments(data);
         } catch (err) {
             console.error("Failed to fetch comments:", err);
         }
-    }, [post.id, post._id]);
+    }, [postId]);
 
+    const trackView = useCallback(async () => {
+        if (hasViewed) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/view`, {
+                method: 'POST'
+            });
+            setHasViewed(true);
+        } catch (err) {
+            console.error("Failed to track view:", err);
+        }
+    }, [postId, hasViewed]);
 
     useEffect(() => {
         const handleUpdate = (event) => {
-            if (event.postId === (post.id || post._id)) {
+            if (event.postId === postId) {
                 if (event.type === 'like') setLikes(event.likes);
+                if (event.type === 'view') setViewCount(event.viewCount);
                 if (event.type === 'comment') {
                     setCommentCount(event.commentCount);
                     // Optionally fetch if comments are showing
@@ -40,7 +56,25 @@ const Post = ({ post }) => {
         };
         socket.on('content_updated', handleUpdate);
         return () => socket.off('content_updated', handleUpdate);
-    }, [post.id, post._id, showComments, fetchComments]);
+    }, [postId, showComments, fetchComments]);
+
+    useEffect(() => {
+        const currentRef = postRef.current;
+        if (!currentRef) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    trackView();
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        observer.observe(currentRef);
+        return () => observer.disconnect();
+    }, [trackView]);
 
 
     const handleToggleComments = () => {
@@ -53,9 +87,12 @@ const Post = ({ post }) => {
         if (!newComment.trim()) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${post.id || post._id}/comments`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/comments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-username': user.username 
+                },
                 body: JSON.stringify({ username: user.username, content: newComment })
             });
             if (res.ok) {
@@ -67,11 +104,11 @@ const Post = ({ post }) => {
         }
     };
 
-
     const handleLike = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/${post.id}/like`, {
-                method: 'POST'
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/${postId}/like`, {
+                method: 'POST',
+                headers: { 'x-user-username': user.username }
             });
             const data = await res.json();
             if (data.success) {
@@ -83,7 +120,7 @@ const Post = ({ post }) => {
     };
 
     return (
-        <article className="instagram-post">
+        <article className="instagram-post" id={`post-${postId}`} ref={postRef}>
             {/* SVG Gradient Definition for icons to use if needed */}
             <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
@@ -164,8 +201,9 @@ const Post = ({ post }) => {
                     </div>
                 </div>
 
-                <div className="post-likes">
-                    {likes.toLocaleString()} likes
+                <div className="post-engagement-stats">
+                    <span className="post-likes">{likes.toLocaleString()} likes</span>
+                    <span className="post-views">{viewCount.toLocaleString()} views</span>
                 </div>
 
                 <div className="post-caption-area">

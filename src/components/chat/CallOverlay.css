@@ -6,14 +6,16 @@
     width: 90vw;
     height: 80vh;
     max-width: 1000px;
-    background: rgba(10, 10, 10, 0.95);
+    background: var(--color-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     z-index: 10000;
-    border-radius: 24px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 50px rgba(139, 92, 246, 0.3);
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow: 0 0 60px var(--color-primary-glow);
+    border: var(--glass-border);
 }
 
 .incoming-call-box {

@@ -4,6 +4,7 @@ import {
     X, UserPlus, Music, Circle, BadgeCheck, Shield, Bell, 
     Activity, Globe, Moon, Check 
 } from 'lucide-react';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 import Avatar from '../components/common/Avatar';
 import './Settings.css';
 
@@ -207,9 +208,11 @@ const Settings = () => {
                                 <Globe size={22} className="ps-icon-muted" />
                                 <div className="ps-item-text">
                                     <span className="ps-item-title">Language</span>
+                                    <div style={{ marginTop: '8px' }}>
+                                        <LanguageSwitcher />
+                                    </div>
                                 </div>
                             </div>
-                            <span className="ps-item-value">English</span>
                         </div>
 
                         <div className="ps-list-item toggle-row">
