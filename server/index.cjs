@@ -140,22 +140,24 @@ const hydrateFromJSON = async () => {
             }
         }
 
-        // 4. Reels (If empty)
-        const reelCount = await Post.countDocuments({ type: 'reel' });
-        if (reelCount === 0 && data.reels) {
+        // 4. Reels
+        if (data.reels) {
             console.log('INFO: Hydrating reels...');
             for (const r of data.reels) {
                 const userObj = await User.findOne({ username: r.username });
-                await Post.create({
-                    username: r.username,
-                    user: userObj ? userObj._id : null,
-                    caption: r.description,
-                    contentUrl: r.url,
-                    likes: r.likes || 0,
-                    music: r.music || "",
-                    type: 'reel',
-                    tags: r.tags || []
-                });
+                await Post.findOneAndUpdate(
+                    { username: r.username, caption: r.description, type: 'reel' },
+                    {
+                        $set: {
+                            user: userObj ? userObj._id : null,
+                            contentUrl: r.url,
+                            likes: r.likes || 0,
+                            music: r.music || "",
+                            tags: r.tags || []
+                        }
+                    },
+                    { upsert: true, new: true }
+                );
             }
         }
 

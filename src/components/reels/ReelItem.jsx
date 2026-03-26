@@ -73,6 +73,8 @@ const ReelItem = ({ video, isActive }) => {
                 loop
                 muted={isMuted}
                 playsInline
+                crossOrigin="anonymous"
+                preload="auto"
                 className="reel-video"
             />
 
