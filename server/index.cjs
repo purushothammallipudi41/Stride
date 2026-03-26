@@ -140,6 +140,25 @@ const hydrateFromJSON = async () => {
             }
         }
 
+        // 4. Reels (If empty)
+        const reelCount = await Post.countDocuments({ type: 'reel' });
+        if (reelCount === 0 && data.reels) {
+            console.log('INFO: Hydrating reels...');
+            for (const r of data.reels) {
+                const userObj = await User.findOne({ username: r.username });
+                await Post.create({
+                    username: r.username,
+                    user: userObj ? userObj._id : null,
+                    caption: r.description,
+                    contentUrl: r.url,
+                    likes: r.likes || 0,
+                    music: r.music || "",
+                    type: 'reel',
+                    tags: r.tags || []
+                });
+            }
+        }
+
         console.log('INFO: Data hydration check complete.');
     } catch (err) {
         console.error('ERROR: Data hydration failed:', err.message);
@@ -574,16 +593,19 @@ app.post('/api/stories', async (req, res) => {
 
 app.get('/api/reels', async (req, res) => {
     try {
-        const data = readData();
-        const reels = data.reels || [];
+        // Fetch Reels from MongoDB (instead of reading raw JSON)
+        const reels = await Post.find({ type: 'reel' }).sort({ createdAt: -1 });
         
-        // Enhance reels with user data (like avatarFrame)
+        // Enhance reels with user data (like avatarFrame and isVerified)
         const enhancedReels = await Promise.all(reels.map(async (reel) => {
             const user = await User.findOne({ username: reel.username });
             return {
-                ...reel,
+                ...reel.toObject(),
+                url: reel.contentUrl, // Compatibility with ReelItem prop naming
+                description: reel.caption, // Compatibility with ReelItem prop naming
+                avatar: user ? user.avatar : '🎧',
                 avatarFrame: user ? user.avatarFrame : 'none',
-                isVerified: user ? user.isVerified : false
+                isVerified: user ? user.isVerified : (reel.isVerified || false)
             };
         }));
         

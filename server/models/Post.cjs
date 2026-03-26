@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional for hydration
-    username: { type: String, required: true }, // Denormalized for fast feed access
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    username: { type: String, required: true },
     content: { type: String, default: "" },
     caption: { type: String, default: "" },
     contentUrl: { type: String, required: true },
     likes: { type: Number, default: 0 },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     commentCount: { type: Number, default: 0 },
-    tags: [String]
+    tags: [String],
+    type: { type: String, enum: ['post', 'reel'], default: 'post' },
+    music: { type: String, default: "" }
 }, { timestamps: true });
 
 
