@@ -22,6 +22,7 @@ const Explore = () => {
     const [trendingHashtags, setTrendingHashtags] = useState([]);
     const [tagResults, setTagResults] = useState({ posts: [], playlists: [], communities: [] });
     const [recommendedFeed, setRecommendedFeed] = useState({ recommendedTracks: [], trendingCommunities: [] });
+    const [vibeLeaderboard, setVibeLeaderboard] = useState([]);
 
 
 
@@ -53,6 +54,30 @@ const Explore = () => {
             }
         };
         fetchDiscovery();
+        fetchDiscovery();
+
+        const fetchLeaderboard = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/leaderboard`);
+                const data = await res.json();
+                setVibeLeaderboard(data);
+            } catch (err) {
+                console.error("Leaderboard fetch failed:", err);
+            }
+        };
+        fetchLeaderboard();
+
+        // Listen for real-time leaderboard updates
+        const socket = window.socket; // Assuming socket is available globally or via a hook
+        if (socket) {
+            socket.on('vibe_leaderboard_updated', (data) => {
+                setVibeLeaderboard(data);
+            });
+        }
+
+        return () => {
+            if (socket) socket.off('vibe_leaderboard_updated');
+        };
     }, []);
 
     useEffect(() => {
@@ -240,7 +265,7 @@ const Explore = () => {
                                 {tagResults.communities.map(c => (
                                     <div key={c._id} className="user-result-card" onClick={() => navigate(`/community/${c._id}`)}>
                                         <div className="community-avatar mini">
-                                            {c.avatar?.length <= 2 ? c.avatar : <img src={c.avatar} alt={c.name} />}
+                                            {c.avatar?.length <= 2 ? c.avatar : <img src={c.avatar} alt={c.name} loading="lazy" />}
                                         </div>
                                         <div className="user-meta">
                                             <span className="user-name">{c.name}</span>
@@ -262,6 +287,34 @@ const Explore = () => {
                 </div>
             ) : (
                 <div className="discovery-area">
+                    {vibeLeaderboard?.length > 0 && (
+                        <div className="discovery-section vibe-leaderboard-section animate-fade-in">
+                            <div className="section-header-row">
+                                <Trophy size={20} className="icon-gold" />
+                                <h3 className="category-title">GLOBAL VIBE LEADERBOARD</h3>
+                            </div>
+                            <div className="vibe-leaderboard-grid">
+                                {vibeLeaderboard.slice(0, 5).map((community, idx) => (
+                                    <div 
+                                        key={community._id} 
+                                        className="vibe-leaderboard-card glass-panel"
+                                        onClick={() => navigate(`/community/${community._id}`)}
+                                    >
+                                        <div className="vibe-rank">#{idx + 1}</div>
+                                        <div className="vibe-card-main">
+                                            {community.avatar ? <img src={community.avatar} alt="" className="vibe-comm-avatar" loading="lazy" /> : <div className="vibe-comm-init">{community.name[0]}</div>}
+                                            <div className="vibe-comm-info">
+                                                <span className="vibe-comm-name">{community.name}</span>
+                                                <span className="vibe-comm-score">{community.vibeScore || 0} Vibe Points</span>
+                                            </div>
+                                        </div>
+                                        <div className="vibe-trend-indicator">🔥 Trending</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {recommendedFeed.trendingCommunities?.length > 0 && (
                         <div className="discovery-section recommended-section animate-fade-in">
                             <div className="section-header-row">
@@ -276,7 +329,7 @@ const Explore = () => {
                                         onClick={() => navigate(`/community/${community._id}`)}
                                     >
                                         <div className="comm-card-banner" style={{ background: community.primaryColor }}>
-                                            {community.avatar ? <img src={community.avatar} alt="" /> : <span>{community.name[0]}</span>}
+                                            {community.avatar ? <img src={community.avatar} alt="" loading="lazy" /> : <span>{community.name[0]}</span>}
                                         </div>
                                         <div className="comm-card-info">
                                             <span className="comm-card-name">{community.name}</span>

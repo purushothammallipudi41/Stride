@@ -1425,6 +1425,59 @@ app.post('/api/favorites/:username', (req, res) => {
     res.json(favorites);
 });
 
+async function updateCommunityVibeScores() {
+    try {
+        const communities = await Community.find();
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        for (const community of communities) {
+            // 1. Message/Activity weight (last 24h)
+            const activityCount = await VibeAnalytics.countDocuments({
+                communityId: community._id,
+                timestamp: { $gte: yesterday }
+            });
+
+            // 2. RSVP weight (upcoming events)
+            const events = await Event.find({
+                communityId: community._id,
+                startTime: { $gte: now }
+            });
+            const totalRSVPs = events.reduce((sum, e) => sum + (e.rsvps?.length || 0), 0);
+
+            // 3. Jukebox engagement (queue size + votes)
+            const queueEngagement = (community.jukeboxQueue?.length || 0) * 5 + 
+                                    (community.jukeboxQueue?.reduce((sum, t) => sum + (t.votes || 0), 0) || 0);
+
+            // Calculate final score
+            const newScore = (activityCount * 2) + (totalRSVPs * 10) + queueEngagement;
+            
+            if (community.vibeScore !== newScore) {
+                community.vibeScore = newScore;
+                await community.save();
+            }
+        }
+        
+        const topCommunities = await Community.find().sort({ vibeScore: -1 }).limit(10);
+        io.emit('vibe_leaderboard_updated', topCommunities);
+    } catch (err) {
+        console.error("Vibe score update failed:", err);
+    }
+}
+
+// Run vibe score updates every 5 minutes
+setInterval(updateCommunityVibeScores, 5 * 60 * 1000);
+
+// Leaderboard API
+app.get('/api/communities/leaderboard', async (req, res) => {
+    try {
+        const topCommunities = await Community.find().sort({ vibeScore: -1 }).limit(20);
+        res.json(topCommunities);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ── Monetization & Analytics ──
 
 app.post('/api/monetization/tip', async (req, res) => {

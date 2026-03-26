@@ -124,17 +124,17 @@ const StoriesRail = () => {
                             <div className="story-progress-fill animate-story-progress" />
                         </div>
                         <div className="story-viewer-header">
-                            <img src={activeStory.avatar} alt={activeStory.username} className="viewer-avatar" />
+                            <img src={activeStory.avatar} alt={activeStory.username} className="viewer-avatar" loading="lazy" />
                             <span className="viewer-username">{activeStory.username}</span>
                             {activeStory.isVerified && <VerificationBadge size={14} />}
                         </div>
                         <div className="story-viewer-media">
-                            <img src={activeStory.contentUrl} alt="Story Content" />
+                            <img src={activeStory.contentUrl} alt="Story Content" loading="lazy" />
                             
                             {/* Render Stickers */}
                             {activeStory.metadata?.track && (
                                 <div className="sticker-item music-sticker viewer-sticker">
-                                    <img src={activeStory.metadata.track.cover} alt="Cover" className="sticker-cover" />
+                                    <img src={activeStory.metadata.track.cover} alt="Cover" className="sticker-cover" loading="lazy" />
                                     <div className="sticker-info">
                                         <span className="sticker-title font-bold">{activeStory.metadata.track.title}</span>
                                         <span className="sticker-artist">{activeStory.metadata.track.artist}</span>

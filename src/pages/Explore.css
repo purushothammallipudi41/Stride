@@ -178,3 +178,100 @@
     font-weight: 700;
     cursor: pointer;
 }
+
+/* Vibe Leaderboard Styles */
+.vibe-leaderboard-section {
+    margin-bottom: 40px;
+}
+
+.icon-gold {
+    color: #f59e0b;
+    filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.5));
+}
+
+.vibe-leaderboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.vibe-leaderboard-card {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-radius: 20px;
+    gap: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vibe-leaderboard-card:hover {
+    transform: scale(1.02) translateX(10px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vibe-rank {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.2);
+    min-width: 40px;
+}
+
+.vibe-leaderboard-card:nth-child(1) .vibe-rank { color: #f59e0b; }
+.vibe-leaderboard-card:nth-child(2) .vibe-rank { color: #94a3b8; }
+.vibe-leaderboard-card:nth-child(3) .vibe-rank { color: #b45309; }
+
+.vibe-card-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.vibe-comm-avatar, .vibe-comm-init {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+.vibe-comm-init {
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
+.vibe-comm-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.vibe-comm-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+}
+
+.vibe-comm-score {
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.vibe-trend-indicator {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}

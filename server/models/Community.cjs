@@ -39,6 +39,7 @@ const CommunitySchema = new mongoose.Schema({
     accentColor: { type: String, default: '#d946ef' },
     isLive: { type: Boolean, default: false },
     voiceParticipants: [{ type: String }], // List of usernames in voice
+    vibeScore: { type: Number, default: 0 },
     timestamp: { type: Date, default: Date.now }
 });
 

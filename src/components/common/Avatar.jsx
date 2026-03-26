@@ -40,6 +40,7 @@ const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListeni
                 alt={alt} 
                 className={`smart-avatar-img ${className}`}
                 style={{ width: size, height: size }}
+                loading="lazy"
                 onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
