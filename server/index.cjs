@@ -611,7 +611,7 @@ app.get('/api/reels', async (req, res) => {
             };
         }));
         
-        res.json(enhancedReels);
+        res.json([{ diagnostic: "LATEST_CODE_V4_PEXELS" }, ...enhancedReels]);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
