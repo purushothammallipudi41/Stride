@@ -293,7 +293,7 @@
         gap: 8px !important;
     }
 
-    .explore-item-card.marketplace, .explore-item-card.logout {
+    .explore-item-card.settings, .explore-item-card.logout {
         max-width: none !important;
         flex: 1 !important;
         flex-direction: row !important;
@@ -301,7 +301,7 @@
         gap: 8px !important;
     }
 
-    .explore-item-card.marketplace .item-icon-wrapper, 
+    .explore-item-card.settings .item-icon-wrapper, 
     .explore-item-card.logout .item-icon-wrapper {
         width: 30px !important;
         height: 30px !important;

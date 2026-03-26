@@ -78,6 +78,15 @@ const hydrateFromJSON = async () => {
         console.log('INFO: Starting database hydration check...');
         const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 
+        // Clear existing data as requested by user to "remove all posts and reels"
+        if (data.feed.length === 0 && data.reels.length === 0) {
+            console.log('INFO: User requested content clearing. Wiping posts, reels, comments, and notifications...');
+            await Post.deleteMany({});
+            await Comment.deleteMany({});
+            await Notification.deleteMany({});
+            stories = []; // Clear in-memory stories
+        }
+
         // 1. Communities / Servers
         if (data.servers) {
             for (const s of data.servers) {
