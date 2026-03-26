@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import VerificationBadge from '../common/VerificationBadge';
 import './PageHeader.css';
 
-const PageHeader = ({ title, isVerified, rightElement }) => {
+const PageHeader = ({ title, rightElement }) => {
     const navigate = useNavigate();
 
     return (
@@ -13,7 +13,6 @@ const PageHeader = ({ title, isVerified, rightElement }) => {
             </button>
             <div className="header-title-container">
                 <h1 className="mobile-page-title">{title}</h1>
-                {isVerified && <VerificationBadge size={16} />}
             </div>
             <div className="header-right-action">
                 {rightElement || <div style={{ width: 28 }} />}

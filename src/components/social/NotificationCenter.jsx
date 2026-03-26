@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { Bell, User, Heart, MessageSquare, UserPlus, Music, Check } from 'lucide-react';
+import { Bell, User, Heart, MessageSquare, UserPlus, Music, Check, ChevronLeft } from 'lucide-react';
 import { useUI } from '../../hooks/useUI';
 import './NotificationCenter.css';
 
@@ -65,6 +65,9 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     return (
         <div className="notification-popover-v2 animate-scale-in" ref={containerRef}>
             <div className="popover-header-v2">
+                <button className="mobile-close-btn" onClick={onClose}>
+                    <ChevronLeft size={28} />
+                </button>
                 <h3>Activity</h3>
                 <button className="mark-read-btn-v2" onClick={markAsRead}>
                     Mark All as Read

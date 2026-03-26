@@ -33,7 +33,6 @@ const Sidebar = () => {
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Compass, label: t('nav.explore'), path: '/explore' },
         { icon: Plus, label: t('nav.create'), action: 'create' },
-        { icon: Wallet, label: 'Wallet', path: '/wallet' },
         { icon: User, label: t('nav.profile'), path: '/profile' },
         { icon: Layout, label: t('common.more'), action: 'explore' },
     ];

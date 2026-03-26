@@ -224,7 +224,7 @@ const Profile = () => {
     return (
         <div className="ig-profile-container">
             {/* Top Header */}
-            <PageHeader title={user.username} isVerified={user.isVerified} />
+            <PageHeader title={user.username} />
 
             {/* Profile Info */}
             <div className="ig-profile-bio-block">

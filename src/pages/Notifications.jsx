@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, Check, ChevronRight, Heart, UserPlus, MessageSquare, Music, Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Check, Heart, UserPlus, Bell } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
+import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
 import socket from '../services/socket';
 import './Notifications.css';
 
 const Notifications = () => {
-    const navigate = useNavigate();
     const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
     const username = userProfile.username || 'guest';
     const { resetNotifications } = useUI();
@@ -78,10 +78,7 @@ const Notifications = () => {
 
     return (
         <div className="notifications-container">
-            <header className="notifications-header">
-                <ChevronLeft size={28} onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} />
-                <h1 className="notifications-title">Notifications</h1>
-            </header>
+            <PageHeader title="Notifications" />
 
             <div className="notifications-content">
                 <div className="caught-up-section">
