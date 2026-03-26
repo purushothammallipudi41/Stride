@@ -54,7 +54,7 @@ const StoriesRail = () => {
                 body: JSON.stringify({
                     username,
                     contentUrl,
-                    musicTrack
+                    metadata: musicTrack // musicTrack now holds { track, poll }
                 })
             });
             if (response.ok) {
@@ -130,6 +130,27 @@ const StoriesRail = () => {
                         </div>
                         <div className="story-viewer-media">
                             <img src={activeStory.contentUrl} alt="Story Content" />
+                            
+                            {/* Render Stickers */}
+                            {activeStory.metadata?.track && (
+                                <div className="sticker-item music-sticker viewer-sticker">
+                                    <img src={activeStory.metadata.track.cover} alt="Cover" className="sticker-cover" />
+                                    <div className="sticker-info">
+                                        <span className="sticker-title font-bold">{activeStory.metadata.track.title}</span>
+                                        <span className="sticker-artist">{activeStory.metadata.track.artist}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeStory.metadata?.poll && (
+                                <div className="sticker-item poll-sticker viewer-sticker glass-panel animate-scale-in">
+                                    <div className="poll-question-viewer">{activeStory.metadata.poll.question}</div>
+                                    <div className="poll-options">
+                                        <button className="poll-option-btn">{activeStory.metadata.poll.option1}</button>
+                                        <button className="poll-option-btn">{activeStory.metadata.poll.option2}</button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

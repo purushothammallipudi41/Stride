@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { X, Send, Camera, Music, Image as ImageIcon, Type } from 'lucide-react';
+import { X, Send, Camera, Music, Image as ImageIcon, Type, BarChart2 } from 'lucide-react';
 import './CreateStoryModal.css';
 
 const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
@@ -8,6 +8,7 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
     const [selectedTrack, setSelectedTrack] = useState(null);
+    const [pollData, setPollData] = useState(null); // { question, option1, option2 }
     const [stream, setStream] = useState(null);
     const cameraInputRef = useRef(null);
     const galleryInputRef = useRef(null);
@@ -106,7 +107,7 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
         setPreviewImage(null);
     };
 
-    const handleMusicClick = () => {
+    const handleMusicPicker = () => {
         setIsMusicPickerOpen(true);
         stopCamera();
     };
@@ -114,6 +115,18 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
     const selectTrack = (track) => {
         setSelectedTrack(track);
         setIsMusicPickerOpen(false);
+    };
+
+    const handleAddPoll = () => {
+        setPollData({
+            question: "Vibe Check?",
+            option1: "🔥 On Fire",
+            option2: "❄️ Chill"
+        });
+    };
+
+    const updatePoll = (field, value) => {
+        setPollData(prev => ({ ...prev, [field]: value }));
     };
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -126,10 +139,17 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                     <div className="top-tools">
                         <button 
                             className="icon-btn-round" 
-                            onClick={handleMusicClick}
+                            onClick={handleMusicPicker}
                             style={{ color: selectedTrack ? 'var(--theme-accent)' : 'white' }}
                         >
                             <Music size={20} />
+                        </button>
+                        <button 
+                            className="icon-btn-round" 
+                            onClick={handleAddPoll}
+                            style={{ color: pollData ? 'var(--theme-accent)' : 'white' }}
+                        >
+                            <BarChart2 size={20} />
                         </button>
                         <button className="icon-btn-round" onClick={handleTextMode} style={{ color: textMode ? 'var(--theme-accent)' : 'white' }}><Type size={20} /></button>
                     </div>
@@ -153,13 +173,37 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                     <canvas ref={canvasRef} style={{ display: 'none' }} />
 
                     {selectedTrack && (
-                        <div className="music-sticker">
+                        <div className="sticker-item music-sticker animate-scale-in">
                             <img src={selectedTrack.cover} alt="Cover" className="sticker-cover" />
                             <div className="sticker-info">
                                 <span className="sticker-title">{selectedTrack.title}</span>
                                 <span className="sticker-artist">{selectedTrack.artist}</span>
                             </div>
                             <button className="remove-sticker" onClick={() => setSelectedTrack(null)}><X size={14} /></button>
+                        </div>
+                    )}
+
+                    {pollData && (
+                        <div className="sticker-item poll-sticker animate-scale-in glass-panel">
+                            <input 
+                                className="poll-question-input"
+                                value={pollData.question}
+                                onChange={(e) => updatePoll('question', e.target.value)}
+                                placeholder="Ask a question..."
+                            />
+                            <div className="poll-options">
+                                <input 
+                                    className="poll-option-input"
+                                    value={pollData.option1}
+                                    onChange={(e) => updatePoll('option1', e.target.value)}
+                                />
+                                <input 
+                                    className="poll-option-input"
+                                    value={pollData.option2}
+                                    onChange={(e) => updatePoll('option2', e.target.value)}
+                                />
+                            </div>
+                            <button className="remove-sticker" onClick={() => setPollData(null)}><X size={14} /></button>
                         </div>
                     )}
 
@@ -211,7 +255,7 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                     </div>
                     <button 
                         className="instagram-share-btn text-gradient-bg" 
-                        onClick={() => onConfirm(previewImage, selectedTrack)}
+                        onClick={() => onConfirm(previewImage, { track: selectedTrack, poll: pollData })}
                         disabled={isUploading || (!previewImage && !textMode)}
                     >
                         {isUploading ? "Sharing..." : "Share to Story"}
