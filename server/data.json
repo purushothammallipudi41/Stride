@@ -119,98 +119,8 @@
       "hasUnreadMessages": true
     }
   },
-  "feed": [
-    {
-      "id": 1,
-      "username": "alex_stride",
-      "name": "Alex Stride",
-      "content": "Midnight Horizons is such a mood. 🌌",
-      "caption": "Midnight Horizons is such a mood. 🌌",
-      "contentUrl": "https://assets.mixkit.co/videos/preview/mixkit-night-city-skyline-time-lapse-under-the-stars-4416-large.mp4",
-      "avatar": "https://i.pravatar.cc/150?u=alex_stride",
-      "likes": 1235,
-      "comments": 5,
-      "time": "5m",
-      "isVerified": false
-    },
-    {
-      "id": 2,
-      "username": "sarah_beats",
-      "name": "Sarah Jenkins",
-      "content": "Anyone down for a collab? Working on some new techno vibes. 🎹",
-      "caption": "Anyone down for a collab? Working on some new techno vibes. 🎹",
-      "contentUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
-      "avatar": "https://i.pravatar.cc/150?u=sarah_beats",
-      "likes": 875,
-      "comments": 12,
-      "time": "15m",
-      "isVerified": true
-    },
-    {
-      "id": 3,
-      "username": "dj_neon",
-      "name": "Marcus Vibe",
-      "content": "The festival season is almost here! 🎧",
-      "caption": "The festival season is almost here! 🎧",
-      "contentUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=80",
-      "avatar": "https://i.pravatar.cc/150?u=dj_neon",
-      "likes": 2453,
-      "comments": 82,
-      "time": "1h",
-      "isVerified": true
-    },
-    {
-      "id": 4,
-      "username": "stride_official",
-      "name": "Stride Official",
-      "content": "New features dropping soon. Stay in the rhythm. 🚀",
-      "caption": "New features dropping soon. Stay in the rhythm. 🚀",
-      "contentUrl": "https://assets.mixkit.co/videos/preview/mixkit-abstract-fast-moving-light-streaks-4422-large.mp4",
-      "avatar": "https://ui-avatars.com/api/?name=Stride+Official&background=8b5cf6&color=fff",
-      "likes": 5000,
-      "comments": 150,
-      "time": "2h",
-      "isVerified": true
-    }
-  ],
-  "stories": [
-    {
-      "id": 1,
-      "username": "dj_neon",
-      "name": "Marcus Vibe",
-      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&q=80",
-      "contentUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
-      "type": "image",
-      "isVerified": true
-    },
-    {
-      "id": 2,
-      "username": "lofi_girl",
-      "name": "Sarah Jenkins",
-      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80",
-      "contentUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
-      "type": "image",
-      "isVerified": true
-    },
-    {
-      "id": 3,
-      "username": "the_weekseeker",
-      "name": "Alex Stride",
-      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&q=80",
-      "contentUrl": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
-      "type": "image",
-      "isVerified": false
-    },
-    {
-      "id": 4,
-      "username": "luna_sol",
-      "name": "Maya Moon",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&q=80",
-      "contentUrl": "https://images.unsplash.com/photo-1619983081563-430f63602796?w=800&q=80",
-      "type": "image",
-      "isVerified": true
-    }
-  ],
+  "feed": [],
+  "stories": [],
   "genres": [
     {
       "id": "g1",
@@ -370,56 +280,7 @@
       "tags": ["music", "techno", "vibe"]
     }
   ],
-  "reels": [
-    {
-      "id": 1,
-      "username": "maya_moon",
-      "name": "Maya Moon",
-      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&q=80",
-      "description": "Learning this new choreo! 💃 #dance #viral",
-      "music": "Original Audio - Maya Moon",
-      "likes": 45200,
-      "comments": 1200,
-      "url": "https://cdn.pixabay.com/video/2016/05/12/3129-166335878_tiny.mp4",
-      "isVerified": true
-    },
-    {
-      "id": 2,
-      "username": "alex_walker",
-      "name": "Alex Walker",
-      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&q=80",
-      "description": "Sunset in Santorini 🌅 Take me back.",
-      "music": "Golden Hour - JVKE",
-      "likes": 120000,
-      "comments": 3400,
-      "url": "https://cdn.pixabay.com/video/2024/02/07/199738-911047164_tiny.mp4",
-      "isVerified": false
-    },
-    {
-      "id": 3,
-      "username": "dj_neon",
-      "name": "Marcus Vibe",
-      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&q=80",
-      "description": "Late night studio vibes 🎹✨",
-      "music": "Midnight Horizon - Marcus Vibe",
-      "likes": 89000,
-      "comments": 2100,
-      "url": "https://cdn.pixabay.com/video/2023/08/21/177014-856306560_tiny.mp4",
-      "isVerified": true
-    },
-    {
-      "id": 4,
-      "username": "sarah_beats",
-      "name": "Sarah Jenkins",
-      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80",
-      "description": "New track coming soon! Stay tuned. 🚀",
-      "music": "Electronic Dreams - Sarah Beats",
-      "likes": 32000,
-      "comments": 850,
-      "url": "https://cdn.pixabay.com/video/2023/11/26/190825-888442036_tiny.mp4",
-      "isVerified": true
-    }
-  ],
+  "reels": [],
   "chat_threads": [
     {
       "id": 1,

@@ -19,7 +19,7 @@ const ExploreModal = () => {
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '/achievements' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '/insights' },
         { id: 'wallet', icon: Wallet, label: 'Wallet', path: '/wallet' },
-        { id: 'settings', icon: Settings, label: 'Settings', path: '/settings' },
+        { id: 'marketplace', icon: ShoppingBag, label: 'Marketplace', path: '/marketplace' },
     ];
 
     const handleNavigate = (path) => {
@@ -72,11 +72,11 @@ const ExploreModal = () => {
                 </div>
 
                 <div className="explore-footer">
-                    <div className="explore-item-card marketplace" onClick={() => handleNavigate('/marketplace')}>
+                    <div className="explore-item-card settings" onClick={() => handleNavigate('/settings')}>
                         <div className="item-icon-wrapper">
-                            <ShoppingBag size={24} />
+                            <Settings size={24} />
                         </div>
-                        <span>Marketplace</span>
+                        <span>Settings</span>
                     </div>
                     <div className="explore-item-card logout" onClick={handleLogout}>
                         <div className="item-icon-wrapper">
