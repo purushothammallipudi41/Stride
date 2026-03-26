@@ -1449,7 +1449,7 @@ app.post('/api/monetization/tip', async (req, res) => {
 });
 
 app.post('/api/monetization/gift-frame', async (req, res) => {
-    const { fromId, toId, frameType, amount } = req.body;
+    const { fromId, toId, frameType, amount, roomId } = req.body;
     try {
         const tx = new Transaction({ from: fromId, to: toId, amount, type: 'gift' });
         await tx.save();
@@ -1473,13 +1473,69 @@ app.post('/api/monetization/gift-frame', async (req, res) => {
             await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
         }
 
-        io.emit('global_event', {
+        const giftPayload = {
             type: 'FRAME_GIFTED',
-            data: { from: sender?.username || fromId, to: recipient?.username || toId, frameType },
+            data: { 
+                from: sender?.username || fromId, 
+                to: recipient?.username || toId, 
+                frameType,
+                amount
+            },
             timestamp: Date.now()
-        });
+        };
+
+        // Broadcast to specific room if provided, otherwise global
+        if (roomId) {
+            io.to(roomId).emit('new_gift', giftPayload);
+        } else {
+            io.emit('global_event', giftPayload);
+        }
 
         res.json({ success: true, user: updatedUser, transaction: tx });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/monetization/send-tip', async (req, res) => {
+    const { fromId, toId, amount, roomId, message } = req.body;
+    try {
+        const tx = new Transaction({ from: fromId, to: toId, amount, type: 'tip', message });
+        await tx.save();
+
+        const sender = await User.findById(fromId);
+        const recipient = await User.findById(toId);
+
+        if (recipient && sender) {
+            await Notification.create({
+                user: recipient.username,
+                type: 'tip',
+                from: sender.username,
+                senderFrame: sender.avatarFrame || 'none',
+                content: `sent you a tip of ${amount} Vibe Points! ${message ? `"${message}"` : ''}`,
+                time: 'Just now'
+            });
+            await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
+        }
+
+        const tipPayload = {
+            type: 'TIP_SENT',
+            data: { 
+                from: sender?.username || fromId, 
+                to: recipient?.username || toId, 
+                amount,
+                message
+            },
+            timestamp: Date.now()
+        };
+
+        if (roomId) {
+            io.to(roomId).emit('new_gift', tipPayload);
+        } else {
+            io.emit('global_event', tipPayload);
+        }
+
+        res.json({ success: true, transaction: tx });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

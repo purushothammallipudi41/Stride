@@ -36,6 +36,9 @@ const CommunityView = () => {
     const [isInVoice, setIsInVoice] = useState(false);
     const [events, setEvents] = useState([]);
     const [showEventModal, setShowEventModal] = useState(false);
+    const [showGiftModal, setShowGiftModal] = useState(false);
+    const [activeGift, setActiveGift] = useState(null);
+    const [targetMember, setTargetMember] = useState(null);
     const [newEventData, setNewEventData] = useState({
         title: '',
         description: '',
@@ -145,6 +148,11 @@ const CommunityView = () => {
             fetchEvents();
         }
 
+        socket.on('new_gift', (payload) => {
+            setActiveGift(payload);
+            setTimeout(() => setActiveGift(null), 5000); // Show for 5s
+        });
+
         socket.on('content_updated', (payload) => {
             if (payload.type === 'event_created') {
                 setEvents(prev => [...prev, payload.data].sort((a, b) => new Date(a.startTime) - new Date(b.startTime)));
@@ -163,6 +171,7 @@ const CommunityView = () => {
              socket.off('voice-answer');
              socket.off('ice-candidate');
              socket.off('content_updated');
+             socket.off('new_gift');
              voiceService.stopLocalStream();
         };
     }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username]);
@@ -261,6 +270,34 @@ const CommunityView = () => {
             });
         } catch (err) {
             console.error("RSVP failed:", err);
+        }
+    };
+
+    const handleSendGift = async (giftType, amount, frameType = null) => {
+        if (!targetMember) return;
+        try {
+            const endpoint = giftType === 'tip' ? '/api/monetization/send-tip' : '/api/monetization/gift-frame';
+            const body = {
+                fromId: user._id,
+                toId: targetMember._id || targetMember.id,
+                amount,
+                roomId: `community_${communityId}`,
+                frameType,
+                message: giftType === 'tip' ? `Enjoy this ${amount} VP tip! ❤️` : `Gifted you a ${frameType} frame!`
+            };
+            
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                setShowGiftModal(false);
+                setTargetMember(null);
+            }
+        } catch (err) {
+            console.error("Send gift failed:", err);
         }
     };
     
@@ -382,7 +419,14 @@ const CommunityView = () => {
                                 <Music size={48} className="pulse-icon" />
                                 <h2>{t('jukebox.jukebox_live')}</h2>
                                 <p>Listeners are currently vibing to the shared queue</p>
-                                 {!isMember && <button className="join-overlay-btn" onClick={handleJoin}>{t('jukebox.join_to_add')}</button>}
+                                 <div className="hero-actions">
+                                    {!isMember && <button className="join-overlay-btn" onClick={handleJoin}>{t('jukebox.join_to_add')}</button>}
+                                    {isMember && (
+                                        <button className="gift-btn-hero" onClick={() => { setShowGiftModal(true); setTargetMember(null); }}>
+                                            <Trophy size={18} /> Send Community Love
+                                        </button>
+                                    )}
+                                 </div>
                              </div>
 
                              {roomListeners?.length > 0 && (
@@ -592,6 +636,7 @@ const CommunityView = () => {
                                 </div>
                                  {!isMe && (
                                     <div className="member-actions">
+                                        <button className="member-item-btn" title="Send Gift" onClick={() => { setTargetMember(memberData); setShowGiftModal(true); }}><Trophy size={14} className="member-gift-icon" /></button>
                                         <button className="member-item-btn" onClick={() => handleStartCall(memberData, 'audio')} aria-label={`Start audio call with ${memberData.username}`}><Phone size={14} className="member-call-icon" /></button>
                                         <button className="member-item-btn" onClick={() => handleStartCall(memberData, 'video')} aria-label={`Start video call with ${memberData.username}`}><Video size={14} className="member-call-icon" /></button>
                                     </div>
@@ -679,6 +724,66 @@ const CommunityView = () => {
                                 Launch Event
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Virtual Gifting Modal */}
+            {showGiftModal && (
+                <div className="modal-overlay" onClick={() => setShowGiftModal(false)}>
+                    <div className="glass-panel gift-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{targetMember ? `Gift to ${targetMember.username}` : 'Community Love'}</h3>
+                            <button onClick={() => setShowGiftModal(false)}>✕</button>
+                        </div>
+                        <div className="gift-options">
+                            <div className="gift-section">
+                                <label>Send Vibe Points</label>
+                                <div className="gift-grid">
+                                    {[50, 100, 500].map(amt => (
+                                        <button key={amt} className="gift-select-btn" onClick={() => handleSendGift('tip', amt)}>
+                                            <span className="amt">{amt} VP</span>
+                                            <span className="desc">Support Vibe</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="gift-section">
+                                <label>Premium Avatar Frames</label>
+                                <div className="gift-grid">
+                                    <button className="gift-select-btn gold" onClick={() => handleSendGift('frame', 1000, 'gold')}>
+                                        <span className="amt">1,000 VP</span>
+                                        <span className="desc">Gold Frame</span>
+                                    </button>
+                                    <button className="gift-select-btn neon" onClick={() => handleSendGift('frame', 500, 'neon')}>
+                                        <span className="amt">500 VP</span>
+                                        <span className="desc">Neon Pulse</span>
+                                    </button>
+                                    <button className="gift-select-btn holo" onClick={() => handleSendGift('frame', 2500, 'holographic')}>
+                                        <span className="amt">2,500 VP</span>
+                                        <span className="desc">Holo Cosmic</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Real-time Gift Overlay */}
+            {activeGift && (
+                <div className="gift-broadcast-overlay animate-slide-up">
+                    <div className="gift-announcement">
+                        <Trophy size={24} className="gift-icon-sparkle" />
+                        <div className="gift-text">
+                            <span className="gift-sender">{activeGift.data.from}</span>
+                            <span className="gift-desc">
+                                {activeGift.type === 'TIP_SENT' 
+                                    ? `sent a ${activeGift.data.amount} VP tip!` 
+                                    : `gifted a ${activeGift.data.frameType} frame!`}
+                            </span>
+                        </div>
+                        <div className="gift-confetti"></div>
                     </div>
                 </div>
             )}
