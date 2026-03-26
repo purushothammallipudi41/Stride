@@ -189,7 +189,7 @@
     justify-content: center;
 }
 
-.explore-item-card.marketplace, .explore-item-card.logout {
+.explore-item-card.settings, .explore-item-card.logout {
     flex: 1;
     max-width: 120px;
 }
