@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const { Resend } = require('resend');
 const rateLimit = require('express-rate-limit');
 
 // Models
@@ -149,24 +150,20 @@ connectDB();
 
 // Email Configuration
 let transporter;
+let resend;
+
 const createTransporter = async () => {
-    // Priority 1: Resend (Highly recommended for Render/Production)
+    // Priority 1: Resend SDK (Most reliable for Render/Production)
     if (process.env.RESEND_API_KEY) {
-        console.log('INFO: Using Resend as the primary email provider.');
-        return nodemailer.createTransport({
-            host: "smtp.resend.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: "resend",
-                pass: process.env.RESEND_API_KEY
-            }
-        });
+        console.log('INFO: Using Resend SDK for reliable HTTP-based email delivery.');
+        resend = new Resend(process.env.RESEND_API_KEY);
+        return null; // Don't need a transporter for Resend
     }
 
-    // Priority 2: Generic SMTP/Gmail
+    // Priority 2: Generic SMTP/Gmail (Fallback)
     if (process.env.EMAIL_PASS && process.env.EMAIL_USER) {
         const port = parseInt(process.env.EMAIL_PORT || "587");
+        console.log(`INFO: Using SMTP fallback on port ${port}.`);
         return nodemailer.createTransport({
             host: process.env.EMAIL_HOST || "smtp.gmail.com",
             port,
@@ -205,56 +202,69 @@ const createTransporter = async () => {
 let transportReady = createTransporter();
 
 const sendEmail = async (to, subject, html) => {
-    const attemptSend = async (currentTransporter) => {
-        if (!currentTransporter) return { success: false, logOnly: true };
-        try {
-            console.log(`Attempting to send email to ${to}...`);
-            const info = await currentTransporter.sendMail({
-                from: `"Stride App" <contact@thestrideapp.in>`,
-                to,
-                subject,
-                html
-            });
-            console.log(`Email sent successfully to ${to}`);
-            if (nodemailer.getTestMessageUrl(info)) {
-                console.log(`PREVIEW URL: ${nodemailer.getTestMessageUrl(info)}`);
-            }
-            return { success: true };
-        } catch (err) {
-            return { success: false, error: err };
-        }
-    };
-
-    let readyTransporter = await transportReady;
-    let result = await attemptSend(readyTransporter);
-
-    if (!result.success && !result.logOnly) {
-        const err = result.error;
-        console.error(`CRITICAL: Error sending email to ${to}:`, err.message);
-        console.error(`ERROR CODE: ${err.code}, SYSCALL: ${err.syscall}, COMMAND: ${err.command}`);
+    try {
+        console.log(`Attempting to send email to ${to}...`);
         
-        if (err.code === 'EAUTH' || err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
-            console.error('SMTP FAILURE: Retrying with fallback test account...');
+        // Priority 1: Resend SDK (HTTP based, avoids SMTP port blocks on Render)
+        if (resend) {
+            console.log('Using Resend SDK Path (HTTP)...');
+            const { data, error } = await resend.emails.send({
+                from: 'Stride <onboarding@resend.dev>',
+                to: [to],
+                subject: subject,
+                html: html,
+            });
+            if (error) {
+                console.error('Resend SDK Error:', error.message);
+                throw error;
+            }
+            console.log(`Resend Email sent successfully to ${to}: ${data.id}`);
+            return true;
+        }
+
+        // Priority 2: Generic SMTP Path
+        let readyTransporter = await transportReady;
+        if (!readyTransporter) throw new Error('No email service configured');
+
+        const info = await readyTransporter.sendMail({
+            from: `"Stride App" <contact@thestrideapp.in>`,
+            to,
+            subject,
+            html
+        });
+        
+        console.log(`Email sent successfully to ${to}`);
+        if (nodemailer.getTestMessageUrl(info)) {
+            console.log(`PREVIEW URL: ${nodemailer.getTestMessageUrl(info)}`);
+        }
+        return true;
+    } catch (err) {
+        console.error(`CRITICAL: Error sending email to ${to}:`, err.message);
+        if (err.code) console.error(`ERROR CODE: ${err.code}, SYSCALL: ${err.syscall}, COMMAND: ${err.command}`);
+        
+        // Final fallback: try to create a test account if SMTP failed and resend is not active
+        if (!resend && (err.code === 'ETIMEDOUT' || err.code === 'EAUTH')) {
+            console.log('SMTP FAILURE: Attempting one-time fallback to test account...');
             try {
                 const testAccount = await nodemailer.createTestAccount();
                 const fallbackTransporter = nodemailer.createTransport({
                     host: "smtp.ethereal.email", port: 587, secure: false,
                     auth: { user: testAccount.user, pass: testAccount.pass }
                 });
-                transportReady = Promise.resolve(fallbackTransporter); // Update global for future calls
-                result = await attemptSend(fallbackTransporter);
+                await fallbackTransporter.sendMail({
+                    from: `"Stride App" <contact@thestrideapp.in>`,
+                    to,
+                    subject,
+                    html
+                });
+                console.log('Successfully sent via Ethereal fallback.');
+                return true;
             } catch (fallbackErr) {
-                console.error('FALLBACK FAILURE: Failed to create test account:', fallbackErr.message);
+                console.error('FALLBACK FAILURE:', fallbackErr.message);
             }
         }
+        return false;
     }
-
-    if (result.logOnly) {
-        console.log(`[DEV-MOCK] Email to ${to} would have been sent with content logged above.`);
-        return true;
-    }
-
-    return result.success;
 };
 
 
