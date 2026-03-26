@@ -142,8 +142,7 @@ const hydrateFromJSON = async () => {
 
         // 4. Reels
         if (data.reels) {
-            console.log('INFO: Hydrating reels (Force Refresh)...');
-            // One-time refresh to ensure Pexels URLs propagate
+            console.log('INFO: Hydrating reels (Force Refresh Pixabay)...');
             await Post.deleteMany({ type: 'reel' });
             
             for (const r of data.reels) {
