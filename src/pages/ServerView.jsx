@@ -34,6 +34,14 @@ const CommunityView = () => {
     const [isMuted, setIsMuted] = useState(false);
     const [voiceParticipants, setVoiceParticipants] = useState([]);
     const [isInVoice, setIsInVoice] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [newEventData, setNewEventData] = useState({
+        title: '',
+        description: '',
+        startTime: '',
+        type: 'general'
+    });
 
     console.log("[ServerView] Rendering for communityId:", communityId);
     console.log("[ServerView] Servers available:", servers?.length);
@@ -123,6 +131,29 @@ const CommunityView = () => {
             }
         };
 
+        const fetchEvents = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/events`);
+                const data = await res.json();
+                setEvents(data);
+            } catch (err) {
+                console.error("Fetch events failed:", err);
+            }
+        };
+
+        if (activeChannel === 'events') {
+            fetchEvents();
+        }
+
+        socket.on('content_updated', (payload) => {
+            if (payload.type === 'event_created') {
+                setEvents(prev => [...prev, payload.data].sort((a, b) => new Date(a.startTime) - new Date(b.startTime)));
+            }
+            if (payload.type === 'event_rsvp') {
+                setEvents(prev => prev.map(e => e._id === payload.eventId ? { ...e, rsvps: payload.rsvps } : e));
+            }
+        });
+
         return () => {
              if (leaveMusicRoom) leaveMusicRoom();
              socket.off('new_channel_message', handleNewMessage);
@@ -131,6 +162,7 @@ const CommunityView = () => {
              socket.off('voice-offer');
              socket.off('voice-answer');
              socket.off('ice-candidate');
+             socket.off('content_updated');
              voiceService.stopLocalStream();
         };
     }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username]);
@@ -201,6 +233,34 @@ const CommunityView = () => {
         if(window.confirm("Are you sure you want to kick this member?")) {
             const result = await kickMember(communityId, memberId);
             if (result?.message) alert("Member kicked from community.");
+        }
+    };
+
+    const handleCreateEvent = async () => {
+        if (!isMod || !newEventData.title || !newEventData.startTime) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...newEventData, createdBy: user._id })
+            });
+            setShowEventModal(false);
+            setNewEventData({ title: '', description: '', startTime: '', type: 'general' });
+        } catch (err) {
+            console.error("Create event failed:", err);
+        }
+    };
+
+    const handleRSVP = async (eventId) => {
+        if (!isMember) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/events/${eventId}/rsvp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user._id })
+            });
+        } catch (err) {
+            console.error("RSVP failed:", err);
         }
     };
     
@@ -424,6 +484,58 @@ const CommunityView = () => {
                         </div>
                     ) : activeChannel === 'analytics' ? (
                         <AnalyticsDashboard communityId={communityId} />
+                    ) : activeChannel === 'events' ? (
+                        <div className="events-calendar-view">
+                            <div className="calendar-header">
+                                <div className="header-info">
+                                    <h2>Upcoming Vibes</h2>
+                                    <p>Schedule your presence for community highlights</p>
+                                </div>
+                                {isMod && (
+                                    <button className="create-event-btn" onClick={() => setShowEventModal(true)}>
+                                        <Plus size={18} /> Schedule Event
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="events-grid">
+                                {events.map(event => (
+                                    <div key={event._id} className="event-card glass-panel animate-fade-in">
+                                        <div className={`event-type-tag ${event.type}`}>
+                                            {event.type === 'voice' ? <Phone size={14} /> : event.type === 'jukebox' ? <Music size={14} /> : <Users size={14} />}
+                                            {event.type.toUpperCase()}
+                                        </div>
+                                        <div className="event-content">
+                                            <h3>{event.title}</h3>
+                                            <p className="event-desc">{event.description}</p>
+                                            <div className="event-meta-info">
+                                                <div className="meta-item">
+                                                    <span className="meta-label">START</span>
+                                                    <span className="meta-value">{new Date(event.startTime).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <div className="meta-item">
+                                                    <span className="meta-label">RSVPs</span>
+                                                    <span className="meta-value">{event.rsvps?.length || 0}</span>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                className={`rsvp-btn ${event.rsvps?.includes(user._id) ? 'active' : ''}`}
+                                                onClick={() => handleRSVP(event._id)}
+                                                disabled={!isMember}
+                                            >
+                                                {event.rsvps?.includes(user._id) ? 'Interested ✅' : 'Count me in!'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {events.length === 0 && (
+                                    <div className="empty-events animate-fade-in">
+                                        <Bell size={48} opacity={0.3} />
+                                        <p>No upcoming events yet. Check back later!</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     ) : (
                          <ChatWindow 
                             activeChat={{ 
@@ -511,6 +623,61 @@ const CommunityView = () => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Event Creation Modal */}
+            {showEventModal && (
+                <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
+                    <div className="glass-panel event-create-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Schedule Community Event</h3>
+                            <button onClick={() => setShowEventModal(false)}>✕</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="input-group">
+                                <label>Event Title</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Weekly Lo-Fi Lounge"
+                                    value={newEventData.title}
+                                    onChange={(e) => setNewEventData({...newEventData, title: e.target.value})}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>Description</label>
+                                <textarea 
+                                    placeholder="What's the vibe?"
+                                    value={newEventData.description}
+                                    onChange={(e) => setNewEventData({...newEventData, description: e.target.value})}
+                                />
+                            </div>
+                            <div className="row">
+                                <div className="input-group">
+                                    <label>Type</label>
+                                    <select 
+                                        value={newEventData.type}
+                                        onChange={(e) => setNewEventData({...newEventData, type: e.target.value})}
+                                    >
+                                        <option value="general">General</option>
+                                        <option value="voice">Voice Lounge</option>
+                                        <option value="jukebox">Jukebox Session</option>
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label>Start Time</label>
+                                    <input 
+                                        type="datetime-local" 
+                                        value={newEventData.startTime}
+                                        onChange={(e) => setNewEventData({...newEventData, startTime: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <button className="confirm-create-btn" onClick={handleCreateEvent}>
+                                Launch Event
+                            </button>
                         </div>
                     </div>
                 </div>

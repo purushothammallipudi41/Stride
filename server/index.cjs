@@ -26,6 +26,7 @@ const Message = require('./models/Message.cjs');
 const Notification = require('./models/Notification.cjs');
 const Comment = require('./models/Comment.cjs');
 const VibeAnalytics = require('./models/VibeAnalytics.cjs');
+const Event = require('./models/Event.cjs');
 
 
 // Database Connection
@@ -585,7 +586,7 @@ app.get('/api/stories', async (req, res) => {
 
 app.post('/api/stories', async (req, res) => {
     try {
-        const { username, contentUrl, musicTrack } = req.body;
+        const { username, contentUrl, metadata } = req.body;
         const user = await User.findOne({ username });
         
         const newStory = {
@@ -593,7 +594,7 @@ app.post('/api/stories', async (req, res) => {
             username,
             avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${username}`,
             contentUrl: contentUrl || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
-            musicTrack: musicTrack || null,
+            metadata: metadata || null,
             createdAt: new Date()
         };
         
@@ -1936,6 +1937,56 @@ app.post('/api/profile/update-frame', async (req, res) => {
         io.emit('content_updated', { type: 'profile_update', username: user.username, avatarFrame: user.avatarFrame });
         
         res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/communities/:id/events', async (req, res) => {
+    try {
+        const events = await Event.find({ communityId: req.params.id }).sort({ startTime: 1 });
+        res.json(events);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/communities/:id/events', async (req, res) => {
+    try {
+        const { title, description, startTime, endTime, type, createdBy } = req.body;
+        const newEvent = await Event.create({
+            communityId: req.params.id,
+            title,
+            description,
+            startTime,
+            endTime,
+            type,
+            createdBy
+        });
+        
+        io.to(`community_${req.params.id}`).emit('content_updated', { type: 'event_created', data: newEvent });
+        res.json(newEvent);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/events/:id/rsvp', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ error: 'Event not found' });
+        
+        const index = event.rsvps.indexOf(userId);
+        if (index === -1) {
+            event.rsvps.push(userId);
+        } else {
+            event.rsvps.splice(index, 1);
+        }
+        
+        await event.save();
+        io.to(`community_${event.communityId}`).emit('content_updated', { type: 'event_rsvp', eventId: event._id, rsvps: event.rsvps });
+        res.json({ success: true, rsvps: event.rsvps });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
