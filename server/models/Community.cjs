@@ -37,6 +37,8 @@ const CommunitySchema = new mongoose.Schema({
     tags: [String],
     primaryColor: { type: String, default: '#8b5cf6' },
     accentColor: { type: String, default: '#d946ef' },
+    isLive: { type: Boolean, default: false },
+    voiceParticipants: [{ type: String }], // List of usernames in voice
     timestamp: { type: Date, default: Date.now }
 });
 

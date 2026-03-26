@@ -68,7 +68,6 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
                                 size={56} 
                                 frame={chat.avatarFrame || 'none'}
                                 isListening={isListening}
-                                isVerified={chat.isVerified}
                             />
                             <div className="chat-item-info">
                                 <div className="chat-item-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

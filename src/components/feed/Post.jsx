@@ -139,7 +139,6 @@ const Post = ({ post }) => {
                         size={32} 
                         className="post-avatar" 
                         frame={post.avatarFrame || 'none'}
-                        isVerified={post.isVerified}
                     />
                     <div className="user-details" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span className="username">{post.username}</span>

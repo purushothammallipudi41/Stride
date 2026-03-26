@@ -28,12 +28,16 @@ const Visualizer = ({ analyzer, isPlaying }) => {
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = (dataArray[i] / 255) * height;
 
-                // Gradient for bars
+                // Vibrant Gradient for bars
                 const gradient = ctx.createLinearGradient(0, height, 0, 0);
                 gradient.addColorStop(0, '#8b5cf6'); // Primary purple
                 gradient.addColorStop(1, '#ec4899'); // Accent pink
 
                 ctx.fillStyle = gradient;
+                
+                // Add Glow Effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#8b5cf640';
                 
                 // Rounded bar effect
                 const radius = 4;
@@ -41,7 +45,7 @@ const Visualizer = ({ analyzer, isPlaying }) => {
                 const finalHeight = Math.max(barHeight, minHeight);
                 
                 ctx.beginPath();
-                ctx.roundRect(x, height - finalHeight, barWidth - 2, finalHeight, [radius, radius, 0, 0]);
+                ctx.roundRect(x, height - finalHeight, barWidth - 3, finalHeight, [radius, radius, 2, 2]);
                 ctx.fill();
 
                 x += barWidth;

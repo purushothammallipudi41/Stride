@@ -29,6 +29,8 @@ const CommunityView = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showMemberSidebar, setShowMemberSidebar] = useState(true);
     const [isMuted, setIsMuted] = useState(false);
+    const [voiceParticipants, setVoiceParticipants] = useState([]);
+    const [isInVoice, setIsInVoice] = useState(false);
 
     console.log("[ServerView] Rendering for communityId:", communityId);
     console.log("[ServerView] Servers available:", servers?.length);
@@ -83,12 +85,28 @@ const CommunityView = () => {
         };
 
         socket.on('new_channel_message', handleNewMessage);
+        
+        socket.on('voice_room_updated', (data) => {
+            setVoiceParticipants(data.participants || []);
+        });
 
         return () => {
              if (leaveMusicRoom) leaveMusicRoom();
              socket.off('new_channel_message', handleNewMessage);
+             socket.off('voice_room_updated');
         };
     }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom]);
+
+    const handleToggleVoice = () => {
+        if (!isMember) return;
+        const newState = !isInVoice;
+        setIsInVoice(newState);
+        if (newState) {
+            socket.emit('join_voice', { communityId, username: user.username });
+        } else {
+            socket.emit('leave_voice', { communityId, username: user.username });
+        }
+    };
 
     const handleSendMessage = (content, type = 'text') => {
         if (!isMember) return;
@@ -189,6 +207,27 @@ const CommunityView = () => {
                             <span className="channel-name">{channel.name}</span>
                         </button>
                     ))}
+
+                    <div className="channel-group-label" style={{ marginTop: '20px' }}>Voice Channels</div>
+                    <button 
+                        className={`channel-btn voice-room-btn ${isInVoice ? 'active' : ''}`}
+                        onClick={handleToggleVoice}
+                    >
+                        <Phone size={20} className="channel-hash" />
+                        <span className="channel-name">Community Lounge</span>
+                        {voiceParticipants.length > 0 && <span className="voice-count-badge">LIVE</span>}
+                    </button>
+                    {voiceParticipants.length > 0 && (
+                        <div className="voice-participants-list">
+                            {voiceParticipants.map(participant => (
+                                <div key={participant} className="voice-participant-item animate-scale-in">
+                                    <Avatar size={20} src={null} frame="neon" />
+                                    <span className="participant-name">{participant}</span>
+                                    <div className="speaking-indicator"></div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="user-pod">

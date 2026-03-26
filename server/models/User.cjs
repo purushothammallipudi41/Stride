@@ -30,8 +30,13 @@ const userSchema = new mongoose.Schema({
     favorites: [{ type: String }], // Array of song IDs or similar
     isVerified: { type: Boolean, default: false },
     isPremium: { type: Boolean, default: false },
+    subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    subscriptionPrice: { type: Number, default: 50 },
     hasUnreadNotifications: { type: Boolean, default: false },
-    hasUnreadMessages: { type: Boolean, default: false }
+    hasUnreadMessages: { type: Boolean, default: false },
+    balance: { type: Number, default: 100 }, // Starting balance for beta users
+    transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]
 }, { timestamps: true });
 
 

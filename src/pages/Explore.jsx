@@ -21,6 +21,7 @@ const Explore = () => {
     const [userResults, setUserResults] = useState([]);
     const [trendingHashtags, setTrendingHashtags] = useState([]);
     const [tagResults, setTagResults] = useState({ posts: [], playlists: [], communities: [] });
+    const [recommendedFeed, setRecommendedFeed] = useState({ recommendedTracks: [], trendingCommunities: [] });
 
 
 
@@ -37,6 +38,21 @@ const Explore = () => {
             }
         };
         fetchTrending();
+
+        // Fetch Personalized Feed
+        const fetchDiscovery = async () => {
+            const username = localStorage.getItem('stride_user_username') || 'puru';
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/discovery/feed`, {
+                    headers: { 'x-user-username': username }
+                });
+                const data = await res.json();
+                setRecommendedFeed(data);
+            } catch (err) {
+                console.error("Discovery fetch failed:", err);
+            }
+        };
+        fetchDiscovery();
     }, []);
 
     useEffect(() => {
@@ -180,7 +196,10 @@ const Explore = () => {
                                             isListening={isUserListening(user.username)}
                                         />
                                         <div className="user-meta">
-                                            <span className="user-name">{user.name}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span className="user-name">{user.name}</span>
+                                                {user.isVerified && <VerificationBadge size={14} />}
+                                            </div>
                                             <span className="user-handle">@{user.username}</span>
                                             {isUserListening(user.username) && (
                                                 <span className="user-listening-status">Listening to {getUserTrack(user.username)?.title}</span>
@@ -243,6 +262,33 @@ const Explore = () => {
                 </div>
             ) : (
                 <div className="discovery-area">
+                    {recommendedFeed.trendingCommunities?.length > 0 && (
+                        <div className="discovery-section recommended-section animate-fade-in">
+                            <div className="section-header-row">
+                                <Layers size={20} className="icon-primary" />
+                                <h3 className="category-title">RECOMMENDED FOR YOU</h3>
+                            </div>
+                            <div className="discovery-horizontal-scroll">
+                                {recommendedFeed.trendingCommunities.map(community => (
+                                    <div 
+                                        key={community._id} 
+                                        className="discovery-community-card glass-panel"
+                                        onClick={() => navigate(`/community/${community._id}`)}
+                                    >
+                                        <div className="comm-card-banner" style={{ background: community.primaryColor }}>
+                                            {community.avatar ? <img src={community.avatar} alt="" /> : <span>{community.name[0]}</span>}
+                                        </div>
+                                        <div className="comm-card-info">
+                                            <span className="comm-card-name">{community.name}</span>
+                                            <span className="comm-card-members">{community.memberCount || 0} members</span>
+                                        </div>
+                                        <button className="comm-join-btn">Vibe</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="trending-hashtags-section">
                         <h3 className="category-title">{t('explore.trending_hashtags')}</h3>
                         <div className="hashtags-scroll">

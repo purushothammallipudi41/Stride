@@ -28,6 +28,7 @@ const Articles = lazy(() => import('./pages/Articles'));
 const Achievements = lazy(() => import('./pages/Achievements'));
 const Insights = lazy(() => import('./pages/Insights'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
+const Wallet = lazy(() => import('./pages/Wallet'));
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -106,6 +107,7 @@ const AppContent = () => {
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

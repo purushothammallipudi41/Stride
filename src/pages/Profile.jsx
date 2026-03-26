@@ -5,6 +5,9 @@ import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sp
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
 import Avatar from '../components/common/Avatar';
+import FrameShop from '../components/profile/FrameShop';
+import GiftFrame from '../components/profile/GiftFrame';
+import SubscribeButton from '../components/profile/SubscribeButton';
 import socket from '../services/socket';
 import VerificationBadge from '../components/common/VerificationBadge';
 import './Profile.css';
@@ -74,26 +77,31 @@ const Profile = () => {
     };
 
     const handleTip = async () => {
-        const amount = prompt(`Enter tip amount for ${user.username}:`, "5.00");
+        const amount = prompt(`Enter tip amount for ${user.username} (credits):`, "10");
         if (!amount || isNaN(amount)) return;
 
         try {
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/monetization/tip`, {
+            const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/tip`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-username': currentUserUsername
+                },
                 body: JSON.stringify({ 
-                    fromId: currentUser._id, 
-                    toId: user._id, 
-                    amount: parseFloat(amount)
+                    targetUsername: user.username, 
+                    amount: parseInt(amount) 
                 })
             });
             const data = await res.json();
             if (data.success) {
-                alert(`Tip of $${amount} sent to ${user.username}!`);
+                alert(`Tip of ${amount} credits sent to ${user.username}!`);
+            } else {
+                alert(data.error || "Tip failed");
             }
         } catch (err) {
             console.error("Tip failed:", err);
+            alert("Payment connection failed.");
         }
     };
 
@@ -168,15 +176,35 @@ const Profile = () => {
 
     const handleGiftFrame = async () => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/monetization/gift-frame`, {
+            const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
+            
+            // First, process the payment via wallet
+            const paymentRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/tip`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-username': currentUserUsername
+                },
+                body: JSON.stringify({ 
+                    targetUsername: user.username, 
+                    amount: 50,
+                    description: `Gifted ${selectedFrame} frame`
+                })
+            });
+            const paymentData = await paymentRes.json();
+            
+            if (!paymentData.success) {
+                alert(paymentData.error || "Insufficient credits for this gift.");
+                return;
+            }
+
+            // Then, update the profile frame
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update-frame`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    fromId: currentUser._id, 
-                    toId: user._id, 
-                    frameType: selectedFrame,
-                    amount: 50.0
+                    username: user.username, 
+                    frameType: selectedFrame 
                 })
             });
             const data = await res.json();
@@ -187,6 +215,7 @@ const Profile = () => {
             }
         } catch (err) {
             console.error("Gifting failed:", err);
+            alert("Gifting process failed.");
         }
     };
 
@@ -265,6 +294,14 @@ const Profile = () => {
                         </>
                     ) : (
                         <>
+                            <button className="ig-action-btn-main">Share profile</button>
+                        {!isOwnProfile && (
+                            <SubscribeButton 
+                                creatorUsername={user?.username} 
+                                subscriberUsername={JSON.parse(localStorage.getItem('user') || '{}').username} 
+                                price={user?.subscriptionPrice || 50} 
+                            />
+                        )}
                             <button 
                                 className={`ig-action-btn-main ${isFollowing ? 'following' : ''}`} 
                                 onClick={handleFollow}

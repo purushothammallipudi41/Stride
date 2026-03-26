@@ -77,7 +77,6 @@ const StoriesRail = () => {
                         src={user.avatar} 
                         alt="Your Story" 
                         size={72} 
-                        isVerified={user.isVerified}
                     />
                     
                     {!hasStory && (
@@ -97,7 +96,6 @@ const StoriesRail = () => {
                             src={story.avatar} 
                             alt={story.username} 
                             size={72} 
-                            isVerified={story.isVerified}
                         />
                     </div>
                     <div className="story-username-container" style={{ display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'center' }}>

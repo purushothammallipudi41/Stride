@@ -1,17 +1,39 @@
-import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout } from 'lucide-react';
+import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout, Wallet } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import socket from '../../services/socket';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { openCreateModal, openExplorer } = useUI();
     const { t } = useTranslation();
+    const [balance, setBalance] = useState(0);
+
+    const username = localStorage.getItem('stride_user_username') || 'puru';
+
+    useEffect(() => {
+        // Initial fetch
+        fetch('/api/wallet/balance', {
+            headers: { 'x-user-username': username }
+        })
+        .then(res => res.json())
+        .then(data => setBalance(data.balance || 0));
+
+        // Listen for real-time updates
+        socket.on('wallet_updated', (data) => {
+            setBalance(data.balance);
+        });
+
+        return () => socket.off('wallet_updated');
+    }, [username]);
 
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Compass, label: t('nav.explore'), path: '/explore' },
         { icon: Plus, label: t('nav.create'), action: 'create' },
+        { icon: Wallet, label: 'Wallet', path: '/wallet' },
         { icon: User, label: t('nav.profile'), path: '/profile' },
         { icon: Layout, label: t('common.more'), action: 'explore' },
     ];
@@ -34,6 +56,9 @@ const Sidebar = () => {
                         <>
                             <div className="nav-icon-wrapper">
                                 <item.icon size={24} />
+                                {item.label === 'Wallet' && balance > 0 && (
+                                    <span className="sidebar-balance-badge">{balance}</span>
+                                )}
                             </div>
                             <span className="nav-label">{item.label}</span>
                         </>

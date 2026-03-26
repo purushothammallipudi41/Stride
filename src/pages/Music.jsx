@@ -196,6 +196,9 @@ const MusicPage = () => {
                             <span className="mini-title">{currentTrack.title}</span>
                             <span className="mini-artist">{currentTrack.artist}</span>
                         </div>
+                        <div className="mini-visualizer-wrapper">
+                            <Visualizer analyzer={analyzer} isPlaying={isPlaying} />
+                        </div>
                         <div className="mini-controls" onClick={e => e.stopPropagation()}>
                             <button className="mini-play-btn" onClick={togglePlay}>
                                 {isPlaying ? <Pause size={24} fill="white" /> : <Play size={24} fill="white" />}

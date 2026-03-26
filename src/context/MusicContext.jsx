@@ -230,7 +230,22 @@ export const MusicProvider = ({ children }) => {
 
     const playTrack = useCallback(async (track) => {
         hapticImpactLight();
-        // Init analyzer on first play if not already done
+        
+        // Initialize Web Audio API for visualizers
+        if (!audioContextRef.current) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContextRef.current = new AudioContext();
+                analyzerRef.current = audioContextRef.current.createAnalyser();
+                analyzerRef.current.fftSize = 256;
+                const source = audioContextRef.current.createMediaElementSource(audioRef.current);
+                source.connect(analyzerRef.current);
+                analyzerRef.current.connect(audioContextRef.current.destination);
+            } catch (err) {
+                console.error("Web Audio API not supported or blocked:", err);
+            }
+        }
+
         if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
         }

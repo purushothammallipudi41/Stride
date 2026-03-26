@@ -16,6 +16,7 @@ const rateLimit = require('express-rate-limit');
 const User = require('./models/User.cjs');
 const Post = require('./models/Post.cjs');
 const Community = require('./models/Community.cjs');
+const DiscoveryService = require('./services/DiscoveryService.cjs');
 const Playlist = require('./models/Playlist.cjs');
 const Analytics = require('./models/Analytics.cjs');
 const Transaction = require('./models/Transaction.cjs');
@@ -743,6 +744,102 @@ app.post('/api/profile/:username/follow', async (req, res) => {
         });
 
         res.json({ success: true, followerCount: targetUser.followerCount });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- WALLET & MONETIZATION ---
+app.get('/api/wallet/balance', async (req, res) => {
+    const username = req.headers['x-user-username'];
+    try {
+        const user = await User.findOne({ username }).populate('transactions');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ balance: user.balance, transactions: user.transactions });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/wallet/topup', async (req, res) => {
+    const username = req.headers['x-user-username'];
+    const { amount } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        user.balance += amount;
+        const transaction = await Transaction.create({
+            user: username,
+            type: 'topup',
+            amount: amount,
+            description: `Topped up ${amount} credits`
+        });
+        user.transactions.push(transaction._id);
+        await user.save();
+
+        io.to(`user_${username}`).emit('wallet_updated', { balance: user.balance });
+        res.json({ success: true, balance: user.balance, transaction });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/wallet/tip', async (req, res) => {
+    const senderUsername = req.headers['x-user-username'];
+    const { targetUsername, amount, postId } = req.body;
+    try {
+        const sender = await User.findOne({ username: senderUsername });
+        const receiver = await User.findOne({ username: targetUsername });
+        
+        if (!sender || !receiver) return res.status(404).json({ error: 'User not found' });
+        if (sender.balance < amount) return res.status(400).json({ error: 'Insufficient balance' });
+
+        // Atomic-like update
+        sender.balance -= amount;
+        receiver.balance += amount;
+
+        const senderTx = await Transaction.create({
+            user: senderUsername,
+            type: 'tip',
+            amount: -amount,
+            target: targetUsername,
+            description: `Tipped ${amount} to ${targetUsername}`
+        });
+        
+        const receiverTx = await Transaction.create({
+            user: targetUsername,
+            type: 'tip',
+            amount: amount,
+            target: senderUsername,
+            description: `Received ${amount} from ${senderUsername}`
+        });
+
+        sender.transactions.push(senderTx._id);
+        receiver.transactions.push(receiverTx._id);
+
+        await sender.save();
+        await receiver.save();
+
+        // Real-time updates
+        io.to(`user_${senderUsername}`).emit('wallet_updated', { balance: sender.balance });
+        io.to(`user_${targetUsername}`).emit('wallet_updated', { balance: receiver.balance });
+
+        // Notification for receiver
+        await Notification.create({
+            user: targetUsername,
+            type: 'tip',
+            from: senderUsername,
+            content: `tipped you ${amount} credits!`,
+            time: 'Just now'
+        });
+        io.to(`user_${targetUsername}`).emit('new_notification', {
+            type: 'tip',
+            from: senderUsername,
+            content: `tipped you ${amount} credits!`
+        });
+
+        res.json({ success: true, balance: sender.balance });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1629,6 +1726,54 @@ io.on('connection', (socket) => {
         console.log(`User joined community room: community_${communityId}`);
     });
 
+    // --- VOICE ROOM EVENTS ---
+    socket.on('join_voice', async ({ communityId, username }) => {
+        try {
+            const community = await Community.findById(communityId);
+            if (!community) return;
+
+            if (!community.voiceParticipants.includes(username)) {
+                community.voiceParticipants.push(username);
+                community.isLive = true;
+                await community.save();
+                
+                io.to(`community_${communityId}`).emit('voice_room_updated', {
+                    isLive: true,
+                    participants: community.voiceParticipants
+                });
+            }
+            socket.join(`voice_${communityId}`);
+        } catch (err) {
+            console.error("Join voice failed:", err);
+        }
+    });
+
+    socket.on('leave_voice', async ({ communityId, username }) => {
+        try {
+            const community = await Community.findById(communityId);
+            if (!community) return;
+
+            community.voiceParticipants = community.voiceParticipants.filter(p => p !== username);
+            if (community.voiceParticipants.length === 0) {
+                community.isLive = false;
+            }
+            await community.save();
+
+            io.to(`community_${communityId}`).emit('voice_room_updated', {
+                isLive: community.isLive,
+                participants: community.voiceParticipants
+            });
+            socket.leave(`voice_${communityId}`);
+        } catch (err) {
+            console.error("Leave voice failed:", err);
+        }
+    });
+
+    socket.on('voice_signal', ({ communityId, signal, to, from }) => {
+        // Relay signaling data to a specific user for WebRTC P2P
+        io.to(`user_${to}`).emit('voice_signal', { signal, from });
+    });
+
     socket.on('disconnect', () => {
         const userData = socketToUser.get(socket.id);
         if (userData) {
@@ -1725,6 +1870,35 @@ io.on('connection', (socket) => {
             console.error("Track finished processing failed:", err);
         }
     });
+});
+
+app.post('/api/profile/update-frame', async (req, res) => {
+    const { username, frameType } = req.body;
+    try {
+        const user = await User.findOneAndUpdate(
+            { username },
+            { avatarFrame: frameType },
+            { new: true }
+        );
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        // Broadcast update for real-time UI reflection
+        io.emit('content_updated', { type: 'profile_update', username: user.username, avatarFrame: user.avatarFrame });
+        
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/discovery/feed', async (req, res) => {
+    const username = req.headers['x-user-username'];
+    try {
+        const feed = await DiscoveryService.getPersonalizedFeed(username);
+        res.json(feed);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 const PORT = process.env.PORT || 3001;

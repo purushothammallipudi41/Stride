@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    from: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    to: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: String, required: true }, // Username
+    type: { type: String, enum: ['topup', 'tip', 'subscription', 'withdrawal'], required: true },
     amount: { type: Number, required: true },
-    type: { type: String, enum: ['tip', 'subscription', 'gift'], default: 'tip' },
-    timestamp: { type: Date, default: Date.now },
-    trackId: { type: String } // Optional track reference for tips
+    target: { type: String }, // Target username or post ID
+    status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'completed' },
+    description: { type: String },
+    timestamp: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);
