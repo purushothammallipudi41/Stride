@@ -117,7 +117,8 @@ const Profile = () => {
             bio: user.bio || '', 
             avatar: user.avatar || '', 
             banner: user.banner || '', 
-            accentColor: user.accentColor || '#8b5cf6' 
+            accentColor: user.accentColor || '#8b5cf6',
+            avatarFrame: user.avatarFrame || 'none'
         });
         setIsEditModalOpen(true);
     }, [user]);
@@ -395,8 +396,26 @@ const Profile = () => {
                             </div>
                             
                              <div className="ig-edit-field">
-                                <label>Bio</label>
-                                <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value})} placeholder="Tell the community about yourself..." rows={3} />
+                                <label>Bio ({editData.bio.length}/150)</label>
+                                <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value.slice(0, 150)})} placeholder="Tell the community about yourself..." rows={3} />
+                            </div>
+
+                            <div className="ig-edit-field">
+                                <label>Profile Frame</label>
+                                <div className="frame-selection-row">
+                                    {['none', 'gold', 'neon', 'holographic'].map(frame => (
+                                        <div 
+                                            key={frame} 
+                                            className={`frame-select-option ${editData.avatarFrame === frame ? 'active' : ''}`}
+                                            onClick={() => setEditData({...editData, avatarFrame: frame})}
+                                        >
+                                            <div className={`frame-preview avatar-frame-${frame}`}>
+                                                <div className="inner-preview" />
+                                            </div>
+                                            <span>{frame}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {user.avatarFrame !== 'none' && (

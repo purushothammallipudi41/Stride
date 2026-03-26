@@ -587,6 +587,81 @@
     background: linear-gradient(45deg, #fbbf24, #f59e0b) !important;
 }
 
+.frame-selection-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    overflow-x: auto;
+}
+
+.frame-select-option {
+    flex: 0 0 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.frame-select-option.active {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--color-primary);
+}
+
+.frame-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.inner-preview {
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.frame-select-option span {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Avatar Frames */
+.avatar-frame-gold {
+    box-shadow: 0 0 15px #f59e0b, inset 0 0 8px #f59e0b;
+    border: 2px solid #f59e0b;
+}
+
+.avatar-frame-neon {
+    box-shadow: 0 0 15px #ec4899, inset 0 0 8px #ec4899;
+    border: 2px solid #ec4899;
+}
+
+.avatar-frame-holographic {
+    box-shadow: 0 0 15px #3b82f6, inset 0 0 8px #3b82f6;
+    border: 2px solid #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(236, 72, 153, 0.2));
+}
+
+.avatar-frame-bubble {
+    box-shadow: 0 0 15px #10b981, inset 0 0 8px #10b981;
+    border: 2px solid #10b981;
+}
+
+.avatar-frame-none {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .gift-modal {
     max-width: 400px;
 }

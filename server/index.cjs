@@ -1648,6 +1648,47 @@ io.on('connection', (socket) => {
         }
     });
 
+    // WebRTC Voice Signaling
+    socket.on('voice-offer', (payload) => {
+        const { to, offer, from } = payload;
+        io.to(`user_${to}`).emit('voice-offer', { from, offer });
+    });
+
+    socket.on('voice-answer', (payload) => {
+        const { to, answer, from } = payload;
+        io.to(`user_${to}`).emit('voice-answer', { from, answer });
+    });
+
+    socket.on('ice-candidate', (payload) => {
+        const { to, candidate, from } = payload;
+        io.to(`user_${to}`).emit('ice-candidate', { from, candidate });
+    });
+
+    const voiceRooms = new Map(); // communityId -> Set(usernames)
+
+    socket.on('join_voice', ({ communityId, username }) => {
+        socket.join(`voice_${communityId}`);
+        if (!voiceRooms.has(communityId)) voiceRooms.set(communityId, new Set());
+        voiceRooms.get(communityId).add(username);
+        
+        io.to(`voice_${communityId}`).emit('voice_room_updated', {
+            participants: Array.from(voiceRooms.get(communityId))
+        });
+        
+        // Notify others to initiate connection
+        socket.to(`voice_${communityId}`).emit('user-joined-voice', { username });
+    });
+
+    socket.on('leave_voice', ({ communityId, username }) => {
+        socket.leave(`voice_${communityId}`);
+        if (voiceRooms.has(communityId)) {
+            voiceRooms.get(communityId).delete(username);
+            io.to(`voice_${communityId}`).emit('voice_room_updated', {
+                participants: Array.from(voiceRooms.get(communityId))
+            });
+        }
+    });
+
     socket.on('mark_messages_read', async ({ username }) => {
         try {
             await User.findOneAndUpdate({ username }, { hasUnreadMessages: false });

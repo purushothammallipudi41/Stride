@@ -13,8 +13,11 @@ import ChatWindow from '../components/chat/ChatWindow';
 import AnalyticsDashboard from '../components/content/AnalyticsDashboard';
 import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
+import VoiceService from '../services/VoiceService';
 
 import './ServerView.css';
+
+const voiceService = new VoiceService(socket);
 
 const CommunityView = () => {
     const { communityId } = useParams();
@@ -90,20 +93,62 @@ const CommunityView = () => {
             setVoiceParticipants(data.participants || []);
         });
 
+        // WebRTC Signaling listeners
+        socket.on('user-joined-voice', ({ username: joinedUser }) => {
+            if (isInVoice) {
+                voiceService.initiateConnection(joinedUser, user.username);
+            }
+        });
+
+        socket.on('voice-offer', async ({ from, offer }) => {
+            await voiceService.handleOffer(offer, from, user.username);
+        });
+
+        socket.on('voice-answer', async ({ from, answer }) => {
+            await voiceService.handleAnswer(answer, from);
+        });
+
+        socket.on('ice-candidate', async ({ from, candidate }) => {
+            await voiceService.handleCandidate(candidate, from);
+        });
+
+        voiceService.onTrackCallback = (participantUsername, stream) => {
+            console.log(`Received remote track from ${participantUsername}`);
+            const audio = document.getElementById(`audio-${participantUsername}`) || document.createElement('audio');
+            audio.id = `audio-${participantUsername}`;
+            audio.srcObject = stream;
+            audio.autoplay = true;
+            if (!document.getElementById(`audio-${participantUsername}`)) {
+                document.body.appendChild(audio);
+            }
+        };
+
         return () => {
              if (leaveMusicRoom) leaveMusicRoom();
              socket.off('new_channel_message', handleNewMessage);
              socket.off('voice_room_updated');
+             socket.off('user-joined-voice');
+             socket.off('voice-offer');
+             socket.off('voice-answer');
+             socket.off('ice-candidate');
+             voiceService.stopLocalStream();
         };
-    }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom]);
+    }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username]);
 
-    const handleToggleVoice = () => {
+    const handleToggleVoice = async () => {
         if (!isMember) return;
         const newState = !isInVoice;
         setIsInVoice(newState);
         if (newState) {
-            socket.emit('join_voice', { communityId, username: user.username });
+            const stream = await voiceService.startLocalStream();
+            if (stream) {
+                socket.emit('join_voice', { communityId, username: user.username });
+            } else {
+                alert("Microphone access denied or unavailable.");
+                setIsInVoice(false);
+            }
         } else {
+            voiceService.stopLocalStream();
             socket.emit('leave_voice', { communityId, username: user.username });
         }
     };
