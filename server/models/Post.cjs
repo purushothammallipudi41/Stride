@@ -11,7 +11,7 @@ const postSchema = new mongoose.Schema({
     commentCount: { type: Number, default: 0 },
     viewCount: { type: Number, default: 0 },
     tags: [String],
-    type: { type: String, enum: ['post', 'reel'], default: 'post' },
+    type: { type: String, enum: ['post', 'reel', 'image', 'video'], default: 'post' },
     isMemberOnly: { type: Boolean, default: false },
     music: { type: String, default: "" }
 }, { timestamps: true });

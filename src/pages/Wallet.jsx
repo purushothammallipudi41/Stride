@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import SEO from '../components/common/SEO';
 import PageHeader from '../components/layout/PageHeader';
-import { CreditCard, History, ArrowUpRight, ArrowDownLeft, Plus, DollarSign, Wallet as WalletIcon } from 'lucide-react';
+import { DollarSign, Plus, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, History } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import './Wallet.css';
 
@@ -11,18 +11,21 @@ const Wallet = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showTopUp, setShowTopUp] = useState(false);
+    const [walletAddress, setWalletAddress] = useState(null);
+    const [isConnecting, setIsConnecting] = useState(false);
     const [topUpAmount, setTopUpAmount] = useState(100);
 
     const username = localStorage.getItem('stride_user_username') || 'puru';
 
     const fetchBalance = useCallback(async () => {
         try {
-            const res = await fetch('/api/wallet/balance', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/balance`, {
                 headers: { 'x-user-username': username }
             });
             const data = await res.json();
             setBalance(data.balance);
             setTransactions(data.transactions || []);
+            setWalletAddress(data.walletAddress);
             setLoading(false);
         } catch (error) {
             console.error("Failed to fetch balance:", error);
@@ -34,25 +37,100 @@ const Wallet = () => {
         fetchBalance();
     }, [fetchBalance]);
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handleTopUp = async () => {
+        setIsConnecting(true);
+        const resScript = await loadRazorpay();
+
+        if (!resScript) {
+            addNotification({ title: 'Payment Error', message: 'Razorpay SDK failed to load. Are you online?', type: 'error' });
+            setIsConnecting(false);
+            return;
+        }
+
         try {
-            const res = await fetch('/api/wallet/topup', {
+            // 1. Create order on backend
+            const orderRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/payments/order`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-user-username': username
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: parseInt(topUpAmount), username })
+            });
+            const { order } = await orderRes.json();
+
+            // 2. Open Razorpay Checkout
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+                amount: order.amount,
+                currency: order.currency,
+                name: 'Stride Credits',
+                description: `Top up ${topUpAmount} VP`,
+                order_id: order.id,
+                handler: async (response) => {
+                    // 3. Verify on backend
+                    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/payments/verify`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...response,
+                            username,
+                            amount: topUpAmount
+                        })
+                    });
+                    const data = await verifyRes.json();
+                    if (data.success) {
+                        setBalance(data.balance);
+                        setTransactions([data.transaction, ...transactions]);
+                        setShowTopUp(false);
+                        addNotification({ title: 'Top-up Successful', message: `Added ${topUpAmount} credits to your wallet.`, type: 'success' });
+                    }
                 },
-                body: JSON.stringify({ amount: parseInt(topUpAmount) })
+                prefill: {
+                    name: username,
+                    email: `${username}@stride.social`
+                },
+                theme: { color: '#8b5cf6' }
+            };
+
+            const paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+        } catch (err) {
+            console.error('Payment Error:', err);
+            addNotification({ title: 'Top-up Failed', message: 'Unable to initiate payment.', type: 'error' });
+        } finally {
+            setIsConnecting(false);
+        }
+    };
+
+    const handleConnectWallet = async () => {
+        setIsConnecting(true);
+        try {
+            // Mock Web3 connection
+            await new Promise(r => setTimeout(r, 1500));
+            const mockAddress = `0x${Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
+            
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/connect`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, walletAddress: mockAddress })
             });
             const data = await res.json();
             if (data.success) {
-                setBalance(data.balance);
-                setTransactions([data.transaction, ...transactions]);
-                setShowTopUp(false);
-                addNotification({ title: 'Top-up Successful', message: `Added ${topUpAmount} credits to your wallet.`, type: 'success' });
+                setWalletAddress(mockAddress);
+                addNotification({ title: 'Wallet Connected', message: 'Your Web3 identity is now linked to Stride.', type: 'success' });
             }
-        } catch (err) {
-            addNotification({ title: 'Top-up Failed', message: 'Something went wrong.', type: 'error' });
+        } catch {
+            addNotification({ title: 'Connection Failed', message: 'Unable to connect to Web3 provider.', type: 'error' });
+        } finally {
+            setIsConnecting(false);
         }
     };
 
@@ -71,6 +149,15 @@ const Wallet = () => {
                         <h2 className="balance-amount">
                             <DollarSign size={32} /> {balance.toLocaleString()}
                         </h2>
+                        {walletAddress ? (
+                            <div className="web3-badge animate-fade-in">
+                                <WalletIcon size={12} /> {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
+                            </div>
+                        ) : (
+                            <button className="connect-wallet-btn" onClick={handleConnectWallet} disabled={isConnecting}>
+                                {isConnecting ? 'Linking...' : 'Connect Web3 Wallet'}
+                            </button>
+                        )}
                     </div>
                     <button className="topup-trigger-btn" onClick={() => setShowTopUp(true)}>
                         <Plus size={20} /> Top Up

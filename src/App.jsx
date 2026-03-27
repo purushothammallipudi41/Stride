@@ -51,7 +51,12 @@ const AppContent = () => {
     }
     
     // Apply dynamic theme if user has custom accent color
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let user = {};
+    try {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+        user = {};
+    }
     if (user.accentColor) {
       document.documentElement.style.setProperty('--theme-primary', user.accentColor);
       document.documentElement.style.setProperty('--theme-accent', user.accentColor + '80'); // 50% opacity for accent

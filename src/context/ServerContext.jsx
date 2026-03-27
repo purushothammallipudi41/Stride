@@ -104,7 +104,12 @@ export const ServerProvider = ({ children }) => {
 
     const updateMemberRole = async (communityId, userId, role) => {
         try {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            let user = {};
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch {
+                user = {};
+            }
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}/role`, {
                 method: 'PUT',
                 headers: { 
@@ -125,7 +130,12 @@ export const ServerProvider = ({ children }) => {
 
     const kickMember = async (communityId, userId) => {
         try {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            let user = {};
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch {
+                user = {};
+            }
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}`, {
                 method: 'DELETE',
                 headers: { 'x-user-id': user._id }

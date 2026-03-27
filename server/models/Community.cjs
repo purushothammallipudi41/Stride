@@ -40,6 +40,7 @@ const CommunitySchema = new mongoose.Schema({
     isLive: { type: Boolean, default: false },
     voiceParticipants: [{ type: String }], // List of usernames in voice
     vibeScore: { type: Number, default: 0 },
+    gatedChannels: [{ type: String }], // List of channel names that require Vibe Pass
     timestamp: { type: Date, default: Date.now }
 });
 

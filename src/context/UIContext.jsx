@@ -9,7 +9,13 @@ export const UIProvider = ({ children }) => {
     const [unreadNotifications, setUnreadNotifications] = useState(0);
     const [unreadMessages, setUnreadMessages] = useState(0);
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let user = {};
+    try {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {
+        console.error("Failed to parse user from localStorage:", e);
+        user = {};
+    }
     const username = user.username || 'guest';
 
     // Fetch initial counts

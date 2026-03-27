@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import MusicContextObject from '../context/MusicContextObject';
 
 
-import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video } from 'lucide-react';
+import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
 import AnalyticsDashboard from '../components/content/AnalyticsDashboard';
 import Avatar from '../components/common/Avatar';
@@ -39,6 +39,9 @@ const CommunityView = () => {
     const [showGiftModal, setShowGiftModal] = useState(false);
     const [activeGift, setActiveGift] = useState(null);
     const [targetMember, setTargetMember] = useState(null);
+    const [hasVibePass, setHasVibePass] = useState(false);
+    const [isMinting, setIsMinting] = useState(false);
+    const [showMintModal, setShowMintModal] = useState(false);
     const [newEventData, setNewEventData] = useState({
         title: '',
         description: '',
@@ -144,9 +147,21 @@ const CommunityView = () => {
             }
         };
 
+        const checkVibePass = async () => {
+            if (!user._id || !communityId) return;
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/check-gate?userId=${user._id}`);
+                const data = await res.json();
+                setHasVibePass(data.hasAccess);
+            } catch (err) {
+                console.error("Check pass failed:", err);
+            }
+        };
+
         if (activeChannel === 'events') {
             fetchEvents();
         }
+        checkVibePass();
 
         socket.on('new_gift', (payload) => {
             setActiveGift(payload);
@@ -300,13 +315,51 @@ const CommunityView = () => {
             console.error("Send gift failed:", err);
         }
     };
-    
+
+    const handleMintPass = async () => {
+        if (!user._id || isMinting) return;
+        setIsMinting(true);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/mint-pass`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user._id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setHasVibePass(true);
+                setShowMintModal(false);
+                alert("Vibe Pass Minted! Welcome to the inner circle. 🎟️");
+            }
+        } catch {
+            alert("Minting failed. Unstable connection to chain.");
+        } finally {
+            setIsMinting(false);
+        }
+    };
+
+    const handleStakeTrack = async (trackId, amount) => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/stake`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user._id, trackId, amount })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`Staked ${amount} VP to boost this track! 🔥`);
+            }
+        } catch {
+            console.error("Staking failed");
+        }
+    };
 
     const channels = [
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
         { id: 'jukebox', name: t('jukebox.jukebox_live'), type: 'music', icon: Music },
         { id: 'events', name: 'upcoming-events', type: 'text', icon: Hash },
+        { id: 'backstage', name: 'backstage-lounge', type: 'text', icon: Lock, isGated: true },
         ...(isMod ? [{ id: 'analytics', name: 'insights', type: 'analytics', icon: BarChart3 }] : [])
     ];
 
@@ -339,16 +392,26 @@ const CommunityView = () => {
 
                 <div className="channel-list">
                     <div className="channel-group-label">Text Channels</div>
-                    {channels.map(channel => (
-                        <button 
-                            key={channel.id}
-                            className={`channel-btn ${activeChannel === channel.id ? 'active' : ''}`}
-                            onClick={() => setActiveChannel(channel.id)}
-                        >
-                            <channel.icon size={20} className="channel-hash" />
-                            <span className="channel-name">{channel.name}</span>
-                        </button>
-                    ))}
+                    {channels.map(channel => {
+                        const isLocked = channel.isGated && !hasVibePass && !isMod;
+                        return (
+                            <button 
+                                key={channel.id}
+                                className={`channel-btn ${activeChannel === channel.id ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                                onClick={() => {
+                                    if (isLocked) {
+                                        setShowMintModal(true);
+                                    } else {
+                                        setActiveChannel(channel.id);
+                                    }
+                                }}
+                            >
+                                <channel.icon size={20} className="channel-hash" />
+                                <span className="channel-name">{channel.name}</span>
+                                {isLocked && <Lock size={12} className="lock-tag" />}
+                            </button>
+                        );
+                    })}
 
                     <div className="channel-group-label" style={{ marginTop: '20px' }}>Voice Channels</div>
                     <button 
@@ -471,6 +534,11 @@ const CommunityView = () => {
                                                 <button onClick={(e) => { e.stopPropagation(); voteSong(communityId, t.trackId || t.id, 1); }} className="vote-btn up"><Plus size={12} /></button>
                                                 <span>{t?.votes || 0}</span>
                                                 <button onClick={(e) => { e.stopPropagation(); voteSong(communityId, t.trackId || t.id, -1); }} className="vote-btn down"><Plus size={12} style={{transform: 'rotate(45deg)'}} /></button>
+                                                {isMember && (
+                                                    <button className="stake-btn" onClick={(e) => { e.stopPropagation(); handleStakeTrack(t.trackId || t.id, 100); }}>
+                                                        <Trophy size={10} className="stake-icon" /> Stake 100
+                                                    </button>
+                                                )}
                                             </div>
                                          </div>
                                         <button 
@@ -784,6 +852,49 @@ const CommunityView = () => {
                             </span>
                         </div>
                         <div className="gift-confetti"></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Vibe Pass Minting Modal */}
+            {showMintModal && (
+                <div className="modal-overlay" onClick={() => setShowMintModal(false)}>
+                    <div className="glass-panel mint-pass-modal" onClick={e => e.stopPropagation()}>
+                        <div className="mint-pass-hero">
+                            <div className="pass-visual-card animate-float">
+                                <div className="logo-mini">STRIDE</div>
+                                <div className="pass-type">VIBE PASS</div>
+                                <div className="pass-id">#{Math.floor(Math.random() * 9999)}</div>
+                            </div>
+                            <div className="glow-effect"></div>
+                        </div>
+                        <div className="mint-pass-body">
+                            <h3>Join the Inner Circle</h3>
+                            <p>Unlock the <b>Backstage Lounge</b> and exclusive community events with a seasonal Vibe Pass.</p>
+                            
+                            <div className="benefits-list">
+                                <div className="benefit-item">
+                                    <div className="icon-circle"><Lock size={12} /></div>
+                                    <span>Access to Gated Channels</span>
+                                </div>
+                                <div className="benefit-item">
+                                    <div className="icon-circle"><Trophy size={12} /></div>
+                                    <span>2x Vibe Multiplier</span>
+                                </div>
+                                <div className="benefit-item">
+                                    <div className="icon-circle"><Music size={12} /></div>
+                                    <span>Priority Jukebox Selection</span>
+                                </div>
+                            </div>
+
+                            <button 
+                                className="mint-action-btn" 
+                                onClick={handleMintPass}
+                                disabled={isMinting}
+                            >
+                                {isMinting ? 'Minting on Chain...' : 'Mint Pass (500 VP)'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

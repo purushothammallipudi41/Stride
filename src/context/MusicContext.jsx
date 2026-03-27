@@ -6,8 +6,15 @@ import { hapticImpactLight, hapticImpactMedium } from '../services/haptics';
 
 export const MusicProvider = ({ children }) => {
     const getLoggedUsername = () => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        return user.username || 'guest';
+        try {
+            const userData = localStorage.getItem('user');
+            if (!userData) return 'guest';
+            const user = JSON.parse(userData);
+            return user.username || 'guest';
+        } catch (e) {
+            console.error("MusicContext: Failed to parse user from localStorage", e);
+            return 'guest';
+        }
     };
 
     const USERNAME = getLoggedUsername();
@@ -119,8 +126,13 @@ export const MusicProvider = ({ children }) => {
             console.log('Global Event received:', event);
         });
 
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user.username) {
+        let user = {};
+        try {
+            user = JSON.parse(localStorage.getItem('user') || '{}');
+        } catch {
+            user = {};
+        }
+        if (user && user.username) {
             socket.emit('register_user', {
                 username: user.username,
                 avatar: user.avatar,
@@ -450,10 +462,16 @@ export const MusicProvider = ({ children }) => {
         },
         createPlaylist: async (playlistData) => {
             try {
+                let user = {};
+                try {
+                    user = JSON.parse(localStorage.getItem('user') || '{}');
+                } catch {
+                    user = {};
+                }
                 const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...playlistData, owner: JSON.parse(localStorage.getItem('user'))._id })
+                    body: JSON.stringify({ ...playlistData, owner: user._id })
                 });
                 const newPlaylist = await res.json();
                 setPlaylists(prev => [...prev, newPlaylist]);
@@ -463,7 +481,12 @@ export const MusicProvider = ({ children }) => {
             }
         },
         addToPlaylist: async (playlistId, track) => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            let user = {};
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch {
+                user = {};
+            }
             const userId = user._id;
             try {
                 await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists/${playlistId}/tracks`, {

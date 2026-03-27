@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema({
     subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     subscriptionPrice: { type: Number, default: 50 },
     hasUnreadNotifications: { type: Boolean, default: false },
+    walletAddress: { type: String, default: null },
     hasUnreadMessages: { type: Boolean, default: false },
     balance: { type: Number, default: 100 }, // Starting balance for beta users
     transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]

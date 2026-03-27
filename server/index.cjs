@@ -10,6 +10,12 @@ const path = require('path');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { Resend } = require('resend');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret'
+});
 const rateLimit = require('express-rate-limit');
 
 // Models
@@ -18,15 +24,17 @@ const Post = require('./models/Post.cjs');
 const Community = require('./models/Community.cjs');
 const DiscoveryService = require('./services/DiscoveryService.cjs');
 const Playlist = require('./models/Playlist.cjs');
-const Analytics = require('./models/Analytics.cjs');
 const Transaction = require('./models/Transaction.cjs');
 
 
-const Message = require('./models/Message.cjs');
 const Notification = require('./models/Notification.cjs');
-const Comment = require('./models/Comment.cjs');
-const VibeAnalytics = require('./models/VibeAnalytics.cjs');
 const Event = require('./models/Event.cjs');
+const VibePass = require('./models/VibePass.cjs');
+const Stake = require('./models/Stake.cjs');
+const VibeAnalytics = require('./models/VibeAnalytics.cjs');
+const Message = require('./models/Message.cjs');
+const Comment = require('./models/Comment.cjs');
+const Analytics = require('./models/Analytics.cjs');
 
 
 // Database Connection
@@ -72,6 +80,15 @@ const connectDB = async () => {
     } catch (err) {
         console.error('CRITICAL: MongoDB connection failed:', err.message);
     }
+};
+
+const parseKiloMega = (val) => {
+    if (typeof val === 'number') return val;
+    if (typeof val !== 'string') return 0;
+    const s = val.toLowerCase().trim();
+    if (s.endsWith('m')) return parseFloat(s) * 1000000;
+    if (s.endsWith('k')) return parseFloat(s) * 1000;
+    return parseInt(s) || 0;
 };
 
 const hydrateFromJSON = async () => {
@@ -142,7 +159,12 @@ const hydrateFromJSON = async () => {
             console.log('INFO: Hydrating feed...');
             for (const p of data.feed) {
                 const userObj = await User.findOne({ username: p.username });
-                const postData = { ...p, user: userObj ? userObj._id : null };
+                const postData = { 
+                    ...p, 
+                    user: userObj ? userObj._id : null,
+                    contentUrl: p.contentUrl || p.imageUrl || p.url || "",
+                    likes: parseKiloMega(p.likes)
+                };
                 if (typeof p.comments === 'number') {
                     postData.commentCount = p.comments;
                     postData.comments = [];
@@ -160,9 +182,9 @@ const hydrateFromJSON = async () => {
                 await Post.create({
                     username: r.username,
                     user: userObj ? userObj._id : null,
-                    caption: r.description,
-                    contentUrl: r.url,
-                    likes: r.likes || 0,
+                    caption: r.description || r.caption || "",
+                    contentUrl: r.url || r.contentUrl || "",
+                    likes: parseKiloMega(r.likes),
                     music: r.music || "",
                     type: 'reel',
                     tags: r.tags || []
@@ -765,7 +787,11 @@ app.get('/api/wallet/balance', async (req, res) => {
     try {
         const user = await User.findOne({ username }).populate('transactions');
         if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json({ balance: user.balance, transactions: user.transactions });
+        res.json({ 
+            balance: user.balance, 
+            transactions: user.transactions,
+            walletAddress: user.walletAddress 
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1425,6 +1451,70 @@ app.post('/api/favorites/:username', (req, res) => {
     res.json(favorites);
 });
 
+// ── Web3 & Governance ──
+
+app.post('/api/wallet/connect', async (req, res) => {
+    const { username, walletAddress } = req.body;
+    try {
+        const user = await User.findOneAndUpdate({ username }, { walletAddress }, { new: true });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/communities/:id/mint-pass', async (req, res) => {
+    const { userId } = req.body;
+    const communityId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if (user.balance < 500) return res.status(400).json({ error: 'Insufficient VP (500 required)' });
+
+        const newPass = await VibePass.create({
+            communityId,
+            owner: userId,
+            tokenId: `STRIDE_${Date.now()}`,
+            metadata: { rank: 'Member', image: 'https://vibe.stride.social/badges/pass.png' }
+        });
+
+        user.balance -= 500;
+        await user.save();
+
+        res.json({ success: true, vibePass: newPass });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/communities/:id/check-gate', async (req, res) => {
+    const { userId } = req.query;
+    const communityId = req.params.id;
+    try {
+        const pass = await VibePass.findOne({ communityId, owner: userId });
+        res.json({ hasAccess: !!pass });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/communities/:id/stake', async (req, res) => {
+    const { userId, trackId, amount } = req.body;
+    try {
+        const user = await User.findById(userId);
+        if (user.balance < amount) return res.status(400).json({ error: 'Insufficient VP' });
+
+        const stake = await Stake.create({ userId, trackId, amount, communityId: req.params.id });
+        user.balance -= amount;
+        await user.save();
+
+        io.to(`community_${req.params.id}`).emit('content_updated', { type: 'stake_boost', trackId, amount });
+        res.json({ success: true, stake });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 async function updateCommunityVibeScores() {
     try {
         const communities = await Community.find();
@@ -1546,6 +1636,61 @@ app.post('/api/monetization/gift-frame', async (req, res) => {
 
         res.json({ success: true, user: updatedUser, transaction: tx });
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Razorpay Payment Endpoints
+app.post('/api/payments/order', async (req, res) => {
+    const { amount, currency = 'INR', username } = req.body;
+    try {
+        const options = {
+            amount: amount * 100, // amount in smallest currency unit (paise)
+            currency,
+            receipt: `receipt_${Date.now()}`,
+            notes: { username }
+        };
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+    } catch (err) {
+        console.error('Razorpay Order Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/payments/verify', async (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, username, amount } = req.body;
+    try {
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret')
+            .update(body.toString())
+            .digest('hex');
+
+        if (expectedSignature === razorpay_signature) {
+            // Payment verified, update user balance
+            const user = await User.findOneAndUpdate(
+                { username },
+                { $inc: { balance: parseInt(amount) } },
+                { new: true }
+            );
+
+            // Record transaction
+            const tx = new Transaction({
+                user: user._id,
+                amount: parseInt(amount),
+                type: 'topup',
+                description: `Razorpay Top-up (${razorpay_payment_id})`,
+                timestamp: new Date()
+            });
+            await tx.save();
+
+            res.json({ success: true, balance: user.balance, transaction: tx });
+        } else {
+            res.status(400).json({ error: 'Invalid signature' });
+        }
+    } catch (err) {
+        console.error('Razorpay Verification Error:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -2106,6 +2251,80 @@ app.get('/api/discovery/feed', async (req, res) => {
     try {
         const feed = await DiscoveryService.getPersonalizedFeed(username);
         res.json(feed);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- WEB3 & DECENTRALIZATION ---
+app.post('/api/wallet/connect', async (req, res) => {
+    const { username, walletAddress } = req.body;
+    try {
+        const user = await User.findOneAndUpdate(
+            { username },
+            { walletAddress },
+            { new: true }
+        );
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, walletAddress: user.walletAddress });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/communities/:id/mint-pass', async (req, res) => {
+    const { userId } = req.body;
+    const communityId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        // Simulation: Cost 500 VP
+        if (user.balance < 500) return res.status(400).json({ error: 'Insufficient Vibe Points' });
+        
+        user.balance -= 500;
+        const pass = await VibePass.create({
+            userId,
+            communityId,
+            tokenId: `STRIDE-${Math.floor(Math.random() * 1000000)}`,
+            metadata: {
+                tier: 'Founder',
+                mintedAt: new Date()
+            }
+        });
+        
+        await user.save();
+        io.to(`user_${user.username}`).emit('wallet_updated', { balance: user.balance });
+        
+        res.json({ success: true, pass });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/communities/:id/stake', async (req, res) => {
+    const { userId, trackId, amount } = req.body;
+    const communityId = req.params.id;
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.balance < amount) return res.status(400).json({ error: 'Insufficient balance' });
+
+        user.balance -= amount;
+        const stake = await Stake.create({
+            userId,
+            communityId,
+            trackId,
+            amount
+        });
+
+        await user.save();
+        io.to(`user_${user.username}`).emit('wallet_updated', { balance: user.balance });
+        
+        // Boost track in real-time (simulation)
+        io.to(`community_${communityId}`).emit('track_boosted', { trackId, boost: amount / 10 });
+        
+        res.json({ success: true, stake });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -1194,3 +1194,158 @@
     0% { transform: scale(1) rotate(0); filter: drop-shadow(0 0 5px gold); }
     100% { transform: scale(1.2) rotate(15deg); filter: drop-shadow(0 0 15px gold); }
 }
+.rsvp-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Vibe Pass & Gating ── */
+.channel-btn.locked {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.channel-btn.locked:hover {
+    background: rgba(239, 68, 68, 0.05);
+    color: var(--color-danger);
+    transform: none;
+}
+
+.lock-tag {
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+.mint-pass-modal {
+    width: 100%;
+    max-width: 440px;
+    padding: 0;
+    overflow: hidden;
+    background: #0a0a12;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mint-pass-hero {
+    height: 180px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.pass-visual-card {
+    width: 120px;
+    height: 160px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    transform: rotate(-5deg);
+}
+
+.pass-visual-card .logo-mini {
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: -1px;
+}
+
+.mint-pass-body {
+    padding: 32px;
+}
+
+.mint-pass-body h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.mint-pass-body p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.benefit-item .icon-circle {
+    width: 24px;
+    height: 24px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.mint-action-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 20px var(--color-primary-glow);
+    transition: all 0.3s ease;
+}
+
+.mint-action-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px var(--color-primary-glow);
+}
+
+.mint-action-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* ── Staking UI ── */
+.stake-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.stake-btn:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.stake-icon {
+    color: #ffd700;
+}
