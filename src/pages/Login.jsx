@@ -25,7 +25,7 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -43,7 +43,7 @@ const Login = () => {
           navigate('/');
         } else {
           // Send verification code before navigating
-          await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
+          await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/send-code`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: data.user.email })

@@ -45,7 +45,7 @@ const Settings = () => {
         setUser(prev => ({ ...prev, avatarFrame: newFrame })); // Optimistic update
         
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: user.username, avatarFrame: newFrame })

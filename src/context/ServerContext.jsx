@@ -15,7 +15,7 @@ export const ServerProvider = ({ children }) => {
 
     useEffect(() => {
         // Fetch existing communities from backend
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities`)
             .then(res => res.json())
             .then(data => {
                 console.log("[ServerContext] Fetched servers:", data.length);
@@ -72,7 +72,7 @@ export const ServerProvider = ({ children }) => {
 
     const addCommunity = async (communityData) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(communityData)
@@ -87,7 +87,7 @@ export const ServerProvider = ({ children }) => {
 
     const joinCommunity = async (communityId, userId) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/join`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId })
@@ -110,7 +110,7 @@ export const ServerProvider = ({ children }) => {
             } catch {
                 user = {};
             }
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}/role`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/members/${userId}/role`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ export const ServerProvider = ({ children }) => {
             } catch {
                 user = {};
             }
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/members/${userId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/members/${userId}`, {
                 method: 'DELETE',
                 headers: { 'x-user-id': user._id }
             });

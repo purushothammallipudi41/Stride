@@ -27,6 +27,13 @@
     filter: drop-shadow(0 0 8px var(--color-primary-glow));
 }
 
+.logo-image-sidebar {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px var(--color-primary-glow));
+}
+
 .logo-text {
     font-size: 1.8rem;
     font-weight: 800;

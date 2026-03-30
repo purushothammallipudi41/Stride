@@ -24,7 +24,7 @@ const Profile = () => {
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const targetUser = username || currentUser.username || 'admin';
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${targetUser}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/${targetUser}`)
             .then(res => res.json())
             .then(data => {
                 setUser(data);
@@ -56,7 +56,7 @@ const Profile = () => {
     const handleFollow = async () => {
         try {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/${user.username}/follow`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/${user.username}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -80,7 +80,7 @@ const Profile = () => {
 
         try {
             const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/tip`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/tip`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const Profile = () => {
 
     const handleUpdateProfile = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editData)
@@ -178,7 +178,7 @@ const Profile = () => {
             const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
             
             // First, process the payment via wallet
-            const paymentRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/tip`, {
+            const paymentRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/tip`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ const Profile = () => {
             }
 
             // Then, update the profile frame
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/profile/update-frame`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update-frame`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 

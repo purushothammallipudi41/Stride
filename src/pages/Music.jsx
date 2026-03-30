@@ -308,7 +308,7 @@ const MusicPage = () => {
                     </button>
                 </div>
                 <div className="albums-grid">
-                    {playlists.map(playlist => (
+                    {Array.isArray(playlists) && playlists.map(playlist => (
                         <div
                             key={playlist._id}
                             className="album-card playlist-card"
@@ -369,7 +369,7 @@ const MusicPage = () => {
                         <h3>Add to Playlist</h3>
                         <p>Select a collection for "{addingToPlaylist.title}"</p>
                         <div className="playlists-select-list">
-                            {playlists.map(p => (
+                            {Array.isArray(playlists) && playlists.map(p => (
                                 <button 
                                     key={p._id} 
                                     className="select-playlist-item"

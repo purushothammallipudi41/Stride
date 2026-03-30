@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { HelmetProvider } from 'react-helmet-async';
 import socket from './services/socket';
 import { useUI } from './hooks/useUI';
@@ -37,6 +39,7 @@ import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
 import OnboardingModal from './components/OnboardingModal';
 import CallOverlay from './components/chat/CallOverlay';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
   const { isCreateModalOpen, isExplorerOpen } = useUI();
@@ -46,8 +49,18 @@ const AppContent = () => {
   const [callInfo, setCallInfo] = useState({ isOpen: false, isIncoming: false, callerData: null, type: 'video' });
 
   useEffect(() => {
+    // Configure mobile status bar
+    if (Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.setOverlaysWebView({ overlay: true });
+        StatusBar.setStyle({ style: Style.Dark }); // Light content for dark theme
+      } catch (e) {
+        console.warn('StatusBar plugin not fully available:', e);
+      }
+    }
+
     if (!isAuthenticated && !isPublicPath) {
-      // Redirect or handle guest state
+      // Logic for guest state
     }
     
     // Apply dynamic theme if user has custom accent color
@@ -88,46 +101,52 @@ const AppContent = () => {
     <div className="app-layout">
       {!isPublicPath && <Sidebar />}
       <main className="main-content">
-        <Suspense fallback={<div className="loading-screen">Loading Stride...</div>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
-            <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" />} />
+        <ErrorBoundary>
+          <Suspense fallback={<div className="loading-screen">Loading Stride...</div>}>
+            <div className="mobile-view-container">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/explore" element={<Explore />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+                <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" />} />
 
-            <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/verify" element={<VerifyEmail />} />
-            <Route path="/artist-dashboard" element={isAuthenticated ? <ArtistDashboard /> : <Navigate to="/login" />} />
+                <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/verify" element={<VerifyEmail />} />
+                <Route path="/artist-dashboard" element={isAuthenticated ? <ArtistDashboard /> : <Navigate to="/login" />} />
 
-            <Route path="/music" element={<Music />} />
-            <Route path="/reels" element={<Reels />} />
-            <Route path="/communities/discover" element={<Communities />} />
-            <Route path="/servers" element={<Servers />} />
-            <Route path="/community/:communityId" element={<ServerView />} />
-            <Route path="/playlist/:id" element={<PlaylistView />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/insights" element={<Insights />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
-            
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+                <Route path="/music" element={<Music />} />
+                <Route path="/reels" element={<Reels />} />
+                <Route path="/communities/discover" element={<Communities />} />
+                <Route path="/servers" element={<Servers />} />
+                <Route path="/community/:communityId" element={<ServerView />} />
+                <Route path="/playlist/:id" element={<PlaylistView />} />
+                <Route path="/articles" element={<Articles />} />
+                <Route path="/achievements" element={<Achievements />} />
+                <Route path="/insights" element={<Insights />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
+                
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <GlobalNotifications />
       {isCreateModalOpen && <CreatePostModal />}
       {isExplorerOpen && <ExploreModal />}
-      <OnboardingModal 
-        isOpen={!localStorage.getItem('onboardingCompleted')} 
-        onClose={() => {
-            localStorage.setItem('onboardingCompleted', 'true');
-            window.location.reload(); // Refresh to ensure state is clean
-        }} 
-      />
+      {isAuthenticated && (
+          <OnboardingModal 
+            isOpen={!localStorage.getItem('onboardingCompleted')} 
+            onClose={() => {
+                localStorage.setItem('onboardingCompleted', 'true');
+                window.location.reload();
+            }} 
+          />
+      )}
       
       {callInfo.isOpen && (
         <CallOverlay 
@@ -143,20 +162,24 @@ const AppContent = () => {
   );
 };
 
+import { Web3Provider } from './context/Web3Provider';
+
 function App() {
   return (
     <HelmetProvider>
-      <MusicProvider>
-        <ActivityProvider>
-          <ServerProvider>
-            <UIProvider>
-              <Router>
-                <AppContent />
-              </Router>
-            </UIProvider>
-          </ServerProvider>
-        </ActivityProvider>
-      </MusicProvider>
+      <Web3Provider>
+        <MusicProvider>
+          <ActivityProvider>
+            <ServerProvider>
+              <UIProvider>
+                <Router>
+                  <AppContent />
+                </Router>
+              </UIProvider>
+            </ServerProvider>
+          </ActivityProvider>
+        </MusicProvider>
+      </Web3Provider>
     </HelmetProvider>
   );
 }

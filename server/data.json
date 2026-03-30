@@ -59,14 +59,14 @@
         {
           "id": "p1",
           "content": "Just found this amazing lo-fi track!",
-          "contentUrl": "https://assets.mixkit.co/videos/preview/mixkit-recording-studio-with-equipment-and-instruments-4434-large.mp4",
+          "contentUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200",
           "likes": 12,
           "comments": 2,
           "timestamp": "2h ago"
         },
         {
           "content": "Stride is fire 🔥",
-          "contentUrl": "https://assets.mixkit.co/videos/preview/mixkit-concert-slow-motion-of-a-dj-playing-at-a-festival-4420-large.mp4",
+          "contentUrl": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1200",
           "likes": 45,
           "comments": 8,
           "timestamp": "1d ago"
@@ -98,6 +98,18 @@
       "hasUnreadNotifications": false,
       "hasUnreadMessages": false
     },
+    "puru": {
+      "username": "puru",
+      "name": "Puru Mallipudi",
+      "email": "purushothammallipudi41@gmail.com",
+      "password": "password123",
+      "bio": "Stride Creator & Enthusiast.",
+      "avatar": "https://i.pravatar.cc/150?u=puru",
+      "followers": 1250,
+      "following": 450,
+      "isVerified": true,
+      "posts": []
+    },
     "admin": {
       "username": "admin",
       "name": "Stride Admin",
@@ -124,7 +136,7 @@
       "id": 1,
       "username": "stride_official",
       "type": "image",
-      "imageUrl": "/Users/purushothammallipudi/.gemini/antigravity/brain/54337ed3-87f7-4f4c-90d7-f42b02bc8f9c/stride_welcome_guide_1774542831989.png",
+      "imageUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
       "caption": "Welcome to Stride! 🎵 Discover the rhythm of social music. Follow artists, join spaces, and find your sound.",
       "likes": 5000,
       "comments": 151,
@@ -135,7 +147,7 @@
       "id": 2,
       "username": "stride_official",
       "type": "image",
-      "imageUrl": "/Users/purushothammallipudi/.gemini/antigravity/brain/54337ed3-87f7-4f4c-90d7-f42b02bc8f9c/stride_jukebox_guide_1774542854621.png",
+      "imageUrl": "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=80",
       "caption": "The Jukebox is live! 📻 Share audio with your community. Everyone listens together, in real-time. Join a space to start vibing.",
       "likes": 3200,
       "comments": 84,
@@ -146,7 +158,7 @@
       "id": 3,
       "username": "stride_official",
       "type": "image",
-      "imageUrl": "/Users/purushothammallipudi/.gemini/antigravity/brain/54337ed3-87f7-4f4c-90d7-f42b02bc8f9c/stride_dashboard_guide_1774542895191.png",
+      "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
       "caption": "Master your craft with the Artist Dashboard. 📈 Track your growth, manage subscriptions, and connect with your true fans.",
       "likes": 4100,
       "comments": 92,
@@ -318,10 +330,19 @@
     {
       "id": 1,
       "username": "stride_official",
-      "url": "/Users/purushothammallipudi/.gemini/antigravity/brain/54337ed3-87f7-4f4c-90d7-f42b02bc8f9c/stride_reels_guide_1774542876496.png",
+      "url": "https://images.unsplash.com/photo-1518609886364-748af2f33777?w=1200",
       "description": "Create the next viral beat! 🚀 Remix, share, and rise with Stride Reels.",
       "likes": "1.2M",
       "music": "Stride Anthem - Original",
+      "isVerified": true
+    },
+    {
+      "id": 2,
+      "username": "stride_official",
+      "url": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1200",
+      "description": "Join the rhythm. 🎵",
+      "likes": "850K",
+      "music": "Electronic Soul",
       "isVerified": true
     }
   ],

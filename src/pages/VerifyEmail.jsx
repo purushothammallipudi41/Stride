@@ -51,7 +51,7 @@ const VerifyEmail = () => {
         setError('');
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/verify-code`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/verify-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, code: fullCode })
@@ -80,7 +80,7 @@ const VerifyEmail = () => {
         if (timer > 0) return;
         setTimer(30);
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/send-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -105,7 +105,7 @@ const VerifyEmail = () => {
 
                 <div className="verify-header">
                     <div className="logo-section">
-                        <img src={logo} alt="Stride Logo" className="logo-image" />
+                        <img src={logo} alt="Stride" className="logo-image" />
                         <h1 className="logo-text">Stride</h1>
                     </div>
                     <p>We've sent a 6-digit code to <strong>{email}</strong>. Enter it below to secure your account.</p>

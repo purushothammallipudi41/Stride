@@ -15,7 +15,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     const fetchNotifications = useCallback(async () => {
         if (!user.username) return;
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/${user.username}`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/${user.username}`);
             const data = await res.json();
             setNotifications(data.notifications || []);
             setLoading(false);
@@ -40,7 +40,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
 
     const markAsRead = async () => {
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/mark-read/${user.username}`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/mark-read/${user.username}`, {
                 method: 'POST'
             });
             onClose();

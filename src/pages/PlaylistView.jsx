@@ -26,7 +26,7 @@ const PlaylistView = () => {
     const handleInvite = async () => {
         if (!inviteUsername) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists/${id}/collaborate`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${id}/collaborate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: inviteUsername })

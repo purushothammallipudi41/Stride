@@ -64,7 +64,7 @@ const ReelItem = ({ video, isActive }) => {
     const trackView = useCallback(async () => {
         if (hasViewed) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${reelId}/view`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${reelId}/view`, {
                 method: 'POST'
             });
             setHasViewed(true);
@@ -87,7 +87,7 @@ const ReelItem = ({ video, isActive }) => {
 
     const handleLike = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/${reelId}/like`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/${reelId}/like`, {
                 method: 'POST',
                 headers: { 'x-user-username': user.username }
             });

@@ -12,7 +12,7 @@ const AnalyticsDashboard = ({ communityId }) => {
             try {
                 setLoading(true);
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/analytics/community/${communityId}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/analytics/community/${communityId}`, {
                     headers: { 'x-user-id': user._id }
                 });
                 if (!response.ok) throw new Error('Failed to fetch analytics');

@@ -35,7 +35,7 @@ const Signup = () => {
 
         try {
             // 1. Create Account
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/signup`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -44,7 +44,7 @@ const Signup = () => {
 
             if (data.success) {
                 // 2. Trigger Verification Code
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/send-code`, {
+                await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/send-code`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: formData.email })

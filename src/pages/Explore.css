@@ -1,5 +1,36 @@
-.explore-container {
-    height: 100%;
+.explore-tabs {
+    display: flex;
+    gap: 12px;
+    margin: 20px auto;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.explore-tab {
+    background: var(--color-surface);
+    border: var(--glass-border);
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.explore-tab:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-primary);
+}
+
+.explore-tab.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px var(--color-primary-glow);
 }
 
 .explore-header-section {

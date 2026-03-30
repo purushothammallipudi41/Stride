@@ -10,8 +10,8 @@ const Feed = ({ type = 'foryou' }) => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const userId = user._id || user.id || user.username;
         const url = type === 'following' && userId && userId !== 'guest'
-            ? `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/following?userId=${userId}`
-            : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed`;
+            ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/following?userId=${userId}`
+            : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed`;
 
         fetch(url)
             .then(res => res.json())

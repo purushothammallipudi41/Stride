@@ -2,13 +2,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+    padding: calc(6px + env(safe-area-inset-top)) 16px 12px;
     background: var(--color-bg);
     position: sticky;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    height: calc(60px + env(safe-area-inset-top));
+    height: auto;
+    min-height: calc(56px + env(safe-area-inset-top));
     width: 100%;
 }
 

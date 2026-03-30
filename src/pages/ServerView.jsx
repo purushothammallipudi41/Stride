@@ -57,7 +57,10 @@ const CommunityView = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     // Derived state
-    const isMember = community?.members?.includes(user._id);
+    const isMember = community?.members?.some(m => {
+        const mId = (m && typeof m === 'object') ? (m._id || m.id) : m;
+        return mId?.toString() === user?._id?.toString() || mId?.toString() === user?.id?.toString();
+    });
 
     const handleAddSong = useCallback(async () => {
         if (!isMember || !allSongs?.length) return;
@@ -71,7 +74,7 @@ const CommunityView = () => {
                 artwork: randomSong.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=480&q=80'
             };
             
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/jukebox`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/jukebox`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ track: trackData, userId: user._id })
@@ -139,7 +142,7 @@ const CommunityView = () => {
 
         const fetchEvents = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/events`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/events`);
                 const data = await res.json();
                 setEvents(data);
             } catch (err) {
@@ -150,7 +153,7 @@ const CommunityView = () => {
         const checkVibePass = async () => {
             if (!user._id || !communityId) return;
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/check-gate?userId=${user._id}`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/check-gate?userId=${user._id}`);
                 const data = await res.json();
                 setHasVibePass(data.hasAccess);
             } catch (err) {
@@ -189,7 +192,7 @@ const CommunityView = () => {
              socket.off('new_gift');
              voiceService.stopLocalStream();
         };
-    }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username]);
+    }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username, user._id]);
 
     const handleToggleVoice = async () => {
         if (!isMember) return;
@@ -263,7 +266,7 @@ const CommunityView = () => {
     const handleCreateEvent = async () => {
         if (!isMod || !newEventData.title || !newEventData.startTime) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/events`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/events`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...newEventData, createdBy: user._id })
@@ -278,7 +281,7 @@ const CommunityView = () => {
     const handleRSVP = async (eventId) => {
         if (!isMember) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/events/${eventId}/rsvp`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/events/${eventId}/rsvp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id })
@@ -301,7 +304,7 @@ const CommunityView = () => {
                 message: giftType === 'tip' ? `Enjoy this ${amount} VP tip! ❤️` : `Gifted you a ${frameType} frame!`
             };
             
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${endpoint}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -320,7 +323,7 @@ const CommunityView = () => {
         if (!user._id || isMinting) return;
         setIsMinting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/mint-pass`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/mint-pass`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id })
@@ -340,7 +343,7 @@ const CommunityView = () => {
 
     const handleStakeTrack = async (trackId, amount) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/${communityId}/stake`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/stake`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id, trackId, amount })
@@ -364,6 +367,7 @@ const CommunityView = () => {
     ];
 
     const activeChannelObj = channels.find(c => c.id === activeChannel);
+    const isGatedChannel = activeChannelObj?.isGated;
 
     const brandStyle = {
         '--color-primary': community?.primaryColor || '#8b5cf6',
@@ -518,10 +522,10 @@ const CommunityView = () => {
                                     <span>{t('jukebox.up_next')}</span>
                                     <button className="add-btn-small" onClick={handleAddSong} disabled={!isMember}><Plus size={16} /> {t('jukebox.add_song')}</button>
                                 </div>
-                                {isPlaying && (
+                                {(isPlaying || activeChannel === 'jukebox') && (
                                     <div className="sync-status-bar">
-                                        <div className="jukebox-sync-indicator">{t('jukebox.live')}</div>
-                                        <span>Everyone is currently listening to <b>{currentTrack?.title}</b></span>
+                                        <div className="jukebox-sync-indicator">{isPlaying ? t('jukebox.live') : 'SYNCED'}</div>
+                                        <span>{isPlaying ? <>Everyone is currently listening to <b>{currentTrack?.title}</b></> : 'The jukebox is synced for everyone.'}</span>
                                     </div>
                                 )}
                                 {community.jukeboxQueue?.map((t, i) => (
@@ -646,6 +650,25 @@ const CommunityView = () => {
                                         <p>No upcoming events yet. Check back later!</p>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    ) : (isGatedChannel && !hasVibePass && !isMod) ? (
+                        <div className="locked-channel-overlay animate-fade-in">
+                            <div className="lock-content">
+                                <div className="lock-icon-wrapper">
+                                    <Lock size={48} className="lock-main" />
+                                    <div className="lock-glow"></div>
+                                </div>
+                                <h2>Exclusive Backstage Access</h2>
+                                <p>This channel is reserved for <b>Vibe Pass</b> holders. Mint your pass to join the inner circle, chat with artists, and unlock premium community perks.</p>
+                                <div className="mint-perks">
+                                    <div className="perk"><Trophy size={14} /> Artist Q&As</div>
+                                    <div className="perk"><Music size={14} /> Unreleased Tracks</div>
+                                    <div className="perk"><Users size={14} /> Private Voice Rooms</div>
+                                </div>
+                                <button className="mint-action-btn" onClick={() => setShowMintModal(true)}>
+                                    Mint Vibe Pass <span className="price-tag">500 VP</span>
+                                </button>
                             </div>
                         </div>
                     ) : (

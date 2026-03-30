@@ -20,6 +20,7 @@ test('Jukebox synchronization and LIVE status', async ({ page }) => {
   await page.waitForSelector('.explore-search-wrapper input');
   await page.fill('.explore-search-wrapper input', '#music');
   await page.keyboard.press('Enter');
+  await page.waitForLoadState('networkidle');
   
   await page.waitForSelector('.user-result-card');
   await page.locator('.user-result-card:has-text("Lo-Fi Lounge")').first().click();
@@ -45,6 +46,7 @@ test('Jukebox synchronization and LIVE status', async ({ page }) => {
       await joinBtn.click();
   }
 
+  await expect(addSongBtn).toBeEnabled({ timeout: 10000 });
   await addSongBtn.click();
   
   // Verify that a song was added to the queue (check for queue-card)

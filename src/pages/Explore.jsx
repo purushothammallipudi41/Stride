@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useActivity } from '../hooks/useActivity';
 import { useTranslation } from 'react-i18next';
 
-import { Search, X, Film, Layers, Music } from 'lucide-react';
+import { Search, X, Film, Layers, Music, Trophy } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Avatar from '../components/common/Avatar';
+import VerificationBadge from '../components/common/VerificationBadge';
 import './Explore.css';
 
 const Explore = () => {
@@ -29,7 +30,7 @@ const Explore = () => {
     useEffect(() => {
         const fetchTrending = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/search/trending`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/search/trending`);
                 const data = await res.json();
                 setTrendingHashtags(data.trendingTags || []);
                 setIsLoading(false);
@@ -44,7 +45,7 @@ const Explore = () => {
         const fetchDiscovery = async () => {
             const username = localStorage.getItem('stride_user_username') || 'puru';
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/discovery/feed`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/discovery/feed`, {
                     headers: { 'x-user-username': username }
                 });
                 const data = await res.json();
@@ -58,7 +59,7 @@ const Explore = () => {
 
         const fetchLeaderboard = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/communities/leaderboard`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/leaderboard`);
                 const data = await res.json();
                 setVibeLeaderboard(data);
             } catch (err) {
@@ -95,11 +96,11 @@ const Explore = () => {
             try {
                 if (query.startsWith('#')) {
                     const tag = query.substring(1);
-                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/search/tag/${tag}`);
+                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/search/tag/${tag}`);
                     const data = await res.json();
                     setTagResults(data);
                 } else {
-                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users/search?q=${query}`);
+                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/users/search?q=${query}`);
                     const data = await res.json();
                     setUserResults(data);
                 }
@@ -302,7 +303,11 @@ const Explore = () => {
                                     >
                                         <div className="vibe-rank">#{idx + 1}</div>
                                         <div className="vibe-card-main">
-                                            {community.avatar ? <img src={community.avatar} alt="" className="vibe-comm-avatar" loading="lazy" /> : <div className="vibe-comm-init">{community.name[0]}</div>}
+                                            {!community.avatar || community.avatar.length <= 2 ? (
+                                                <div className="vibe-comm-init">{community.avatar || community.name[0]}</div>
+                                            ) : (
+                                                <img src={community.avatar} alt="" className="vibe-comm-avatar" loading="lazy" />
+                                            )}
                                             <div className="vibe-comm-info">
                                                 <span className="vibe-comm-name">{community.name}</span>
                                                 <span className="vibe-comm-score">{community.vibeScore || 0} Vibe Points</span>

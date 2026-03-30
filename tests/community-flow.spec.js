@@ -15,6 +15,7 @@ test('App loads and user can navigate to explore', async ({ page }) => {
 
 test('Community interaction flow', async ({ page }) => {
   await page.goto('/explore');
+  await page.waitForLoadState('networkidle');
   
   // Wait for communities section or trending hashtags
   await expect(page.locator('.category-title').first()).toBeVisible({ timeout: 10000 });
@@ -27,6 +28,7 @@ test('Community interaction flow', async ({ page }) => {
       // Try searching for a known tag
       await page.fill('.explore-search-wrapper input', '#music');
       await page.keyboard.press('Enter');
+      await page.waitForLoadState('networkidle');
       
       // Wait for the communities section to appear and click Lo-Fi Lounge
       await page.waitForSelector('.user-result-card');

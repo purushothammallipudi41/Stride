@@ -83,40 +83,50 @@ export const MusicProvider = ({ children }) => {
         if (username === 'guest') return;
 
         // Fetch favorites
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/favorites/${username}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/favorites/${username}`)
             .then(res => res.json())
             .then(data => setFavorites(data))
             .catch(err => console.error("Failed to fetch favorites:", err));
 
         // Fetch genres
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/genres`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/genres`)
             .then(res => res.json())
             .then(data => setGenres(data))
             .catch(err => console.error("Failed to fetch genres:", err));
 
         // Fetch artists
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/artists`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/artists`)
             .then(res => res.json())
             .then(data => setArtists(data))
             .catch(err => console.error("Failed to fetch artists:", err));
 
         // Fetch albums
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/albums`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/albums`)
             .then(res => res.json())
             .then(data => setAlbums(data))
             .catch(err => console.error("Failed to fetch albums:", err));
 
         // Fetch languages
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/music/languages`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/languages`)
             .then(res => res.json())
             .then(data => setLanguages(data))
             .catch(err => console.error("Failed to fetch languages:", err));
 
         // Fetch playlists
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists/${username}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${username}`)
             .then(res => res.json())
-            .then(data => setPlaylists(data))
-            .catch(err => console.error("Failed to fetch playlists:", err));
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setPlaylists(data);
+                } else {
+                    console.warn("Playlists fetch returned non-array data:", data);
+                    setPlaylists([]);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to fetch playlists:", err);
+                setPlaylists([]);
+            });
     }, [username]);
 
 
@@ -407,7 +417,7 @@ export const MusicProvider = ({ children }) => {
     const toggleFavorite = async (track) => {
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/favorites/${username}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/favorites/${username}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ track })
@@ -468,7 +478,7 @@ export const MusicProvider = ({ children }) => {
                 } catch {
                     user = {};
                 }
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...playlistData, owner: user._id })
@@ -489,7 +499,7 @@ export const MusicProvider = ({ children }) => {
             }
             const userId = user._id;
             try {
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/playlists/${playlistId}/tracks`, {
+                await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${playlistId}/tracks`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ track, userId })

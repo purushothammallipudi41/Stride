@@ -251,7 +251,7 @@
 }
 
 .reel-follow-btn.following {
-    background: white;
+    background: var(--color-bg);
     color: black;
 }
 

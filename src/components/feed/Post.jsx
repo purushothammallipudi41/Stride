@@ -22,7 +22,7 @@ const Post = ({ post }) => {
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/comments`);
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/comments`);
             const data = await res.json();
             setComments(data);
         } catch (err) {
@@ -33,7 +33,7 @@ const Post = ({ post }) => {
     const trackView = useCallback(async () => {
         if (hasViewed) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/view`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/view`, {
                 method: 'POST'
             });
             setHasViewed(true);
@@ -87,7 +87,7 @@ const Post = ({ post }) => {
         if (!newComment.trim()) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/posts/${postId}/comments`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ const Post = ({ post }) => {
 
     const handleLike = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed/${postId}/like`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/${postId}/like`, {
                 method: 'POST',
                 headers: { 'x-user-username': user.username }
             });
@@ -152,9 +152,9 @@ const Post = ({ post }) => {
 
             <div className="post-media">
                 {!mediaError ? (
-                    post.contentUrl?.endsWith('.mp4') ? (
+                    (post.contentUrl || post.imageUrl || post.url)?.endsWith('.mp4') ? (
                         <video 
-                            src={post.contentUrl} 
+                            src={post.contentUrl || post.imageUrl || post.url} 
                             controls={false}
                             autoPlay 
                             muted 
@@ -166,7 +166,7 @@ const Post = ({ post }) => {
                         />
                     ) : (
                         <img 
-                            src={post.contentUrl} 
+                            src={post.contentUrl || post.imageUrl || post.url} 
                             alt="Post content" 
                             loading="lazy" 
                             onError={() => setMediaError(true)}
@@ -174,7 +174,10 @@ const Post = ({ post }) => {
                     )
                 ) : (
                     <div className="post-media-placeholder glass-panel" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                        <span style={{ color: 'var(--color-text-muted)' }}>Vibe unavailable</span>
+                        <div style={{ textAlign: 'center' }}>
+                            <span style={{ color: 'var(--color-text-muted)', display: 'block', marginBottom: '8px' }}>Vibe unavailable</span>
+                            <code style={{ fontSize: '10px', opacity: 0.5 }}>{post.contentUrl || post.imageUrl || post.url || 'No URL'}</code>
+                        </div>
                     </div>
                 )}
             </div>

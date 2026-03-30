@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import logo from '../../assets/stride-logo.png';
 import socket from '../../services/socket';
 import './Sidebar.css';
 
@@ -40,7 +41,7 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
-                <Activity className="logo-icon" size={32} />
+                <img src={logo} alt="Stride" className="logo-image-sidebar" />
                 <div className="logo-container">
                     <h1 className="logo-text">{t('common.stride')}</h1>
                     <span className="slogan-text">{t('common.find_your_rhythm')}</span>

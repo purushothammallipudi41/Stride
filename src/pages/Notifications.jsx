@@ -19,7 +19,7 @@ const Notifications = () => {
         resetNotifications();
 
         const fetchNotifications = () => {
-            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/${username}`)
+            fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/${username}`)
                 .then(res => res.json())
                 .then(data => {
                     setNotifications(data.notifications || []);

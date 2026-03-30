@@ -17,7 +17,7 @@ const StoriesRail = () => {
     const username = user.username || 'guest';
 
     const loadStories = () => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stories`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/stories`)
             .then(res => res.json())
             .then(data => {
                 setFriendStories(data);
@@ -48,7 +48,7 @@ const StoriesRail = () => {
 
         setIsUploading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/stories`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/stories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

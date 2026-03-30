@@ -22,12 +22,12 @@ export const UIProvider = ({ children }) => {
     useEffect(() => {
         if (username === 'guest') return;
 
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/unread-count/${username}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/unread-count/${username}`)
             .then(res => res.json())
             .then(data => setUnreadNotifications(data.count))
             .catch(err => console.error("Unread notifs fetch error:", err));
 
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/messages/unread-count/${username}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/messages/unread-count/${username}`)
             .then(res => res.json())
             .then(data => setUnreadMessages(data.count))
             .catch(err => console.error("Unread msgs fetch error:", err));
@@ -80,7 +80,7 @@ export const UIProvider = ({ children }) => {
     const resetNotifications = useCallback(async () => {
         setUnreadNotifications(0);
         if (username !== 'guest') {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/notifications/mark-all-read/${username}`, { method: 'POST' });
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/mark-all-read/${username}`, { method: 'POST' });
         }
     }, [username]);
 

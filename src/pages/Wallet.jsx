@@ -4,28 +4,33 @@ import PageHeader from '../components/layout/PageHeader';
 import { DollarSign, Plus, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, History } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import './Wallet.css';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const Wallet = () => {
     const { addNotification } = useUI();
+    const { address: evmAddress } = useAccount();
+    const { publicKey: solanaAddress } = useWallet();
+    
     const [balance, setBalance] = useState(0);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showTopUp, setShowTopUp] = useState(false);
-    const [walletAddress, setWalletAddress] = useState(null);
-    const [isConnecting, setIsConnecting] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [topUpAmount, setTopUpAmount] = useState(100);
 
     const username = localStorage.getItem('stride_user_username') || 'puru';
 
     const fetchBalance = useCallback(async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/balance`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/balance`, {
                 headers: { 'x-user-username': username }
             });
             const data = await res.json();
             setBalance(data.balance);
             setTransactions(data.transactions || []);
-            setWalletAddress(data.walletAddress);
             setLoading(false);
         } catch (error) {
             console.error("Failed to fetch balance:", error);
@@ -48,18 +53,18 @@ const Wallet = () => {
     };
 
     const handleTopUp = async () => {
-        setIsConnecting(true);
+        setIsProcessing(true);
         const resScript = await loadRazorpay();
 
         if (!resScript) {
             addNotification({ title: 'Payment Error', message: 'Razorpay SDK failed to load. Are you online?', type: 'error' });
-            setIsConnecting(false);
+            setIsProcessing(false);
             return;
         }
 
         try {
             // 1. Create order on backend
-            const orderRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/payments/order`, {
+            const orderRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/payments/order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: parseInt(topUpAmount), username })
@@ -76,7 +81,7 @@ const Wallet = () => {
                 order_id: order.id,
                 handler: async (response) => {
                     // 3. Verify on backend
-                    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/payments/verify`, {
+                    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/payments/verify`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -106,33 +111,27 @@ const Wallet = () => {
             console.error('Payment Error:', err);
             addNotification({ title: 'Top-up Failed', message: 'Unable to initiate payment.', type: 'error' });
         } finally {
-            setIsConnecting(false);
+            setIsProcessing(false);
         }
     };
 
-    const handleConnectWallet = async () => {
-        setIsConnecting(true);
-        try {
-            // Mock Web3 connection
-            await new Promise(r => setTimeout(r, 1500));
-            const mockAddress = `0x${Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
-            
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/wallet/connect`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, walletAddress: mockAddress })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setWalletAddress(mockAddress);
-                addNotification({ title: 'Wallet Connected', message: 'Your Web3 identity is now linked to Stride.', type: 'success' });
+    useEffect(() => {
+        const syncWallet = async () => {
+            const currentAddress = evmAddress || solanaAddress?.toBase58();
+            if (currentAddress) {
+                try {
+                    await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/connect`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, walletAddress: currentAddress })
+                    });
+                } catch (err) {
+                    console.error("Failed to sync wallet with backend:", err);
+                }
             }
-        } catch {
-            addNotification({ title: 'Connection Failed', message: 'Unable to connect to Web3 provider.', type: 'error' });
-        } finally {
-            setIsConnecting(false);
-        }
-    };
+        };
+        syncWallet();
+    }, [evmAddress, solanaAddress, username]);
 
     if (loading) return <div className="loading-state">Loading your vibes...</div>;
 
@@ -147,16 +146,17 @@ const Wallet = () => {
                     <div className="balance-info">
                         <span className="balance-label">Current Balance</span>
                         <h2 className="balance-amount">
-                            <DollarSign size={32} /> {balance.toLocaleString()}
+                            <DollarSign size={32} /> {(balance || 0).toLocaleString()}
                         </h2>
-                        {walletAddress ? (
+                        {(evmAddress || solanaAddress) ? (
                             <div className="web3-badge animate-fade-in">
-                                <WalletIcon size={12} /> {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
+                                <WalletIcon size={12} /> {evmAddress ? `${evmAddress.substring(0, 6)}...${evmAddress.substring(38)}` : `${solanaAddress.toBase58().substring(0, 4)}...${solanaAddress.toBase58().substring(40)}`}
                             </div>
                         ) : (
-                            <button className="connect-wallet-btn" onClick={handleConnectWallet} disabled={isConnecting}>
-                                {isConnecting ? 'Linking...' : 'Connect Web3 Wallet'}
-                            </button>
+                            <div className="wallet-connect-group">
+                                <ConnectButton label="Connect Polygon" />
+                                <WalletMultiButton className="solana-connect-btn" />
+                            </div>
                         )}
                     </div>
                     <button className="topup-trigger-btn" onClick={() => setShowTopUp(true)}>
@@ -200,7 +200,7 @@ const Wallet = () => {
                                         <span className="tx-date">{new Date(tx.timestamp).toLocaleDateString()}</span>
                                     </div>
                                     <span className={`tx-amount ${tx.amount > 0 ? 'positive' : 'negative'}`}>
-                                        {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                        {tx.amount > 0 ? '+' : ''}{(tx.amount || 0).toLocaleString()}
                                     </span>
                                 </div>
                             ))
@@ -242,8 +242,8 @@ const Wallet = () => {
                             />
                         </div>
 
-                        <button className="confirm-topup-btn" onClick={handleTopUp}>
-                            Confirm Payment
+                        <button className="confirm-topup-btn" onClick={handleTopUp} disabled={isProcessing}>
+                            {isProcessing ? 'Processing...' : 'Confirm Payment'}
                         </button>
                     </div>
                 </div>

@@ -10,7 +10,7 @@ const Reels = () => {
     const containerRef = useRef(null);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/reels`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/reels`)
             .then(res => res.json())
             .then(data => {
                 setReelsData(data);
