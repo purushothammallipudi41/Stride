@@ -46,7 +46,7 @@
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "viem": "^2.47.6",
-    "wagmi": "^3.6.0"
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

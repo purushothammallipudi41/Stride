@@ -7,12 +7,19 @@
     overflow: hidden;
 }
 
+@media (max-width: 900px) {
+    .channel-sidebar, .member-sidebar {
+        display: none;
+    }
+}
+
 .channel-sidebar {
     width: 240px;
-    background: #0a0a12; /* Solid background */
+    background: #0d0d12; /* Solid midnight surface */
     display: flex;
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
 }
 
 .server-header {
@@ -225,10 +232,11 @@
 
 .member-sidebar {
     width: 260px;
-    background: #0a0a12; /* Solid background */
+    background: #0d0d12; /* Solid midnight surface */
     padding: 32px 16px;
     overflow-y: auto;
     border-left: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
 }
 
 .member-group-label {
@@ -896,6 +904,7 @@
     margin-bottom: 20px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

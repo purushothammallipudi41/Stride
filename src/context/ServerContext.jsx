@@ -13,6 +13,14 @@ export const ServerProvider = ({ children }) => {
     const [servers, setServers] = useState([]);
     const [realTimeActivity, setRealTimeActivity] = useState([]);
 
+    const matchCommunityId = (server, idOrName) => {
+        if (!server || !idOrName) return false;
+        const target = String(idOrName);
+        return String(server._id) === target || 
+               (server.id && String(server.id) === target) || 
+               (server.name && server.name === idOrName);
+    };
+
     useEffect(() => {
         // Fetch existing communities from backend
         fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities`)
@@ -42,22 +50,24 @@ export const ServerProvider = ({ children }) => {
         socket.on('global_event', (event) => {
             if (event.type === 'COMMUNITY_CREATED') {
                 setServers(prev => {
-                    if (prev.find(s => s._id === event.data._id)) return prev;
+                    if (prev.find(s => matchCommunityId(s, event.data._id))) return prev;
                     return [...prev, event.data];
                 });
             }
         });
 
         socket.on('jukebox_updated', ({ communityId, queue }) => {
+            console.log("[ServerContext] Jukebox updated (Socket):", communityId, "Queue size:", queue?.length);
             setServers(prev => prev.map(s => 
-                s._id === communityId ? { ...s, jukeboxQueue: queue } : s
+                matchCommunityId(s, communityId) ? { ...s, jukeboxQueue: queue } : s
             ));
         });
 
 
         socket.on('community_updated', ({ communityId, community }) => {
-            console.log("[ServerContext] Community updated:", communityId);
-            setServers(prev => prev.map(s => s._id === communityId ? community : s));
+            if (community && (community._id || community.id)) {
+                setServers(prev => prev.map(s => matchCommunityId(s, communityId) ? community : s));
+            }
         });
 
         return () => {
@@ -87,13 +97,25 @@ export const ServerProvider = ({ children }) => {
 
     const joinCommunity = async (communityId, userId) => {
         try {
+            console.log("[ServerContext] Joining community (API Request):", communityId, "for user:", userId);
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId })
             });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("[ServerContext] Join API Error:", errorData);
+                return errorData;
+            }
+
             const updated = await response.json();
-            setServers(prev => prev.map(s => s._id === communityId ? updated : s));
+            
+            if (updated && (updated._id || updated.id)) {
+                setServers(prev => prev.map(s => matchCommunityId(s, communityId) ? updated : s));
+            }
+            
             socket.emit('join_community', communityId);
             return updated;
         } catch (error) {
@@ -120,7 +142,7 @@ export const ServerProvider = ({ children }) => {
             });
             const updatedData = await response.json();
             if (updatedData.community) {
-                setServers(prev => prev.map(s => s._id === communityId ? updatedData.community : s));
+                setServers(prev => prev.map(s => matchCommunityId(s, communityId) ? updatedData.community : s));
             }
             return updatedData;
         } catch (error) {
@@ -142,7 +164,7 @@ export const ServerProvider = ({ children }) => {
             });
             const updatedData = await response.json();
             if (updatedData.community) {
-                setServers(prev => prev.map(s => s._id === communityId ? updatedData.community : s));
+                setServers(prev => prev.map(s => matchCommunityId(s, communityId) ? updatedData.community : s));
             }
             return updatedData;
         } catch (error) {

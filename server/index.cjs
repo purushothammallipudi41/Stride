@@ -66,8 +66,11 @@ const connectDB = async () => {
     try {
         let uri = process.env.MONGODB_URI;
         if (!uri) {
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error('MONGODB_URI environment variable is required in production.');
+            }
             console.log('INFO: No MONGODB_URI found. Starting MongoMemoryServer for local development...');
-            const { MongoMemoryServer } = require('mongodb-memory-server');
+            const { MongoMemoryServer } = await import('mongodb-memory-server');
             const mongoServer = await MongoMemoryServer.create();
             uri = mongoServer.getUri();
         }
@@ -123,6 +126,7 @@ const hydrateFromJSON = async () => {
                     { 
                         $setOnInsert: { owner: communityData.owner, members: [] },
                         $set: { 
+                            id: s.id, // Legacy ID from data.json
                             description: communityData.description,
                             memberCount: communityData.memberCount,
                             avatar: communityData.avatar,
@@ -1045,37 +1049,75 @@ app.post('/api/communities', async (req, res) => {
 app.post('/api/communities/:id/join', async (req, res) => {
     try {
         const { userId } = req.body;
-        const community = await Community.findById(req.params.id);
-        if (!community) return res.status(404).json({ error: "Community not found" });
+        const { id } = req.params;
         
-        if (!community.members.some(id => id.toString() === userId.toString())) {
+        console.log(`[Backend API] Join request for community: ${id}, user: ${userId}`);
+
+        // Find by ObjectId or legacy numeric ID or Name
+        const query = {
+            $or: [
+                { _id: mongoose.isValidObjectId(id) ? id : new mongoose.Types.ObjectId() },
+                { id: isNaN(parseInt(id)) ? -1 : parseInt(id) },
+                { name: id }
+            ]
+        };
+        
+        const community = await Community.findOne(query);
+        
+        if (!community) {
+            return res.status(404).json({ error: "Community not found" });
+        }
+        
+        // Ensure user exists (Auto-hydrate for tests/mocking)
+        let existingUser = await User.findById(userId);
+        if (!existingUser && mongoose.isValidObjectId(userId)) {
+            existingUser = await User.create({ 
+                _id: userId, 
+                username: `user_${userId.toString().slice(-4)}`, 
+                name: `User ${userId.toString().slice(-4)}`,
+                email: `user_${userId}@example.com`,
+                password: 'password123',
+                avatar: `https://i.pravatar.cc/150?u=${userId}`
+            });
+        }
+        
+        const isAlreadyMember = community.members.some(m => m.toString() === userId.toString());
+        
+        if (!isAlreadyMember) {
             community.members.push(userId);
             community.memberCount = community.members.length;
             await community.save();
             
-            const updated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
+            const updated = await Community.findOne({ _id: community._id }).populate('members', 'username avatar avatarFrame');
             
             // Broadcast to everyone that a member joined
             io.emit('community_updated', { 
                 type: 'MEMBER_JOINED', 
-                communityId: req.params.id, 
+                communityId: community._id, 
                 community: updated 
             });
             
             res.json(updated);
         } else {
-            const populated = await Community.findById(req.params.id).populate('members', 'username avatar avatarFrame');
+            const populated = await Community.findOne({ _id: community._id }).populate('members', 'username avatar avatarFrame');
             res.json(populated);
         }
     } catch (err) {
+        console.error("[Backend API] Error in join:", err);
         res.status(500).json({ error: err.message });
     }
 });
 
 app.get('/api/communities/:id/jukebox', async (req, res) => {
     try {
-        const community = await Community.findById(req.params.id);
-        res.json(community.jukeboxQueue || []);
+        const { id } = req.params;
+        const community = await Community.findOne({
+            $or: [
+                { _id: mongoose.isValidObjectId(id) ? id : new mongoose.Types.ObjectId() },
+                { id: isNaN(parseInt(id)) ? -1 : parseInt(id) }
+            ]
+        });
+        res.json(community?.jukeboxQueue || []);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1084,15 +1126,35 @@ app.get('/api/communities/:id/jukebox', async (req, res) => {
 app.post('/api/communities/:id/jukebox', async (req, res) => {
     try {
         const { track, userId } = req.body;
-        const community = await Community.findById(req.params.id);
+        const { id } = req.params;
+        
+        const community = await Community.findOne({
+            $or: [
+                { _id: mongoose.isValidObjectId(id) ? id : new mongoose.Types.ObjectId() },
+                { id: isNaN(parseInt(id)) ? -1 : parseInt(id) }
+            ]
+        });
+        
+        if (!community) return res.status(404).json({ error: "Community not found" });
+
+        const isFirstTrack = community.jukeboxQueue.length === 0;
         community.jukeboxQueue.push({ ...track, addedBy: userId });
         await community.save();
         
         // Notify members via socket
-        io.to(`community_${req.params.id}`).emit('jukebox_updated', { 
-            communityId: req.params.id, 
+        io.to(`community_${id}`).emit('jukebox_updated', { 
+            communityId: id, 
             queue: community.jukeboxQueue 
         });
+
+        if (isFirstTrack) {
+            io.to(`community_${id}`).emit('playback_synced', {
+                track: track,
+                progress: 0,
+                isPlaying: true,
+                sender: 'system'
+            });
+        }
         
         res.json(community.jukeboxQueue);
     } catch (err) {

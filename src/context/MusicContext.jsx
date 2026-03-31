@@ -513,9 +513,14 @@ export const MusicProvider = ({ children }) => {
         currentRoom,
         roomListeners,
         joinMusicRoom: (roomId) => {
-            setCurrentRoom(roomId);
-            socket.emit('join_room', roomId);
-            socket.emit('request_sync', { roomId, requester: username });
+            // Ensure consistency in community room names (back-end expects community_ID)
+            const target = (roomId && roomId.length === 24 && /^[0-9a-fA-F]{24}$/.test(roomId)) 
+                ? `community_${roomId}` 
+                : roomId;
+                
+            setCurrentRoom(target);
+            socket.emit('join_room', target);
+            socket.emit('request_sync', { roomId: target, requester: username });
         },
         leaveMusicRoom: () => {
             setCurrentRoom(null);

@@ -103,7 +103,7 @@ const AppContent = () => {
       <main className="main-content">
         <ErrorBoundary>
           <Suspense fallback={<div className="loading-screen">Loading Stride...</div>}>
-            <div className="mobile-view-container">
+            <div className={location.pathname.startsWith('/community/') ? "full-view-container" : "mobile-view-container"}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/explore" element={<Explore />} />

@@ -43,9 +43,16 @@ test('Jukebox synchronization and LIVE status', async ({ page }) => {
   // but we can also click the Join button if it exists.
   const joinBtn = page.locator('.join-overlay-btn');
   if (await joinBtn.isVisible()) {
+      console.log('Clicking Join button...');
       await joinBtn.click();
+      // Wait for the join button to disappear
+      await expect(joinBtn).not.toBeVisible({ timeout: 5000 });
   }
 
+  // After joining, the app might temporarily show "Finding community..." while the state updates
+  await expect(page.getByText('Finding community...')).not.toBeVisible({ timeout: 5000 });
+
+  console.log('Waiting for Add Song button to be enabled...');
   await expect(addSongBtn).toBeEnabled({ timeout: 10000 });
   await addSongBtn.click();
   

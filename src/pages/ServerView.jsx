@@ -49,11 +49,12 @@ const CommunityView = () => {
         type: 'general'
     });
 
-    console.log("[ServerView] Rendering for communityId:", communityId);
-    console.log("[ServerView] Servers available:", servers?.length);
-    
-    const community = servers.find(s => s._id === communityId);
-    console.log("[ServerView] Found community:", community?.name);
+    const communityIdTarget = String(communityId);
+    const community = servers.find(s => 
+        String(s._id) === communityIdTarget || 
+        (s.id && String(s.id) === communityIdTarget) || 
+        (s.name && s.name === communityId)
+    );
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     // Derived state
@@ -244,21 +245,39 @@ const CommunityView = () => {
     };
 
     if (!community) {
-        return <div className="loading-screen">Finding community...</div>;
+        return (
+            <div className="loading-screen" id="debug-loading-screen">
+                <div className="loading-spinner"></div>
+                <h2>Finding community...</h2>
+                <div style={{ marginTop: '20px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '12px', textAlign: 'left', maxWidth: '80%', overflow: 'auto' }}>
+                    <p><b>Target communityId:</b> {communityId}</p>
+                    <p><b>Target String:</b> {communityIdTarget}</p>
+                    <p><b>Total Servers in State:</b> {servers.length}</p>
+                    <p><b>Server IDs in State:</b></p>
+                    <ul>
+                        {servers.map((s, i) => (
+                            <li key={i}>
+                                _id: {String(s._id)}, id: {s.id}, name: "{s.name}"
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        );
     }
 
     const handleJoin = async () => {
-        if (user?._id) await joinCommunity(communityId, user._id);
+        if (user?._id) await joinCommunity(community?._id || communityId, user._id);
     };
 
     const handlePromote = async (memberId) => {
-        const result = await updateMemberRole(communityId, memberId, 'mod');
+        const result = await updateMemberRole(community?._id || communityId, memberId, 'mod');
         if (result?.message) alert("Member promoted to Moderator!");
     };
 
     const handleKick = async (memberId) => {
         if(window.confirm("Are you sure you want to kick this member?")) {
-            const result = await kickMember(communityId, memberId);
+            const result = await kickMember(community?._id || communityId, memberId);
             if (result?.message) alert("Member kicked from community.");
         }
     };
@@ -524,7 +543,7 @@ const CommunityView = () => {
                                 </div>
                                 {(isPlaying || activeChannel === 'jukebox') && (
                                     <div className="sync-status-bar">
-                                        <div className="jukebox-sync-indicator">{isPlaying ? t('jukebox.live') : 'SYNCED'}</div>
+                                        <div className="jukebox-sync-indicator">{(isPlaying || (community.jukeboxQueue && community.jukeboxQueue.length > 0)) ? t('jukebox.live') : 'SYNCED'}</div>
                                         <span>{isPlaying ? <>Everyone is currently listening to <b>{currentTrack?.title}</b></> : 'The jukebox is synced for everyone.'}</span>
                                     </div>
                                 )}

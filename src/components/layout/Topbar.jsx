@@ -12,7 +12,7 @@ const Topbar = () => {
     const [showNotifPopover, setShowNotifPopover] = useState(false);
 
     return (
-        <header className="topbar instagram-header">
+        <header className="topbar">
             <div className="topbar-logo-section">
                 <img src={logo} alt="Stride" className="topbar-logo" />
                 <span className="topbar-logo-text">Stride</span>
