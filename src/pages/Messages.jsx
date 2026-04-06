@@ -181,6 +181,7 @@ const Messages = () => {
                         roomId={`chat_${activeChatId}`}
                         currentUser={userProfile.username}
                         onBack={() => setActiveChatId(null)}
+                        typingUsers={typingUsers}
                     />
                 </div>
             </div>

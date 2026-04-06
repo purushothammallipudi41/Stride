@@ -5,7 +5,7 @@ import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
 import './Chat.css';
 
-const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons }) => {
+const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers }) => {
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
     const messagesEndRef = useRef(null);
@@ -47,103 +47,97 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     }
 
     return (
-        <div className={`chat-window-v2 animate-fade-in ${isDisabled ? 'disabled' : ''}`}>
-            <div className="chat-header-v2">
+        <div className={`chat-window-v3 animate-fade-in ${isDisabled ? 'disabled' : ''}`}>
+            <div className="chat-header-glass">
                 <div className="chat-header-left">
                     <button 
-                        className="chat-action-icon" 
+                        className="chat-back-btn" 
                         onClick={onBack} 
-                        style={{ background: 'none', border: 'none', color: '#fff', padding: 0 }}
                         aria-label="Go back"
                     >
-                        <ChevronLeft size={28} />
+                        <ChevronLeft size={24} />
                     </button>
-                    <Avatar 
-                        src={activeChat.avatar} 
-                        alt="Avatar" 
-                        size={32} 
-                        frame={activeChat.avatarFrame || 'none'}
-                    />
+                    <div className="chat-avatar-ring">
+                        <Avatar 
+                            src={activeChat.avatar} 
+                            alt="Avatar" 
+                            size={38} 
+                            frame={activeChat.avatarFrame || 'none'}
+                        />
+                    </div>
                     <div className="chat-header-info">
-                        <div className="chat-header-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span className="chat-header-name" style={{ margin: 0 }}>{activeChat.name || activeChat.username}</span>
-                            {activeChat.isVerified && <VerificationBadge size={16} />}
+                        <div className="chat-header-name-row">
+                            <span className="chat-header-name">{activeChat.name || activeChat.username}</span>
+                            {activeChat.isVerified && <VerificationBadge size={14} />}
                         </div>
-                        {activeChat.username && activeChat.username !== (activeChat.name || activeChat.username) && (
-                            <span className="chat-header-sub">{activeChat.username}</span>
-                        )}
+                        <span className="chat-header-status">{typingUsers?.has(activeChat.username) ? 'typing...' : 'Active now'}</span>
                     </div>
                 </div>
                 {!hideCallButtons && (
                     <div className="chat-header-right">
-                        <button className="chat-action-icon-btn" onClick={() => onStartCall && onStartCall('audio')} aria-label="Audio Call">
-                            <Phone size={24} className="chat-action-icon" />
+                        <button className="chat-icon-btn glow" onClick={() => onStartCall && onStartCall('audio')} aria-label="Audio Call">
+                            <Phone size={20} />
                         </button>
-                        <button className="chat-action-icon-btn" onClick={() => onStartCall && onStartCall('video')} aria-label="Video Call">
-                            <Video size={24} className="chat-action-icon" />
+                        <button className="chat-icon-btn glow" onClick={() => onStartCall && onStartCall('video')} aria-label="Video Call">
+                            <Video size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            <div className="chat-messages-v2">
-                {activeChat.messages.map((msg, index) => {
-                    const isLastInGroup = index === activeChat.messages.length - 1 || activeChat.messages[index + 1].username !== msg.username;
-                    return (
-                        <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
-                            {!msg.isMe && isLastInGroup && (
-                                <div className="message-group-avatar">
-                                    <Avatar src={activeChat.avatar} size={28} />
-                                </div>
-                            )}
-                            <div className="message-content">
-                                <div className="message-bubble-v2">
-                                    {msg.text}
-                                </div>
-                                {msg.isMe && isLastInGroup && (
-                                    <div className="message-status-v2">
-                                        {msg.readStatus ? 'Seen' : 'Sent'}
+            <div className="chat-messages-container">
+                <div className="chat-messages-v2">
+                    {activeChat.messages.map((msg, index) => {
+                        const isLastInGroup = index === activeChat.messages.length - 1 || activeChat.messages[index + 1].username !== msg.username;
+                        return (
+                            <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
+                                {!msg.isMe && isLastInGroup && (
+                                    <div className="message-group-avatar">
+                                        <Avatar src={activeChat.avatar} size={24} />
                                     </div>
                                 )}
+                                <div className="message-content">
+                                    <div className="message-bubble-v2">
+                                        {msg.text}
+                                    </div>
+                                    {msg.isMe && isLastInGroup && (
+                                        <div className="message-status-v2">
+                                            {msg.readStatus ? 'Seen' : 'Sent'}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
-                <div ref={messagesEndRef} />
+                        );
+                    })}
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
 
-            <div className="chat-input-container-v2">
-                <div className="chat-input-wrapper-v2">
-                    <div className="chat-input-actions" style={{ marginRight: 8 }}>
-                        <div style={{ backgroundColor: '#3797f0', borderRadius: '50%', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Camera size={20} color="#fff" />
+            <div className="chat-input-bar-glass">
+                <div className="chat-input-wrapper-premium">
+                    <div className="chat-input-prefix">
+                        <div className="chat-camera-btn">
+                            <Camera size={20} color="#fff" strokeWidth={2.5} />
                         </div>
                     </div>
                     <input 
                         type="text" 
                         placeholder={isDisabled ? "Join community to chat" : "Message..."} 
-                        className="chat-input-v2" 
+                        className="chat-input-field" 
                         value={msgText}
                         onChange={handleInputChange}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
                         disabled={isDisabled}
                     />
-                    <div className="chat-input-actions">
+                    <div className="chat-input-suffix">
                         {msgText.trim() ? (
-                            <button 
-                                onClick={handleSendText} 
-                                style={{ background: 'none', border: 'none', color: '#3797f0', fontWeight: '700', fontSize: '1rem', cursor: 'pointer' }}
-                                aria-label="Send Message"
-                            >
-                                Send
-                            </button>
+                            <button className="chat-send-btn" onClick={handleSendText}>Send</button>
                         ) : (
-                            <>
-                                <button className="chat-action-icon-btn" aria-label="Voice Message"><Mic size={24} className="chat-action-icon" /></button>
-                                <button className="chat-action-icon-btn" aria-label="Send Image"><Image size={24} className="chat-action-icon" /></button>
-                                <button className="chat-action-icon-btn" aria-label="Express with Emoji or GIF" onClick={() => setShowGifs(!showGifs)}><Smile size={24} className="chat-action-icon" /></button>
-                                <button className="chat-action-icon-btn" aria-label="More Options"><Plus size={24} className="chat-action-icon" /></button>
-                            </>
+                            <div className="chat-input-actions-group">
+                                <button className="chat-action-sm-btn"><Mic size={20} /></button>
+                                <button className="chat-action-sm-btn"><Image size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={() => setShowGifs(!showGifs)}><Plus size={20} /></button>
+                            </div>
                         )}
                     </div>
                 </div>

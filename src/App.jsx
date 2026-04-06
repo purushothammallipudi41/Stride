@@ -108,9 +108,12 @@ const AppContent = () => {
     };
   }, [setCallInfo]);
 
+  const isMessagesPage = location.pathname === '/messages';
+
   return (
     <div className="app-layout">
-      {!isPublicPath && <Topbar />}
+      {(!isPublicPath && !isMessagesPage) && <Topbar />}
+      {/* On mobile messages, we show the Topbar only if no chat is active, but actually Messages.jsx handles its own PageHeader/ChatHeader. So we hide here for Messages always. */}
       {!isPublicPath && <Sidebar />}
       <main className="main-content">
         <ErrorBoundary>
