@@ -95,7 +95,9 @@ const connectDB = async () => {
                 $or: [
                     { contentUrl: localPathRegex },
                     { imageUrl: localPathRegex },
-                    { content: localPathRegex }
+                    { content: localPathRegex },
+                    { contentUrl: { $regex: '1518609886364', $options: 'i' } },
+                    { imageUrl: { $regex: '1518609886364', $options: 'i' } }
                 ]
             });
             if (wipeResult.deletedCount > 0) {
