@@ -740,8 +740,22 @@ app.get('/api/reels', async (req, res) => {
 app.post('/api/feed', async (req, res) => {
     try {
         const userObj = await User.findOne({ username: req.body.username });
+        
+        let contentUrl = req.body.contentUrl;
+        let imageUrl = req.body.imageUrl;
+        const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
+        
+        if (contentUrl && localPathRegex.test(contentUrl)) {
+            contentUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80";
+        }
+        if (imageUrl && localPathRegex.test(imageUrl)) {
+            imageUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80";
+        }
+
         const newPost = await Post.create({
             ...req.body,
+            contentUrl: contentUrl || req.body.contentUrl,
+            imageUrl: imageUrl || req.body.imageUrl,
             user: userObj ? userObj._id : null
         });
         
