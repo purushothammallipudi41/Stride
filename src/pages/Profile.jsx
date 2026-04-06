@@ -107,7 +107,19 @@ const Profile = () => {
         }
     };
 
+    const handleShare = () => {
+        const url = `${window.location.origin}/profile/${user.username}`;
+        if (navigator.share) {
+            navigator.share({ title: `${user.username} on Stride`, url });
+        } else {
+            navigator.clipboard.writeText(url);
+            alert('Profile link copied to clipboard!');
+        }
+    };
 
+    const handleMessage = () => {
+        navigate('/messages');
+    };
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
@@ -314,7 +326,7 @@ const Profile = () => {
                         </>
                     ) : (
                         <>
-                            <button className="ig-action-btn-main">Share profile</button>
+                            <button className="ig-action-btn-main" onClick={handleShare}>Share profile</button>
                         {!isOwnProfile && (
                             <SubscribeButton 
                                 creatorUsername={user?.username} 
@@ -328,13 +340,13 @@ const Profile = () => {
                             >
                                 {isFollowing ? 'Following' : 'Follow'}
                             </button>
-                            <button className="ig-action-btn-main">Message</button>
+                            <button className="ig-action-btn-main" onClick={handleMessage}>Message</button>
                             <button className="ig-action-btn-main tip-btn" onClick={handleTip}><DollarSign size={16} /> Tip</button>
                             <button className="ig-action-btn-main gift-btn" onClick={() => setIsGiftModalOpen(true)}><Sparkles size={16} /> Gift Frame</button>
 
                         </>
                     )}
-                    <button className="ig-action-btn-main icon-btn"><User size={18} /></button>
+
                 </div>
 
                 {/* Story Highlights Wrapper */}
