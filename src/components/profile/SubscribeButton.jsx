@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Crown, CheckCircle } from 'lucide-react';
+import { BASE_URL } from '../../utils/api';
 
 const SubscribeButton = ({ creatorUsername, subscriberUsername, price = 50 }) => {
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -13,7 +14,7 @@ const SubscribeButton = ({ creatorUsername, subscriberUsername, price = 50 }) =>
     const handleSubscribe = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/creator/subscribe', {
+            const res = await fetch(`${BASE_URL}/api/creator/subscribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subscriberUsername, creatorUsername })

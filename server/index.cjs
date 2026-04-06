@@ -998,6 +998,47 @@ app.post('/api/wallet/tip', async (req, res) => {
     }
 });
 
+// --- CREATOR SUBSCRIPTIONS ---
+app.post('/api/creator/subscribe', async (req, res) => {
+    const { subscriberUsername, creatorUsername } = req.body;
+    try {
+        const subscriber = await User.findOne({ username: subscriberUsername });
+        const creator = await User.findOne({ username: creatorUsername });
+        if (!subscriber || !creator) return res.status(404).json({ error: 'User not found' });
+
+        const price = creator.subscriptionPrice || 50;
+        if (subscriber.balance < price) return res.status(400).json({ error: 'Insufficient credits to join this club' });
+
+        // Deduct from subscriber, credit creator
+        subscriber.balance -= price;
+        creator.balance += price;
+
+        // Track subscription on both sides
+        if (!subscriber.subscriptions) subscriber.subscriptions = [];
+        if (!creator.subscribers) creator.subscribers = [];
+        if (!subscriber.subscriptions.includes(creatorUsername)) subscriber.subscriptions.push(creatorUsername);
+        if (!creator.subscribers.includes(subscriberUsername)) creator.subscribers.push(subscriberUsername);
+
+        await subscriber.save();
+        await creator.save();
+
+        // Notify creator
+        await Notification.create({
+            user: creatorUsername,
+            type: 'subscribe',
+            from: subscriberUsername,
+            content: `joined your member club!`,
+            time: 'Just now'
+        });
+        io.to(`user_${creatorUsername}`).emit('new_notification', { type: 'subscribe', from: subscriberUsername });
+        io.to(`user_${subscriberUsername}`).emit('wallet_updated', { balance: subscriber.balance });
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- PLAYLISTS & COLLABORATION ---
 app.post('/api/playlists', async (req, res) => {
     try {
