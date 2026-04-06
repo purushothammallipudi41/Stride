@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -10,27 +10,27 @@ import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
 import { ActivityProvider } from './context/ActivityContext';
 // Pages
-const Home = lazy(() => import('./pages/Home'));
-const Explore = lazy(() => import('./pages/Explore'));
-const Messages = lazy(() => import('./pages/Messages'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-const Settings = lazy(() => import('./pages/Settings'));
-const Signup = lazy(() => import('./pages/Signup'));
-const Login = lazy(() => import('./pages/Login'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
-const ArtistDashboard = lazy(() => import('./pages/ArtistDashboard'));
-const Music = lazy(() => import('./pages/Music'));
-const Reels = lazy(() => import('./pages/Reels'));
-const Communities = lazy(() => import('./pages/Communities'));
-const Servers = lazy(() => import('./pages/Servers'));
-const ServerView = lazy(() => import('./pages/ServerView'));
-const PlaylistView = lazy(() => import('./pages/PlaylistView'));
-const Articles = lazy(() => import('./pages/Articles'));
-const Achievements = lazy(() => import('./pages/Achievements'));
-const Insights = lazy(() => import('./pages/Insights'));
-const Marketplace = lazy(() => import('./pages/Marketplace'));
-const Wallet = lazy(() => import('./pages/Wallet'));
+import Home from './pages/Home';
+import Explore from './pages/Explore';
+import Messages from './pages/Messages';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
+import VerifyEmail from './pages/VerifyEmail';
+import ArtistDashboard from './pages/ArtistDashboard';
+import Music from './pages/Music';
+import Reels from './pages/Reels';
+import Communities from './pages/Communities';
+import Servers from './pages/Servers';
+import ServerView from './pages/ServerView';
+import PlaylistView from './pages/PlaylistView';
+import Articles from './pages/Articles';
+import Achievements from './pages/Achievements';
+import Insights from './pages/Insights';
+import Marketplace from './pages/Marketplace';
+import Wallet from './pages/Wallet';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -114,7 +114,6 @@ const AppContent = () => {
       {!isPublicPath && <Sidebar />}
       <main className="main-content">
         <ErrorBoundary>
-          <Suspense fallback={<div className="loading-screen">Loading Stride...</div>}>
             <div className={location.pathname.startsWith('/community/') ? "full-view-container" : "mobile-view-container"}>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -145,7 +144,6 @@ const AppContent = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
-          </Suspense>
         </ErrorBoundary>
       </main>
       <GlobalNotifications />
