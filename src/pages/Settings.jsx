@@ -4,6 +4,7 @@ import {
     X, UserPlus, Music, Circle, BadgeCheck, Shield, Bell, 
     Activity, Globe, Moon, Check 
 } from 'lucide-react';
+import { BASE_URL } from '../utils/api';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
 import Avatar from '../components/common/Avatar';
 import './Settings.css';
@@ -45,7 +46,7 @@ const Settings = () => {
         setUser(prev => ({ ...prev, avatarFrame: newFrame })); // Optimistic update
         
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update`, {
+            const res = await fetch(`${BASE_URL}/api/profile/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: user.username, avatarFrame: newFrame })

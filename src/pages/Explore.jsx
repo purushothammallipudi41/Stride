@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import SEO from '../components/common/SEO';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useActivity } from '../hooks/useActivity';
 import { useTranslation } from 'react-i18next';
+import { BASE_URL } from '../utils/api';
 
 import { Search, X, Film, Layers, Music, Trophy } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
@@ -14,11 +15,12 @@ const Explore = () => {
     const navigate = useNavigate();
     const { isUserListening, getUserTrack } = useActivity();
     const { t } = useTranslation();
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const [isSearching, setIsSearching] = useState(false);
+    const [searchParams] = useSearchParams();
+    const urlQuery = searchParams.get('q') || '';
+    const [searchQuery, setSearchQuery] = useState(urlQuery);
+    const [isSearching, setIsSearching] = useState(!!urlQuery);
     const [discoverPosts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!urlQuery);
     const [userResults, setUserResults] = useState([]);
     const [trendingHashtags, setTrendingHashtags] = useState([]);
     const [tagResults, setTagResults] = useState({ posts: [], playlists: [], communities: [] });
@@ -30,7 +32,7 @@ const Explore = () => {
     useEffect(() => {
         const fetchTrending = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/search/trending`);
+                const res = await fetch(`${BASE_URL}/api/search/trending`);
                 const data = await res.json();
                 setTrendingHashtags(data.trendingTags || []);
                 setIsLoading(false);
@@ -39,13 +41,11 @@ const Explore = () => {
                 setIsLoading(false);
             }
         };
-        fetchTrending();
 
-        // Fetch Personalized Feed
         const fetchDiscovery = async () => {
             const username = localStorage.getItem('stride_user_username') || 'puru';
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/discovery/feed`, {
+                const res = await fetch(`${BASE_URL}/api/discovery/feed`, {
                     headers: { 'x-user-username': username }
                 });
                 const data = await res.json();
@@ -54,12 +54,13 @@ const Explore = () => {
                 console.error("Discovery fetch failed:", err);
             }
         };
-        fetchDiscovery();
+
+        fetchTrending();
         fetchDiscovery();
 
         const fetchLeaderboard = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/leaderboard`);
+                const res = await fetch(`${BASE_URL}/api/communities/leaderboard`);
                 const data = await res.json();
                 setVibeLeaderboard(data);
             } catch (err) {
@@ -96,11 +97,11 @@ const Explore = () => {
             try {
                 if (query.startsWith('#')) {
                     const tag = query.substring(1);
-                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/search/tag/${tag}`);
+                    const res = await fetch(`${BASE_URL}/api/search/tag/${tag}`);
                     const data = await res.json();
                     setTagResults(data);
                 } else {
-                    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/users/search?q=${query}`);
+                    const res = await fetch(`${BASE_URL}/api/users/search?q=${query}`);
                     const data = await res.json();
                     setUserResults(data);
                 }
@@ -156,6 +157,7 @@ const Explore = () => {
                         value={searchQuery}
                         onChange={handleSearchInput}
                         onKeyDown={handleSearch}
+                        className="search-input"
                     />
                     {searchQuery && (
                         <button className="clear-search-btn" onClick={clearSearch}>

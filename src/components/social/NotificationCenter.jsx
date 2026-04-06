@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { Bell, User, Heart, MessageSquare, UserPlus, Music, Check, ChevronLeft } from 'lucide-react';
+import { Bell, User, Heart, MessageSquare, UserPlus, Music, Check, ChevronLeft, Plus } from 'lucide-react';
+import Avatar from '../common/Avatar';
 import { useUI } from '../../hooks/useUI';
+import { BASE_URL } from '../../utils/api';
 import './NotificationCenter.css';
 
 const NotificationCenter = ({ isOpen, onClose }) => {
@@ -15,7 +17,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     const fetchNotifications = useCallback(async () => {
         if (!user.username) return;
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/${user.username}`);
+            const res = await fetch(`${BASE_URL}/api/notifications/${user.username}`);
             const data = await res.json();
             setNotifications(data.notifications || []);
             setLoading(false);
@@ -40,7 +42,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
 
     const markAsRead = async () => {
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/mark-read/${user.username}`, {
+            await fetch(`${BASE_URL}/api/notifications/mark-read/${user.username}`, {
                 method: 'POST'
             });
             onClose();

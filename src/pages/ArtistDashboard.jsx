@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, DollarSign, Headphones, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import { useMusic } from '../hooks/useMusic';
+import { BASE_URL } from '../utils/api';
 import './ArtistDashboard.css';
 
 const ArtistDashboard = () => {
@@ -18,24 +19,32 @@ const ArtistDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate API fetch
-        const timer = setTimeout(() => {
-            setStats({
-                totalPlays: 124500,
-                totalTips: 450.25,
-                monthlyListeners: 18200,
-                followers: 5430,
-                trend: '+12%'
-            });
-            setRecentTips([
-                { id: 1, user: 'MusicLover', amount: 5.00, date: '2m ago' },
-                { id: 2, user: 'StrideFan1', amount: 20.00, date: '15m ago' },
-                { id: 3, user: 'BeatMaker', amount: 10.00, date: '1h ago' },
-            ]);
+        if (!username || username === 'guest') {
             setIsLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, []);
+            return;
+        }
+
+        fetch(`${BASE_URL}/api/artist/stats/${username}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.summary) {
+                    setStats(data.summary);
+                }
+                if (data.recentTransactions) {
+                    setRecentTips(data.recentTransactions.map(tx => ({
+                        id: tx._id,
+                        user: tx.from?.username || 'Supporter',
+                        amount: tx.amount || 0,
+                        date: tx.timestamp ? new Date(tx.timestamp).toLocaleDateString() : 'Recent'
+                    })));
+                }
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Dashboard fetch error:", err);
+                setIsLoading(false);
+            });
+    }, [username]);
 
     // Simple SVG Sparkline Data
     const playData = [30, 45, 35, 60, 50, 85, 70];

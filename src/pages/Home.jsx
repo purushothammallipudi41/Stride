@@ -14,7 +14,6 @@ const Home = () => {
                 title="Home" 
                 description="Experience the rhythm of Stride. Follow your favorite artists and discover new music in your social feed." 
             />
-            <Topbar />
             
             <div className="home-layout">
                 {/* Main Feed Column */}

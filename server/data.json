@@ -50,6 +50,21 @@
     }
   ],
   "users": {
+    "testuser": {
+      "_id": "507f1f77bcf86cd799439011",
+      "username": "testuser",
+      "name": "Test User",
+      "email": "test@example.com",
+      "password": "password123",
+      "avatar": "https://i.pravatar.cc/150?u=testuser",
+      "bio": "Just a music lover on Stride 🎵",
+      "onboardingCompleted": true,
+      "accentColor": "#8b5cf6",
+      "posts": [],
+      "favorites": [],
+      "followers": 0,
+      "following": 0
+    },
     "default_user": {
       "username": "alex_walker",
       "name": "Alexander Walker",

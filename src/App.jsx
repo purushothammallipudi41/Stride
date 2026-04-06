@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -10,21 +10,21 @@ import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
 import { ActivityProvider } from './context/ActivityContext';
 // Pages
-const Home = lazy(() => import('./pages/Home'));
-const Explore = lazy(() => import('./pages/Explore'));
+import Home from './pages/Home';
+import Explore from './pages/Explore';
 const Messages = lazy(() => import('./pages/Messages'));
-const Profile = lazy(() => import('./pages/Profile'));
+import Profile from './pages/Profile';
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Signup = lazy(() => import('./pages/Signup'));
 const Login = lazy(() => import('./pages/Login'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const ArtistDashboard = lazy(() => import('./pages/ArtistDashboard'));
-const Music = lazy(() => import('./pages/Music'));
+import Music from './pages/Music';
 const Reels = lazy(() => import('./pages/Reels'));
 const Communities = lazy(() => import('./pages/Communities'));
 const Servers = lazy(() => import('./pages/Servers'));
-const ServerView = lazy(() => import('./pages/ServerView'));
+import ServerView from './pages/ServerView';
 const PlaylistView = lazy(() => import('./pages/PlaylistView'));
 const Articles = lazy(() => import('./pages/Articles'));
 const Achievements = lazy(() => import('./pages/Achievements'));
@@ -34,6 +34,7 @@ const Wallet = lazy(() => import('./pages/Wallet'));
 
 // Components
 import Sidebar from './components/layout/Sidebar';
+import Topbar from './components/layout/Topbar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
@@ -42,11 +43,10 @@ import CallOverlay from './components/chat/CallOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
-  const { isCreateModalOpen, isExplorerOpen } = useUI();
+  const { isCreateModalOpen, isExplorerOpen, callInfo, setCallInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
-  const [callInfo, setCallInfo] = useState({ isOpen: false, isIncoming: false, callerData: null, type: 'video' });
 
   useEffect(() => {
     // Configure mobile status bar
@@ -70,11 +70,22 @@ const AppContent = () => {
     } catch {
         user = {};
     }
-    if (user.accentColor) {
-      document.documentElement.style.setProperty('--theme-primary', user.accentColor);
-      document.documentElement.style.setProperty('--theme-accent', user.accentColor + '80'); // 50% opacity for accent
-      document.documentElement.style.setProperty('--theme-primary-glow', user.accentColor + '40');
-    }
+
+    const applyTheme = (userData = {}) => {
+      const storedColor = localStorage.getItem('stride_theme_color');
+      const userColor = userData?.accentColor;
+      const themeColor = storedColor || userColor || '#8b5cf6';
+      
+      console.log(`[App] Applying theme color: ${themeColor} (stored: ${storedColor}, user: ${userColor})`);
+      
+      const root = document.documentElement;
+      root.style.setProperty('--theme-primary', themeColor);
+      root.style.setProperty('--theme-accent', themeColor + '80');
+      root.style.setProperty('--theme-primary-glow', themeColor + '40');
+      document.body.style.setProperty('--theme-primary', themeColor);
+    };
+
+    applyTheme(user);
 
     if (isAuthenticated && user.username) {
         socket.emit('register_user', user);
@@ -95,10 +106,11 @@ const AppContent = () => {
         socket.off('incoming-call');
         socket.off('start-direct-call');
     };
-  }, []);
+  }, [setCallInfo]);
 
   return (
     <div className="app-layout">
+      {!isPublicPath && <Topbar />}
       {!isPublicPath && <Sidebar />}
       <main className="main-content">
         <ErrorBoundary>
@@ -121,7 +133,7 @@ const AppContent = () => {
                 <Route path="/reels" element={<Reels />} />
                 <Route path="/communities/discover" element={<Communities />} />
                 <Route path="/servers" element={<Servers />} />
-                <Route path="/community/:communityId" element={<ServerView />} />
+                <Route path="/community/:communityId/:channelId?" element={<ServerView />} />
                 <Route path="/playlist/:id" element={<PlaylistView />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/achievements" element={<Achievements />} />

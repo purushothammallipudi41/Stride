@@ -13,6 +13,10 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:5174',
     trace: 'off',
     video: 'off',
+    env: {
+      VITE_API_URL: 'http://127.0.0.1:3001',
+      VITE_AUDIUS_HOST: 'https://api.audius.co'
+    }
   },
   projects: [
     {
@@ -24,6 +28,6 @@ export default defineConfig({
     command: 'npm run test:start',
     port: 5174,
     timeout: 120000,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 });

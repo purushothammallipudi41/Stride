@@ -20,6 +20,7 @@
     flex-direction: column;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     flex-shrink: 0;
+    z-index: 5;
 }
 
 .server-header {
@@ -171,6 +172,7 @@
     flex-direction: column;
     min-width: 0;
     position: relative;
+    z-index: 10;
 }
 
 .chat-header {
@@ -237,6 +239,7 @@
     overflow-y: auto;
     border-left: 1px solid rgba(255, 255, 255, 0.05);
     flex-shrink: 0;
+    z-index: 5;
 }
 
 .member-group-label {
@@ -356,6 +359,8 @@
     border: var(--glass-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-premium);
+    position: relative;
+    z-index: 1000;
 }
 
 .pulse-icon {
@@ -374,6 +379,8 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1001;
 }
 
 .join-overlay-btn:hover {

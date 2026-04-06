@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Music, Play } from 'lucide-react';
+import { BASE_URL } from '../../utils/api';
 
 const FriendsActivity = () => {
     const [activities, setActivities] = useState([]);
@@ -9,7 +10,7 @@ const FriendsActivity = () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user._id) return;
 
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/friends/activity?userId=${user._id}`)
+        fetch(`${BASE_URL}/api/friends/activity?userId=${user._id}`)
             .then(res => res.json())
             .then(data => {
                 setActivities(data);

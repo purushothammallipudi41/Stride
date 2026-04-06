@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import socket from '../services/socket';
 import { getTrendingTracks, getStreamUrl } from '../services/audiusService';
 import MusicContext from './MusicContextObject';
-import { hapticImpactLight, hapticImpactMedium } from '../services/haptics';
+import { hapticImpactLight } from '../services/haptics';
+import { BASE_URL } from '../utils/api';
 
 export const MusicProvider = ({ children }) => {
     const getLoggedUsername = () => {
@@ -51,8 +52,6 @@ export const MusicProvider = ({ children }) => {
     const [playlists, setPlaylists] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [isPublicSession, setIsPublicSession] = useState(false);
-    const [currentRoom, setCurrentRoom] = useState(null); // 'community_ID' or null
-    const [roomListeners, setRoomListeners] = useState([]);
 
 
     
@@ -83,37 +82,37 @@ export const MusicProvider = ({ children }) => {
         if (username === 'guest') return;
 
         // Fetch favorites
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/favorites/${username}`)
+        fetch(`${BASE_URL}/api/favorites/${username}`)
             .then(res => res.json())
             .then(data => setFavorites(data))
             .catch(err => console.error("Failed to fetch favorites:", err));
 
         // Fetch genres
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/genres`)
+        fetch(`${BASE_URL}/api/music/genres`)
             .then(res => res.json())
             .then(data => setGenres(data))
             .catch(err => console.error("Failed to fetch genres:", err));
 
         // Fetch artists
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/artists`)
+        fetch(`${BASE_URL}/api/music/artists`)
             .then(res => res.json())
             .then(data => setArtists(data))
             .catch(err => console.error("Failed to fetch artists:", err));
 
         // Fetch albums
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/albums`)
+        fetch(`${BASE_URL}/api/music/albums`)
             .then(res => res.json())
             .then(data => setAlbums(data))
             .catch(err => console.error("Failed to fetch albums:", err));
 
         // Fetch languages
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/music/languages`)
+        fetch(`${BASE_URL}/api/music/languages`)
             .then(res => res.json())
             .then(data => setLanguages(data))
             .catch(err => console.error("Failed to fetch languages:", err));
 
         // Fetch playlists
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${username}`)
+        fetch(`${BASE_URL}/api/playlists/${username}`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -150,56 +149,10 @@ export const MusicProvider = ({ children }) => {
             });
         }
 
-        socket.on('room_members_updated', ({ roomId, members }) => {
-            if (roomId === currentRoom) {
-               setRoomListeners(members);
-            }
-        });
-
-        socket.on('sync_requested', (data) => {
-            console.log('Sync requested by:', data.requester);
-            if (isPlaying && currentTrack) {
-                socket.emit('sync_playback', {
-                    roomId: currentRoom || 'listening_party',
-                    track: currentTrack,
-                    progress: audioRef.current.currentTime,
-                    isPlaying: true,
-                    sender: socket.id // Identify as the responder
-                });
-            }
-        });
-
-        socket.on('playback_synced', (data) => {
-            console.log('Playback Synced Event:', data);
-            // Only auto-sync if we are in a room and not the sender
-            if (data.sender !== socket.id) {
-                // If it's a new track, load it.
-                if (data.track && data.track.id !== currentTrack?.id) {
-                    setCurrentTrack(data.track);
-                    // If the room was already playing, we should probably start playing too
-                    if (data.isPlaying && !isPlaying) {
-                        setIsPlaying(true);
-                    }
-                }
-                
-                if (audioRef.current && data.progress !== undefined) {
-                    const diff = Math.abs(audioRef.current.currentTime - data.progress);
-                    if (diff > 3) { // 3 second threshold for auto-correction
-                        audioRef.current.currentTime = data.progress;
-                    }
-                    if (data.isPlaying !== undefined && data.isPlaying !== isPlaying) {
-                        setIsPlaying(data.isPlaying);
-                    }
-                }
-            }
-        });
-
         return () => {
             socket.off('global_event');
-            socket.off('playback_synced');
-            socket.off('sync_requested');
         };
-    }, [currentTrack, isPlaying, currentRoom]);
+    }, []);
 
 
     // Sync recent to localStorage (keeping local for now as per plan focus on favorites/servers)
@@ -211,7 +164,7 @@ export const MusicProvider = ({ children }) => {
     useEffect(() => {
         const fetchTracks = async () => {
             const tracks = await getTrendingTracks();
-            if (tracks.length > 0) {
+            if (tracks && tracks.length > 0) {
                 const formattedTracks = tracks.map(t => ({
                     id: t.id,
                     title: t.title,
@@ -232,13 +185,6 @@ export const MusicProvider = ({ children }) => {
         }
         setIsPlaying(prev => {
             const newState = !prev;
-            const roomId = currentRoom || 'listening_party';
-            socket.emit('sync_playback', {
-                roomId,
-                track: currentTrack,
-                progress: audioRef.current.currentTime,
-                isPlaying: newState
-            });
             socket.emit('playback_update', {
                 username,
                 track: currentTrack,
@@ -246,7 +192,7 @@ export const MusicProvider = ({ children }) => {
             });
             return newState;
         });
-    }, [currentTrack, username, currentRoom]);
+    }, [currentTrack, username]);
 
 
 
@@ -315,14 +261,6 @@ export const MusicProvider = ({ children }) => {
                 audioRef.current.src = streamUrl;
                 audioRef.current.play().catch(e => console.error("Play failed", e));
                 
-                const roomId = currentRoom || 'listening_party';
-                socket.emit('sync_playback', {
-                    roomId,
-                    track: fallbackTrack,
-                    progress: 0,
-                    isPlaying: true
-                });
-
                 socket.emit('playback_update', {
                     username,
                     track: fallbackTrack,
@@ -346,7 +284,7 @@ export const MusicProvider = ({ children }) => {
             setIsPlaying(false);
             // Optionally try another node here in a real app
         }
-    }, [currentTrack, togglePlay, username, isPublicSession, currentRoom]);
+    }, [currentTrack, togglePlay, username, isPublicSession]);
 
 
     const nextTrack = useCallback(() => {
@@ -414,10 +352,9 @@ export const MusicProvider = ({ children }) => {
         }
     }, [isPlaying]);
 
-    const toggleFavorite = async (track) => {
-
+    const toggleFavorite = useCallback(async (track) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/favorites/${username}`, {
+            const response = await fetch(`${BASE_URL}/api/favorites/${username}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ track })
@@ -427,7 +364,82 @@ export const MusicProvider = ({ children }) => {
         } catch (error) {
             console.error("Failed to toggle favorite:", error);
         }
-    };
+    }, [username]);
+
+    const setProgressHandler = useCallback((time) => {
+        setProgress(time);
+        audioRef.current.currentTime = time;
+    }, []);
+
+    const createPlaylist = useCallback(async (playlistData) => {
+        try {
+            let user = {};
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch {
+                user = {};
+            }
+            const res = await fetch(`${BASE_URL}/api/playlists`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...playlistData, owner: user._id })
+            });
+            const newPlaylist = await res.json();
+            setPlaylists(prev => [...prev, newPlaylist]);
+            return newPlaylist;
+        } catch (err) {
+            console.error("Create playlist failed:", err);
+        }
+    }, []);
+
+    const addToPlaylist = useCallback(async (playlistId, track) => {
+        let user = {};
+        try {
+            user = JSON.parse(localStorage.getItem('user') || '{}');
+        } catch {
+            user = {};
+        }
+        const userId = user._id;
+        try {
+            await fetch(`${BASE_URL}/api/playlists/${playlistId}/tracks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track, userId })
+            });
+        } catch (err) {
+            console.error("Add to playlist failed:", err);
+        }
+    }, []);
+
+
+
+    const sendBeat = useCallback(async (targetUsername, track) => {
+        hapticImpactLight();
+        // This is a stub for the Phase 7 direct sharing feature
+        // In a real app, this would emit a socket event or call an API
+        console.log(`Sending beat ${track.title} to ${targetUsername}`);
+        socket.emit('send_message', {
+            to: targetUsername,
+            from: username,
+            text: `🎵 Shared a beat: ${track.title} by ${track.artist}`,
+            attachment: {
+                type: 'track',
+                trackId: track.id,
+                title: track.title,
+                artist: track.artist,
+                cover: track.cover
+            }
+        });
+        alert(`Beat shared with ${targetUsername}!`);
+    }, [username]);
+
+    const clearNotification = useCallback((id) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    }, []);
+
+    const togglePublicSession = useCallback(() => {
+        setIsPublicSession(prev => !prev);
+    }, []);
 
 
 
@@ -435,7 +447,7 @@ export const MusicProvider = ({ children }) => {
 
 
 
-    const value = {
+    const value = useMemo(() => ({
         allSongs,
         currentTrack,
         isPlaying,
@@ -458,98 +470,21 @@ export const MusicProvider = ({ children }) => {
         setVolume,
         analyzer: analyzerRef.current,
         username,
-        clearNotification: (id) => setNotifications(prev => prev.filter(n => n.id !== id)),
-        setProgress: (time) => {
-            setProgress(time);
-            audioRef.current.currentTime = time;
-            const roomId = currentRoom || 'listening_party';
-            socket.emit('sync_playback', {
-                roomId,
-                track: currentTrack,
-                progress: time,
-                isPlaying
-            });
-        },
-        createPlaylist: async (playlistData) => {
-            try {
-                let user = {};
-                try {
-                    user = JSON.parse(localStorage.getItem('user') || '{}');
-                } catch {
-                    user = {};
-                }
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...playlistData, owner: user._id })
-                });
-                const newPlaylist = await res.json();
-                setPlaylists(prev => [...prev, newPlaylist]);
-                return newPlaylist;
-            } catch (err) {
-                console.error("Create playlist failed:", err);
-            }
-        },
-        addToPlaylist: async (playlistId, track) => {
-            let user = {};
-            try {
-                user = JSON.parse(localStorage.getItem('user') || '{}');
-            } catch {
-                user = {};
-            }
-            const userId = user._id;
-            try {
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${playlistId}/tracks`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ track, userId })
-                });
-            } catch (err) {
-                console.error("Add to playlist failed:", err);
-            }
-        },
+        clearNotification,
+        setProgress: setProgressHandler,
+        createPlaylist,
+        addToPlaylist,
         isPublicSession,
-        togglePublicSession: () => setIsPublicSession(prev => !prev),
-        currentRoom,
-        roomListeners,
-        joinMusicRoom: (roomId) => {
-            // Ensure consistency in community room names (back-end expects community_ID)
-            const target = (roomId && roomId.length === 24 && /^[0-9a-fA-F]{24}$/.test(roomId)) 
-                ? `community_${roomId}` 
-                : roomId;
-                
-            setCurrentRoom(target);
-            socket.emit('join_room', target);
-            socket.emit('request_sync', { roomId: target, requester: username });
-        },
-        leaveMusicRoom: () => {
-            setCurrentRoom(null);
-            setRoomListeners([]);
-        },
-        voteSong: (communityId, trackId, vote) => {
-            hapticImpactMedium();
-            socket.emit('vote_song', { communityId, trackId, vote });
-        },
-        sendBeat: async (targetUsername, track) => {
-            hapticImpactLight();
-            // This is a stub for the Phase 7 direct sharing feature
-            // In a real app, this would emit a socket event or call an API
-            console.log(`Sending beat ${track.title} to ${targetUsername}`);
-            socket.emit('send_message', {
-                to: targetUsername,
-                from: username,
-                text: `🎵 Shared a beat: ${track.title} by ${track.artist}`,
-                attachment: {
-                    type: 'track',
-                    trackId: track.id,
-                    title: track.title,
-                    artist: track.artist,
-                    cover: track.cover
-                }
-            });
-            alert(`Beat shared with ${targetUsername}!`);
-        }
-    };
+        togglePublicSession,
+        sendBeat
+    }), [
+        allSongs, currentTrack, isPlaying, progress, volume, favorites, 
+        recentTracks, genres, artists, albums, languages, notifications, 
+        playlists, togglePlay, nextTrack, prevTrack, playTrack, toggleFavorite, 
+        setVolume, username, clearNotification, setProgressHandler, 
+        createPlaylist, addToPlaylist, isPublicSession, togglePublicSession, 
+        sendBeat
+    ]);
 
 
     return (

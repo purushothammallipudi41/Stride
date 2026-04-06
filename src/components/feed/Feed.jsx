@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Post from './Post';
 import socket from '../../services/socket';
+import { BASE_URL } from '../../utils/api';
+import './Feed.css';
 
 const Feed = ({ type = 'foryou' }) => {
     const [posts, setPosts] = useState([]);
@@ -10,13 +12,13 @@ const Feed = ({ type = 'foryou' }) => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const userId = user._id || user.id || user.username;
         const url = type === 'following' && userId && userId !== 'guest'
-            ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/following?userId=${userId}`
-            : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed`;
+            ? `${BASE_URL}/api/feed/following?userId=${userId}`
+            : `${BASE_URL}/api/feed`;
 
         fetch(url)
             .then(res => res.json())
             .then(data => {
-                setPosts(data);
+                setPosts(Array.isArray(data) ? data : []);
                 setIsLoading(false);
             })
             .catch(err => {

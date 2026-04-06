@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Users, Play, MessageSquare, Heart, TrendingUp } from 'lucide-react';
+import { BASE_URL } from '../../utils/api';
 import './AnalyticsDashboard.css';
 
 const AnalyticsDashboard = ({ communityId }) => {
@@ -12,7 +13,7 @@ const AnalyticsDashboard = ({ communityId }) => {
             try {
                 setLoading(true);
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/analytics/community/${communityId}`, {
+                const response = await fetch(`${BASE_URL}/api/analytics/community/${communityId}`, {
                     headers: { 'x-user-id': user._id }
                 });
                 if (!response.ok) throw new Error('Failed to fetch analytics');

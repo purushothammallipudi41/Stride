@@ -57,6 +57,7 @@ const Communities = () => {
                         placeholder="Search communities..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
                     />
                 </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Smartphone, Loader2 } from 'lucide-react';
 import logo from '../assets/stride-logo.png';
+import { BASE_URL } from '../utils/api';
 import './Login.css'; // Reuse Login styles for consistency
 
 const Signup = () => {
@@ -35,7 +36,7 @@ const Signup = () => {
 
         try {
             // 1. Create Account
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/signup`, {
+            const response = await fetch(`${BASE_URL}/api/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -44,7 +45,7 @@ const Signup = () => {
 
             if (data.success) {
                 // 2. Trigger Verification Code
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/send-code`, {
+                await fetch(`${BASE_URL}/api/send-code`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: formData.email })

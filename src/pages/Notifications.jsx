@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
+import { BASE_URL } from '../utils/api';
 import socket from '../services/socket';
 import './Notifications.css';
 
@@ -19,10 +20,11 @@ const Notifications = () => {
         resetNotifications();
 
         const fetchNotifications = () => {
-            fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/notifications/${username}`)
+            fetch(`${BASE_URL}/api/notifications/${username}`)
                 .then(res => res.json())
                 .then(data => {
-                    setNotifications(data.notifications || []);
+                    const fetchedNotifs = Array.isArray(data?.notifications) ? data.notifications : [];
+                    setNotifications(fetchedNotifs);
                     setIsLoading(false);
                 })
                 .catch(err => {
@@ -90,10 +92,10 @@ const Notifications = () => {
             </div>
 
             <div className="notifications-list">
-                {groupedNotifications.map(([group, items]) => (
+                {groupedNotifications?.map(([group, items]) => (
                     <div key={group} className="time-group">
                         <div className="time-group-header">{group}</div>
-                        {items.map(notif => (
+                        {items?.map(notif => (
                             <div key={notif.id} className="notification-item-v2">
                                 <div className="notif-v2-avatar-group">
                                     <Avatar src={notif.fromAvatar} size={44} frame={notif.senderFrame} />

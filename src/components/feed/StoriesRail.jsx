@@ -4,6 +4,7 @@ import socket from '../../services/socket';
 import CreateStoryModal from './CreateStoryModal';
 import VerificationBadge from '../common/VerificationBadge';
 import Avatar from '../common/Avatar';
+import { BASE_URL } from '../../utils/api';
 import './StoriesRail.css';
 
 const StoriesRail = () => {
@@ -17,7 +18,7 @@ const StoriesRail = () => {
     const username = user.username || 'guest';
 
     const loadStories = () => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/stories`)
+        fetch(`${BASE_URL}/api/stories`)
             .then(res => res.json())
             .then(data => {
                 setFriendStories(data);
@@ -48,7 +49,7 @@ const StoriesRail = () => {
 
         setIsUploading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/stories`, {
+            const response = await fetch(`${BASE_URL}/api/stories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

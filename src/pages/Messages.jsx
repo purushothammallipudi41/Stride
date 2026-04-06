@@ -4,12 +4,13 @@ import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
 import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
+import { BASE_URL } from '../utils/api';
 
 const Messages = () => {
     const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
     const [chats, setChats] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { resetMessages } = useUI();
+    const { resetMessages, setCallInfo } = useUI();
     const [activeChatId, setActiveChatId] = useState(null);
     const [typingUsers, setTypingUsers] = useState(new Set());
 
@@ -18,7 +19,7 @@ const Messages = () => {
     }, [resetMessages]);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/messages`)
+        fetch(`${BASE_URL}/api/messages`)
             .then(res => res.json())
             .then(data => {
                 setChats(data);
@@ -85,8 +86,23 @@ const Messages = () => {
             [type === 'text' ? 'text' : 'gif']: content,
             username: userProfile.username || 'Anonymous',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            type
+            type,
+            isMe: true,
+            id: 'optimistic-' + Date.now()
         };
+
+        // Optimistic update for sender's UI
+        setChats(prevChats => prevChats.map(chat => {
+            if (chat.id === activeChatId) {
+                return {
+                    ...chat,
+                    messages: [...(chat.messages || []), newMessage],
+                    lastMessage: newMessage.text || 'Sent an attachment',
+                    time: 'Now'
+                };
+            }
+            return chat;
+        }));
 
         socket.emit('private_message', {
             roomId: `chat_${activeChatId}`,
@@ -96,6 +112,17 @@ const Messages = () => {
 
     const handleStartCall = (type) => {
         if (!activeChat) return;
+        
+        setCallInfo({
+            isOpen: true,
+            isIncoming: false,
+            callerData: {
+                username: activeChat.username,
+                name: activeChat.name || activeChat.username
+            },
+            type
+        });
+        
         socket.emit('start-direct-call', {
             username: activeChat.username,
             name: activeChat.name || activeChat.username,

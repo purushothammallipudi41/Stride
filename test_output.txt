@@ -1,0 +1,166 @@
+
+Running 1 test using 1 worker
+
+[PAGE] [vite] connecting...
+[PAGE] [vite] connected.
+[PAGE] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[PAGE] Module "util" has been externalized for browser compatibility. Cannot access "util.debuglog" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "util" has been externalized for browser compatibility. Cannot access "util.inspect" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "buffer" has been externalized for browser compatibility. Cannot access "buffer.Buffer" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "buffer" has been externalized for browser compatibility. Cannot access "buffer.Buffer" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+[PAGE] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+[PAGE] Connected to backend socket: 7xAo89FoakM9vnRgAAAB
+[NETWORK] GET http://127.0.0.1:5174/api/wallet/balance
+[NETWORK] GET http://127.0.0.1:3001/api/stories
+[NETWORK] GET http://127.0.0.1:3001/api/feed
+[PAGE] [App] Applying theme color: #8b5cf6 (stored: null, user: #8b5cf6)
+[NETWORK] GET http://127.0.0.1:3001/api/notifications/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/messages/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/communities
+[NETWORK] GET http://127.0.0.1:3001/api/favorites/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/music/genres
+[NETWORK] GET http://127.0.0.1:3001/api/music/artists
+[NETWORK] GET http://127.0.0.1:3001/api/music/albums
+[NETWORK] GET http://127.0.0.1:3001/api/music/languages
+[NETWORK] GET http://127.0.0.1:3001/api/playlists/testuser
+[NETWORK] GET http://127.0.0.1:5174/api/wallet/balance
+[NETWORK] GET http://127.0.0.1:3001/api/stories
+[NETWORK] GET http://127.0.0.1:3001/api/feed
+[PAGE] [App] Applying theme color: #8b5cf6 (stored: null, user: #8b5cf6)
+[NETWORK] GET http://127.0.0.1:3001/api/notifications/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/messages/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/communities
+[NETWORK] GET http://127.0.0.1:3001/api/favorites/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/music/genres
+[NETWORK] GET http://127.0.0.1:3001/api/music/artists
+[NETWORK] GET http://127.0.0.1:3001/api/music/albums
+[NETWORK] GET http://127.0.0.1:3001/api/music/languages
+[NETWORK] GET http://127.0.0.1:3001/api/playlists/testuser
+[PAGE ERROR] Unexpected token '<', "<!doctype "... is not valid JSON
+[PAGE ERROR] Unexpected token '<', "<!doctype "... is not valid JSON
+[PAGE] [Audius] Host selected: http://127.0.0.1:5174/mock-audius
+[E2E MOCK] Catching Audius request: http://127.0.0.1:5174/mock-audius/v1/tracks/trending?app_name=STRIDE
+[PAGE] [Audius] Host selected: http://127.0.0.1:5174/mock-audius
+[E2E MOCK] Catching Audius request: http://127.0.0.1:5174/mock-audius/v1/tracks/trending?app_name=STRIDE
+[PAGE] Each child in a list should have a unique "key" prop.%s%s See https://react.dev/link/warning-keys for more information. 
+
+Check the render method of `Feed`. 
+[PAGE] [ServerContext] Fetched servers: 5
+[PAGE] [ServerContext] Fetched servers: 5
+[NETWORK] POST http://127.0.0.1:3001/api/posts/69d345370ea6959415a1120f/view
+[PAGE] [Reown Config] Failed to fetch remote project configuration. Using local/default values. TypeError: Failed to fetch
+    at fetchData (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1745:26)
+    at FetchUtil.get (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1761:28)
+    at Object.fetchProjectConfig (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:4812:33)
+    at Object.fetchRemoteFeatures (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8607:46)
+    at AppKit.initialize (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8805:44)
+[PAGE] [vite] connecting...
+[PAGE] [vite] connected.
+[PAGE] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[PAGE] Module "util" has been externalized for browser compatibility. Cannot access "util.debuglog" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "util" has been externalized for browser compatibility. Cannot access "util.inspect" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "buffer" has been externalized for browser compatibility. Cannot access "buffer.Buffer" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] Module "buffer" has been externalized for browser compatibility. Cannot access "buffer.Buffer" in client code. See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[PAGE] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+[PAGE] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+[PAGE] [ServerView] isMember check skipped: missing user or community members
+[PAGE] [ServerView] isMember check skipped: missing user or community members
+[PAGE] Connected to backend socket: FtoQOIaHiUYe7WgmAAAD
+[NETWORK] GET http://127.0.0.1:5174/api/wallet/balance
+[NETWORK] GET http://127.0.0.1:3001/api/communities/1/check-gate?userId=507f1f77bcf86cd799439011
+[PAGE] [App] Applying theme color: #8b5cf6 (stored: null, user: #8b5cf6)
+[NETWORK] GET http://127.0.0.1:3001/api/notifications/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/messages/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/communities
+[NETWORK] GET http://127.0.0.1:3001/api/favorites/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/music/genres
+[NETWORK] GET http://127.0.0.1:3001/api/music/artists
+[NETWORK] GET http://127.0.0.1:3001/api/music/albums
+[NETWORK] GET http://127.0.0.1:3001/api/music/languages
+[NETWORK] GET http://127.0.0.1:3001/api/playlists/testuser
+[NETWORK] GET http://127.0.0.1:5174/api/wallet/balance
+[NETWORK] GET http://127.0.0.1:3001/api/communities/1/check-gate?userId=507f1f77bcf86cd799439011
+[PAGE] [App] Applying theme color: #8b5cf6 (stored: null, user: #8b5cf6)
+[NETWORK] GET http://127.0.0.1:3001/api/notifications/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/messages/unread-count/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/communities
+[NETWORK] GET http://127.0.0.1:3001/api/favorites/testuser
+[NETWORK] GET http://127.0.0.1:3001/api/music/genres
+[NETWORK] GET http://127.0.0.1:3001/api/music/artists
+[NETWORK] GET http://127.0.0.1:3001/api/music/albums
+[NETWORK] GET http://127.0.0.1:3001/api/music/languages
+[NETWORK] GET http://127.0.0.1:3001/api/playlists/testuser
+[PAGE ERROR] Unexpected token '<', "<!doctype "... is not valid JSON
+[PAGE ERROR] Unexpected token '<', "<!doctype "... is not valid JSON
+[PAGE] [Audius] Host selected: http://127.0.0.1:5174/mock-audius
+[PAGE] [Audius] Host selected: http://127.0.0.1:5174/mock-audius
+[E2E MOCK] Catching Audius request: http://127.0.0.1:5174/mock-audius/v1/tracks/trending?app_name=STRIDE
+[E2E MOCK] Catching Audius request: http://127.0.0.1:5174/mock-audius/v1/tracks/trending?app_name=STRIDE
+[PAGE] [ServerContext] Fetched servers: 5
+[PAGE] [ServerView Render] Community: Lo-Fi Lounge, Queue size: 0
+[PAGE] [ServerView Render] Community: Lo-Fi Lounge, Queue size: 0
+[PAGE] [ServerView] isMember: true (User: 507f1f77bcf86cd799439011, Community Members: 1)
+[PAGE] [ServerView] isMember: true (User: 507f1f77bcf86cd799439011, Community Members: 1)
+[NETWORK] GET http://127.0.0.1:3001/api/communities/1/check-gate?userId=507f1f77bcf86cd799439011
+[PAGE] [ServerContext] Fetched servers: 5
+[PAGE] [ServerView Render] Community: Lo-Fi Lounge, Queue size: 0
+[PAGE] [ServerView Render] Community: Lo-Fi Lounge, Queue size: 0
+[PAGE] [ServerView] isMember: true (User: 507f1f77bcf86cd799439011, Community Members: 1)
+[PAGE] [ServerView] isMember: true (User: 507f1f77bcf86cd799439011, Community Members: 1)
+[PAGE] [SOCKET] Browser socket exists, id: FtoQOIaHiUYe7WgmAAAD
+[PAGE] [SOCKET] Browser socket exists, id: FtoQOIaHiUYe7WgmAAAD
+[PAGE] [SOCKET EVENT] room_members_updated [Object]
+[PAGE] [SOCKET EVENT] room_members_updated [Object]
+[PAGE] [SOCKET EVENT] room_members_updated [Object]
+[PAGE] [SOCKET EVENT] room_members_updated [Object]
+[PAGE] Failed to load resource: the server responded with a status of 403 ()
+[PAGE] Failed to load resource: the server responded with a status of 403 ()
+[PAGE] [Reown Config] Failed to fetch remote project configuration. Using local/default values. Error: HTTP status code: 403
+    at fetchData (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1747:17)
+    at async FetchUtil.get (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1761:22)
+    at async Object.fetchProjectConfig (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:4812:22)
+    at async Object.fetchRemoteFeatures (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8607:26)
+    at async AppKit.initialize (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8805:27)
+[PAGE] [Reown Config] Failed to fetch remote project configuration. Using local/default values. Error: HTTP status code: 403
+    at fetchData (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1747:17)
+    at async FetchUtil.get (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:1761:22)
+    at async Object.fetchProjectConfig (http://127.0.0.1:5174/node_modules/.vite/deps/chunk-JQWH6NOS.js?v=95926ca1:4812:22)
+    at async Object.fetchRemoteFeatures (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8607:26)
+    at async AppKit.initialize (http://127.0.0.1:5174/node_modules/.vite/deps/core-7WJE4WDI.js?v=95926ca1:8805:27)
+[PAGE] Failed to load resource: the server responded with a status of 400 ()
+[PAGE] Failed to load resource: the server responded with a status of 400 ()
+[NETWORK RESPONSE] https://api.web3modal.org/appkit/v1/config?projectId=YOUR_PROJECT_ID_PLACEHOLDER&st=appkit&sv=html-core-1.7.8 -> 403: Forbidden
+[NETWORK RESPONSE] https://pulse.walletconnect.org/e?projectId=YOUR_PROJECT_ID_PLACEHOLDER&st=appkit&sv=html-core-1.7.8 -> 400: Bad Request - projectId must be 32 characters long, Invalid. Required query params: projectId, st, sv
+  ✘  1 [chromium] › tests/jukebox-sync.spec.js:27:1 › Jukebox synchronization and LIVE status (16.5s)
+
+
+  1) [chromium] › tests/jukebox-sync.spec.js:27:1 › Jukebox synchronization and LIVE status ────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.track-card').first()
+    Expected: visible
+    Timeout: 15000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 15000ms[22m
+    [2m  - waiting for locator('.track-card').first()[22m
+
+
+      65 |   
+      66 |   // Wait for trending tracks to be visible
+    > 67 |   await expect(page.locator('.track-card').first()).toBeVisible({ timeout: 15000 });
+         |                                                     ^
+      68 |   
+      69 |   await addButton.scrollIntoViewIfNeeded();
+      70 |   
+        at /Users/purushothammallipudi/.gemini/antigravity/scratch/stride/tests/jukebox-sync.spec.js:67:53
+
+    Error Context: test-results/jukebox-sync-Jukebox-synchronization-and-LIVE-status-chromium/error-context.md
+
+  1 failed
+    [chromium] › tests/jukebox-sync.spec.js:27:1 › Jukebox synchronization and LIVE status ─────────
+
+[36m  Serving HTML report at http://localhost:49366. Press Ctrl+C to quit.[39m

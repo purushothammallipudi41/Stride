@@ -1,7 +1,7 @@
 {
   "name": "stride",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:start": "concurrently \"npm run dev\" \"npm run server\"",
+    "test:start": "concurrently \"npm run dev > /tmp/stride_vite.log 2>&1\" \"npm run server > /tmp/stride_server.log 2>&1\"",
     "test:e2e": "playwright test"
   },
   "dependencies": {

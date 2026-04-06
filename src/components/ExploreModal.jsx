@@ -1,4 +1,4 @@
-import { X, Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag, Music2, Settings, Layout, LogOut, Wallet } from 'lucide-react';
+import { X, Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag, Music, Settings, Layout, LogOut, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUI } from '../hooks/useUI';
 import './ExploreModal.css';
@@ -15,7 +15,7 @@ const ExploreModal = () => {
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
         { id: 'dashboard', icon: Layout, label: 'Dashboard', path: '/artist-dashboard' },
-        { id: 'music', icon: Music2, label: 'Music', path: '/music' },
+        { id: 'music', icon: Music, label: 'Music', path: '/music' },
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '/achievements' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '/insights' },
         { id: 'wallet', icon: Wallet, label: 'Wallet', path: '/wallet' },

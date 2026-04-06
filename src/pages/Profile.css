@@ -775,3 +775,53 @@
     font-size: 0.9rem;
     cursor: default;
 }
+
+/* Theme Picker & Color Swatches for Edit Profile */
+.theme-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.color-swatch:hover {
+    transform: scale(1.15);
+    border-color: white;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.color-swatch.active {
+    border-color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px currentColor;
+    z-index: 1;
+}
+
+.color-swatch.active::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    font-style: italic;
+}

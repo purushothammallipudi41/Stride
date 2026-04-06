@@ -3,6 +3,7 @@ import SEO from '../components/common/SEO';
 import PageHeader from '../components/layout/PageHeader';
 import { DollarSign, Plus, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, History } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
+import { BASE_URL } from '../utils/api';
 import './Wallet.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
@@ -25,7 +26,7 @@ const Wallet = () => {
 
     const fetchBalance = useCallback(async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/balance`, {
+            const res = await fetch(`${BASE_URL}/api/wallet/balance`, {
                 headers: { 'x-user-username': username }
             });
             const data = await res.json();
@@ -64,7 +65,7 @@ const Wallet = () => {
 
         try {
             // 1. Create order on backend
-            const orderRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/payments/order`, {
+            const orderRes = await fetch(`${BASE_URL}/api/payments/order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: parseInt(topUpAmount), username })
@@ -81,7 +82,7 @@ const Wallet = () => {
                 order_id: order.id,
                 handler: async (response) => {
                     // 3. Verify on backend
-                    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/payments/verify`, {
+                    const verifyRes = await fetch(`${BASE_URL}/api/payments/verify`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -120,7 +121,7 @@ const Wallet = () => {
             const currentAddress = evmAddress || solanaAddress?.toBase58();
             if (currentAddress) {
                 try {
-                    await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/connect`, {
+                    await fetch(`${BASE_URL}/api/wallet/connect`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, walletAddress: currentAddress })

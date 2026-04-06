@@ -10,12 +10,31 @@ const Topbar = () => {
     const navigate = useNavigate();
     const { unreadNotifications, unreadMessages } = useUI();
     const [showNotifPopover, setShowNotifPopover] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const handleSearch = (e) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
 
     return (
         <header className="topbar">
             <div className="topbar-logo-section">
                 <img src={logo} alt="Stride" className="topbar-logo" />
                 <span className="topbar-logo-text">Stride</span>
+            </div>
+
+            <div className="topbar-search-container">
+                <div className="topbar-search-wrapper">
+                    <input 
+                        type="text" 
+                        placeholder="Search Stride..." 
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                    />
+                </div>
             </div>
 
             <div className="topbar-actions">

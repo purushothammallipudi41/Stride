@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
+import { BASE_URL } from '../utils/api';
 import logo from '../assets/stride-logo.png';
 import './VerifyEmail.css';
 
@@ -51,7 +52,7 @@ const VerifyEmail = () => {
         setError('');
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/verify-code`, {
+            const response = await fetch(`${BASE_URL}/api/verify-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, code: fullCode })
@@ -80,7 +81,7 @@ const VerifyEmail = () => {
         if (timer > 0) return;
         setTimer(30);
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/send-code`, {
+            await fetch(`${BASE_URL}/api/send-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })

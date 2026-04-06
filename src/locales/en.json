@@ -26,5 +26,18 @@
     "join_to_add": "Join to Add Beats",
     "up_next": "UP NEXT",
     "listeners_count": "{{count}} LISTENING LIVE"
+  },
+  "notifications": {
+      "title": "Notifications",
+      "no_notifications": "No notifications yet",
+      "mark_as_read": "Mark as read",
+      "caught_up": "You're all caught up!"
+  },
+  "settings": {
+      "title": "Settings",
+      "theme": "Theme",
+      "accent_color": "Accent Color",
+      "language": "Language",
+      "logout": "Log Out"
   }
 }

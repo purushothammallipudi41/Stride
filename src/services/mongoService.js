@@ -3,9 +3,10 @@
  * Template for interacting with MongoDB Atlas without a direct database driver.
  */
 
+import { BASE_URL } from '../utils/api';
 const APP_ID = ""; 
 const API_KEY = ""; 
-const BASE_URL = `https://data.mongodb-api.com/app/${APP_ID}/endpoint/data/v1`;
+const BASE_URL_CONFIG = `${BASE_URL}/app/${APP_ID}/endpoint/data/v1`;
 
 const headers = {
     'Content-Type': 'application/json',
@@ -20,7 +21,7 @@ const mongoRequest = async (action, body) => {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/action/${action}`, {
+        const response = await fetch(`${BASE_URL_CONFIG}/action/${action}`, {
             method: 'POST',
             headers,
             body: JSON.stringify({

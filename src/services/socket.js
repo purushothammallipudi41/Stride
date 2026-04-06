@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../utils/api';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001';
 const socket = io(SOCKET_URL);
 
 socket.on('connect', () => {
@@ -10,5 +10,9 @@ socket.on('connect', () => {
 socket.on('connect_error', (error) => {
     console.error('Socket connection error:', error);
 });
+
+if (typeof window !== 'undefined') {
+    window.socket = socket;
+}
 
 export default socket;

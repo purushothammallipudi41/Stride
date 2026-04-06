@@ -11,6 +11,9 @@ let selectedHost = null;
  * Selects a healthy discovery node from the Audius network.
  */
 export const selectHost = async (forceRefresh = false) => {
+    if (import.meta.env.VITE_AUDIUS_HOST) {
+        return import.meta.env.VITE_AUDIUS_HOST;
+    }
     if (selectedHost && !forceRefresh) return selectedHost;
     
     try {

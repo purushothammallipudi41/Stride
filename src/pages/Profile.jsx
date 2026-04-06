@@ -8,6 +8,7 @@ import Avatar from '../components/common/Avatar';
 import SubscribeButton from '../components/profile/SubscribeButton';
 import socket from '../services/socket';
 import VerificationBadge from '../components/common/VerificationBadge';
+import { BASE_URL } from '../utils/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -19,18 +20,19 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
 
-    const isOwnProfile = (username || 'admin') === (user?.username);
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const isOwnProfile = !username || username === currentUser.username;
 
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const targetUser = username || currentUser.username || 'admin';
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/${targetUser}`)
+        fetch(`${BASE_URL}/api/profile/${targetUser}`)
             .then(res => res.json())
             .then(data => {
                 setUser(data);
                 setIsLoading(false);
                 const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                setIsFollowing(data.followers?.some(f => f._id === currentUser._id || f === currentUser._id));
+                setIsFollowing(Array.isArray(data.followers) && data.followers.some(f => f._id === currentUser._id || f === currentUser._id));
             })
             .catch(err => {
                 console.error("Failed to fetch profile:", err);
@@ -45,7 +47,7 @@ const Profile = () => {
 
         const handleUpdate = (event) => {
             if (event.type === 'follow' && event.username === (username || JSON.parse(localStorage.getItem('user') || '{}').username)) {
-                setUser(prev => ({ ...prev, followerCount: event.followerCount }));
+                setUser(prev => prev ? { ...prev, followerCount: event.followerCount } : prev);
             }
         };
         socket.on('content_updated', handleUpdate);
@@ -56,7 +58,7 @@ const Profile = () => {
     const handleFollow = async () => {
         try {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/${user.username}/follow`, {
+            const res = await fetch(`${BASE_URL}/api/profile/${user.username}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -80,7 +82,7 @@ const Profile = () => {
 
         try {
             const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/tip`, {
+            const res = await fetch(`${BASE_URL}/api/wallet/tip`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -152,19 +154,27 @@ const Profile = () => {
 
     const handleUpdateProfile = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update`, {
+            const res = await fetch(`${BASE_URL}/api/profile/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editData)
             });
             const data = await res.json();
             if (data.success) {
-                setUser(data.user);
-                // Update local storage to reflect theme changes immediately
+                // Update local storage and DOM immediately for instant feedback and E2E stability
                 localStorage.setItem('user', JSON.stringify(data.user));
-                closeEditModal();
-                // Refresh to apply CSS variables in App.jsx
-                window.location.reload(); 
+                if (data.user.accentColor) {
+                    localStorage.setItem('stride_theme_color', data.user.accentColor);
+                    document.documentElement.style.setProperty('--theme-primary', data.user.accentColor);
+                }
+                
+                setUser(data.user);
+                
+                // Deterministic reload: use a very short delay to ensure browser paints/saves if needed
+                // but keep it fast enough for E2E speed
+                requestAnimationFrame(() => {
+                    window.location.reload();
+                });
             } else {
                 console.error("Failed to update:", data.message);
             }
@@ -178,7 +188,7 @@ const Profile = () => {
             const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
             
             // First, process the payment via wallet
-            const paymentRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/wallet/tip`, {
+            const paymentRes = await fetch(`${BASE_URL}/api/wallet/tip`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -198,7 +208,7 @@ const Profile = () => {
             }
 
             // Then, update the profile frame
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/profile/update-frame`, {
+            const res = await fetch(`${BASE_URL}/api/profile/update-frame`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -222,6 +232,15 @@ const Profile = () => {
     if (isLoading) return <div className="loading-screen">Resonating...</div>;
     if (!user) return <div className="error-screen">User not found</div>;
 
+    // Last-ditch safety for nested properties
+    const safeUser = {
+        posts: [],
+        topTracks: [],
+        followers: [],
+        highlights: [],
+        ...user
+    };
+
     return (
         <div className="ig-profile-container">
             {/* Top Header */}
@@ -235,24 +254,24 @@ const Profile = () => {
                 
                 <div className="ig-bio-top-row">
                     <Avatar 
-                        src={user?.avatar} 
+                        src={safeUser?.avatar} 
                         alt="Profile" 
                         size={80} 
                         className="ig-avatar-actual" 
-                        frame={user?.avatarFrame || 'none'}
-                        isVerified={user?.isVerified}
+                        frame={safeUser?.avatarFrame || 'none'}
+                        isVerified={safeUser?.isVerified}
                     />
                     <div className="ig-stats-row">
                         <div className="ig-stat">
-                            <span className="ig-stat-num">{user.posts?.length || 0}</span>
+                            <span className="ig-stat-num">{safeUser.posts?.length || 0}</span>
                             <span className="ig-stat-label">posts</span>
                         </div>
                         <div className="ig-stat">
-                            <span className="ig-stat-num">{(user.followerCount || 0).toLocaleString()}</span>
+                            <span className="ig-stat-num">{(safeUser.followerCount || 0).toLocaleString()}</span>
                             <span className="ig-stat-label">followers</span>
                         </div>
                         <div className="ig-stat">
-                            <span className="ig-stat-num">{(user.followingCount || 0).toLocaleString()}</span>
+                            <span className="ig-stat-num">{(safeUser.followingCount || 0).toLocaleString()}</span>
                             <span className="ig-stat-label">following</span>
                         </div>
                     </div>
@@ -260,19 +279,19 @@ const Profile = () => {
 
                 <div className="ig-bio-text-block">
                     <div className="ig-bio-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <h3 className="ig-bio-name">{user.name || user.username}</h3>
-                        {user.isVerified && <VerificationBadge size={18} />}
+                        <h3 className="ig-bio-name">{safeUser.name || safeUser.username}</h3>
+                        {safeUser.isVerified && <VerificationBadge size={18} />}
                     </div>
-                    <p className="ig-bio-desc">{user.bio}</p>
+                    <p className="ig-bio-desc">{safeUser.bio}</p>
                 </div>
 
                 {/* Top Tracks Section */}
-                {user.topTracks?.length > 0 && (
+                {safeUser.topTracks?.length > 0 && (
                     <div className="top-tracks-vibe">
                         <h4 className="vibe-label">Top Rotation</h4>
-                        <div className="tracks-scroll">
-                            {user.topTracks.map(track => (
-                                <div key={track.id} className="vibe-track-card">
+                        <div className="ig-top-tracks">
+                            {safeUser.topTracks?.map(track => (
+                                <div key={track.id} className="ig-track-item">
                                     <img src={track.artwork} alt="" />
                                     <div className="vibe-meta">
                                         <span className="vibe-title">{track.title}</span>
@@ -353,7 +372,7 @@ const Profile = () => {
 
             {/* Grid Content */}
             <div className="ig-profile-grid">
-                {user.posts.map((post, i) => (
+                {user.posts?.map((post, i) => (
                     <div key={i} className="ig-grid-item">
                         <img src={post.contentUrl || post.image} alt="Post" loading="lazy" />
                     </div>
@@ -374,7 +393,7 @@ const Profile = () => {
                             <div className="ig-edit-field ig-file-field">
                                 <label>Profile Banner</label>
                                 <div className="ig-upload-preview banner-preview" onClick={() => document.getElementById('banner-upload').click()}>
-                                    {editData.banner ? <img src={editData.banner} alt="Banner Preview" className="preview-img" /> : <div className="ig-upload-placeholder"><Image size={24}/></div>}
+                                    {editData?.banner ? <img src={editData?.banner} alt="Banner Preview" className="preview-img" /> : <div className="ig-upload-placeholder"><Image size={24}/></div>}
                                     <div className="ig-upload-overlay"><Upload size={20} /> <span>Change Banner</span></div>
                                 </div>
                                 <input id="banner-upload" type="file" accept="image/*" onChange={e => handleFileChange(e, 'banner')} style={{ display: 'none' }} />
@@ -396,8 +415,8 @@ const Profile = () => {
                             </div>
                             
                              <div className="ig-edit-field">
-                                <label>Bio ({editData.bio.length}/150)</label>
-                                <textarea value={editData.bio} onChange={e => setEditData({...editData, bio: e.target.value.slice(0, 150)})} placeholder="Tell the community about yourself..." rows={3} />
+                                <label>Bio ({(editData.bio || '').length}/150)</label>
+                                <textarea value={editData.bio || ''} onChange={e => setEditData({...editData, bio: e.target.value.slice(0, 150)})} placeholder="Tell the community about yourself..." rows={3} />
                             </div>
 
                             <div className="ig-edit-field">
@@ -407,6 +426,7 @@ const Profile = () => {
                                         <div 
                                             key={frame} 
                                             className={`frame-select-option ${editData.avatarFrame === frame ? 'active' : ''}`}
+                                            data-testid={`frame-option-${frame}`}
                                             onClick={() => setEditData({...editData, avatarFrame: frame})}
                                         >
                                             <div className={`frame-preview avatar-frame-${frame}`}>
@@ -418,7 +438,7 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {user.avatarFrame !== 'none' && (
+                            {editData.avatarFrame !== 'none' && (
                                 <div className="ig-edit-field">
                                     <label>Premium Accent Color</label>
                                     <div className="theme-picker">
@@ -427,6 +447,7 @@ const Profile = () => {
                                                 key={color} 
                                                 className={`color-swatch ${editData.accentColor === color ? 'active' : ''}`}
                                                 style={{ backgroundColor: color }}
+                                                data-color={color}
                                                 onClick={() => setEditData({...editData, accentColor: color})}
                                             />
                                         ))}

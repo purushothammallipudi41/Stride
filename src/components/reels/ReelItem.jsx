@@ -4,6 +4,7 @@ import { Heart, MessageSquare, Share2, Music2, Volume2, VolumeX, Sparkles, Link2
 import { useMusic } from '../../hooks/useMusic';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
+import { BASE_URL } from '../../utils/api';
 import socket from '../../services/socket';
 import './Reels.css';
 
@@ -64,7 +65,7 @@ const ReelItem = ({ video, isActive }) => {
     const trackView = useCallback(async () => {
         if (hasViewed) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${reelId}/view`, {
+            await fetch(`${BASE_URL}/api/posts/${reelId}/view`, {
                 method: 'POST'
             });
             setHasViewed(true);
@@ -87,7 +88,7 @@ const ReelItem = ({ video, isActive }) => {
 
     const handleLike = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/${reelId}/like`, {
+            const res = await fetch(`${BASE_URL}/api/feed/${reelId}/like`, {
                 method: 'POST',
                 headers: { 'x-user-username': user.username }
             });

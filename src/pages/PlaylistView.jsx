@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Play, Pause, Music, UserPlus, Share2, ArrowLeft, MoreVertical, Trash2 } from 'lucide-react';
 import { useMusic } from '../hooks/useMusic';
+import { BASE_URL } from '../utils/api';
 import socket from '../services/socket';
 import Topbar from '../components/layout/Topbar';
 import './Music.css'; // Reuse music styles
@@ -26,7 +27,7 @@ const PlaylistView = () => {
     const handleInvite = async () => {
         if (!inviteUsername) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/playlists/${id}/collaborate`, {
+            await fetch(`${BASE_URL}/api/playlists/${id}/collaborate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: inviteUsername })
@@ -46,7 +47,6 @@ const PlaylistView = () => {
 
     return (
         <div className="playlist-view animate-fade-in" style={{ paddingBottom: '100px' }}>
-            <Topbar />
             
             <button className="back-btn" onClick={() => navigate('/music')}>
                 <ArrowLeft size={20} /> Back to Music

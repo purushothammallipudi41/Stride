@@ -3,6 +3,8 @@ import SEO from '../components/common/SEO';
 import ReelItem from '../components/reels/ReelItem';
 import '../components/reels/Reels.css';
 
+import { BASE_URL } from '../utils/api';
+
 const Reels = () => {
     const [activeReelId, setActiveReelId] = useState(null);
     const [reelsData, setReelsData] = useState([]);
@@ -10,7 +12,7 @@ const Reels = () => {
     const containerRef = useRef(null);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/reels`)
+        fetch(`${BASE_URL}/api/reels`)
             .then(res => res.json())
             .then(data => {
                 setReelsData(data);

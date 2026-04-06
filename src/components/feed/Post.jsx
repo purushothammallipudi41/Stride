@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { Heart, MessageCircle, ArrowUpRight, Bookmark, MoreHorizontal } from 'lucide-react';
+import { BASE_URL } from '../../utils/api';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
 import socket from '../../services/socket';
@@ -22,7 +23,7 @@ const Post = ({ post }) => {
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/comments`);
+            const res = await fetch(`${BASE_URL}/api/posts/${postId}/comments`);
             const data = await res.json();
             setComments(data);
         } catch (err) {
@@ -33,7 +34,7 @@ const Post = ({ post }) => {
     const trackView = useCallback(async () => {
         if (hasViewed) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/view`, {
+            await fetch(`${BASE_URL}/api/posts/${postId}/view`, {
                 method: 'POST'
             });
             setHasViewed(true);
@@ -87,7 +88,7 @@ const Post = ({ post }) => {
         if (!newComment.trim()) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/posts/${postId}/comments`, {
+            const res = await fetch(`${BASE_URL}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ const Post = ({ post }) => {
 
     const handleLike = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/feed/${postId}/like`, {
+            const res = await fetch(`${BASE_URL}/api/feed/${postId}/like`, {
                 method: 'POST',
                 headers: { 'x-user-username': user.username }
             });

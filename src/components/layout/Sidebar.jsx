@@ -1,4 +1,4 @@
-import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout, Wallet } from 'lucide-react';
+import { Home, Compass, MessageCircle, User, Activity, Plus, Bell, Menu, Layout, Wallet, Music } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useState, useEffect } from 'react';
@@ -33,6 +33,8 @@ const Sidebar = () => {
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Compass, label: t('nav.explore'), path: '/explore' },
+        { icon: Activity, label: t('nav.servers'), path: '/servers' },
+        { icon: Wallet, label: t('nav.wallet'), path: '/wallet' },
         { icon: Plus, label: t('nav.create'), action: 'create' },
         { icon: User, label: t('nav.profile'), path: '/profile' },
         { icon: Layout, label: t('common.more'), action: 'explore' },

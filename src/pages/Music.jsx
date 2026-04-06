@@ -148,13 +148,15 @@ const MusicPage = () => {
             />
             <PageHeader title="Music" />
             
-            <div className="music-search-container">
+            <div className="music-search">
+                <Music size={20} className="search-icon" />
                 <input 
                     type="text" 
                     placeholder="Search Audius tracks..." 
                     value={searchQuery}
                     onChange={handleSearch}
                     className="music-search-input"
+                    data-testid="music-search-input"
                 />
                 {isSearching && <div className="search-spinner">Searching...</div>}
             </div>
@@ -163,31 +165,63 @@ const MusicPage = () => {
                 <section className="music-section search-results">
                     <h3>Search Results</h3>
                     <div className="songs-list">
-                        {searchResults.map((song, idx) => (
+                        {searchResults?.map((song) => (
                             <div
                                 key={song.id}
                                 className={`song-row${currentTrack?.id === song.id ? ' active' : ''}`}
-                                onClick={() => playTrack(song)}
+                                onClick={() => handlePlaySong(song)}
                             >
-                                <span className="song-num">{idx + 1}</span>
+                                <img src={song.cover || song.artwork?.['150x150'] || '/default-track.png'} alt={song.title} />
                                 <div className="song-info">
                                     <span className="song-title">{song.title}</span>
-                                    <span className="song-artist">{song.user?.name || 'Audius Artist'}</span>
+                                    <span className="song-artist">{song.artist || song.user?.name}</span>
                                 </div>
-                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
-                                    <Share2 size={16} />
-                                </button>
-                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
-                                    <Plus size={16} />
-                                </button>
+                                <div className="song-actions">
+                                    <button onClick={(e) => handleShareSong(e, song)}><Share2 size={18}/></button>
+                                    <button onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}><Plus size={18}/></button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </section>
             )}
 
+            <section className="music-section trending-list">
+                <div className="section-header">
+                    <h3>Trending on Audius</h3>
+                    <button 
+                        className="jukebox-nav-btn" 
+                        onClick={() => navigate('/community/stride-official/jukebox')}
+                    >
+                        <Music size={16} /> Jukebox
+                    </button>
+                </div>
+                {allSongs?.length === 0 && (
+                    <div className="loading-inline">Discovering vibes on Audius...</div>
+                )}
+                <div className="songs-list">
+                    {allSongs?.map((song) => (
+                        <div 
+                            key={song.id} 
+                            className={`song-row${currentTrack?.id === song.id ? ' active' : ''}`}
+                            onClick={() => handlePlaySong(song)}
+                        >
+                            <img src={song.cover || '/default-track.png'} alt={song.title} />
+                            <div className="song-info">
+                                <span className="song-title">{song.title}</span>
+                                <span className="song-artist">{song.artist}</span>
+                            </div>
+                            <div className="song-actions">
+                                <button onClick={(e) => handleShareSong(e, song)}><Share2 size={18}/></button>
+                                <button onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}><Plus size={18}/></button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
             {/* Spotify-style MiniPlayer */}
-            {currentTrack && (
+            {currentTrack?.id && (
                 <div className={`spotify-mini-player ${isExpanded ? 'hidden' : ''}`} onClick={() => setIsExpanded(true)}>
                     <Scrubber />
                     <div className="mini-player-content">

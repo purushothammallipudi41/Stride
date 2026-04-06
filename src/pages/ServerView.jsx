@@ -1,32 +1,47 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SEO from '../components/common/SEO';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useServer } from '../hooks/useServer';
 import { useActivity } from '../hooks/useActivity';
 import { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
 import MusicContextObject from '../context/MusicContextObject';
+import { useUI } from '../hooks/useUI';
 
 
 import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
 import AnalyticsDashboard from '../components/content/AnalyticsDashboard';
+import TrackCard from '../components/chat/TrackCard';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
 import VoiceService from '../services/VoiceService';
+import { BASE_URL } from '../utils/api';
 
 import './ServerView.css';
 
 const voiceService = new VoiceService(socket);
 
 const CommunityView = () => {
-    const { communityId } = useParams();
+    const { communityId, channelId } = useParams();
     const navigate = useNavigate();
-    const { servers, joinCommunity, updateMemberRole, kickMember } = useServer();
+    const { servers, updateMemberRole, kickMember } = useServer();
+    const user = useMemo(() => {
+        try {
+            return JSON.parse(localStorage.getItem('user') || '{}');
+        } catch {
+            return {};
+        }
+    }, []);
+    const { addNotification } = useUI();
     const { isUserListening } = useActivity();
-    const { allSongs, currentTrack, isPlaying, playTrack, joinMusicRoom, leaveMusicRoom, roomListeners, voteSong } = useContext(MusicContextObject);
-    const { t } = useTranslation();
-    const [activeChannel, setActiveChannel] = useState('general');
+    const { joinMusicRoom, leaveMusicRoom } = useContext(MusicContextObject);
+    const [activeChannel, setActiveChannel] = useState(channelId || 'general');
+
+    useEffect(() => {
+        if (channelId) setActiveChannel(channelId);
+    }, [channelId]);
+
     const [showModTools, setShowModTools] = useState(false);
     const [channelMessages, setChannelMessages] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -50,55 +65,62 @@ const CommunityView = () => {
     });
 
     const communityIdTarget = String(communityId);
-    const community = servers.find(s => 
-        String(s._id) === communityIdTarget || 
-        (s.id && String(s.id) === communityIdTarget) || 
-        (s.name && s.name === communityId)
-    );
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const community = useMemo(() => {
+        const found = servers.find(s => 
+            String(s._id) === communityIdTarget || 
+            (s.id && String(s.id) === communityIdTarget) || 
+            (s.name && s.name === communityId)
+        );
+        return found;
+    }, [servers, communityIdTarget, communityId]);
     
-    // Derived state
-    const isMember = community?.members?.some(m => {
-        const mId = (m && typeof m === 'object') ? (m._id || m.id) : m;
-        return mId?.toString() === user?._id?.toString() || mId?.toString() === user?.id?.toString();
-    });
-
-    const handleAddSong = useCallback(async () => {
-        if (!isMember || !allSongs?.length) return;
-        const randomSong = allSongs[Math.floor(Math.random() * allSongs.length)];
-        
-        try {
-            const trackData = {
-                id: randomSong.id,
-                title: randomSong.title,
-                artist: randomSong.artist || 'Unknown Artist',
-                artwork: randomSong.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=480&q=80'
-            };
-            
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/jukebox`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track: trackData, userId: user._id })
-            });
-        } catch (err) {
-            console.error("Add song failed:", err);
+    const isMember = useMemo(() => {
+        if (!user?._id || !community?.members) {
+            return false;
         }
-    }, [isMember, allSongs, communityId, user._id]);
+        const memberIds = community.members.map(m => {
+            if (m && typeof m === 'object' && m !== null) return String(m._id || m);
+            return String(m);
+        });
+        return memberIds.includes(String(user._id));
+    }, [user?._id, community?.members]);
 
     const userRole = community?.roles?.find(r => r.user === user?.username)?.role || (community?.owner === user?._id ? 'owner' : 'member');
     const isMod = userRole === 'owner' || userRole === 'mod';
 
-    useEffect(() => {
-        if (communityId) {
-            socket.emit('join_community', communityId);
-            // Join specific channel room
-            socket.emit('join_room', `community_${communityId}_${activeChannel}`);
-            
-            if (joinMusicRoom) joinMusicRoom(`community_${communityId}`);
-        }
+    const handleStartCall = (member, type = 'video') => {
+        if (!member?.username || member.username === user.username) return;
+        socket.emit('start-direct-call', {
+            username: member.username,
+            name: member.name || member.username,
+            type
+        });
+    };
 
+    const handlePromote = async (memberId) => {
+        const result = await updateMemberRole(community?._id || communityId, memberId, 'mod');
+        if (result?.message) addNotification({ title: 'Success', message: 'Member promoted to Moderator!', type: 'success' });
+    };
+
+    const handleKick = async (memberId) => {
+        if(window.confirm("Are you sure you want to kick this member?")) {
+            const result = await kickMember(community?._id || communityId, memberId);
+            if (result?.message) addNotification({ title: 'Success', message: 'Member kicked from community.', type: 'info' });
+        }
+    };
+
+    useEffect(() => {
+        if (community?._id) {
+            socket.emit('join_community', community._id);
+            socket.emit('join_room', `community_${community._id}_${activeChannel}`);
+            
+            if (joinMusicRoom) joinMusicRoom(`community_${community._id}`);
+        }
+    }, [community?._id, activeChannel, joinMusicRoom]);
+
+
+    useEffect(() => {
         const handleNewMessage = (msg) => {
-            console.log("[ServerView] New channel message:", msg);
             setChannelMessages(prev => ({
                 ...prev,
                 [msg.roomId]: [...(prev[msg.roomId] || []), msg]
@@ -111,7 +133,6 @@ const CommunityView = () => {
             setVoiceParticipants(data.participants || []);
         });
 
-        // WebRTC Signaling listeners
         socket.on('user-joined-voice', ({ username: joinedUser }) => {
             if (isInVoice) {
                 voiceService.initiateConnection(joinedUser, user.username);
@@ -131,7 +152,6 @@ const CommunityView = () => {
         });
 
         voiceService.onTrackCallback = (participantUsername, stream) => {
-            console.log(`Received remote track from ${participantUsername}`);
             const audio = document.getElementById(`audio-${participantUsername}`) || document.createElement('audio');
             audio.id = `audio-${participantUsername}`;
             audio.srcObject = stream;
@@ -143,7 +163,7 @@ const CommunityView = () => {
 
         const fetchEvents = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/events`);
+                const res = await fetch(`${BASE_URL}/api/communities/${communityId}/events`);
                 const data = await res.json();
                 setEvents(data);
             } catch (err) {
@@ -154,7 +174,7 @@ const CommunityView = () => {
         const checkVibePass = async () => {
             if (!user._id || !communityId) return;
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/check-gate?userId=${user._id}`);
+                const res = await fetch(`${BASE_URL}/api/communities/${communityId}/check-gate?userId=${user._id}`);
                 const data = await res.json();
                 setHasVibePass(data.hasAccess);
             } catch (err) {
@@ -169,7 +189,7 @@ const CommunityView = () => {
 
         socket.on('new_gift', (payload) => {
             setActiveGift(payload);
-            setTimeout(() => setActiveGift(null), 5000); // Show for 5s
+            setTimeout(() => setActiveGift(null), 5000);
         });
 
         socket.on('content_updated', (payload) => {
@@ -193,7 +213,7 @@ const CommunityView = () => {
              socket.off('new_gift');
              voiceService.stopLocalStream();
         };
-    }, [communityId, activeChannel, joinMusicRoom, leaveMusicRoom, isInVoice, user.username, user._id]);
+    }, [communityId, activeChannel, community?._id, isInVoice, joinMusicRoom, leaveMusicRoom, user._id, user.username]);
 
     const handleToggleVoice = async () => {
         if (!isMember) return;
@@ -228,20 +248,10 @@ const CommunityView = () => {
         };
         socket.emit('channel_message', newMessage);
         
-        // Optimistic update
         setChannelMessages(prev => ({
             ...prev,
             [roomId]: [...(prev[roomId] || []), { ...newMessage.message, isMe: true, id: Date.now() }]
         }));
-    };
-
-    const handleStartCall = (member, type = 'video') => {
-        if (!member?.username || member.username === user.username) return;
-        socket.emit('start-direct-call', {
-            username: member.username,
-            name: member.name || member.username,
-            type
-        });
     };
 
     if (!community) {
@@ -249,43 +259,16 @@ const CommunityView = () => {
             <div className="loading-screen" id="debug-loading-screen">
                 <div className="loading-spinner"></div>
                 <h2>Finding community...</h2>
-                <div style={{ marginTop: '20px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', fontSize: '12px', textAlign: 'left', maxWidth: '80%', overflow: 'auto' }}>
-                    <p><b>Target communityId:</b> {communityId}</p>
-                    <p><b>Target String:</b> {communityIdTarget}</p>
-                    <p><b>Total Servers in State:</b> {servers.length}</p>
-                    <p><b>Server IDs in State:</b></p>
-                    <ul>
-                        {servers.map((s, i) => (
-                            <li key={i}>
-                                _id: {String(s._id)}, id: {s.id}, name: "{s.name}"
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </div>
         );
     }
 
-    const handleJoin = async () => {
-        if (user?._id) await joinCommunity(community?._id || communityId, user._id);
-    };
 
-    const handlePromote = async (memberId) => {
-        const result = await updateMemberRole(community?._id || communityId, memberId, 'mod');
-        if (result?.message) alert("Member promoted to Moderator!");
-    };
-
-    const handleKick = async (memberId) => {
-        if(window.confirm("Are you sure you want to kick this member?")) {
-            const result = await kickMember(community?._id || communityId, memberId);
-            if (result?.message) alert("Member kicked from community.");
-        }
-    };
 
     const handleCreateEvent = async () => {
         if (!isMod || !newEventData.title || !newEventData.startTime) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/events`, {
+            await fetch(`${BASE_URL}/api/communities/${communityId}/events`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...newEventData, createdBy: user._id })
@@ -300,7 +283,7 @@ const CommunityView = () => {
     const handleRSVP = async (eventId) => {
         if (!isMember) return;
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/events/${eventId}/rsvp`, {
+            await fetch(`${BASE_URL}/api/events/${eventId}/rsvp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id })
@@ -323,7 +306,7 @@ const CommunityView = () => {
                 message: giftType === 'tip' ? `Enjoy this ${amount} VP tip! ❤️` : `Gifted you a ${frameType} frame!`
             };
             
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}${endpoint}`, {
+            const res = await fetch(`${BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -342,7 +325,7 @@ const CommunityView = () => {
         if (!user._id || isMinting) return;
         setIsMinting(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/mint-pass`, {
+            const res = await fetch(`${BASE_URL}/api/communities/${communityId}/mint-pass`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user._id })
@@ -360,26 +343,9 @@ const CommunityView = () => {
         }
     };
 
-    const handleStakeTrack = async (trackId, amount) => {
-        try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/stake`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user._id, trackId, amount })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert(`Staked ${amount} VP to boost this track! 🔥`);
-            }
-        } catch {
-            console.error("Staking failed");
-        }
-    };
-
     const channels = [
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
-        { id: 'jukebox', name: t('jukebox.jukebox_live'), type: 'music', icon: Music },
         { id: 'events', name: 'upcoming-events', type: 'text', icon: Hash },
         { id: 'backstage', name: 'backstage-lounge', type: 'text', icon: Lock, isGated: true },
         ...(isMod ? [{ id: 'analytics', name: 'insights', type: 'analytics', icon: BarChart3 }] : [])
@@ -499,125 +465,7 @@ const CommunityView = () => {
                 </header>
 
                 <div className="chat-content">
-                    {activeChannel === 'jukebox' ? (
-                        <div className="jukebox-container">
-                             <div className="jukebox-hero">
-                                <Music size={48} className="pulse-icon" />
-                                <h2>{t('jukebox.jukebox_live')}</h2>
-                                <p>Listeners are currently vibing to the shared queue</p>
-                                 <div className="hero-actions">
-                                    {!isMember && <button className="join-overlay-btn" onClick={handleJoin}>{t('jukebox.join_to_add')}</button>}
-                                    {isMember && (
-                                        <button className="gift-btn-hero" onClick={() => { setShowGiftModal(true); setTargetMember(null); }}>
-                                            <Trophy size={18} /> Send Community Love
-                                        </button>
-                                    )}
-                                 </div>
-                             </div>
-
-                             {roomListeners?.length > 0 && (
-                                <div className="live-listeners-tray">
-                                    <div className="tray-header">
-                                        <Users size={16} /> <span>{t('jukebox.listeners_count', { count: roomListeners.length })}</span>
-                                    </div>
-                                    <div className="listener-pills">
-                                        {roomListeners.map(listener => (
-                                            <div key={listener.username} className="listener-pill animate-fade-in">
-                                                <Avatar 
-                                                    src={listener.avatar} 
-                                                    alt="" 
-                                                    size={20} 
-                                                    frame={listener.avatarFrame || 'none'} 
-                                                />
-                                                <span>{listener.username}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                             )}
-                             
-                             <div className="jukebox-queue">
-                                 <div className="queue-header">
-                                    <span>{t('jukebox.up_next')}</span>
-                                    <button className="add-btn-small" onClick={handleAddSong} disabled={!isMember}><Plus size={16} /> {t('jukebox.add_song')}</button>
-                                </div>
-                                {(isPlaying || activeChannel === 'jukebox') && (
-                                    <div className="sync-status-bar">
-                                        <div className="jukebox-sync-indicator">{(isPlaying || (community.jukeboxQueue && community.jukeboxQueue.length > 0)) ? t('jukebox.live') : 'SYNCED'}</div>
-                                        <span>{isPlaying ? <>Everyone is currently listening to <b>{currentTrack?.title}</b></> : 'The jukebox is synced for everyone.'}</span>
-                                    </div>
-                                )}
-                                {community.jukeboxQueue?.map((t, i) => (
-                                    <div key={i} className="queue-card">
-                                        <img src={t?.artwork || ''} alt="" />
-                                         <div className="card-meta">
-                                            <span className="t-title">{t?.title}</span>
-                                            <span className="t-artist">{t?.artist}</span>
-                                            <div className="t-votes-badge">
-                                                <button onClick={(e) => { e.stopPropagation(); voteSong(communityId, t.trackId || t.id, 1); }} className="vote-btn up"><Plus size={12} /></button>
-                                                <span>{t?.votes || 0}</span>
-                                                <button onClick={(e) => { e.stopPropagation(); voteSong(communityId, t.trackId || t.id, -1); }} className="vote-btn down"><Plus size={12} style={{transform: 'rotate(45deg)'}} /></button>
-                                                {isMember && (
-                                                    <button className="stake-btn" onClick={(e) => { e.stopPropagation(); handleStakeTrack(t.trackId || t.id, 100); }}>
-                                                        <Trophy size={10} className="stake-icon" /> Stake 100
-                                                    </button>
-                                                )}
-                                            </div>
-                                         </div>
-                                        <button 
-                                            className={`play-btn-circle ${currentTrack?.id === (t?.trackId || t?.id) && isPlaying ? 'playing' : ''}`}
-                                            onClick={() => playTrack && playTrack(t)}
-                                        >
-                                            <Play size={18} />
-                                        </button>
-                                    </div>
-                                ))}
-                                {(!community.jukeboxQueue || community.jukeboxQueue.length === 0) && (
-                                    <div className="empty-state-music">Queue is empty.</div>
-                                )}
-                             </div>
-
-                             <div className="jukebox-social-sidebar">
-                                {community.vibeLeaderboard?.length > 0 && (
-                                    <div className="vibe-leaderboard glass-panel">
-                                        <div className="section-header">
-                                            <Trophy size={18} color="gold" />
-                                            <h3>TOP DJs</h3>
-                                        </div>
-                                        <div className="leaderboard-list">
-                                            {community.vibeLeaderboard.slice(0, 5).map((entry, idx) => (
-                                                <div key={idx} className="leaderboard-item">
-                                                    <span className="rank">#{idx + 1}</span>
-                                                    <span className="l-username">{entry.username}</span>
-                                                    <span className="l-points">{entry.points} pts</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {community.pastQueue?.length > 0 && (
-                                    <div className="past-vibes glass-panel">
-                                        <div className="section-header">
-                                            <History size={18} />
-                                            <h3>RECENTLY PLAYED</h3>
-                                        </div>
-                                        <div className="history-list">
-                                            {community.pastQueue.slice(0, 5).map((t, i) => (
-                                                <div key={i} className="history-item">
-                                                    <img src={t.artwork} alt="" />
-                                                    <div className="h-meta">
-                                                        <span className="h-title">{t.title}</span>
-                                                        <span className="h-artist">{t.artist}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                             </div>
-                        </div>
-                    ) : activeChannel === 'analytics' ? (
+                    {activeChannel === 'analytics' ? (
                         <AnalyticsDashboard communityId={communityId} />
                     ) : activeChannel === 'events' ? (
                         <div className="events-calendar-view">
@@ -818,7 +666,6 @@ const CommunityView = () => {
                                     >
                                         <option value="general">General</option>
                                         <option value="voice">Voice Lounge</option>
-                                        <option value="jukebox">Jukebox Session</option>
                                     </select>
                                 </div>
                                 <div className="input-group">
@@ -925,7 +772,7 @@ const CommunityView = () => {
                                 </div>
                                 <div className="benefit-item">
                                     <div className="icon-circle"><Music size={12} /></div>
-                                    <span>Priority Jukebox Selection</span>
+                                    <span>Premium Profile Badge</span>
                                 </div>
                             </div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import socket from '../services/socket';
 
 import { ServerContext } from './ServerContextObject';
+import { BASE_URL } from '../utils/api';
 
 
 
@@ -17,17 +18,46 @@ export const ServerProvider = ({ children }) => {
         if (!server || !idOrName) return false;
         const target = String(idOrName);
         return String(server._id) === target || 
-               (server.id && String(server.id) === target) || 
-               (server.name && server.name === idOrName);
+               String(server.id) === target || 
+               (server.name && server.name === idOrName) ||
+               (server._id && String(server._id).includes(target)) ||
+               (target.includes(String(server._id)));
     };
 
     useEffect(() => {
         // Fetch existing communities from backend
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities`)
+        fetch(`${BASE_URL}/api/communities`)
             .then(res => res.json())
             .then(data => {
                 console.log("[ServerContext] Fetched servers:", data.length);
-                setServers(data);
+                
+                // Synchronize initial membership for logged-in user (especially for E2E mocks)
+                let loggedInUser = {};
+                try {
+                    loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
+                } catch {
+                    loggedInUser = {};
+                }
+
+                if (loggedInUser._id && loggedInUser.communities) {
+                    const syncedServers = data.map(server => {
+                        const isPreSeeded = loggedInUser.communities.includes(String(server._id)) || 
+                                           loggedInUser.communities.includes(String(server.id));
+                        if (isPreSeeded) {
+                            const members = server.members_list || [];
+                            if (!members.find(m => m.userId === loggedInUser._id)) {
+                                return {
+                                    ...server,
+                                    members_list: [...members, { userId: loggedInUser._id, username: loggedInUser.username }]
+                                };
+                            }
+                        }
+                        return server;
+                    });
+                    setServers(syncedServers);
+                } else {
+                    setServers(data);
+                }
             })
             .catch(err => console.error("[ServerContext] Failed to fetch communities:", err));
 
@@ -56,12 +86,7 @@ export const ServerProvider = ({ children }) => {
             }
         });
 
-        socket.on('jukebox_updated', ({ communityId, queue }) => {
-            console.log("[ServerContext] Jukebox updated (Socket):", communityId, "Queue size:", queue?.length);
-            setServers(prev => prev.map(s => 
-                matchCommunityId(s, communityId) ? { ...s, jukeboxQueue: queue } : s
-            ));
-        });
+
 
 
         socket.on('community_updated', ({ communityId, community }) => {
@@ -75,14 +100,13 @@ export const ServerProvider = ({ children }) => {
             socket.off('activity_broadcast');
             socket.off('user_disconnected');
             socket.off('global_event');
-            socket.off('jukebox_updated');
             socket.off('community_updated');
         };
     }, []);
 
     const addCommunity = async (communityData) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities`, {
+            const response = await fetch(`${BASE_URL}/api/communities`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(communityData)
@@ -98,7 +122,7 @@ export const ServerProvider = ({ children }) => {
     const joinCommunity = async (communityId, userId) => {
         try {
             console.log("[ServerContext] Joining community (API Request):", communityId, "for user:", userId);
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/join`, {
+            const response = await fetch(`${BASE_URL}/api/communities/${communityId}/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId })
@@ -132,7 +156,7 @@ export const ServerProvider = ({ children }) => {
             } catch {
                 user = {};
             }
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/members/${userId}/role`, {
+            const response = await fetch(`${BASE_URL}/api/communities/${communityId}/members/${userId}/role`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -158,7 +182,7 @@ export const ServerProvider = ({ children }) => {
             } catch {
                 user = {};
             }
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'}/api/communities/${communityId}/members/${userId}`, {
+            const response = await fetch(`${BASE_URL}/api/communities/${communityId}/members/${userId}`, {
                 method: 'DELETE',
                 headers: { 'x-user-id': user._id }
             });
