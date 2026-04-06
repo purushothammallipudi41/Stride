@@ -121,6 +121,7 @@ const AppContent = () => {
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+                <Route path="/profile/:username" element={<Profile />} />
                 <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" />} />
 
                 <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />

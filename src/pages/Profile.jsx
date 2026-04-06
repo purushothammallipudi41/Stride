@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
@@ -12,7 +12,8 @@ import { BASE_URL } from '../utils/api';
 import './Profile.css';
 
 const Profile = () => {
-    const { username } = useMusic();
+    const { username: routeUsername } = useParams();
+    const { username: loggedUser } = useMusic();
     const navigate = useNavigate();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('posts');
@@ -21,11 +22,11 @@ const Profile = () => {
     const [isFollowing, setIsFollowing] = useState(false);
 
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const isOwnProfile = !username || username === currentUser.username;
+    const isOwnProfile = !routeUsername || routeUsername === currentUser.username;
 
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const targetUser = username || currentUser.username || 'admin';
+        const targetUser = routeUsername || loggedUser || currentUser.username || 'admin';
         fetch(`${BASE_URL}/api/profile/${targetUser}`)
             .then(res => res.json())
             .then(data => {
@@ -38,7 +39,7 @@ const Profile = () => {
                 console.error("Failed to fetch profile:", err);
                 setIsLoading(false);
             });
-    }, [username]);
+    }, [routeUsername, loggedUser]);
 
 
 
@@ -46,13 +47,14 @@ const Profile = () => {
         loadProfile();
 
         const handleUpdate = (event) => {
-            if (event.type === 'follow' && event.username === (username || JSON.parse(localStorage.getItem('user') || '{}').username)) {
+            const currentTarget = routeUsername || loggedUser || JSON.parse(localStorage.getItem('user') || '{}').username;
+            if (event.type === 'follow' && event.username === currentTarget) {
                 setUser(prev => prev ? { ...prev, followerCount: event.followerCount } : prev);
             }
         };
         socket.on('content_updated', handleUpdate);
         return () => socket.off('content_updated', handleUpdate);
-    }, [username, loadProfile]);
+    }, [routeUsername, loggedUser, loadProfile]);
 
 
     const handleFollow = async () => {

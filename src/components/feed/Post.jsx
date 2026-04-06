@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
+import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, ArrowUpRight, Bookmark, MoreHorizontal } from 'lucide-react';
 import { BASE_URL } from '../../utils/api';
 import Avatar from '../common/Avatar';
@@ -133,19 +133,21 @@ const Post = ({ post }) => {
             </svg>
 
             <div className="post-header">
-                <div className="post-user-info">
-                    <Avatar 
-                        src={post.avatar} 
-                        alt={post.username} 
-                        size={32} 
-                        className="post-avatar" 
-                        frame={post.avatarFrame || 'none'}
-                    />
-                    <div className="user-details" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span className="username">{post.username}</span>
-                        {post.isVerified && <VerificationBadge size={14} />}
+                <Link to={`/profile/${post.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="post-user-info">
+                        <Avatar 
+                            src={post.avatar} 
+                            alt={post.username} 
+                            size={32} 
+                            className="post-avatar" 
+                            frame={post.avatarFrame || 'none'}
+                        />
+                        <div className="user-details" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span className="username">{post.username}</span>
+                            {post.isVerified && <VerificationBadge size={14} />}
+                        </div>
                     </div>
-                </div>
+                </Link>
                 <button className="more-btn">
                     <MoreHorizontal size={20} />
                 </button>
@@ -227,7 +229,9 @@ const Post = ({ post }) => {
                     <div className="comments-list">
                         {comments.map(c => (
                             <div key={c._id || c.id} className="comment-item">
-                                <span className="comment-username">{c.username}</span>
+                                <Link to={`/profile/${c.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <span className="comment-username">{c.username}</span>
+                                </Link>
                                 <span className="comment-text">{c.content}</span>
                             </div>
                         ))}
