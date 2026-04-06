@@ -63,18 +63,15 @@ const Profile = () => {
             const res = await fetch(`${BASE_URL}/api/profile/${user.username}/follow`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    currentUserId: currentUser._id,
-                    followerUsername: currentUser.username
-                })
+                body: JSON.stringify({ followerUsername: currentUser.username })
             });
             const data = await res.json();
             if (data.success) {
-                setIsFollowing(true);
+                setIsFollowing(data.isFollowing);
                 setUser(prev => ({ ...prev, followerCount: data.followerCount }));
             }
         } catch (err) {
-            console.error("Failed to follow user:", err);
+            console.error('Failed to follow/unfollow user:', err);
         }
     };
 

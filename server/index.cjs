@@ -622,15 +622,16 @@ app.get('/api/profile/:username', async (req, res) => {
     try {
         const user = await User.findOne({ username }).populate('posts');
         if (user) {
-            res.json(user);
+            const userObj = user.toObject();
+            // Always derive counts from real arrays, not stale numeric fields
+            userObj.followerCount = user.followers?.length || 0;
+            userObj.followingCount = user.following?.length || 0;
+            res.json(userObj);
         } else {
-            // Default mock for missing users during dev
             res.json({
                 username,
                 name: "Stride User",
                 bio: "Just a music lover on Stride 🎵",
-                followers: 0,
-                following: 0,
                 isVerified: true,
                 avatar: `https://i.pravatar.cc/150?u=${username}`,
                 posts: [],
@@ -862,37 +863,59 @@ app.post('/api/profile/:username/follow', async (req, res) => {
     const { followerUsername } = req.body;
     try {
         const targetUser = await User.findOne({ username });
+        const followerUser = await User.findOne({ username: followerUsername });
         if (!targetUser) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!followerUser) return res.status(404).json({ success: false, message: 'Follower user not found' });
 
-        // Increment follower count
-        targetUser.followerCount += 1;
-        targetUser.hasUnreadNotifications = true;
-        await targetUser.save();
-        
-        // Create notification
-        await Notification.create({
-            user: username,
-            type: 'follow',
-            from: followerUsername || 'someone',
-            content: 'started following you',
-            time: 'Just now'
-        });
+        const targetId = targetUser._id;
+        const followerId = followerUser._id;
 
-        // Targeted notification for followed user
-        io.to(`user_${username}`).emit('new_notification', {
-            type: 'follow',
-            from: followerUsername || 'someone',
-            content: 'started following you'
-        });
+        // Check if already following (toggle)
+        const alreadyFollowing = targetUser.followers.some(id => id.toString() === followerId.toString());
 
-        // Global broadcast for real-time count updates
+        if (alreadyFollowing) {
+            // Unfollow
+            await User.updateOne({ _id: targetId }, { $pull: { followers: followerId } });
+            await User.updateOne({ _id: followerId }, { $pull: { following: targetId } });
+        } else {
+            // Follow
+            await User.updateOne({ _id: targetId }, { $addToSet: { followers: followerId } });
+            await User.updateOne({ _id: followerId }, { $addToSet: { following: targetId } });
+
+            // Notify only on new follow
+            await Notification.create({
+                user: username,
+                type: 'follow',
+                from: followerUsername || 'someone',
+                content: 'started following you',
+                time: 'Just now'
+            });
+            io.to(`user_${username}`).emit('new_notification', {
+                type: 'follow',
+                from: followerUsername || 'someone',
+                content: 'started following you'
+            });
+        }
+
+        // Re-fetch both to get real array lengths
+        const updatedTarget = await User.findById(targetId);
+        const updatedFollower = await User.findById(followerId);
+        const followerCount = updatedTarget.followers.length;
+        const followingCount = updatedFollower.following.length;
+
+        // Broadcast real-time count update
         io.emit('content_updated', { 
             type: 'follow', 
-            username: username, 
-            followerCount: targetUser.followerCount 
+            username, 
+            followerCount
         });
 
-        res.json({ success: true, followerCount: targetUser.followerCount });
+        res.json({ 
+            success: true, 
+            isFollowing: !alreadyFollowing,
+            followerCount,
+            followingCount
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
