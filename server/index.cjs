@@ -108,6 +108,18 @@ const connectDB = async () => {
             console.error('Self-healing failed:', e);
         }
 
+        // Patch: ensure verified accounts always have isVerified set
+        try {
+            const verifiedUsernames = ['stride_official', 'apple_user'];
+            await User.updateMany(
+                { username: { $in: verifiedUsernames } },
+                { $set: { isVerified: true } }
+            );
+            console.log('Startup patch: Ensured verified badges for official accounts.');
+        } catch(e) {
+            console.error('Verified badge patch failed:', e);
+        }
+
         // Hydrate from data.json if empty
         await hydrateFromJSON();
     } catch (err) {
