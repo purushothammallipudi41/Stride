@@ -160,7 +160,7 @@ const Explore = () => {
                         className="search-input"
                     />
                     {searchQuery && (
-                        <button className="clear-search-btn" onClick={clearSearch}>
+                        <button className="clear-search-btn" onClick={clearSearch} aria-label="Clear Search">
                             <X size={18} />
                         </button>
                     )}
