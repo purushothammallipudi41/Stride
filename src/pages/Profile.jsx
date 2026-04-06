@@ -78,34 +78,22 @@ const Profile = () => {
         }
     };
 
-    const handleTip = async () => {
-        const amount = prompt(`Enter tip amount for ${user.username} (credits):`, "10");
-        if (!amount || isNaN(amount)) return;
-
+    const handleSendTip = async () => {
+        if (!tipAmount || isNaN(tipAmount) || parseInt(tipAmount) <= 0) return;
+        setTipStatus('sending');
         try {
             const currentUserUsername = localStorage.getItem('stride_user_username') || 'puru';
             const res = await fetch(`${BASE_URL}/api/wallet/tip`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-user-username': currentUserUsername
-                },
-                body: JSON.stringify({ 
-                    targetUsername: user.username, 
-                    amount: parseInt(amount) 
-                })
+                headers: { 'Content-Type': 'application/json', 'x-user-username': currentUserUsername },
+                body: JSON.stringify({ targetUsername: user.username, amount: parseInt(tipAmount) })
             });
             const data = await res.json();
-            if (data.success) {
-                alert(`Tip of ${amount} credits sent to ${user.username}!`);
-            } else {
-                alert(data.error || "Tip failed");
-            }
-        } catch (err) {
-            console.error("Tip failed:", err);
-            alert("Payment connection failed.");
-        }
+            setTipStatus(data.success ? 'success' : 'error');
+            if (data.success) setTimeout(() => { setIsTipModalOpen(false); setTipStatus(''); setTipAmount('10'); }, 1500);
+        } catch { setTipStatus('error'); }
     };
+
 
     const handleShare = () => {
         const url = `${window.location.origin}/profile/${user.username}`;
@@ -123,6 +111,9 @@ const Profile = () => {
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+    const [isTipModalOpen, setIsTipModalOpen] = useState(false);
+    const [tipAmount, setTipAmount] = useState('10');
+    const [tipStatus, setTipStatus] = useState('');
     const [selectedFrame, setSelectedFrame] = useState('gold');
     const [editData, setEditData] = useState({ username: '', name: '', bio: '', avatar: '', banner: '', accentColor: '' });
 
@@ -341,7 +332,7 @@ const Profile = () => {
                                 {isFollowing ? 'Following' : 'Follow'}
                             </button>
                             <button className="ig-action-btn-main" onClick={handleMessage}>Message</button>
-                            <button className="ig-action-btn-main tip-btn" onClick={handleTip}><DollarSign size={16} /> Tip</button>
+                            <button className="ig-action-btn-main tip-btn" onClick={() => setIsTipModalOpen(true)}><DollarSign size={16} /> Tip</button>
                             <button className="ig-action-btn-main gift-btn" onClick={() => setIsGiftModalOpen(true)}><Sparkles size={16} /> Gift Frame</button>
 
                         </>
@@ -508,6 +499,57 @@ const Profile = () => {
                         <div className="ig-modal-footer">
                             <button className="ig-btn-cancel" onClick={() => setIsGiftModalOpen(false)}>Cancel</button>
                             <button className="ig-btn-save gift-confirm-btn" onClick={handleGiftFrame}>Confirm Gift</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Tip Modal */}
+            {isTipModalOpen && (
+                <div className="ig-modal-overlay">
+                    <div className="ig-modal-glass gift-modal">
+                        <div className="ig-modal-header">
+                            <h2><DollarSign size={20} style={{display:'inline',marginRight:6}} />Send a Tip</h2>
+                            <button className="ig-modal-close" onClick={() => { setIsTipModalOpen(false); setTipStatus(''); setTipAmount('10'); }}>✕</button>
+                        </div>
+                        <div className="ig-modal-body">
+                            <p className="gift-intro">Support <strong>{user.username}</strong> with credits!</p>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', margin: '16px 0' }}>
+                                {['10', '25', '50', '100'].map(amt => (
+                                    <button
+                                        key={amt}
+                                        onClick={() => setTipAmount(amt)}
+                                        style={{
+                                            padding: '8px 18px',
+                                            borderRadius: '20px',
+                                            border: tipAmount === amt ? '2px solid var(--theme-primary)' : '2px solid rgba(255,255,255,0.15)',
+                                            background: tipAmount === amt ? 'var(--theme-primary)' : 'rgba(255,255,255,0.07)',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            fontWeight: 600,
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >{amt}¢</button>
+                                ))}
+                            </div>
+                            <div className="ig-edit-field" style={{ marginTop: '12px' }}>
+                                <label>Custom amount</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={tipAmount}
+                                    onChange={e => setTipAmount(e.target.value)}
+                                    placeholder="Enter amount..."
+                                    style={{ textAlign: 'center', fontSize: '1.2rem' }}
+                                />
+                            </div>
+                            {tipStatus === 'success' && <p style={{ color: '#10b981', textAlign: 'center', marginTop: '12px', fontWeight: 600 }}>✓ Tip sent successfully!</p>}
+                            {tipStatus === 'error' && <p style={{ color: '#ef4444', textAlign: 'center', marginTop: '12px' }}>Failed — check your balance.</p>}
+                        </div>
+                        <div className="ig-modal-footer">
+                            <button className="ig-btn-cancel" onClick={() => { setIsTipModalOpen(false); setTipStatus(''); setTipAmount('10'); }}>Cancel</button>
+                            <button className="ig-btn-save gift-confirm-btn" onClick={handleSendTip} disabled={tipStatus === 'sending'}>
+                                {tipStatus === 'sending' ? 'Sending...' : `Send ${tipAmount}¢`}
+                            </button>
                         </div>
                     </div>
                 </div>
