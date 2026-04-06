@@ -186,39 +186,7 @@ const MusicPage = () => {
                 </section>
             )}
 
-            <section className="music-section trending-list">
-                <div className="section-header">
-                    <h3>Trending on Audius</h3>
-                    <button 
-                        className="jukebox-nav-btn" 
-                        onClick={() => navigate('/community/stride-official/jukebox')}
-                    >
-                        <Music size={16} /> Jukebox
-                    </button>
-                </div>
-                {allSongs?.length === 0 && (
-                    <div className="loading-inline">Discovering vibes on Audius...</div>
-                )}
-                <div className="songs-list">
-                    {allSongs?.map((song) => (
-                        <div 
-                            key={song.id} 
-                            className={`song-row${currentTrack?.id === song.id ? ' active' : ''}`}
-                            onClick={() => handlePlaySong(song)}
-                        >
-                            <img src={song.cover || '/default-track.png'} alt={song.title} />
-                            <div className="song-info">
-                                <span className="song-title">{song.title}</span>
-                                <span className="song-artist">{song.artist}</span>
-                            </div>
-                            <div className="song-actions">
-                                <button onClick={(e) => handleShareSong(e, song)}><Share2 size={18}/></button>
-                                <button onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}><Plus size={18}/></button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+
 
             {/* Spotify-style MiniPlayer */}
             {currentTrack?.id && (
@@ -297,7 +265,15 @@ const MusicPage = () => {
 
             {/* ── Trending on Audius ── */}
             <section className="music-section">
-                <h3>Trending on Audius</h3>
+                <div className="section-header">
+                    <h3>Trending on Audius</h3>
+                    <button 
+                        className="jukebox-nav-btn" 
+                        onClick={() => navigate('/community/stride-official/jukebox')}
+                    >
+                        <Music size={16} /> Jukebox
+                    </button>
+                </div>
                 <div className="songs-list">
                     {allSongs.slice(0, 10).map((song, idx) => {
                         const isActive = currentTrack?.id === song.id;

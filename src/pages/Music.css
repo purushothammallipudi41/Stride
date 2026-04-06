@@ -268,22 +268,49 @@
     margin-bottom: 48px;
 }
 
-.music-section h3 {
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.music-section h3, .section-header h3 {
     font-size: 1.5rem;
     font-weight: 700;
     font-family: var(--font-header);
-    margin-bottom: 24px;
+    margin-bottom: 0;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.music-section h3::before {
+.music-section h3::before, .section-header h3::before {
     content: '';
     width: 4px;
     height: 24px;
     background: var(--color-primary);
     border-radius: 2px;
+}
+
+.jukebox-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.jukebox-nav-btn:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: scale(1.05);
 }
 
 /* ── Albums Grid ── */
