@@ -10,19 +10,7 @@ export default defineConfig({
     host: true,
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            // Only split the massive web3 libraries — Vite handles React automatically
-            if (id.includes('@solana') || id.includes('@rainbow-me') || id.includes('wagmi')) {
-              return 'web3-vendor';
-            }
-            return 'vendor';
-          }
-        }
-      }
-    }
+    chunkSizeWarningLimit: 4000
   }
 })
 
