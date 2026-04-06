@@ -21,6 +21,7 @@ const CommunitySchema = new mongoose.Schema({
     gatedChannels: [{ type: String }], // List of channel names that require Vibe Pass
     timestamp: { type: Date, default: Date.now }
 });
-
+CommunitySchema.index({ memberCount: -1 });
+CommunitySchema.index({ vibeScore: -1 });
 
 module.exports = mongoose.model('Community', CommunitySchema);

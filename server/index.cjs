@@ -17,6 +17,7 @@ const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
     key_secret: process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret'
 });
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
 // Models
@@ -393,6 +394,7 @@ const limiter = rateLimit({
     max: 10000,
     skip: (req) => req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1'
 });
+app.use(compression());
 app.use('/api/', limiter);
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
@@ -647,11 +649,11 @@ app.get('/api/profile/:username', async (req, res) => {
 
 app.get('/api/feed', async (req, res) => {
     try {
-        const postsArray = await Post.find().populate('user').sort({ createdAt: -1 });
+        const postsArray = await Post.find().populate('user').sort({ createdAt: -1 }).lean();
         const enhancedPosts = await Promise.all(postsArray.map(async (post) => {
             const user = await User.findById(post.user);
             return {
-                ...post.toObject(),
+                ...post,
                 user: user ? user.username : (post.username || 'Stride User'),
                 avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${post.username || 'stride'}`,
                 avatarFrame: user ? user.avatarFrame : 'none',
@@ -735,13 +737,13 @@ app.post('/api/stories', async (req, res) => {
 app.get('/api/reels', async (req, res) => {
     try {
         // Fetch Reels from MongoDB (instead of reading raw JSON)
-        const reels = await Post.find({ type: 'reel' }).sort({ createdAt: -1 });
+        const reels = await Post.find({ type: 'reel' }).sort({ createdAt: -1 }).lean();
         
         // Enhance reels with user data (like avatarFrame and isVerified)
         const enhancedReels = await Promise.all(reels.map(async (reel) => {
             const user = await User.findOne({ username: reel.username });
             return {
-                ...reel.toObject(),
+                ...reel,
                 url: reel.contentUrl, // Compatibility with ReelItem prop naming
                 description: reel.caption, // Compatibility with ReelItem prop naming
                 avatar: user ? user.avatar : '🎧',

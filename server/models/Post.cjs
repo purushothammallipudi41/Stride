@@ -16,6 +16,7 @@ const postSchema = new mongoose.Schema({
     music: { type: String, default: "" }
 }, { timestamps: true });
 
-
+postSchema.index({ createdAt: -1 });
+postSchema.index({ type: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Post', postSchema);
