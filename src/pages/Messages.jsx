@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import socket from '../services/socket';
 import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
@@ -8,6 +9,8 @@ import { BASE_URL } from '../utils/api';
 
 const Messages = () => {
     const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
+    const location = useLocation();
+    const openUsername = location.state?.openUsername;
     const [chats, setChats] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { resetMessages, setCallInfo } = useUI();
@@ -24,12 +27,33 @@ const Messages = () => {
             .then(data => {
                 setChats(data);
                 setIsLoading(false);
+
+                // Auto-open conversation if navigated from a profile
+                if (openUsername) {
+                    const existing = data.find(c => c.username === openUsername);
+                    if (existing) {
+                        setActiveChatId(existing.id);
+                    } else {
+                        // Create a fresh empty thread so the user can start typing
+                        const newChat = {
+                            id: `new_${openUsername}`,
+                            username: openUsername,
+                            name: openUsername,
+                            avatar: `https://i.pravatar.cc/150?u=${openUsername}`,
+                            messages: [],
+                            lastMessage: '',
+                            time: ''
+                        };
+                        setChats(prev => [newChat, ...prev]);
+                        setActiveChatId(newChat.id);
+                    }
+                }
             })
             .catch(err => {
                 console.error("Failed to fetch messages:", err);
                 setIsLoading(false);
             });
-    }, []);
+    }, [openUsername]);
 
     const activeChat = chats.find(c => c.id === activeChatId);
 

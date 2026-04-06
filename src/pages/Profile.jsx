@@ -106,7 +106,7 @@ const Profile = () => {
     };
 
     const handleMessage = () => {
-        navigate('/messages');
+        navigate('/messages', { state: { openUsername: user.username } });
     };
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
