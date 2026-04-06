@@ -110,7 +110,7 @@ const connectDB = async () => {
 
         // Patch: ensure verified accounts always have isVerified set
         try {
-            const verifiedUsernames = ['stride_official', 'apple_user'];
+            const verifiedUsernames = ['stride_official', 'apple_user', 'puru', 'admin'];
             await User.updateMany(
                 { username: { $in: verifiedUsernames } },
                 { $set: { isVerified: true } }
@@ -1558,6 +1558,29 @@ app.post('/api/signup', async (req, res) => {
             avatar: `https://i.pravatar.cc/150?u=${username}`,
             favorites: []
         });
+
+        // Auto-follow official accounts for all new users
+        const autoFollowUsernames = ['stride_official', 'puru'];
+        for (const targetUsername of autoFollowUsernames) {
+            try {
+                const targetUser = await User.findOne({ username: targetUsername });
+                if (targetUser) {
+                    await User.updateOne({ _id: targetUser._id }, { $addToSet: { followers: newUser._id } });
+                    await User.updateOne({ _id: newUser._id }, { $addToSet: { following: targetUser._id } });
+                    // Notify the official account
+                    await Notification.create({
+                        user: targetUsername,
+                        type: 'follow',
+                        from: username,
+                        content: 'started following you',
+                        time: 'Just now'
+                    });
+                    io.to(`user_${targetUsername}`).emit('new_notification', { type: 'follow', from: username });
+                }
+            } catch (e) {
+                console.error(`Auto-follow ${targetUsername} failed:`, e.message);
+            }
+        }
 
         // Send Welcome Email (async, don't block response)
         const welcomeHtml = `
