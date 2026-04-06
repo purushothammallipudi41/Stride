@@ -110,11 +110,16 @@ const connectDB = async () => {
 
         // Patch: ensure verified accounts always have isVerified set
         try {
-            const verifiedUsernames = ['stride_official', 'apple_user', 'puru', 'admin'];
+            const verifiedUsernames = ['stride_official', 'apple_user', 'purushotham_m', 'admin'];
             await User.updateMany(
                 { username: { $in: verifiedUsernames } },
                 { $set: { isVerified: true } }
             );
+            // Migrate: delete old puru account if it still exists
+            const deleted = await User.deleteOne({ username: 'puru' });
+            if (deleted.deletedCount > 0) {
+                console.log('Migration: Deleted legacy puru account from DB.');
+            }
             console.log('Startup patch: Ensured verified badges for official accounts.');
         } catch(e) {
             console.error('Verified badge patch failed:', e);
@@ -1560,7 +1565,7 @@ app.post('/api/signup', async (req, res) => {
         });
 
         // Auto-follow official accounts for all new users
-        const autoFollowUsernames = ['stride_official', 'puru'];
+        const autoFollowUsernames = ['stride_official', 'purushotham_m'];
         for (const targetUsername of autoFollowUsernames) {
             try {
                 const targetUser = await User.findOne({ username: targetUsername });
