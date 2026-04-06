@@ -631,13 +631,27 @@ app.get('/api/music/languages', async (req, res) => {
 
 app.get('/api/profile/:username', async (req, res) => {
     const { username } = req.params;
+    const { viewer } = req.query; // logged-in user's username
     try {
         const user = await User.findOne({ username }).populate('posts');
         if (user) {
             const userObj = user.toObject();
-            // Always derive counts from real arrays, not stale numeric fields
+            // Derive real counts from arrays
             userObj.followerCount = user.followers?.length || 0;
             userObj.followingCount = user.following?.length || 0;
+
+            // Server-side isFollowing check for the viewer
+            if (viewer) {
+                const viewerUser = await User.findOne({ username: viewer });
+                if (viewerUser) {
+                    userObj.isFollowing = user.followers.some(
+                        id => id.toString() === viewerUser._id.toString()
+                    );
+                    // Also send viewer's real followingCount
+                    userObj.viewerFollowingCount = viewerUser.following?.length || 0;
+                }
+            }
+
             res.json(userObj);
         } else {
             res.json({
@@ -646,13 +660,8 @@ app.get('/api/profile/:username', async (req, res) => {
                 bio: "Just a music lover on Stride 🎵",
                 isVerified: true,
                 avatar: `https://i.pravatar.cc/150?u=${username}`,
-                posts: [],
-                topTracks: [],
-                followers: [],
-                following: [],
-                followerCount: 0,
-                followingCount: 0,
-                favorites: []
+                posts: [], topTracks: [], followers: [], following: [],
+                followerCount: 0, followingCount: 0, favorites: []
             });
         }
     } catch (err) {

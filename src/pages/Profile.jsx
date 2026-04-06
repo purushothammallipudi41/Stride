@@ -27,16 +27,25 @@ const Profile = () => {
     const loadProfile = useCallback(() => {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const targetUser = routeUsername || loggedUser || currentUser.username || 'admin';
-        fetch(`${BASE_URL}/api/profile/${targetUser}`)
+        const viewerParam = currentUser.username ? `?viewer=${currentUser.username}` : '';
+        fetch(`${BASE_URL}/api/profile/${targetUser}${viewerParam}`)
             .then(res => res.json())
             .then(data => {
                 setUser(data);
                 setIsLoading(false);
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                setIsFollowing(Array.isArray(data.followers) && data.followers.some(f => f._id === currentUser._id || f === currentUser._id));
+                // Use server-computed isFollowing (reliable) if available
+                if (typeof data.isFollowing === 'boolean') {
+                    setIsFollowing(data.isFollowing);
+                } else {
+                    // Fallback: client-side check using followers array
+                    const cu = JSON.parse(localStorage.getItem('user') || '{}');
+                    setIsFollowing(Array.isArray(data.followers) && data.followers.some(
+                        f => f.toString() === cu._id?.toString()
+                    ));
+                }
             })
             .catch(err => {
-                console.error("Failed to fetch profile:", err);
+                console.error('Failed to fetch profile:', err);
                 setIsLoading(false);
             });
     }, [routeUsername, loggedUser]);
