@@ -88,6 +88,23 @@ const connectDB = async () => {
         await mongoose.connect(uri);
         console.log('MongoDB Connected successfully.');
         
+        // Self-Healing Phase: Wipe broken local/test paths from production DB
+        try {
+            const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
+            const wipeResult = await Post.deleteMany({
+                $or: [
+                    { contentUrl: localPathRegex },
+                    { imageUrl: localPathRegex },
+                    { content: localPathRegex }
+                ]
+            });
+            if (wipeResult.deletedCount > 0) {
+                console.log(`Self-healing: Cleared ${wipeResult.deletedCount} broken mock posts with local file paths.`);
+            }
+        } catch(e) {
+            console.error('Self-healing failed:', e);
+        }
+
         // Hydrate from data.json if empty
         await hydrateFromJSON();
     } catch (err) {
