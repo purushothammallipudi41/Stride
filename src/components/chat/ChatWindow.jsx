@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Phone, Video, Image, ChevronLeft, Mic, Plus, Smile, Camera } from 'lucide-react';
+import { Phone, Video, Image, ChevronLeft, Mic, Plus, Smile, Camera, MessageSquare } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
@@ -40,8 +40,18 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
     if (!activeChat) {
         return (
-            <div className="chat-window-v2 empty" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
-                <p>Select a conversation to start chatting</p>
+            <div className="chat-window-v3">
+                <div className="empty-chat-placeholder glass-panel">
+                    <div className="empty-chat-icon-glow">
+                        <MessageSquare size={48} className="text-white" />
+                    </div>
+                    <h3>Your Messages</h3>
+                    <p>Send a private photo or message to a friend.</p>
+                    {/* Add a placeholder action button for premium feel */}
+                    <button className="chat-tab active" style={{ marginTop: '20px', padding: '12px 30px' }}>
+                        Send Message
+                    </button>
+                </div>
             </div>
         );
     }
@@ -70,7 +80,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             <span className="chat-header-name">{activeChat.name || activeChat.username}</span>
                             {activeChat.isVerified && <VerificationBadge size={14} />}
                         </div>
-                        <span className="chat-header-status">{typingUsers?.has(activeChat.username) ? 'typing...' : 'Active now'}</span>
+                        <span className="chat-header-status">{typingUsers?.has(activeChat.username) ? <span className="text-gradient">typing...</span> : 'Active now'}</span>
                     </div>
                 </div>
                 {!hideCallButtons && (
@@ -91,18 +101,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         const isLastInGroup = index === activeChat.messages.length - 1 || activeChat.messages[index + 1].username !== msg.username;
                         return (
                             <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
-                                {!msg.isMe && isLastInGroup && (
-                                    <div className="message-group-avatar">
-                                        <Avatar src={activeChat.avatar} size={24} />
-                                    </div>
-                                )}
                                 <div className="message-content">
                                     <div className="message-bubble-v2">
                                         {msg.text}
                                     </div>
-                                    {msg.isMe && isLastInGroup && (
+                                    {isLastInGroup && (
                                         <div className="message-status-v2">
-                                            {msg.readStatus ? 'Seen' : 'Sent'}
+                                            {msg.isMe ? (msg.readStatus ? 'Seen' : 'Sent') : msg.time}
                                         </div>
                                     )}
                                 </div>
@@ -134,9 +139,9 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             <button className="chat-send-btn" onClick={handleSendText}>Send</button>
                         ) : (
                             <div className="chat-input-actions-group">
-                                <button className="chat-action-sm-btn"><Mic size={20} /></button>
-                                <button className="chat-action-sm-btn"><Image size={20} /></button>
-                                <button className="chat-action-sm-btn" onClick={() => setShowGifs(!showGifs)}><Plus size={20} /></button>
+                                <button className="chat-action-sm-btn" aria-label="Microphone"><Mic size={20} /></button>
+                                <button className="chat-action-sm-btn" aria-label="Gallery"><Image size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={() => setShowGifs(!showGifs)} aria-label="More options"><Plus size={20} /></button>
                             </div>
                         )}
                     </div>

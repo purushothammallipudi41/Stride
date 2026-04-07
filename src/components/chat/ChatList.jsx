@@ -12,27 +12,27 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
     const [showAccounts, setShowAccounts] = useState(false);
     
     return (
-        <div className="chat-list-container">
+        <div className="chat-list-container glass-panel">
             <div className="chat-list-header-v2">
                 <div className="chat-header-top">
                     <div className="chat-header-user" onClick={() => setShowAccounts(!showAccounts)}>
-                        <span>{currentUser || 'purushotham_mallipudi'}</span>
+                        <span className="text-gradient">{currentUser || 'purushotham_m'}</span>
                         <ChevronDown size={18} />
                         {unreadNotifications > 0 && (
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ff3b30' }} />
+                            <div className="notification-dot-v2" />
                         )}
                     </div>
-                    <Edit size={24} className="chat-action-icon" />
+                    <Edit size={24} className="chat-action-icon" aria-label="Compose Message" />
 
                     {showAccounts && (
-                        <div className="account-switcher-dropdown animate-fade-in">
+                        <div className="account-switcher-dropdown glass-panel animate-fade-in">
                             <div className="account-item active">
                                 <Avatar size={32} src={null} alt={currentUser} />
                                 <div className="account-info">
                                     <span className="account-name">{currentUser}</span>
                                     <span className="account-sub">Current account</span>
                                 </div>
-                                <Check size={18} color="#3797f0" />
+                                <Check size={18} color="var(--theme-primary)" />
                             </div>
                             <div className="account-divider" />
                             <div className="account-item secondary" onClick={() => setShowAccounts(false)}>
@@ -70,15 +70,15 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
                                 isListening={isListening}
                             />
                             <div className="chat-item-info">
-                                <div className="chat-item-name-row" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <div className="chat-item-name-row">
                                     <span className="chat-item-name">{chat.username}</span>
                                     {chat.isVerified && <VerificationBadge size={14} />}
                                 </div>
                                 <span className="chat-item-status">
-                                    {isTyping ? 'typing...' : chat.lastMessageStatus || `Sent ${chat.time || '10h ago'}`}
+                                    {isTyping ? <span className="text-gradient">typing...</span> : (chat.lastMessageStatus || `Sent ${chat.time || '10h ago'}`)}
                                 </span>
                             </div>
-                            <Camera size={24} className="chat-item-action" />
+                            <Camera size={22} className="chat-item-action" />
                         </div>
                     );
                 })}

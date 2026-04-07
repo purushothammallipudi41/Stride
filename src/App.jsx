@@ -117,7 +117,7 @@ const AppContent = () => {
       {!isPublicPath && <Sidebar />}
       <main className="main-content">
         <ErrorBoundary>
-            <div className={location.pathname.startsWith('/community/') ? "full-view-container" : "mobile-view-container"}>
+            <div className={(location.pathname.startsWith('/community/') || isMessagesPage) ? "full-view-container" : "mobile-view-container"}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/explore" element={<Explore />} />

@@ -89,42 +89,39 @@ const connectDB = async () => {
         await mongoose.connect(uri);
         console.log('MongoDB Connected successfully.');
         
-        // Self-Healing Phase: Wipe broken local/test paths from production DB
-        try {
-            const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
-            const wipeResult = await Post.deleteMany({
-                $or: [
-                    { contentUrl: localPathRegex },
-                    { imageUrl: localPathRegex },
-                    { content: localPathRegex },
-                    { contentUrl: { $regex: '1518609886364', $options: 'i' } },
-                    { imageUrl: { $regex: '1518609886364', $options: 'i' } }
-                ]
-            });
-            if (wipeResult.deletedCount > 0) {
-                console.log(`Self-healing: Cleared ${wipeResult.deletedCount} broken mock posts with local file paths.`);
-            }
-        } catch(e) {
-            console.error('Self-healing failed:', e);
-        }
+        // Startup patches and Self-Healing
+        const runPatches = async () => {
+            try {
+                // Self-Healing Phase: Wipe broken local/test paths from production DB
+                const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
+                const wipeResult = await Post.deleteMany({
+                    $or: [
+                        { contentUrl: localPathRegex },
+                        { imageUrl: localPathRegex },
+                        { content: localPathRegex },
+                        { contentUrl: { $regex: '1518609886364', $options: 'i' } },
+                        { imageUrl: { $regex: '1518609886364', $options: 'i' } }
+                    ]
+                });
+                if (wipeResult.deletedCount > 0) {
+                    console.log(`Self-healing: Cleared ${wipeResult.deletedCount} broken mock posts with local file paths.`);
+                }
 
-        // Patch: ensure verified accounts always have isVerified set
-        try {
-            const verifiedUsernames = ['stride_official', 'apple_user', 'purushotham_m', 'admin'];
-            await User.updateMany(
-                { username: { $in: verifiedUsernames } },
-                { $set: { isVerified: true } }
-            );
-            // Migrate: delete old puru account if it still exists
-            const deleted = await User.deleteOne({ username: 'puru' });
-            if (deleted.deletedCount > 0) {
-                console.log('Migration: Deleted legacy puru account from DB.');
+                // Patch: ensure verified accounts always have isVerified set
+                const verifiedUsernames = ['stride_official', 'apple_user', 'purushotham_m', 'admin'];
+                await User.updateMany(
+                    { username: { $in: verifiedUsernames } },
+                    { $set: { isVerified: true } }
+                );
+                // Migrate: delete old puru account if it still exists
+                await User.deleteOne({ username: 'puru' });
+                console.log('Startup patch: Verified official accounts and cleaned legacy data.');
+            } catch (e) {
+                console.error('Startup patches failed:', e);
             }
-            console.log('Startup patch: Ensured verified badges for official accounts.');
-        } catch(e) {
-            console.error('Verified badge patch failed:', e);
-        }
+        };
 
+        await runPatches();
         // Hydrate from data.json if empty
         await hydrateFromJSON();
     } catch (err) {
@@ -143,7 +140,15 @@ const parseKiloMega = (val) => {
 
 const hydrateFromJSON = async () => {
     try {
-        console.log('INFO: Starting database hydration check...');
+        const userCount = await User.countDocuments();
+        const serverCount = await Community.countDocuments();
+        
+        if (userCount > 0 && serverCount > 0) {
+            console.log(`INFO: Database already populated (Users: ${userCount}, Communities: ${serverCount}). Skipping full hydration.`);
+            return;
+        }
+
+        console.log('INFO: Starting database hydration from data.json...');
         const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 
         // Clear existing data as requested by user to "remove all posts and reels"
@@ -193,8 +198,7 @@ const hydrateFromJSON = async () => {
             }
         }
 
-        // 2. Users (Robust Hydration)
-        const userCount = await User.countDocuments();
+        // 2. Users (Robust Hydration) - userCount already updated at top
         if (data.users) {
             console.log(`INFO: Checking user hydration (Current count: ${userCount})...`);
             for (const u of Object.values(data.users)) {

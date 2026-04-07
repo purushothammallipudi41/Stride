@@ -204,7 +204,7 @@ h1, h2, h3, h4, .font-header {
   position: relative;
   overflow-y: auto;
   padding: 0;
-  height: calc(100vh - var(--player-height));
+  height: 100%;
 }
 
 /* Micro-animations */
