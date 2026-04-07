@@ -5,7 +5,7 @@ import { getStoredUser } from '../utils/storage';
 import { hapticImpactLight } from '../services/haptics';
 import { BASE_URL } from '../utils/api';
 
-export const MusicContext = createContext();
+import MusicContext from './MusicContextObject';
 
 export const MusicProvider = ({ children }) => {
     const getLoggedUsername = () => {
@@ -28,13 +28,7 @@ export const MusicProvider = ({ children }) => {
     const [albums, setAlbums] = useState([]);
     const [languages, setLanguages] = useState([]);
     
-    const [currentTrack, setCurrentTrack] = useState({
-        title: "Loading...",
-        artist: "Audius",
-        cover: null,
-        duration: 0,
-        url: null
-    });
+    const [currentTrack, setCurrentTrack] = useState(FALLBACK_TRACKS[0]);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -158,17 +152,25 @@ export const MusicProvider = ({ children }) => {
     // Fetch trending tracks on mount
     useEffect(() => {
         const fetchTracks = async () => {
-            const tracks = await getTrendingTracks();
-            if (tracks && tracks.length > 0) {
-                const formattedTracks = tracks.map(t => ({
-                    id: t.id,
-                    title: t.title,
-                    artist: t.user?.name || "Unknown",
-                    cover: t.artwork?.['480x480'] || t.artwork?.['150x150'] || null,
-                    duration: t.duration
-                }));
-                setAllSongs(formattedTracks);
-                setCurrentTrack(formattedTracks[0]);
+            try {
+                const tracks = await getTrendingTracks();
+                if (tracks && tracks.length > 0) {
+                    const formattedTracks = tracks.map(t => ({
+                        id: t.id,
+                        title: t.title,
+                        artist: t.user?.name || "Unknown",
+                        cover: t.artwork?.['480x480'] || t.artwork?.['150x150'] || null,
+                        duration: t.duration
+                    }));
+                    setAllSongs(formattedTracks);
+                    // Only update current track if none is playing or we were on fallback
+                    if (currentTrack.id === 'f1') {
+                        setCurrentTrack(formattedTracks[0]);
+                    }
+                }
+            } catch (err) {
+                console.error("Trending tracks error:", err);
+                // Keep fallbacks
             }
         };
         fetchTracks();
@@ -379,6 +381,10 @@ export const MusicProvider = ({ children }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...playlistData, owner: user._id })
             });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Failed to create playlist');
+            }
             const newPlaylist = await res.json();
             setPlaylists(prev => [...prev, newPlaylist]);
             return newPlaylist;

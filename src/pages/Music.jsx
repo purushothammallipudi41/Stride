@@ -190,7 +190,11 @@ const MusicPage = () => {
 
             {/* Spotify-style MiniPlayer */}
             {currentTrack?.id && (
-                <div className={`spotify-mini-player ${isExpanded ? 'hidden' : ''}`} onClick={() => setIsExpanded(true)}>
+                <div 
+                    className={`spotify-mini-player ${isExpanded ? 'hidden' : ''}`} 
+                    onClick={() => setIsExpanded(true)}
+                    data-testid="spotify-mini-player"
+                >
                     <Scrubber />
                     <div className="mini-player-content">
                         <ImageWithFallback src={currentTrack.cover} alt="" className="mini-cover" />
@@ -323,6 +327,8 @@ const MusicPage = () => {
                             key={playlist._id}
                             className="album-card playlist-card"
                             onClick={() => navigate(`/playlist/${playlist._id}`)}
+                            data-testid="playlist-card"
+                            data-test-name={playlist.name}
                         >
                             <div className="album-thumb">
                                 {playlist.thumbnail ? (

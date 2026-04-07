@@ -119,10 +119,8 @@ const Explore = () => {
         if (urlQuery && urlQuery !== searchQuery) {
             setSearchQuery(urlQuery);
             setIsSearching(true);
-        } else if (!urlQuery && searchQuery === 'vibing') {
-            // Keep 'vibing' state if it was explicitly selected via tabs
-        } else if (!urlQuery && !isSearching && searchQuery !== '') {
-            setSearchQuery('');
+        } else if (!isSearching && !searchQuery.trim()) {
+            setTagResults({ posts: [], playlists: [], communities: [] });
         }
     }, [urlQuery, searchQuery, isSearching]);
 

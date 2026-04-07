@@ -176,8 +176,8 @@
         left: 0;
         transform: none;
         width: 100%;
-        height: calc(65px + env(safe-area-inset-bottom));
-        min-height: calc(65px + env(safe-area-inset-bottom));
+        height: calc(72px + env(safe-area-inset-bottom));
+        min-height: calc(72px + env(safe-area-inset-bottom));
         margin: 0;
         padding: 0 16px env(safe-area-inset-bottom) 16px;
         flex-direction: row;
@@ -218,7 +218,7 @@
         flex-shrink: 0;
         border: 2px solid rgba(255, 255, 255, 0.1) !important;
         color: white;
-        transform: translateY(-12px); /* Higher protrusion for premium feel */
+        transform: translateY(-8px); /* Safe protrusion to prevent overlap */
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 

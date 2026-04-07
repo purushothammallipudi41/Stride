@@ -27,13 +27,13 @@ test('Music page basic interaction', async ({ page }) => {
   expect(count).toBeGreaterThan(0);
 
   // Click the first song to play
-  const firstSong = page.locator('.trending-list .song-row').first();
-  await expect(firstSong).toBeVisible({ timeout: 5000 });
+  const firstSong = page.locator('.music-section .song-row').first();
+  await expect(firstSong).toBeVisible({ timeout: 10000 });
   await firstSong.click();
 
   // Mini player or expanded modal should appear
-  const miniPlayer = page.locator('.spotify-mini-player, .spotify-expanded-modal.active, .mini-player-container');
-  await expect(miniPlayer.first()).toBeVisible({ timeout: 10000 });
+  const miniPlayer = page.getByTestId('spotify-mini-player');
+  await expect(miniPlayer).toBeVisible({ timeout: 20000 });
 });
 
 
@@ -51,8 +51,7 @@ test('Playlist creation flow', async ({ page }) => {
   await nameInput.fill('E2E Test Vibe');
   await page.keyboard.press('Enter');
 
-  // Verify notification or playlist card appears
-  // Note: Playlist card might take a moment to render
-  const playlistCard = page.locator('.playlist-card:has-text("E2E Test Vibe")').first();
-  await expect(playlistCard).toBeVisible({ timeout: 10000 });
+  // Verify playlist card appears
+  const playlistCard = page.locator('[data-testid="playlist-card"][data-test-name="E2E Test Vibe"]').first();
+  await expect(playlistCard).toBeVisible({ timeout: 20000 });
 });

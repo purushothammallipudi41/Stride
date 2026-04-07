@@ -39,7 +39,8 @@ test.describe('Social Interactions Extended (DMs & Calls)', () => {
     const firstChat = page.locator('.chat-item-v2').first();
     await firstChat.click();
 
-    await page.waitForSelector('.chat-window-v2:not(.empty)');
+    // Check for v3 window
+    await page.waitForSelector('.chat-window-v3:not(.empty)');
 
     const messageText = `Test message ${Date.now()}`;
     await page.fill('input[placeholder="Message..."]', messageText);
@@ -54,7 +55,7 @@ test.describe('Social Interactions Extended (DMs & Calls)', () => {
   test('should initiate a call and see call overlay', async ({ page }) => {
     // Select a chat
     await page.locator('.chat-item-v2').first().click();
-    await page.waitForSelector('.chat-window-v2:not(.empty)');
+    await page.waitForSelector('.chat-window-v3:not(.empty)');
 
     // Click call button (header-v2 contains it)
     const callBtn = page.locator('button[aria-label="Audio Call"]');

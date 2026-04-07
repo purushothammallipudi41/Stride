@@ -358,7 +358,7 @@
 
 @media (max-width: 768px) {
     .chat-input-bar-glass {
-        padding-bottom: calc(65px + env(safe-area-inset-bottom) + 12px); /* Dock height + internal spacing */
+        padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Increased to clear the 72px dock and protrusion */
         background: rgba(10, 10, 18, 0.98); /* Slightly darker for better blending with nav */
     }
 }

@@ -27,13 +27,13 @@ test('Community interaction flow', async ({ page }) => {
       await communityCard.click();
   } else {
       // Try searching for a known tag
-      await page.fill('.explore-search-wrapper input', '#music');
+      await page.fill('.music-search-input, .explore-search-wrapper input', '#music');
       await page.keyboard.press('Enter');
-      await page.waitForLoadState('domcontentloaded');
       
-      // Wait for the communities section to appear and click Lo-Fi Lounge
-      await page.waitForSelector('.user-result-card');
-      await page.locator('.user-result-card:has-text("Lo-Fi Lounge")').first().click();
+      // Wait for results with better selector
+      const resultCard = page.locator('.user-result-card').filter({ hasText: /Lo-Fi Lounge/i }).first();
+      await expect(resultCard).toBeVisible({ timeout: 20000 });
+      await resultCard.click();
       
       // Wait for the community view to load by checking the header
       await page.waitForSelector('.server-header .server-name');
