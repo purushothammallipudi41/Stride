@@ -237,6 +237,16 @@ h1, h2, h3, h4, .font-header {
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes pulse-purple {
+  0% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); color: var(--color-primary); }
+  100% { opacity: 0.3; transform: scale(1); }
+}
+
+.animate-pulse-purple {
+  animation: pulse-purple 2s infinite ease-in-out;
+}
+
 .mobile-view-container {
   max-width: 480px;
   margin: 0 auto;

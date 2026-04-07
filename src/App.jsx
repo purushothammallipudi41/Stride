@@ -99,14 +99,13 @@ const AppContent = () => {
     };
   }, [setCallInfo]);
 
-  const isMessagesPage = location.pathname === '/messages';
 
   return (
     <div className="app-layout">
       {!isPublicPath && <Sidebar />}
       
       <div className="layout-primary">
-        {(location.pathname === '/' || location.pathname === '/home') && <Topbar />}
+        {!['/profile', '/explore', '/messages', '/reels', '/communities', '/servers', '/settings', '/wallet', '/artist-dashboard', '/achievements', '/insights', '/marketplace'].some(path => location.pathname.startsWith(path)) && <Topbar />}
         <main className="main-content">
           <ErrorBoundary>
             <div className="full-view-container">
