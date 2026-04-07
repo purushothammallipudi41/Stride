@@ -115,6 +115,16 @@ const connectDB = async () => {
                 );
                 // Migrate: delete old puru account if it still exists
                 await User.deleteOne({ username: 'puru' });
+
+                // Maintenance: Prune non-official stride accounts
+                const pruneResult = await User.deleteMany({
+                    username: { $regex: /stride/i },
+                    username: { $ne: 'stride_official' }
+                });
+                if (pruneResult.deletedCount > 0) {
+                    console.log(`Self-healing: Pruned ${pruneResult.deletedCount} non-official 'stride' accounts.`);
+                }
+
                 console.log('Startup patch: Verified official accounts and cleaned legacy data.');
             } catch (e) {
                 console.error('Startup patches failed:', e);
