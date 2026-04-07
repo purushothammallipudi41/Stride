@@ -9,7 +9,7 @@
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     background-clip: padding-box;
-    position: sticky;
+    position: relative;
     top: 0;
     z-index: 1000;
     border-bottom: var(--glass-border);
