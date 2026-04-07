@@ -358,9 +358,13 @@
 
 @media (max-width: 768px) {
     .chat-input-bar-glass {
-        padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Increased to clear the 72px dock and protrusion */
-        background: rgba(10, 10, 18, 0.98); /* Slightly darker for better blending with nav */
-        z-index: 1100; /* Ensure it is above the sidebar (1000) but below modals */
+        padding: 10px 16px; 
+        padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* Minimal padding */
+        margin-bottom: 72px; /* Physical clearance for the dock - creates ZERO GAP look */
+        background: rgba(18, 18, 26, 0.98); 
+        z-index: 1100;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
     }
 }
 

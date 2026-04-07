@@ -106,7 +106,7 @@ const AppContent = () => {
       {!isPublicPath && <Sidebar />}
       
       <div className="layout-primary">
-        {(location.pathname === '/') && <Topbar />}
+        {(location.pathname === '/' || location.pathname === '/home') && <Topbar />}
         <main className="main-content">
           <ErrorBoundary>
             <div className="full-view-container">
