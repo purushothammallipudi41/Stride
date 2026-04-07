@@ -157,10 +157,22 @@ const Messages = () => {
     if (isLoading) return <div className="loading-screen">Intercepting waves...</div>;
 
     return (
-        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#000' }}>
+        <div className="page-container messages-full-view" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#000' }}>
             <div className="desktop-only">
                 <PageHeader title="Direct Messages" />
             </div>
+            
+            <style>{`
+                @media (max-width: 768px) {
+                    .main-content {
+                        padding-bottom: 0 !important;
+                        height: 100vh !important;
+                    }
+                    .messages-full-view {
+                        height: calc(100vh - 65px - env(safe-area-inset-bottom)) !important;
+                    }
+                }
+            `}</style>
             
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
                 <div className={`chat-list-wrapper ${activeChatId ? 'hidden-mobile' : ''}`} style={{ flex: activeChatId ? '0 0 350px' : '1' }}>

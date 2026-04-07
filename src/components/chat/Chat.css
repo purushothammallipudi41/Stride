@@ -28,7 +28,7 @@
 
 /* Glass Header */
 .chat-header-glass {
-    padding: 14px 20px;
+    padding: 10px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -196,7 +196,7 @@
 
 /* Premium Input Bar */
 .chat-input-bar-glass {
-    padding: 20px 24px 24px;
+    padding: 14px 16px 14px;
     background: var(--chat-glass-bg);
     backdrop-filter: blur(var(--chat-blur));
     -webkit-backdrop-filter: blur(var(--chat-blur));
@@ -293,7 +293,7 @@
     }
 
     .chat-input-bar-glass {
-        padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+        padding: 10px 12px env(safe-area-inset-bottom);
     }
 
     .chat-input-wrapper-premium {
