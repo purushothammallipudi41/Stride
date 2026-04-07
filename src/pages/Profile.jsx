@@ -135,7 +135,7 @@ const Profile = () => {
             avatarFrame: user.avatarFrame || 'none'
         });
         setIsEditModalOpen(true);
-    }, [user]);
+    }, [user, setIsEditModalOpen]);
 
     const closeEditModal = () => {
         setIsEditModalOpen(false);
@@ -181,12 +181,12 @@ const Profile = () => {
                 }
                 
                 setUser(data.user);
+                setIsEditModalOpen(false);
                 
-                // Deterministic reload: use a very short delay to ensure browser paints/saves if needed
-                // but keep it fast enough for E2E speed
-                requestAnimationFrame(() => {
+                // Deterministic reload: wait a tiny bit for React to flush and UI to update
+                setTimeout(() => {
                     window.location.reload();
-                });
+                }, 500);
             } else {
                 console.error("Failed to update:", data.message);
             }

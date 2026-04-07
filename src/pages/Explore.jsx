@@ -85,34 +85,46 @@ const Explore = () => {
     useEffect(() => {
         const query = searchQuery.trim();
         if (!query) {
-            const timer = setTimeout(() => {
-                setUserResults([]);
-                setTagResults({ posts: [], playlists: [], communities: [] });
-            }, 0);
-            return () => clearTimeout(timer);
+            setUserResults([]);
+            setTagResults({ posts: [], playlists: [], communities: [] });
+            return;
         }
 
-        
         const fetchData = async () => {
             try {
                 if (query.startsWith('#')) {
                     const tag = query.substring(1);
                     const res = await fetch(`${BASE_URL}/api/search/tag/${tag}`);
                     const data = await res.json();
-                    setTagResults(data);
+                    setTagResults(data || { posts: [], playlists: [], communities: [] });
                 } else {
                     const res = await fetch(`${BASE_URL}/api/users/search?q=${query}`);
                     const data = await res.json();
-                    setUserResults(data);
+                    setUserResults(data || []);
                 }
             } catch (err) {
                 console.error("Search error:", err);
             }
         };
 
-        const timeout = setTimeout(fetchData, 300);
+        const isInitial = !userResults.length && !tagResults.posts.length;
+        const delay = isInitial ? 0 : 300;
+
+        const timeout = setTimeout(fetchData, delay);
         return () => clearTimeout(timeout);
-    }, [searchQuery]);
+    }, [searchQuery, userResults.length, tagResults.posts.length]);
+
+    // Sync state with URL search param
+    useEffect(() => {
+        if (urlQuery && urlQuery !== searchQuery) {
+            setSearchQuery(urlQuery);
+            setIsSearching(true);
+        } else if (!urlQuery && searchQuery === 'vibing') {
+            // Keep 'vibing' state if it was explicitly selected via tabs
+        } else if (!urlQuery && !isSearching && searchQuery !== '') {
+            setSearchQuery('');
+        }
+    }, [urlQuery, searchQuery, isSearching]);
 
 
     const handleSearchInput = (e) => {

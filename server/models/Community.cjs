@@ -19,6 +19,7 @@ const CommunitySchema = new mongoose.Schema({
     voiceParticipants: [{ type: String }], // List of usernames in voice
     vibeScore: { type: Number, default: 0 },
     gatedChannels: [{ type: String }], // List of channel names that require Vibe Pass
+    tags: [String],
     timestamp: { type: Date, default: Date.now }
 });
 CommunitySchema.index({ memberCount: -1 });

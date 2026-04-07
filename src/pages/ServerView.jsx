@@ -60,10 +60,11 @@ const CommunityView = () => {
 
     const communityIdTarget = String(communityId);
     const community = useMemo(() => {
+        if (!servers || servers.length === 0) return null;
         const found = servers.find(s => 
             String(s._id) === communityIdTarget || 
             (s.id && String(s.id) === communityIdTarget) || 
-            (s.name && s.name === communityId)
+            (s.name && (s.name === communityId || s.name.toLowerCase().replace(/\s+/g, '-') === communityId))
         );
         return found;
     }, [servers, communityIdTarget, communityId]);
@@ -340,6 +341,7 @@ const CommunityView = () => {
     const channels = [
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
+        { id: 'jukebox', name: 'jukebox', type: 'text', icon: Music },
         { id: 'events', name: 'upcoming-events', type: 'text', icon: Hash },
         { id: 'backstage', name: 'backstage-lounge', type: 'text', icon: Lock, isGated: true },
         ...(isMod ? [{ id: 'analytics', name: 'insights', type: 'analytics', icon: BarChart3 }] : [])
@@ -512,6 +514,28 @@ const CommunityView = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    ) : activeChannel === 'jukebox' ? (
+                        <div className="jukebox-viewer animate-fade-in" style={{ padding: '24px' }}>
+                            <div className="jukebox-sync-indicator" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: 'var(--color-primary)' }}>
+                                <Music size={24} className="pulse-icon" />
+                                <h3>Jukebox Sync LIVE</h3>
+                            </div>
+                            <ChatWindow 
+                                activeChat={{ 
+                                    username: 'Jukebox', 
+                                    name: 'Jukebox',
+                                    avatar: '', 
+                                    messages: channelMessages[`community_${communityId}_jukebox`] || [
+                                        { text: `Welcome to the Jukebox! Request tracks and vibe with the community.`, time: 'System', username: 'System' }
+                                    ] 
+                                }} 
+                                roomId={`community_${communityId}_jukebox`}
+                                currentUser={user.username}
+                                onSendMessage={handleSendMessage}
+                                isDisabled={!isMember}
+                                hideCallButtons={true}
+                            />
                         </div>
                     ) : (isGatedChannel && !hasVibePass && !isMod) ? (
                         <div className="locked-channel-overlay animate-fade-in">
