@@ -1,5 +1,5 @@
 .servers-page {
-    padding: 24px 0 120px;
+    padding: 24px 0 calc(72px + env(safe-area-inset-bottom));
     animation: fadeIn 0.8s ease-out;
 }
 
