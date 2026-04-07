@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getStoredUser } from '../../utils/storage';
 import { Heart, MessageSquare, Share2, Music2, Volume2, VolumeX, Sparkles, Link2, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useMusic } from '../../hooks/useMusic';
 import Avatar from '../common/Avatar';
@@ -26,7 +27,7 @@ const ReelItem = ({ video, isActive }) => {
     const [beatScale, setBeatScale] = useState(1);
     
     const reelId = video._id || video.id;
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getStoredUser();
     const lastTap = useRef(0);
     const requestRef = useRef();
 

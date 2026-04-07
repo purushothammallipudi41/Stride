@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getStoredUser } from '../utils/storage';
 
 
 import socket from '../services/socket';
@@ -32,12 +33,7 @@ export const ServerProvider = ({ children }) => {
                 console.log("[ServerContext] Fetched servers:", data.length);
                 
                 // Synchronize initial membership for logged-in user (especially for E2E mocks)
-                let loggedInUser = {};
-                try {
-                    loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
-                } catch {
-                    loggedInUser = {};
-                }
+                const loggedInUser = getStoredUser();
 
                 if (loggedInUser._id && loggedInUser.communities) {
                     const syncedServers = data.map(server => {

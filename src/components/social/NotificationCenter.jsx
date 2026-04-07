@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-import { Bell, User, Heart, MessageSquare, UserPlus, Music, Check, ChevronLeft, Plus } from 'lucide-react';
+import { Bell, Heart, MessageSquare, UserPlus, Music, ChevronLeft, Plus } from 'lucide-react';
 import Avatar from '../common/Avatar';
 import { useUI } from '../../hooks/useUI';
+import { getStoredUser } from '../../utils/storage';
 import { BASE_URL } from '../../utils/api';
 import './NotificationCenter.css';
 
@@ -12,10 +12,10 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     const [loading, setLoading] = useState(true);
     const containerRef = useRef(null);
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getStoredUser();
 
     const fetchNotifications = useCallback(async () => {
-        if (!user.username) return;
+        if (!user?.username) return;
         try {
             const res = await fetch(`${BASE_URL}/api/notifications/${user.username}`);
             const data = await res.json();

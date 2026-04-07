@@ -6,9 +6,11 @@ import ChatWindow from '../components/chat/ChatWindow';
 import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
+import { getStoredUser } from '../utils/storage';
+import '../components/chat/Chat.css';
 
 const Messages = () => {
-    const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
+    const userProfile = getStoredUser();
     const location = useLocation();
     const openUsername = location.state?.openUsername;
     const [chats, setChats] = useState([]);

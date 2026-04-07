@@ -1,21 +1,16 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useRef, useMemo } from 'react';
 import socket from '../services/socket';
 import { getTrendingTracks, getStreamUrl } from '../services/audiusService';
-import MusicContext from './MusicContextObject';
+import { getStoredUser } from '../utils/storage';
 import { hapticImpactLight } from '../services/haptics';
 import { BASE_URL } from '../utils/api';
 
+export const MusicContext = createContext();
+
 export const MusicProvider = ({ children }) => {
     const getLoggedUsername = () => {
-        try {
-            const userData = localStorage.getItem('user');
-            if (!userData) return 'guest';
-            const user = JSON.parse(userData);
-            return user.username || 'guest';
-        } catch (e) {
-            console.error("MusicContext: Failed to parse user from localStorage", e);
-            return 'guest';
-        }
+        const user = getStoredUser();
+        return user?.username || 'guest';
     };
 
     const USERNAME = getLoggedUsername();

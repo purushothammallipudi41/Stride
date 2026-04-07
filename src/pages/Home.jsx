@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
-import Topbar from '../components/layout/Topbar';
 import SEO from '../components/common/SEO';
 import './Home.css';
 
@@ -44,20 +43,17 @@ const Home = () => {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .home-page-v2 { max-width: 800px; margin: 0 auto; padding: 0 16px 20px; }
-                .home-layout { display: flex; justify-content: center; }
-                .main-column { flex: 1; max-width: 630px; }
+                .home-page-v2 { width: 100%; height: 100%; padding: 24px; overflow-y: auto; }
+                .home-layout { display: flex; width: 100%; }
+                .main-column { flex: 1; max-width: 100%; }
                 
                 @media (max-width: 1000px) {
-                    .home-page-v2 { padding: 0; }
-                    .main-column { max-width: 100%; }
+                    .home-page-v2 { padding: 12px; }
                 }
 
                 .feed-tabs { display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 24px; }
                 .feed-tab { background: transparent; border: none; padding: 12px 24px; color: var(--color-text-muted); font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
                 .feed-tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-primary); }
-                .feed-tab:hover { color: var(--color-text-primary); }
-
                 .feed-tab:hover { color: var(--color-text-primary); }
             `}} />
         </div>
@@ -65,4 +61,5 @@ const Home = () => {
 };
 
 export default Home;
+
 

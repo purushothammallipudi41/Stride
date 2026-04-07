@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Post from './Post';
 import socket from '../../services/socket';
 import { BASE_URL } from '../../utils/api';
+import { getStoredUser } from '../../utils/storage';
 import './Feed.css';
 
 const Feed = ({ type = 'foryou' }) => {
@@ -9,7 +10,7 @@ const Feed = ({ type = 'foryou' }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const loadFeed = useCallback(() => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = getStoredUser();
         const userId = user._id || user.id || user.username;
         const url = type === 'following' && userId && userId !== 'guest'
             ? `${BASE_URL}/api/feed/following?userId=${userId}`
@@ -47,9 +48,9 @@ const Feed = ({ type = 'foryou' }) => {
     }
 
     return (
-        <div className="feed-container" style={{ width: '100%', maxWidth: '700px', margin: '0 auto' }}>
+        <div className="feed-container">
             {posts.map(post => (
-                <Post key={post.id} post={post} />
+                <Post key={post._id || post.id} post={post} />
             ))}
         </div>
     );

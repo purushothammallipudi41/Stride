@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Peer from 'simple-peer';
 import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, Maximize2, Minimize2, X } from 'lucide-react';
 import socket from '../../services/socket';
+import { getStoredUser } from '../../utils/storage';
 import './CallOverlay.css';
 
 const CallOverlay = ({ isOpen, isIncoming, callerData, onReject, onEnd, callType = 'video' }) => {
+    const user = getStoredUser();
     const [stream, setStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
@@ -22,8 +24,8 @@ const CallOverlay = ({ isOpen, isIncoming, callerData, onReject, onEnd, callType
             socket.emit('call-user', {
                 userToCall: callerData.username,
                 signalData: data,
-                from: JSON.parse(localStorage.getItem('user') || '{}').username,
-                name: JSON.parse(localStorage.getItem('user') || '{}').name,
+                from: user.username,
+                name: user.name || user.username,
                 type: callType
             });
         });
@@ -39,7 +41,7 @@ const CallOverlay = ({ isOpen, isIncoming, callerData, onReject, onEnd, callType
         });
 
         connectionRef.current = peer;
-    }, [stream, callerData, callType]);
+    }, [stream, callerData, callType, user]);
 
     const answerCall = useCallback(() => {
         const peer = new Peer({ initiator: false, trickle: false, stream: stream });
@@ -78,6 +80,9 @@ const CallOverlay = ({ isOpen, isIncoming, callerData, onReject, onEnd, callType
     }, [isOpen, callType, stream]);
 
     useEffect(() => {
+        const userObj = getStoredUser();
+        if (!userObj?._id) return;
+
         if (isAccepted && stream && !connectionRef.current) {
             if (isIncoming) {
                 answerCall();

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Image, Hash, Music, Send, Loader2 } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
+import { getStoredUser } from '../utils/storage';
 import { BASE_URL } from '../utils/api';
 import './CreatePostModal.css';
 
@@ -11,7 +12,7 @@ const CreatePostModal = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null);
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getStoredUser();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

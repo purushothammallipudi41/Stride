@@ -6,10 +6,11 @@ import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
 import socket from '../services/socket';
+import { getStoredUser } from '../utils/storage';
 import './Notifications.css';
 
 const Notifications = () => {
-    const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
+    const userProfile = getStoredUser();
     const username = userProfile.username || 'guest';
     const { resetNotifications } = useUI();
     const [notifications, setNotifications] = useState([]);

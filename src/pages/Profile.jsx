@@ -9,6 +9,7 @@ import SubscribeButton from '../components/profile/SubscribeButton';
 import socket from '../services/socket';
 import VerificationBadge from '../components/common/VerificationBadge';
 import { BASE_URL } from '../utils/api';
+import { getStoredUser } from '../utils/storage';
 import './Profile.css';
 
 const Profile = () => {
@@ -21,11 +22,11 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
 
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUser = getStoredUser();
     const isOwnProfile = !routeUsername || routeUsername === currentUser.username;
 
     const loadProfile = useCallback(() => {
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUser = getStoredUser();
         const targetUser = routeUsername || loggedUser || currentUser.username || 'admin';
         const viewerParam = currentUser.username ? `?viewer=${currentUser.username}` : '';
         fetch(`${BASE_URL}/api/profile/${targetUser}${viewerParam}`)

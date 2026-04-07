@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Music, Play } from 'lucide-react';
 import { BASE_URL } from '../../utils/api';
+import { getStoredUser } from '../../utils/storage';
 
 const FriendsActivity = () => {
     const [activities, setActivities] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!user._id) return;
+        const user = getStoredUser();
+        if (!user?._id) {
+            const timer = setTimeout(() => setIsLoading(false), 0);
+            return () => clearTimeout(timer);
+        }
 
         fetch(`${BASE_URL}/api/friends/activity?userId=${user._id}`)
             .then(res => res.json())

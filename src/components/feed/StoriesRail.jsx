@@ -5,6 +5,7 @@ import CreateStoryModal from './CreateStoryModal';
 import VerificationBadge from '../common/VerificationBadge';
 import Avatar from '../common/Avatar';
 import { BASE_URL } from '../../utils/api';
+import { getStoredUser } from '../../utils/storage';
 import './StoriesRail.css';
 
 const StoriesRail = () => {
@@ -13,9 +14,8 @@ const StoriesRail = () => {
     const [activeStory, setActiveStory] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const username = user.username || 'guest';
+    const user = getStoredUser();
+    const username = user?.username || 'guest';
 
     const loadStories = () => {
         fetch(`${BASE_URL}/api/stories`)

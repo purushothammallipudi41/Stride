@@ -2,23 +2,19 @@ import { useState, useCallback, useEffect } from 'react';
 import UIContext from './UIContextObject';
 import socket from '../services/socket';
 import { BASE_URL } from '../utils/api';
+import { getStoredUser } from '../utils/storage';
 
 export const UIProvider = ({ children }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [notifications, setNotifications] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [callInfo, setCallInfo] = useState({ isOpen: false, isIncoming: false, callerData: null, type: 'video' });
 
-    let user = {};
-    try {
-        user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {
-        console.error("Failed to parse user from localStorage:", e);
-        user = {};
-    }
-    const username = user.username || 'guest';
+    const user = getStoredUser();
+    const username = user?.username || 'guest';
 
     // Fetch initial counts
     useEffect(() => {
@@ -89,10 +85,11 @@ export const UIProvider = ({ children }) => {
     const incrementMessages = useCallback(() => setUnreadMessages(prev => prev + 1), []);
     const resetMessages = useCallback(async () => {
         setUnreadMessages(0);
-        if (username !== 'guest') {
-            socket.emit('mark_messages_read', { username });
+        const loggedInUser = getStoredUser();
+        if (loggedInUser?.username) {
+            socket.emit('mark_messages_read', { username: loggedInUser.username });
         }
-    }, [username]);
+    }, []);
 
 
     const value = {

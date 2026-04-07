@@ -17,7 +17,7 @@ import Avatar from '../components/common/Avatar';
 import socket from '../services/socket';
 import VoiceService from '../services/VoiceService';
 import { BASE_URL } from '../utils/api';
-
+import { getStoredUser } from '../utils/storage';
 import './ServerView.css';
 
 const voiceService = new VoiceService(socket);
@@ -26,13 +26,7 @@ const CommunityView = () => {
     const { communityId, channelId } = useParams();
     const navigate = useNavigate();
     const { servers, updateMemberRole, kickMember } = useServer();
-    const user = useMemo(() => {
-        try {
-            return JSON.parse(localStorage.getItem('user') || '{}');
-        } catch {
-            return {};
-        }
-    }, []);
+    const user = getStoredUser();
     const { addNotification } = useUI();
     const { isUserListening } = useActivity();
     const { joinMusicRoom, leaveMusicRoom } = useContext(MusicContextObject);

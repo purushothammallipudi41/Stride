@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getStoredUser } from '../../utils/storage';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, ArrowUpRight, Bookmark, MoreHorizontal } from 'lucide-react';
 import { BASE_URL } from '../../utils/api';
@@ -18,7 +19,7 @@ const Post = ({ post }) => {
     const [hasViewed, setHasViewed] = useState(false);
     
     const postId = post._id || post.id;
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getStoredUser();
     const postRef = useRef(null);
 
     const fetchComments = useCallback(async () => {

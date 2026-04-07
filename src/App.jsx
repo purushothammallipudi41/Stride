@@ -5,6 +5,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { HelmetProvider } from 'react-helmet-async';
 import socket from './services/socket';
 import { useUI } from './hooks/useUI';
+import { getStoredUser } from './utils/storage';
 import { MusicProvider } from './context/MusicContext';
 import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
@@ -59,17 +60,7 @@ const AppContent = () => {
       }
     }
 
-    if (!isAuthenticated && !isPublicPath) {
-      // Logic for guest state
-    }
-    
-    // Apply dynamic theme if user has custom accent color
-    let user = {};
-    try {
-        user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch {
-        user = {};
-    }
+    const user = getStoredUser();
 
     const applyTheme = (userData = {}) => {
       const storedColor = localStorage.getItem('stride_theme_color');
@@ -87,7 +78,7 @@ const AppContent = () => {
 
     applyTheme(user);
 
-    if (isAuthenticated && user.username) {
+    if (isAuthenticated && user?.username) {
         socket.emit('register_user', user);
         socket.emit('join_user_room', user.username);
     }
@@ -112,12 +103,13 @@ const AppContent = () => {
 
   return (
     <div className="app-layout">
-      {(!isPublicPath && !isMessagesPage) && <Topbar />}
-      {/* On mobile messages, we show the Topbar only if no chat is active, but actually Messages.jsx handles its own PageHeader/ChatHeader. So we hide here for Messages always. */}
       {!isPublicPath && <Sidebar />}
-      <main className="main-content">
-        <ErrorBoundary>
-            <div className={(location.pathname.startsWith('/community/') || isMessagesPage) ? "full-view-container" : "mobile-view-container"}>
+      
+      <div className="layout-primary">
+        {(!isPublicPath && !isMessagesPage) && <Topbar />}
+        <main className="main-content">
+          <ErrorBoundary>
+            <div className="full-view-container">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/explore" element={<Explore />} />
@@ -147,8 +139,9 @@ const AppContent = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
-        </ErrorBoundary>
-      </main>
+          </ErrorBoundary>
+        </main>
+      </div>
       <GlobalNotifications />
       {isCreateModalOpen && <CreatePostModal />}
       {isExplorerOpen && <ExploreModal />}
