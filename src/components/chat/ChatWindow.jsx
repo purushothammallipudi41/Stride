@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Phone, Video, Image, ChevronLeft, Mic, Plus, Smile, Camera, MessageSquare } from 'lucide-react';
+import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
@@ -154,17 +154,18 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
             {showGifs && (
                 <div className="chat-actions-drawer animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                    <div style={{ display: 'none' }}>DESTRUCTION_V1</div>
                     <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
                     <div className="drawer-grid">
                         <div className="drawer-item" onClick={() => alert("Giphy integration loading...")}>
                             <div className="drawer-icon-box" style={{ background: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}>
-                                <Smile size={24} />
+                                <SmileIcon size={24} />
                             </div>
                             <span>GIFs</span>
                         </div>
                         <div className="drawer-item" onClick={handleGalleryClick}>
                             <div className="drawer-icon-box" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981' }}>
-                                <Image size={24} />
+                                <ImageIcon size={24} />
                             </div>
                             <span>Gallery</span>
                         </div>
@@ -206,7 +207,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="chat-input-actions-group">
                                 <button className="chat-action-sm-btn" onClick={handleMicClick} aria-label="Microphone"><Mic size={20} /></button>
-                                <button className="chat-action-sm-btn" onClick={handleGalleryClick} aria-label="Gallery"><Image size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={handleGalleryClick} aria-label="Gallery"><ImageIcon size={20} /></button>
                                 <button className="chat-action-sm-btn" onClick={handlePlusClick} aria-label="More options"><Plus size={20} /></button>
                             </div>
                         )}

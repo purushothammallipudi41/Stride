@@ -586,9 +586,9 @@
     bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 84px);
     left: 16px;
     right: 16px;
-    background: rgba(18, 18, 26, 0.95);
+    background: rgba(255, 0, 0, 0.95); /* RED SMOKE TEST */
     backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid #fff; /* HIGH VISIBILITY */
     border-radius: 24px;
     padding: 24px 16px;
     z-index: 1300;
@@ -609,11 +609,11 @@
 }
 
 .drawer-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 8px;
     width: 100%;
-    place-items: center;
 }
 
 .drawer-item {
@@ -623,6 +623,8 @@
     gap: 8px;
     cursor: pointer;
     transition: transform 0.2s;
+    width: 64px; /* Explicit width to prevent collapse */
+    flex-shrink: 0;
 }
 
 .drawer-item:active {
