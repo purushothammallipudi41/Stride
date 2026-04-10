@@ -153,23 +153,31 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             </div>
 
             {showGifs && (
-                <div className="chat-actions-drawer animate-slide-up">
+                <div className="chat-actions-drawer animate-slide-up" onClick={(e) => e.stopPropagation()}>
                     <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
                     <div className="drawer-grid">
                         <div className="drawer-item" onClick={() => alert("Giphy integration loading...")}>
-                            <div className="drawer-icon-box"><Smile size={24} /></div>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}>
+                                <Smile size={24} />
+                            </div>
                             <span>GIFs</span>
                         </div>
                         <div className="drawer-item" onClick={handleGalleryClick}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(52, 199, 89, 0.2)', color: '#34c759' }}><Image size={24} /></div>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981' }}>
+                                <Image size={24} />
+                            </div>
                             <span>Gallery</span>
                         </div>
                         <div className="drawer-item" onClick={handleCameraClick}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(0, 122, 255, 0.2)', color: '#007aff' }}><Camera size={24} /></div>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6' }}>
+                                <Camera size={24} />
+                            </div>
                             <span>Camera</span>
                         </div>
                         <div className="drawer-item" onClick={() => alert("Location sharing active")}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(255, 149, 0, 0.2)', color: '#ff9500' }}><Plus size={24} /></div>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(249, 115, 22, 0.2)', color: '#f97316' }}>
+                                <Plus size={24} />
+                            </div>
                             <span>Location</span>
                         </div>
                     </div>
