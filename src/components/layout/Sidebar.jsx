@@ -82,7 +82,14 @@ const Sidebar = () => {
 
 
             <div className="sidebar-footer">
-                <div className="version-tag animate-pulse-purple" style={{ fontSize: '10px', padding: '10px', textAlign: 'center', fontWeight: '800' }}>v1.2.3-LIVE</div>
+                <div className="version-tag animate-pulse-purple" style={{ 
+                    fontSize: '10px', 
+                    padding: '10px', 
+                    textAlign: 'center', 
+                    fontWeight: '900',
+                    color: '#8b5cf6',
+                    textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
+                }}>v1.2.5-ULTIMATE</div>
             </div>
         </aside>
     );

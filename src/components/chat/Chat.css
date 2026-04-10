@@ -359,12 +359,16 @@
 @media (max-width: 768px) {
     .chat-input-bar-glass {
         padding: 10px 16px; 
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* Minimal padding */
-        margin-bottom: 72px; /* Physical clearance for the dock - creates ZERO GAP look */
-        background: rgba(18, 18, 26, 0.98); 
-        z-index: 1100;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        position: absolute !important;
+        bottom: 72px; /* Lock to the top of the 72px navigation dock */
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: rgba(10, 10, 18, 0.98); 
+        z-index: 1200;
+        border-top: 1.5px solid rgba(255, 255, 255, 0.08); /* More defined border */
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5); /* Premium depth */
     }
 }
 
