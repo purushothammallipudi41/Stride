@@ -10,6 +10,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const [showGifs, setShowGifs] = useState(false);
     const messagesEndRef = useRef(null);
 
+    const fileInputRef = useRef(null);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -38,6 +40,31 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         }
     };
 
+    const handlePlusClick = () => {
+        setShowGifs(!showGifs);
+    };
+
+    const handleCameraClick = () => {
+        // Mock camera trigger or show feedback
+        console.log("Camera triggered");
+        alert("Camera feature coming soon in Stride Pro!");
+    };
+
+    const handleGalleryClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            onSendMessage(`Sent a photo: ${file.name}`, 'image');
+        }
+    };
+
+    const handleMicClick = () => {
+        alert("Voice messages are enabled for your account. Hold to record.");
+    };
+
     if (!activeChat) {
         return (
             <div className="chat-window-v3">
@@ -47,7 +74,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     </div>
                     <h3>Your Messages</h3>
                     <p>Send a private photo or message to a friend.</p>
-                    {/* Add a placeholder action button for premium feel */}
                     <button className="chat-tab active" style={{ marginTop: '20px', padding: '12px 30px' }}>
                         Send Message
                     </button>
@@ -58,6 +84,14 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
     return (
         <div className={`chat-window-v3 animate-fade-in ${isDisabled ? 'disabled' : ''}`}>
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                accept="image/*"
+                onChange={handleFileChange}
+            />
+
             <div className="chat-header-glass">
                 <div className="chat-header-left">
                     <button 
@@ -118,12 +152,36 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 </div>
             </div>
 
+            {showGifs && (
+                <div className="chat-actions-drawer animate-slide-up">
+                    <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
+                    <div className="drawer-grid">
+                        <div className="drawer-item" onClick={() => alert("Giphy integration loading...")}>
+                            <div className="drawer-icon-box"><Smile size={24} /></div>
+                            <span>GIFs</span>
+                        </div>
+                        <div className="drawer-item" onClick={handleGalleryClick}>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(52, 199, 89, 0.2)', color: '#34c759' }}><Image size={24} /></div>
+                            <span>Gallery</span>
+                        </div>
+                        <div className="drawer-item" onClick={handleCameraClick}>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(0, 122, 255, 0.2)', color: '#007aff' }}><Camera size={24} /></div>
+                            <span>Camera</span>
+                        </div>
+                        <div className="drawer-item" onClick={() => alert("Location sharing active")}>
+                            <div className="drawer-icon-box" style={{ background: 'rgba(255, 149, 0, 0.2)', color: '#ff9500' }}><Plus size={24} /></div>
+                            <span>Location</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="chat-input-bar-glass">
                 <div className="chat-input-wrapper-premium">
                     <div className="chat-input-prefix">
-                        <div className="chat-camera-btn">
+                        <button className="chat-camera-btn" onClick={handleCameraClick} aria-label="Camera">
                             <Camera size={20} color="#fff" strokeWidth={2.5} />
-                        </div>
+                        </button>
                     </div>
                     <input 
                         type="text" 
@@ -139,9 +197,9 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             <button className="chat-send-btn" onClick={handleSendText}>Send</button>
                         ) : (
                             <div className="chat-input-actions-group">
-                                <button className="chat-action-sm-btn" aria-label="Microphone"><Mic size={20} /></button>
-                                <button className="chat-action-sm-btn" aria-label="Gallery"><Image size={20} /></button>
-                                <button className="chat-action-sm-btn" onClick={() => setShowGifs(!showGifs)} aria-label="More options"><Plus size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={handleMicClick} aria-label="Microphone"><Mic size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={handleGalleryClick} aria-label="Gallery"><Image size={20} /></button>
+                                <button className="chat-action-sm-btn" onClick={handlePlusClick} aria-label="More options"><Plus size={20} /></button>
                             </div>
                         )}
                     </div>
