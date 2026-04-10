@@ -105,7 +105,7 @@ const AppContent = () => {
       {!isPublicPath && <Sidebar />}
       
       <div className="layout-primary">
-        {!['/profile', '/explore', '/messages', '/reels', '/communities', '/servers', '/settings', '/wallet', '/artist-dashboard', '/achievements', '/insights', '/marketplace'].some(path => location.pathname.startsWith(path)) && <Topbar />}
+
         <main className="main-content">
           <ErrorBoundary>
             <div className="full-view-container">

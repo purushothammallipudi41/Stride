@@ -1,14 +1,43 @@
 import { useState } from 'react';
 import Feed from '../components/feed/Feed';
 import StoriesRail from '../components/feed/StoriesRail';
+import Topbar from '../components/layout/Topbar';
 import SEO from '../components/common/SEO';
 import './Home.css';
 
 const Home = () => {
-    const [feedType, setFeedType] = useState('foryou'); // 'foryou' or 'following'
+    const [feedType, setFeedType] = useState('foryou');
+    const [headerVisible, setHeaderVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    const handleScroll = (e) => {
+        const currentScrollY = e.currentTarget.scrollTop;
+        
+        // Only trigger after initial scroll to avoid jitter
+        if (currentScrollY > 10) {
+            if (currentScrollY > lastScrollY) {
+                // Scrolling down
+                setHeaderVisible(false);
+            } else {
+                // Scrolling up
+                setHeaderVisible(true);
+            }
+        } else {
+            // At the very top
+            setHeaderVisible(true);
+        }
+        
+        setLastScrollY(currentScrollY);
+    };
 
     return (
-        <div className="home-page-v2 animate-fade-in">
+        <div 
+            className="home-page-v2 animate-fade-in" 
+            onScroll={handleScroll}
+        >
+            <div className={`topbar-wrapper ${headerVisible ? 'visible' : 'hidden'}`}>
+                <Topbar />
+            </div>
             <SEO 
                 title="Home" 
                 description="Experience the rhythm of Stride. Follow your favorite artists and discover new music in your social feed." 
@@ -43,8 +72,18 @@ const Home = () => {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .home-page-v2 { width: 100%; height: 100%; padding: 24px; overflow-y: auto; }
-                .home-layout { display: flex; width: 100%; }
+                .home-page-v2 { width: 100%; height: 100%; padding: 0; overflow-y: auto; overflow-x: hidden; }
+                .topbar-wrapper { 
+                    position: sticky; 
+                    top: 0; 
+                    z-index: 1100; 
+                    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+                    width: 100%; 
+                }
+                .topbar-wrapper.hidden { transform: translateY(-100%); pointer-events: none; }
+                .topbar-wrapper.visible { transform: translateY(0); }
+                
+                .home-layout { display: flex; width: 100%; padding: 24px; padding-top: 0; }
                 .main-column { flex: 1; max-width: 100%; }
                 
                 @media (max-width: 1000px) {
