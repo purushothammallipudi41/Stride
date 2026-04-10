@@ -33,6 +33,7 @@
 
   /* Layout */
   --sidebar-width: 280px;
+  --bottom-nav-height: 72px;
   --player-height: 90px;
   --glass-blur: 24px;
   --glass-border: 1px solid var(--color-border);

@@ -176,8 +176,8 @@
         left: 0;
         transform: none;
         width: 100%;
-        height: calc(72px + env(safe-area-inset-bottom));
-        min-height: calc(72px + env(safe-area-inset-bottom));
+        height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+        min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
         margin: 0;
         padding: 0 16px env(safe-area-inset-bottom) 16px;
         flex-direction: row;
