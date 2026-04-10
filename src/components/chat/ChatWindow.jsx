@@ -161,7 +161,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         bottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 70px)',
                         left: '16px',
                         right: '16px',
-                        background: 'rgba(255, 0, 0, 0.95)', // RED SMOKE TEST INLINE
+                        background: 'rgba(255, 0, 0, 0.95)', // RED SMOKE TEST V3
                         backdropFilter: 'blur(24px)',
                         borderRadius: '24px',
                         padding: '24px 16px',
@@ -173,7 +173,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         border: '3px solid white'
                     }}
                 >
-                    <div style={{ display: 'none' }}>DESTRUCTION_V2.2</div>
+                    <div style={{ display: 'none' }}>DESTRUCTION_V3_MAP</div>
                     <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
                     <div 
                         className="drawer-grid"
@@ -184,30 +184,38 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             gap: '8px'
                         }}
                     >
-                        <div className="drawer-item" onClick={() => alert("Giphy integration loading...")} style={{ width: '64px', flexShrink: 0, textAlign: 'center' }}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(168, 85, 247, 0.2)', color: '#a855f7', width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                                <SmileIcon size={24} />
+                        {[
+                            { id: 'gif', label: 'GIFs', icon: '👾', color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
+                            { id: 'gallery', label: 'Gallery', icon: '🖼️', color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                            { id: 'camera', label: 'Camera', icon: '📸', color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                            { id: 'location', label: 'Location', icon: '📍', color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
+                        ].map((item) => (
+                            <div 
+                                key={item.id} 
+                                className="drawer-item" 
+                                onClick={item.action} 
+                                style={{ width: '64px', flexShrink: 0, textAlign: 'center', cursor: 'pointer' }}
+                            >
+                                <div 
+                                    className="drawer-icon-box" 
+                                    style={{ 
+                                        background: item.color, 
+                                        color: item.textColor, 
+                                        width: '50px', 
+                                        height: '50px', 
+                                        borderRadius: '16px', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        margin: '0 auto',
+                                        fontSize: '24px'
+                                    }}
+                                >
+                                    {item.icon}
+                                </div>
+                                <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '600' }}>{item.label}</span>
                             </div>
-                            <span style={{ fontSize: '0.7rem', color: '#fff' }}>GIFs</span>
-                        </div>
-                        <div className="drawer-item" onClick={handleGalleryClick} style={{ width: '64px', flexShrink: 0, textAlign: 'center' }}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                                <ImageIcon size={24} />
-                            </div>
-                            <span style={{ fontSize: '0.7rem', color: '#fff' }}>Gallery</span>
-                        </div>
-                        <div className="drawer-item" onClick={handleCameraClick} style={{ width: '64px', flexShrink: 0, textAlign: 'center' }}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                                <Camera size={24} />
-                            </div>
-                            <span style={{ fontSize: '0.7rem', color: '#fff' }}>Camera</span>
-                        </div>
-                        <div className="drawer-item" onClick={() => alert("Location sharing active")} style={{ width: '64px', flexShrink: 0, textAlign: 'center' }}>
-                            <div className="drawer-icon-box" style={{ background: 'rgba(249, 115, 22, 0.2)', color: '#f97316', width: '50px', height: '50px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-                                <Plus size={24} />
-                            </div>
-                            <span style={{ fontSize: '0.7rem', color: '#fff' }}>Location</span>
-                        </div>
+                        ))}
                     </div>
                 </div>
             )}
