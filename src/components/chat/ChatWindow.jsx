@@ -159,10 +159,10 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         <div className="action-sheet-handle" />
                         <div className="action-sheet-grid">
                             {[
-                                { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={28} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
-                                { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={28} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                                { id: 'action-camera', label: 'Camera', icon: <Camera size={28} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                                { id: 'action-location', label: 'Location', icon: <Plus size={28} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
+                                { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
+                                { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                                { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                                { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
                             ].map((item) => (
                                 <div key={item.id} className="action-sheet-item" onClick={() => { item.action(); setShowGifs(false); }}>
                                     <div className="action-sheet-icon-box" style={{ background: item.color, color: item.textColor }}>
