@@ -681,3 +681,119 @@
 .animate-sheet-up {
     animation: slideUpSheet 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
+/* Stride Map Engine Styles */
+.stride-map-container {
+    width: 100%;
+    max-width: 280px;
+    background: rgba(18, 18, 26, 0.95);
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    margin-top: 8px;
+}
+
+.stride-map-header {
+    padding: 8px 12px;
+    background: rgba(139, 92, 246, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stride-map-badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    letter-spacing: 0.05em;
+}
+
+.stride-map-iframe {
+    width: 100%;
+    height: 180px;
+    /* Stride 'Midnight Purple' Engine Filter */
+    filter: invert(100%) hue-rotate(240deg) brightness(0.9) saturate(1.2);
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+}
+
+.stride-map-iframe:hover {
+    opacity: 1;
+}
+
+.stride-map-info {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* GIF Picker Styles */
+.gif-picker-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 8px;
+}
+
+.gif-picker-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.gif-back-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.gif-search-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.gif-search-input:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.gif-results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.search-gif-item {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.search-gif-item:hover {
+    transform: scale(1.02);
+    border-color: var(--color-primary);
+}

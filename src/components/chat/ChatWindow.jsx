@@ -9,9 +9,11 @@ import './Chat.css';
 const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers }) => {
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
+    const [isGifMode, setIsGifMode] = useState(false);
+    const [gifSearch, setGifSearch] = useState('');
     const messagesEndRef = useRef(null);
-
     const fileInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,9 +48,23 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     };
 
     const handleCameraClick = () => {
-        // Mock camera trigger or show feedback
-        console.log("Camera triggered");
-        alert("Camera feature coming soon in Stride Pro!");
+        cameraInputRef.current?.click();
+    };
+
+    const handleLocationClick = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            onSendMessage(`Shared my location: ${mapUrl}`, 'location');
+            setShowGifs(false);
+        }, () => {
+            alert("Unable to retrieve your location. Please check permissions.");
+        });
     };
 
     const handleGalleryClick = () => {
@@ -90,6 +106,14 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 ref={fileInputRef} 
                 style={{ display: 'none' }} 
                 accept="image/*"
+                onChange={handleFileChange}
+            />
+            <input 
+                type="file" 
+                ref={cameraInputRef} 
+                style={{ display: 'none' }} 
+                accept="image/*"
+                capture="environment"
                 onChange={handleFileChange}
             />
 
@@ -138,7 +162,24 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
                                 <div className="message-content">
                                     <div className="message-bubble-v2">
-                                        {msg.text}
+                                        {msg.text && msg.text.startsWith('[LOCATION:') ? (
+                                            <div className="stride-map-container">
+                                                <div className="stride-map-header">
+                                                    <span className="stride-map-badge">STRIDE MAPS</span>
+                                                </div>
+                                                <iframe 
+                                                    className="stride-map-iframe"
+                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(msg.text.split(':')[1].split(',')[1]) - 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[0]) - 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[1]) + 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[0]) + 0.005}&layer=mapnik&marker=${msg.text.split(':')[1]}`}
+                                                    frameBorder="0"
+                                                    scrolling="no"
+                                                />
+                                                <div className="stride-map-info">
+                                                    Shared Location
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            msg.text
+                                        )}
                                     </div>
                                     {isLastInGroup && (
                                         <div className="message-status-v2">
@@ -155,24 +196,57 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
             {showGifs && createPortal(
                 <>
-                    <div className="action-sheet-backdrop" onClick={() => setShowGifs(false)} />
+                    <div className="action-sheet-backdrop" onClick={() => { setShowGifs(false); setIsGifMode(false); }} />
                     <div className="action-sheet-container animate-sheet-up" onClick={(e) => e.stopPropagation()}>
                         <div className="action-sheet-handle" />
-                        <div className="action-sheet-grid">
-                            {[
-                                { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
-                                { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                                { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                                { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
-                            ].map((item) => (
-                                <div key={item.id} className="action-sheet-item" onClick={() => { item.action(); setShowGifs(false); }}>
-                                    <div className="action-sheet-icon-box" style={{ background: item.color, color: item.textColor }}>
-                                        {item.icon}
-                                    </div>
-                                    <span>{item.label}</span>
+                        
+                        {isGifMode ? (
+                            <div className="gif-picker-content">
+                                <div className="gif-picker-header">
+                                    <button className="gif-back-btn" onClick={() => setIsGifMode(false)}><ChevronLeft size={20} /></button>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search GIFs..." 
+                                        className="gif-search-input"
+                                        value={gifSearch}
+                                        onChange={(e) => setGifSearch(e.target.value)}
+                                        autoFocus
+                                    />
                                 </div>
-                            ))}
-                        </div>
+                                <div className="gif-results-grid">
+                                    {[
+                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o7TKMGpx4B46vS46I/giphy.gif",
+                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l0HlHFRbmaZtBRhXG/giphy.gif",
+                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o6Zt481isdL8EbF6M/giphy.gif",
+                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l41lTfO7K8W4N2EaE/giphy.gif"
+                                    ].map((url, i) => (
+                                        <img 
+                                            key={i} 
+                                            src={url} 
+                                            alt="GIF" 
+                                            className="search-gif-item" 
+                                            onClick={() => { onSendMessage(url, 'gif'); setShowGifs(false); setIsGifMode(false); }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="action-sheet-grid">
+                                {[
+                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => setIsGifMode(true) },
+                                    { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                                    { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                                    { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: handleLocationClick }
+                                ].map((item) => (
+                                    <div key={item.id} className="action-sheet-item" onClick={() => { if (item.id !== 'action-gif') setShowGifs(false); item.action(); }}>
+                                        <div className="action-sheet-icon-box" style={{ background: item.color, color: item.textColor }}>
+                                            {item.icon}
+                                        </div>
+                                        <span>{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </>,
                 document.body
