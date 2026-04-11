@@ -164,21 +164,26 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     <div className="message-bubble-v2">
                                         {msg.text && msg.text.includes('[LOCATION:') ? (
                                             (() => {
-                                                // Matches both decimal and integer coordinates
+                                                // Robust regex for coordinates (handles decimals and integers)
                                                 const match = msg.text.match(/\[LOCATION:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\]/);
                                                 if (match) {
-                                                    const lat = match[1];
-                                                    const lon = match[2];
+                                                    const lat = parseFloat(match[1]);
+                                                    const lon = parseFloat(match[2]);
+                                                    // Calculate a stable bbox for the shared point
+                                                    const offset = 0.005;
+                                                    const bbox = [lon - offset, lat - offset, lon + offset, lat + offset].join('%2C');
+                                                    
                                                     return (
                                                         <div className="stride-map-placeholder-pre" onClick={() => window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank')}>
                                                             <div className="stride-map-header">
-                                                                <span className="stride-map-badge">STRIDE MAPS ENGINE</span>
+                                                                <span className="stride-map-badge">STRIDE MAPS ENGINE v2</span>
                                                             </div>
                                                             <div className="stride-map-preview-static">
                                                                 <iframe 
                                                                     className="stride-map-iframe"
                                                                     title="Stride Location"
-                                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(lon) - 0.01}%2C${parseFloat(lat) - 0.01}%2C${parseFloat(lon) + 0.01}%2C${parseFloat(lat) + 0.01}&layer=mapnik&marker=${lat}%2C${lon}`}
+                                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`}
+                                                                    onLoad={(e) => console.log('SocialAction: Map rendered')}
                                                                 />
                                                             </div>
                                                             <div className="stride-map-footer">
@@ -242,20 +247,26 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                 </div>
                                 <div className="gif-results-grid">
                                     {[
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l41lTfO7K8W4N2EaE/giphy.webp",
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o7TKSj06qV99N7fP2/giphy.webp",
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o7TKVUn7iM8FMEU24/giphy.webp",
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o7TKMGpx4B46vS46I/giphy.webp",
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l0HlHFRbmaZtBRhXG/giphy.webp",
-                                        "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o6Zt481isdL8EbF6M/giphy.webp"
+                                        "https://media.giphy.com/media/l41lTfO7K8W4N2EaE/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKSj06qV99N7fP2/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKVUn7iM8FMEU24/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKMGpx4B46vS46I/giphy.gif",
+                                        "https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif",
+                                        "https://media.giphy.com/media/3o6Zt481isdL8EbF6M/giphy.gif"
                                     ].map((url, i) => (
-                                        <img 
-                                            key={i} 
-                                            src={url} 
-                                            alt="GIF" 
-                                            className="search-gif-item" 
-                                            onClick={() => { onSendMessage(url, 'gif'); setShowGifs(false); setIsGifMode(false); }}
-                                        />
+                                        <div key={i} className="gif-picker-item-wrapper">
+                                            <img 
+                                                src={url} 
+                                                alt="GIF" 
+                                                className="search-gif-item" 
+                                                onClick={() => { 
+                                                    console.log('SocialAction: GIF selected', url);
+                                                    onSendMessage(url, 'gif'); 
+                                                    setShowGifs(false); 
+                                                    setIsGifMode(false); 
+                                                }}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
