@@ -947,3 +947,32 @@
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* Global Trending Social Styles */
+.gif-results-header {
+    padding: 8px 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.global-trending-badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    background: rgba(139, 92, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    text-transform: uppercase;
+}
+
+.giphy-embed-mini {
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gif-picker-item-wrapper:hover .giphy-embed-mini {
+    transform: scale(1.15);
+}

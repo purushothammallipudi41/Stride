@@ -241,24 +241,25 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         {isGifMode ? (
                             <div className="gif-picker-content">
                                 <div className="gif-picker-header">
-                                    <button className="gif-back-btn" onClick={() => setIsGifMode(false)}><ChevronLeft size={20} /></button>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search GIFs..." 
-                                        className="gif-search-input"
-                                        value={gifSearch}
-                                        onChange={(e) => setGifSearch(e.target.value)}
-                                        autoFocus
-                                    />
+                                    <button className="gif-back-btn" onClick={() => { setShowGifs(false); setIsGifMode(false); }}>
+                                        <ChevronLeft size={20} />
+                                    </button>
+                                    <div className="gif-search-box">
+                                        <Search size={16} />
+                                        <input type="text" placeholder="Search Global Stride GIFs..." readOnly />
+                                    </div>
+                                </div>
+                                <div className="gif-results-header">
+                                    <span className="global-trending-badge">GLOBAL TRENDING</span>
                                 </div>
                                 <div className="gif-results-grid">
                                     {[
-                                        "https://giphy.com/embed/l41lTfO7K8W4N2EaE",
-                                        "https://giphy.com/embed/3o7TKSj06qV99N7fP2",
-                                        "https://giphy.com/embed/3o7TKVUn7iM8FMEU24",
-                                        "https://giphy.com/embed/3o7TKMGpx4B46vS46I",
-                                        "https://giphy.com/embed/l0HlHFRbmaZtBRhXG",
-                                        "https://giphy.com/embed/3o6Zt481isdL8EbF6M"
+                                        "https://giphy.com/embed/l0MYt5jPR6QX5pnqM",
+                                        "https://giphy.com/embed/lYjA4tfvCc8UAju1Op",
+                                        "https://giphy.com/embed/GpyS1lJXJYupG",
+                                        "https://giphy.com/embed/PQKlfexeEpnTq",
+                                        "https://giphy.com/embed/PUBxelwT57jsQ",
+                                        "https://giphy.com/embed/P53TSsopKicrm"
                                     ].map((url, i) => (
                                         <div key={i} className="gif-picker-item-wrapper">
                                             <iframe 
