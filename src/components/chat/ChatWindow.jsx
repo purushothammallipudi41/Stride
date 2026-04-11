@@ -29,47 +29,30 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             { id: '5GoZ2HXJCZAlW', title: 'Happy' }, { id: 'm4jEkv8T5V37W', title: 'Cool' }
         ],
         'Reactions': [
-            { id: 'Hi0ODLYPDChm8', title: 'Reaction Hi' }, { id: '8KshN3nvZNPDq', title: 'Reaction Yes' },
-            { id: '1256k0OSoI8d3i', title: 'Reaction No' }, { id: 'hwdr7pvte2yVW', title: 'Reaction Wait' },
-            { id: 'ukGm72ZLZvYfS', title: 'Reaction What' }
+            { id: 'Hi0ODLYPDChm8', title: 'Hi' }, { id: '8KshN3nvZNPDq', title: 'Yes' }, { id: 'ukGm72ZLZvYfS', title: 'What' }
         ],
         'Love': [
-            { id: 'azi3GTPtxWKCQ', title: 'Love Heart' }, { id: '7J4WxAd5J9nLLMYKmA', title: 'Love Together' },
-            { id: '17zrEYLzrQwgM', title: 'Love Sweet' }, { id: 'wvYNSqBAMDVx8CEYkt', title: 'Love Kisses' },
-            { id: 'RJObHnqqPzPskPIvI8', title: 'Love Hug' }
+            { id: 'azi3GTPtxWKCQ', title: 'Hearts' }, { id: '7J4WxAd5J9nLLMYKmA', title: 'Together' }, { id: '17zrEYLzrQwgM', title: 'Sweet' }
         ],
         'Happy': [
-            { id: 'qdxDab2ZKCLq3qI6kO', title: 'Happy Dance' }, { id: 'ukmZRuEqc2Rbi', title: 'Happy Joy' },
-            { id: '31lPv5L3aIvTi', title: 'Happy Smile' }, { id: 'rdma0nDFZMR32', title: 'Happy Cheering' },
-            { id: 'aQYR1p8saOQla', title: 'Happy Yes' }
+            { id: 'fUQ4rhUZJYiQsas6WD', title: 'Dance' }, { id: 'IAbrtESCyrqLOMlWdx', title: 'Joy' }, { id: 'cXblnKXr2BQOaYnTni', title: 'Smile' }
         ],
         'Sad': [
-            { id: 'H6cmWzp6LGFvqjidB7', title: 'Sad Crying' }, { id: 'bqZadRhjePrJeqONfL', title: 'Sad Alone' },
-            { id: '4V3RuU0zSq1SC8Hh4x', title: 'Sad Rain' }, { id: 'mBaNKEmk9SUKs', title: 'Sad Sigh' },
-            { id: 'ISOckXUybCHBxH7vR1', title: 'Sad Frown' }
+            { id: 'H6cmWzp6LGFvqjidB7', title: 'Crying' }, { id: '4V3RuU0zSq1SC8Hh4x', title: 'Rain' }, { id: 'mBaNKEmk9SUKs', title: 'Sigh' }
         ],
         'Dance': [
-            { id: 'ujTVMASREzuRbH6zy5', title: 'Dance Disco' }, { id: '9gMVPuOKoOxGpbxCm7', title: 'Dance Move' },
-            { id: 'oF6TOssuzqVmbYE70d', title: 'Dance Party' }, { id: 'UZxzsNx1kpZZwTCSSp', title: 'Dance Together' },
-            { id: 'V7jkATiqn3mRie2LI2', title: 'Dance Win' }
+            { id: 'ujTVMASREzuRbH6zy5', title: 'Disco' }, { id: '9gMVPuOKoOxGpbxCm7', title: 'Move' }, { id: 'UZxzsNx1kpZZwTCSSp', title: 'Party' }
         ],
         'Angry': [
-            { id: 'OHRF8LZis06OiPDJby', title: 'Angry Mad' }, { id: 'RuYPi0HyBnOxy', title: 'Angry Fire' },
-            { id: '3ohs81rDuEz9ioJzAA', title: 'Angry Rage' }, { id: 'm8fyrgnXwXV5EHw6Lm', title: 'Angry No' },
-            { id: 'bcqAMUTUHoLDy', title: 'Angry Stop' }
+            { id: 'OHRF8LZis06OiPDJby', title: 'Mad' }, { id: '3ohs81rDuEz9ioJzAA', title: 'Rage' }, { id: 'm8fyrgnXwXV5EHw6Lm', title: 'No' }
         ],
         'Wow': [
-            { id: 'aWPGuTlDqq2yc', title: 'Wow Cool' }, { id: '9sJ7ZldhfGyn4KuOyP', title: 'Wow Shock' },
-            { id: 'lxxOGaDRk4f7R5TkBd', title: 'Wow Surprised' }, { id: 'oYtVHSxngR3lC', title: 'Wow OMG' },
-            { id: 'QUENDfi6DEMLzQ0CKt', title: 'Wow Brain' }
+            { id: 'oYtVHSxngR3lC', title: 'OMG' }, { id: 'QUENDfi6DEMLzQ0CKt', title: 'Brain' }, { id: '9sJ7ZldhfGyn4KuOyP', title: 'Shock' }
         ],
         'Memes': [
-            { id: 'xdboJUaNA9qG81rUSa', title: 'Meme Cat' }, { id: 'Lopx9eUi34rbq', title: 'Meme High' },
-            { id: 'e6PwP26WNDO3bBVQ2t', title: 'Meme Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Meme Deal' },
-            { id: 'kKolzIJEy8xXXm0544', title: 'Meme Lol' }
+            { id: 'xdboJUaNA9qG81rUSa', title: 'Memes' }, { id: 'Lopx9eUi34rbq', title: 'High' }, { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }
         ],
         'Music': [
-            { id: 'q618imRRVODIMoznGC', title: 'Music Headset' }, { id: 'wllvWYR1OXVZOmjS4p', title: 'Music Vinyl' },
             { id: 'gQJyPqc6E4xoc', title: 'Music Listen' }, { id: 'hiLLD9o1wTB3a', title: 'Music Beat' },
             { id: 'J1vnExqoLkA76xcWvP', title: 'Music Dance' }
         ]
