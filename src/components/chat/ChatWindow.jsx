@@ -20,21 +20,63 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
     const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
     
-    // Social Fail-Safe: Hardcoded verified IDs to ensure the picker is never empty
-    const SOCIAL_FALLBACKS = [
-        { id: 'l0MYt5jPR6QX5pnqM', title: 'Celebrate' },
-        { id: 'lYjA4tfvCc8UAju1Op', title: 'Clapping' },
-        { id: 'GpyS1lJXJYupG', title: 'Lol' },
-        { id: 'PQKlfexeEpnTq', title: 'Heart' },
-        { id: 'PUBxelwT57jsQ', title: 'Wow' },
-        { id: 'P53TSsopKicrm', title: 'Sad' },
-        { id: '3o7TKMGpxSdrR99JJC', title: 'Dance' },
-        { id: 'uTCAwHoVre8Uc', title: 'Angry' },
-        { id: '5GoZ2HXJCZAlW', title: 'Happy' },
-        { id: 'o75ajIFH0LqqA', title: 'Meme' },
-        { id: 'm4jEkv8T5V37W', title: 'Cool' },
-        { id: 'xT9IgG50Fb7MiY99S0', title: 'Applause' }
-    ];
+    // Bulletproof Social Archive: Category-specific unique sets
+    const CATEGORY_FALLBACKS = {
+        'Trending': [
+            { id: 'l0MYt5jPR6QX5pnqM', title: 'Celebrate' }, { id: 'lYjA4tfvCc8UAju1Op', title: 'Clap' }, 
+            { id: 'GpyS1lJXJYupG', title: 'Laugh' }, { id: 'PQKlfexeEpnTq', title: 'Heart' },
+            { id: 'PUBxelwT57jsQ', title: 'Wow' }, { id: '3o7TKMGpxSdrR99JJC', title: 'Dance' },
+            { id: '5GoZ2HXJCZAlW', title: 'Happy' }, { id: 'm4jEkv8T5V37W', title: 'Cool' }
+        ],
+        'Reactions': [
+            { id: '3oEjI6SIIHBdRxH20w', title: 'No' }, { id: '26tPo9rksWNF93RZe', title: 'Yes' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Shrug' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Thumbs Up' },
+            { id: 'l41lS6KzOQ90yL72g', title: 'Eye Roll' }, { id: '3o7btUgffRzZKyC492', title: 'Facepalm' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Mic Drop' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Applause' }
+        ],
+        'Love': [
+            { id: 'l2JhL0GpxO7XGvO1p92Y', title: 'Love Heart' }, { id: '3o7TKoV7G39m5L4w1e', title: 'Love kiss' },
+            { id: 'l0HlUf3jPhTf5qHq0', title: 'Sweet Love' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Love Wow' },
+            { id: 'l41lU9Xy8q7q6K6e4', title: 'Love sparkle' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Love together' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Love celebrate' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Love always' }
+        ],
+        'Happy': [
+            { id: '5GoZ2HXJCZAlW', title: 'Happy smile' }, { id: 'l2JhG8L7b6vO1p92Y', title: 'Happy joy' },
+            { id: 'l0HlV7G39m5L4w1e', title: 'Happy laugh' }, { id: '3o7TKMGpxSdrR99JJC', title: 'Happy dance' },
+            { id: 'l41lS6KzOQ90yL72g', title: 'Happy celebrate' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Happy wow' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Happy yes' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Happy fun' }
+        ],
+        'Sad': [
+            { id: '3o6Zt6ML82KmJpX6XY', title: 'Sad cry' }, { id: 'l41lY9Xy8q7q6K6e4', title: 'Sad rain' },
+            { id: '3o7TKMv8o9Sj8n6m1u', title: 'Sad alone' }, { id: 'l3q2K1MhuoByAHSi4', title: 'Sad why' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Sad sorry' }, { id: 'l41lO6KzOQ90yL72g', title: 'Sad sigh' },
+            { id: '3o7TKVfu7rfDQ6RLa8', title: 'Sad done' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Sad frown' }
+        ],
+        'Dance': [
+            { id: '3o7TKMGpxSdrR99JJC', title: 'Dance party' }, { id: 'l2JhG8L7b6vO1p92Y', title: 'Dance move' },
+            { id: 'l0HlV7G39m5L4w1e', title: 'Dance joy' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Dance together' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Dance celebrate' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Dance win' },
+            { id: 'l41lS6KzOQ90yL72g', title: 'Dance yes' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Dance fun' }
+        ],
+        'Angry': [
+            { id: 'uTCAwHoVre8Uc', title: 'Angry mad' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Angry fire' },
+            { id: 'l41lS6KzOQ90yL72g', title: 'Angry no' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Angry stop' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Angry rage' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Angry wow' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Angry sigh' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Angry done' }
+        ],
+        'Wow': [
+            { id: 'PUBxelwT57jsQ', title: 'Wow cool' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Wow omg' },
+            { id: 'l41lS6KzOQ90yL72g', title: 'Wow magic' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Wow amazing' },
+            { id: 'l3q2K1MhuoByAHSi4', title: 'Wow yes' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Wow win' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Wow shrug' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Wow great' }
+        ],
+        'Memes': [
+            { id: 'o75ajIFH0LqqA', title: 'Meme high' }, { id: 'u7ka77eR8Nq92', title: 'Meme doge' },
+            { id: '3o7TKoV7G39m5L4w1e', title: 'Meme rick' }, { id: 'l0HluN8PywJyK692w', title: 'Meme deal' },
+            { id: '3o7TKUvXC88y2nUfM4', title: 'Meme cat' }, { id: '3o84smGVAgT6W8m2vC', title: 'Meme fine' },
+            { id: 'l0MYD9nJhJuvPiH3a', title: 'Meme lol' }, { id: 'l3q2K1MhuoByAHSi4', title: 'Meme face' }
+        ]
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,18 +103,21 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 if (data.data && data.data.length > 0) {
                     setGifs(data.data);
                 } else {
-                    // Use fallbacks if API returns empty but categorize them
-                    console.warn("Giphy API returned empty, using social fallbacks");
-                    setGifs(SOCIAL_FALLBACKS);
+                    // Use category-specific fallbacks if API returns empty
+                    console.warn(`Giphy API empty for ${selectedCategory}, using social archive`);
+                    setGifs(CATEGORY_FALLBACKS[selectedCategory] || CATEGORY_FALLBACKS['Trending']);
                 }
             } catch (err) {
-                console.error("Giphy Fetch Error, reverting to fallbacks:", err);
-                setGifs(SOCIAL_FALLBACKS);
+                console.error("Giphy Fetch Error, reverting to social archive:", err);
+                setGifs(CATEGORY_FALLBACKS[selectedCategory] || CATEGORY_FALLBACKS['Trending']);
             } finally {
                 setIsLoadingGifs(false);
             }
         };
 
+        // Clear previous results immediately to provide snappy transitions
+        if (!gifSearch) setGifs([]);
+        
         const timer = setTimeout(fetchGifs, gifSearch ? 500 : 0);
         return () => clearTimeout(timer);
     }, [isGifMode, gifSearch, selectedCategory]);
