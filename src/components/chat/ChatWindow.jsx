@@ -29,52 +29,49 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             { id: '5GoZ2HXJCZAlW', title: 'Happy' }, { id: 'm4jEkv8T5V37W', title: 'Cool' }
         ],
         'Reactions': [
-            { id: '3oEjI6SIIHBdRxH20w', title: 'No' }, { id: '26tPo9rksWNF93RZe', title: 'Yes' },
-            { id: 'l0HlvtIPzPRe2zjRC', title: 'Shrug' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Thumbs Up' },
-            { id: 'l41lS6KzOQ90yL72g', title: 'Eye Roll' }, { id: '3o7btUgffRzZKyC492', title: 'Facepalm' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Mic Drop' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Applause' }
+            { id: 'Hi0ODLYPDChm8', title: 'Reaction Hi' }, { id: '8KshN3nvZNPDq', title: 'Reaction Yes' },
+            { id: '1256k0OSoI8d3i', title: 'Reaction No' }, { id: 'hwdr7pvte2yVW', title: 'Reaction Wait' },
+            { id: 'ukGm72ZLZvYfS', title: 'Reaction What' }
         ],
         'Love': [
-            { id: 'l2JhL0GpxO7XGvO1p92Y', title: 'Love Heart' }, { id: '3o7TKoV7G39m5L4w1e', title: 'Love kiss' },
-            { id: 'l0HlUf3jPhTf5qHq0', title: 'Sweet Love' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Love Wow' },
-            { id: 'l41lU9Xy8q7q6K6e4', title: 'Love sparkle' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Love together' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Love celebrate' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Love always' }
+            { id: 'azi3GTPtxWKCQ', title: 'Love Heart' }, { id: '7J4WxAd5J9nLLMYKmA', title: 'Love Together' },
+            { id: '17zrEYLzrQwgM', title: 'Love Sweet' }, { id: 'wvYNSqBAMDVx8CEYkt', title: 'Love Kisses' },
+            { id: 'RJObHnqqPzPskPIvI8', title: 'Love Hug' }
         ],
         'Happy': [
-            { id: '5GoZ2HXJCZAlW', title: 'Happy smile' }, { id: 'l2JhG8L7b6vO1p92Y', title: 'Happy joy' },
-            { id: 'l0HlV7G39m5L4w1e', title: 'Happy laugh' }, { id: '3o7TKMGpxSdrR99JJC', title: 'Happy dance' },
-            { id: 'l41lS6KzOQ90yL72g', title: 'Happy celebrate' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Happy wow' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Happy yes' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Happy fun' }
+            { id: 'qdxDab2ZKCLq3qI6kO', title: 'Happy Dance' }, { id: 'ukmZRuEqc2Rbi', title: 'Happy Joy' },
+            { id: '31lPv5L3aIvTi', title: 'Happy Smile' }, { id: 'rdma0nDFZMR32', title: 'Happy Cheering' },
+            { id: 'aQYR1p8saOQla', title: 'Happy Yes' }
         ],
         'Sad': [
-            { id: '3o6Zt6ML82KmJpX6XY', title: 'Sad cry' }, { id: 'l41lY9Xy8q7q6K6e4', title: 'Sad rain' },
-            { id: '3o7TKMv8o9Sj8n6m1u', title: 'Sad alone' }, { id: 'l3q2K1MhuoByAHSi4', title: 'Sad why' },
-            { id: 'l0HlvtIPzPRe2zjRC', title: 'Sad sorry' }, { id: 'l41lO6KzOQ90yL72g', title: 'Sad sigh' },
-            { id: '3o7TKVfu7rfDQ6RLa8', title: 'Sad done' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Sad frown' }
+            { id: 'H6cmWzp6LGFvqjidB7', title: 'Sad Crying' }, { id: 'bqZadRhjePrJeqONfL', title: 'Sad Alone' },
+            { id: '4V3RuU0zSq1SC8Hh4x', title: 'Sad Rain' }, { id: 'mBaNKEmk9SUKs', title: 'Sad Sigh' },
+            { id: 'ISOckXUybCHBxH7vR1', title: 'Sad Frown' }
         ],
         'Dance': [
-            { id: '3o7TKMGpxSdrR99JJC', title: 'Dance party' }, { id: 'l2JhG8L7b6vO1p92Y', title: 'Dance move' },
-            { id: 'l0HlV7G39m5L4w1e', title: 'Dance joy' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Dance together' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Dance celebrate' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Dance win' },
-            { id: 'l41lS6KzOQ90yL72g', title: 'Dance yes' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Dance fun' }
+            { id: 'ujTVMASREzuRbH6zy5', title: 'Dance Disco' }, { id: '9gMVPuOKoOxGpbxCm7', title: 'Dance Move' },
+            { id: 'oF6TOssuzqVmbYE70d', title: 'Dance Party' }, { id: 'UZxzsNx1kpZZwTCSSp', title: 'Dance Together' },
+            { id: 'V7jkATiqn3mRie2LI2', title: 'Dance Win' }
         ],
         'Angry': [
-            { id: 'uTCAwHoVre8Uc', title: 'Angry mad' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Angry fire' },
-            { id: 'l41lS6KzOQ90yL72g', title: 'Angry no' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Angry stop' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Angry rage' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Angry wow' },
-            { id: 'l0HlvtIPzPRe2zjRC', title: 'Angry sigh' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Angry done' }
+            { id: 'OHRF8LZis06OiPDJby', title: 'Angry Mad' }, { id: 'RuYPi0HyBnOxy', title: 'Angry Fire' },
+            { id: '3ohs81rDuEz9ioJzAA', title: 'Angry Rage' }, { id: 'm8fyrgnXwXV5EHw6Lm', title: 'Angry No' },
+            { id: 'bcqAMUTUHoLDy', title: 'Angry Stop' }
         ],
         'Wow': [
-            { id: 'PUBxelwT57jsQ', title: 'Wow cool' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Wow omg' },
-            { id: 'l41lS6KzOQ90yL72g', title: 'Wow magic' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Wow amazing' },
-            { id: 'l3q2K1MhuoByAHSi4', title: 'Wow yes' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Wow win' },
-            { id: 'l0HlvtIPzPRe2zjRC', title: 'Wow shrug' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Wow great' }
+            { id: 'aWPGuTlDqq2yc', title: 'Wow Cool' }, { id: '9sJ7ZldhfGyn4KuOyP', title: 'Wow Shock' },
+            { id: 'lxxOGaDRk4f7R5TkBd', title: 'Wow Surprised' }, { id: 'oYtVHSxngR3lC', title: 'Wow OMG' },
+            { id: 'QUENDfi6DEMLzQ0CKt', title: 'Wow Brain' }
         ],
         'Memes': [
-            { id: 'o75ajIFH0LqqA', title: 'Meme high' }, { id: 'u7ka77eR8Nq92', title: 'Meme doge' },
-            { id: '3o7TKoV7G39m5L4w1e', title: 'Meme rick' }, { id: 'l0HluN8PywJyK692w', title: 'Meme deal' },
-            { id: '3o7TKUvXC88y2nUfM4', title: 'Meme cat' }, { id: '3o84smGVAgT6W8m2vC', title: 'Meme fine' },
-            { id: 'l0MYD9nJhJuvPiH3a', title: 'Meme lol' }, { id: 'l3q2K1MhuoByAHSi4', title: 'Meme face' }
+            { id: 'xdboJUaNA9qG81rUSa', title: 'Meme Cat' }, { id: 'Lopx9eUi34rbq', title: 'Meme High' },
+            { id: 'e6PwP26WNDO3bBVQ2t', title: 'Meme Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Meme Deal' },
+            { id: 'kKolzIJEy8xXXm0544', title: 'Meme Lol' }
+        ],
+        'Music': [
+            { id: 'q618imRRVODIMoznGC', title: 'Music Headset' }, { id: 'wllvWYR1OXVZOmjS4p', title: 'Music Vinyl' },
+            { id: 'gQJyPqc6E4xoc', title: 'Music Listen' }, { id: 'hiLLD9o1wTB3a', title: 'Music Beat' },
+            { id: 'J1vnExqoLkA76xcWvP', title: 'Music Dance' }
         ]
     };
 
