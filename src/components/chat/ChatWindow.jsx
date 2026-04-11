@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
@@ -152,7 +153,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 </div>
             </div>
 
-            {showGifs && (
+            {showGifs && createPortal(
                 <>
                     <div className="action-sheet-backdrop" onClick={() => setShowGifs(false)} />
                     <div className="action-sheet-container animate-sheet-up" onClick={(e) => e.stopPropagation()}>
@@ -173,7 +174,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             ))}
                         </div>
                     </div>
-                </>
+                </>,
+                document.body
             )}
 
             <div className="chat-input-bar-glass">
