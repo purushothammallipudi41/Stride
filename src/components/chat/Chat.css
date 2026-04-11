@@ -1100,39 +1100,43 @@
     100% { transform: scale(0.95); opacity: 0.5; }
 }
 
-.gif-results-grid {
-    padding-bottom: 20px;
+.gif-picker-item-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    aspect-ratio: 16/9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Premium Giphy Scroll & Category Icons */
-.premium-scroll {
-    flex-shrink: 0;
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-    padding: 12px 10px !important;
+.gif-picker-item-wrapper:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
 }
 
-.gif-category-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px !important;
-    font-size: 0.78rem !important;
+.gif-item-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.cat-icon {
-    font-size: 1rem;
+.gif-item-preview.loaded {
+    opacity: 1;
 }
 
-.gif-picker-content {
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
-}
-
-.gif-results-grid {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 4px 20px 4px;
+.gif-click-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    pointer-events: none;
 }
 
 /* Ensure categories are always visible and distinct */

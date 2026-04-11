@@ -74,20 +74,17 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         'Memes': [
             { id: 'xdboJUaNA9qG81rUSa', title: 'Cat' }, { id: 'Lopx9eUi34rbq', title: 'High' },
             { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Deal' },
-            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' },
-            { id: 'u7ka77eR8Nq92', title: 'Doge' }, { id: '3o84smGVAgT6W8m2vC', title: 'Fine' }
+            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' }
         ],
         'Meme': [
             { id: 'xdboJUaNA9qG81rUSa', title: 'Cat' }, { id: 'Lopx9eUi34rbq', title: 'High' },
             { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Deal' },
-            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' },
-            { id: 'u7ka77eR8Nq92', title: 'Doge' }, { id: '3o84smGVAgT6W8m2vC', title: 'Fine' }
+            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' }
         ],
         'Music': [
-            { id: 'm5YDMdUgGPKMw', title: 'Listen' }, { id: 'q618imRRVODIMoznGC', title: 'Beat' },
-            { id: 'hiLLD9o1wTB3a', title: 'Dance' }, { id: 'wllvWYR1OXVZOmjS4p', title: 'Vinyl' },
-            { id: 'J1vnExqoLkA76xcWvP', title: 'Energy' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Vibes' },
-            { id: 'gQJyPqc6E4xoc', title: 'Sound' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Soul' }
+            { id: 'q618imRRVODIMoznGC', title: 'Beat' }, { id: 'hiLLD9o1wTB3a', title: 'Dance' },
+            { id: 'wllvWYR1OXVZOmjS4p', title: 'Vinyl' }, { id: 'J1vnExqoLkA76xcWvP', title: 'Energy' },
+            { id: 'm5YDMdUgGPKMw', title: 'Listen' }, { id: 'gQJyPqc6E4xoc', title: 'Sound' }
         ]
     };
 
@@ -415,24 +412,23 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         </div>
                                     ) : gifs.length > 0 ? (
                                         gifs.map((gif) => (
-                                            <div key={gif.id} className="gif-picker-item-wrapper">
-                                                <iframe 
-                                                    src={`https://giphy.com/embed/${gif.id}?html5=true`}
-                                                    width="100%" 
-                                                    height="100%" 
-                                                    frameBorder="0" 
-                                                    className="giphy-embed-mini" 
-                                                    title={gif.title}
-                                                ></iframe>
-                                                <div 
-                                                    className="gif-click-overlay" 
-                                                    onClick={() => {
-                                                        const embedUrl = `https://giphy.com/embed/${gif.id}`;
-                                                        onSendMessage(embedUrl, 'gif'); 
-                                                        setShowGifs(false); 
-                                                        setIsGifMode(false);
-                                                    }}
+                                            <div 
+                                                key={gif.id} 
+                                                className="gif-picker-item-wrapper"
+                                                onClick={() => {
+                                                    const mediaUrl = `https://media.giphy.com/media/${gif.id}/giphy.gif`;
+                                                    onSendMessage(mediaUrl, 'gif'); 
+                                                    setShowGifs(false); 
+                                                    setIsGifMode(false);
+                                                }}
+                                            >
+                                                <img 
+                                                    src={`https://media.giphy.com/media/${gif.id}/giphy.gif`}
+                                                    alt={gif.title}
+                                                    className="gif-item-preview"
+                                                    onLoad={(e) => e.target.classList.add('loaded')}
                                                 />
+                                                <div className="gif-click-overlay" />
                                             </div>
                                         ))
                                     ) : (
