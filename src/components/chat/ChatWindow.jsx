@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare } from 'lucide-react';
+import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
