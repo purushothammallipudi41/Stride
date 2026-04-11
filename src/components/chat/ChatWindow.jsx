@@ -357,16 +357,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         <div className="gif-empty-state">No GIFs found for this search.</div>
                                     )}
                                 </div>
-                                                onClick={() => { 
-                                                    console.log('SocialAction: GIF selected via overlay', url);
-                                                    onSendMessage(url, 'gif'); 
-                                                    setShowGifs(false); 
-                                                    setIsGifMode(false); 
-                                                }} 
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
                             </div>
                         ) : (
                             <div className="action-sheet-grid">
