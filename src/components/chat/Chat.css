@@ -546,7 +546,7 @@
         width: 100% !important;
         height: 100% !important;
         position: relative;
-        z-index: 101;
+        z-index: 2000; /* Elevated to sit above .sidebar (bottom nav) at 1000 */
         margin: 0;
     }
 
