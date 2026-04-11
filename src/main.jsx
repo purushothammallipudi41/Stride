@@ -1,3 +1,4 @@
+// BUILD_SIG: HARD_SYNC_V4_EMOJIS_FINAL
 if (typeof BigInt !== 'undefined' && !BigInt.prototype.toJSON) {
   BigInt.prototype.toJSON = function () {
     return this.toString();

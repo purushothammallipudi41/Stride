@@ -177,6 +177,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
                     <div 
                         className="drawer-grid"
+                        id="v4-drawer-container"
                         style={{
                             display: 'flex',
                             justifyContent: 'space-evenly',
@@ -185,13 +186,14 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         }}
                     >
                         {[
-                            { id: 'gif', label: 'GIFs', icon: '👾', color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
-                            { id: 'gallery', label: 'Gallery', icon: '🖼️', color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                            { id: 'camera', label: 'Camera', icon: '📸', color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                            { id: 'location', label: 'Location', icon: '📍', color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
+                            { id: 'v4-gif', label: 'GIFs', icon: '👾', color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
+                            { id: 'v4-gallery', label: 'Gallery', icon: '🖼️', color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                            { id: 'v4-camera', label: 'Camera', icon: '📸', color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                            { id: 'v4-location', label: 'Location', icon: '📍', color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
                         ].map((item) => (
                             <div 
                                 key={item.id} 
+                                id={item.id}
                                 className="drawer-item" 
                                 onClick={item.action} 
                                 style={{ width: '64px', flexShrink: 0, textAlign: 'center', cursor: 'pointer' }}
