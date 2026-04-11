@@ -26,35 +26,62 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             { id: 'l0MYt5jPR6QX5pnqM', title: 'Celebrate' }, { id: 'lYjA4tfvCc8UAju1Op', title: 'Clap' }, 
             { id: 'GpyS1lJXJYupG', title: 'Laugh' }, { id: 'PQKlfexeEpnTq', title: 'Heart' },
             { id: 'PUBxelwT57jsQ', title: 'Wow' }, { id: '3o7TKMGpxSdrR99JJC', title: 'Dance' },
-            { id: '5GoZ2HXJCZAlW', title: 'Happy' }, { id: 'm4jEkv8T5V37W', title: 'Cool' }
+            { id: '5GoZ2HXJCZAlW', title: 'Happy' }, { id: 'm4jEkv8T5V37W', title: 'Cool' },
+            { id: 'xT9IgG50Fb7MiY99S0', title: 'Applause' }, { id: 'l2JhL0GpxO7XGvO1p92Y', title: 'Heart Hands' }
         ],
         'Reactions': [
-            { id: 'Hi0ODLYPDChm8', title: 'Hi' }, { id: '8KshN3nvZNPDq', title: 'Yes' }, { id: 'ukGm72ZLZvYfS', title: 'What' }
+            { id: 'Hi0ODLYPDChm8', title: 'Hi' }, { id: '8KshN3nvZNPDq', title: 'Yes' },
+            { id: '1256k0OSoI8d3i', title: 'No' }, { id: 'hwdr7pvte2yVW', title: 'Wait' },
+            { id: 'ukGm72ZLZvYfS', title: 'What' }, { id: '3oEjI6SIIHBdRxH20w', title: 'Smirk' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Shrug' }, { id: '3o7btUgffRzZKyC492', title: 'Facepalm' }
         ],
         'Love': [
-            { id: 'azi3GTPtxWKCQ', title: 'Hearts' }, { id: '7J4WxAd5J9nLLMYKmA', title: 'Together' }, { id: '17zrEYLzrQwgM', title: 'Sweet' }
+            { id: 'azi3GTPtxWKCQ', title: 'Hearts' }, { id: '7J4WxAd5J9nLLMYKmA', title: 'Together' },
+            { id: '17zrEYLzrQwgM', title: 'Sweet' }, { id: 'wvYNSqBAMDVx8CEYkt', title: 'Kisses' },
+            { id: 'RJObHnqqPzPskPIvI8', title: 'Hug' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Always' },
+            { id: '3o7TKoV7G39m5L4w1e', title: 'Sparkle' }, { id: 'l41lU9Xy8q7q6K6e4', title: 'Soul' }
         ],
         'Happy': [
-            { id: 'fUQ4rhUZJYiQsas6WD', title: 'Dance' }, { id: 'IAbrtESCyrqLOMlWdx', title: 'Joy' }, { id: 'cXblnKXr2BQOaYnTni', title: 'Smile' }
+            { id: 'fUQ4rhUZJYiQsas6WD', title: 'Dance' }, { id: 'IAbrtESCyrqLOMlWdx', title: 'Joy' },
+            { id: 'cXblnKXr2BQOaYnTni', title: 'Smile' }, { id: 'rdma0nDFZMR32', title: 'Cheer' },
+            { id: 'aQYR1p8saOQla', title: 'Yes' }, { id: 'l0MYt5jPR6QX5pnqM', title: 'Win' },
+            { id: 'ukmZRuEqc2Rbi', title: 'Fun' }, { id: '3o7TKVfu7rfDQ6RLa8', title: 'Thumbs' }
         ],
         'Sad': [
-            { id: 'H6cmWzp6LGFvqjidB7', title: 'Crying' }, { id: '4V3RuU0zSq1SC8Hh4x', title: 'Rain' }, { id: 'mBaNKEmk9SUKs', title: 'Sigh' }
+            { id: 'H6cmWzp6LGFvqjidB7', title: 'Cry' }, { id: '4V3RuU0zSq1SC8Hh4x', title: 'Rain' },
+            { id: 'mBaNKEmk9SUKs', title: 'Sigh' }, { id: 'bqZadRhjePrJeqONfL', title: 'Alone' },
+            { id: 'ISOckXUybCHBxH7vR1', title: 'Frown' }, { id: 'l41lO6KzOQ90yL72g', title: 'Done' },
+            { id: '3o6Zt6ML82KmJpX6XY', title: 'Why' }, { id: 'l0HlvtIPzPRe2zjRC', title: 'Sorry' }
         ],
         'Dance': [
-            { id: 'ujTVMASREzuRbH6zy5', title: 'Disco' }, { id: '9gMVPuOKoOxGpbxCm7', title: 'Move' }, { id: 'UZxzsNx1kpZZwTCSSp', title: 'Party' }
+            { id: 'ujTVMASREzuRbH6zy5', title: 'Disco' }, { id: '9gMVPuOKoOxGpbxCm7', title: 'Move' },
+            { id: 'oF6TOssuzqVmbYE70d', title: 'Party' }, { id: 'UZxzsNx1kpZZwTCSSp', title: 'Together' },
+            { id: 'V7jkATiqn3mRie2LI2', title: 'Win' }, { id: '3o7TKMGpxSdrR99JJC', title: 'Groove' },
+            { id: 'l2JhG8L7b6vO1p92Y', title: 'Energy' }, { id: 'l0HlV7G39m5L4w1e', title: 'Joy' }
         ],
         'Angry': [
-            { id: 'OHRF8LZis06OiPDJby', title: 'Mad' }, { id: '3ohs81rDuEz9ioJzAA', title: 'Rage' }, { id: 'm8fyrgnXwXV5EHw6Lm', title: 'No' }
+            { id: 'OHRF8LZis06OiPDJby', title: 'Mad' }, { id: 'RuYPi0HyBnOxy', title: 'Fire' },
+            { id: '3ohs81rDuEz9ioJzAA', title: 'Rage' }, { id: 'm8fyrgnXwXV5EHw6Lm', title: 'No' },
+            { id: 'bcqAMUTUHoLDy', title: 'Stop' }, { id: 'uTCAwHoVre8Uc', title: 'Fuming' },
+            { id: 'l0HlvtIPzPRe2zjRC', title: 'Out' }, { id: '3o7TKT7z8Yp8L1f8fS', title: 'Boom' }
         ],
         'Wow': [
-            { id: 'oYtVHSxngR3lC', title: 'OMG' }, { id: 'QUENDfi6DEMLzQ0CKt', title: 'Brain' }, { id: '9sJ7ZldhfGyn4KuOyP', title: 'Shock' }
+            { id: 'aWPGuTlDqq2yc', title: 'Cool' }, { id: '9sJ7ZldhfGyn4KuOyP', title: 'Shock' },
+            { id: 'lxxOGaDRk4f7R5TkBd', title: 'Surprise' }, { id: 'oYtVHSxngR3lC', title: 'OMG' },
+            { id: 'QUENDfi6DEMLzQ0CKt', title: 'Brain' }, { id: 'PUBxelwT57jsQ', title: 'Amazing' },
+            { id: 'l0MYD9nJhJuvPiH3a', title: 'Win' }, { id: 'l3q2K1MhuoByAHSi4', title: 'Pop' }
         ],
         'Memes': [
-            { id: 'xdboJUaNA9qG81rUSa', title: 'Memes' }, { id: 'Lopx9eUi34rbq', title: 'High' }, { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }
+            { id: 'xdboJUaNA9qG81rUSa', title: 'Cat' }, { id: 'Lopx9eUi34rbq', title: 'High' },
+            { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Deal' },
+            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' },
+            { id: 'u7ka77eR8Nq92', title: 'Doge' }, { id: '3o84smGVAgT6W8m2vC', title: 'Fine' }
         ],
         'Music': [
-            { id: 'gQJyPqc6E4xoc', title: 'Music Listen' }, { id: 'hiLLD9o1wTB3a', title: 'Music Beat' },
-            { id: 'J1vnExqoLkA76xcWvP', title: 'Music Dance' }
+            { id: 'm5YDMdUgGPKMw', title: 'Listen' }, { id: 'q618imRRVODIMoznGC', title: 'Beat' },
+            { id: 'hiLLD9o1wTB3a', title: 'Dance' }, { id: 'wllvWYR1OXVZOmjS4p', title: 'Vinyl' },
+            { id: 'J1vnExqoLkA76xcWvP', title: 'Energy' }, { id: 'l0MYD9nJhJuvPiH3a', title: 'Vibes' },
+            { id: 'gQJyPqc6E4xoc', title: 'Sound' }, { id: '3o7TKMv8o9Sj8n6m1u', title: 'Soul' }
         ]
     };
 

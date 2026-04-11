@@ -1034,10 +1034,15 @@
 .gif-categories-bar {
     display: flex;
     overflow-x: auto;
-    padding: 12px 4px;
-    gap: 8px;
-    scrollbar-width: none; /* Hide scrollbar for Chrome/Safari */
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 16px !important;
+    gap: 10px;
+    scrollbar-width: none;
     -ms-overflow-style: none;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 0 -16px;
+    scroll-snap-type: x proximity;
 }
 
 .gif-categories-bar::-webkit-scrollbar {
@@ -1045,16 +1050,21 @@
 }
 
 .gif-category-pill {
+    flex-shrink: 0;
     white-space: nowrap;
-    padding: 6px 14px;
+    padding: 8px 16px !important;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     color: var(--color-text-secondary);
-    font-size: 0.72rem;
+    font-size: 0.78rem !important;
     font-weight: 600;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-backface-visibility: hidden;
 }
 
 .gif-category-pill.active {
