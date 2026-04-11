@@ -180,9 +180,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             display: 'flex',
                             justifyContent: 'space-evenly',
                             width: '100%',
-                            gap: '8px'
+                            gap: '12px',
+                            padding: '0 8px'
                         }}
                     >
+                        <div style={{ display: 'none' }}>STABLE_SYNC_V5_FINAL</div>
                         {[
                             { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={24} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
                             { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={24} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
