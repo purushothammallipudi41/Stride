@@ -1029,3 +1029,67 @@
     transform: scale(0.9);
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* Giphy Dynamic Interface Styles */
+.gif-categories-bar {
+    display: flex;
+    overflow-x: auto;
+    padding: 12px 4px;
+    gap: 8px;
+    scrollbar-width: none; /* Hide scrollbar for Chrome/Safari */
+    -ms-overflow-style: none;
+}
+
+.gif-categories-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.gif-category-pill {
+    white-space: nowrap;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gif-category-pill.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.gif-loading-state, .gif-empty-state {
+    grid-column: span 2;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    gap: 12px;
+}
+
+.gif-pulse-loader {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    animation: gif-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes gif-pulse {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+.gif-results-grid {
+    padding-bottom: 20px;
+}

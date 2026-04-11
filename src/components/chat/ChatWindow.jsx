@@ -11,13 +11,47 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const [showGifs, setShowGifs] = useState(false);
     const [isGifMode, setIsGifMode] = useState(false);
     const [gifSearch, setGifSearch] = useState('');
+    const [gifs, setGifs] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('Trending');
+    const [isLoadingGifs, setIsLoadingGifs] = useState(false);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
 
+    const GIPHY_API_KEY = 'dc6zaTOxFJmzC';
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    useEffect(() => {
+        if (!isGifMode) return;
+        
+        const fetchGifs = async () => {
+            setIsLoadingGifs(true);
+            try {
+                let url;
+                if (gifSearch) {
+                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(gifSearch)}&limit=20&rating=pg`;
+                } else if (selectedCategory !== 'Trending') {
+                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(selectedCategory)}&limit=20&rating=pg`;
+                } else {
+                    url = `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=20&rating=pg`;
+                }
+                
+                const resp = await fetch(url);
+                const data = await resp.json();
+                setGifs(data.data || []);
+            } catch (err) {
+                console.error("Giphy Fetch Error:", err);
+            } finally {
+                setIsLoadingGifs(false);
+            }
+        };
+
+        const timer = setTimeout(fetchGifs, gifSearch ? 500 : 0);
+        return () => clearTimeout(timer);
+    }, [isGifMode, gifSearch, selectedCategory]);
 
     useEffect(() => {
         scrollToBottom();
@@ -246,38 +280,72 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     </button>
                                     <div className="gif-search-box">
                                         <Search size={16} />
-                                        <input type="text" placeholder="Search Global Stride GIFs..." readOnly />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search GIPHY..." 
+                                            value={gifSearch}
+                                            onChange={(e) => {
+                                                setGifSearch(e.target.value);
+                                                if (e.target.value) setSelectedCategory('Search');
+                                            }}
+                                            autoFocus
+                                        />
                                     </div>
                                 </div>
-                                <div className="gif-results-header">
-                                    <span className="global-trending-badge">GLOBAL TRENDING</span>
+
+                                <div className="gif-categories-bar">
+                                    {['Trending', 'Reactions', 'Love', 'Sad', 'Happy', 'Angry', 'Dance', 'Wow'].map(cat => (
+                                        <button 
+                                            key={cat} 
+                                            className={`gif-category-pill ${selectedCategory === cat ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedCategory(cat);
+                                                setGifSearch('');
+                                            }}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
                                 </div>
+
+                                <div className="gif-results-header">
+                                    <span className="global-trending-badge">
+                                        {gifSearch ? `SEARCH: ${gifSearch.toUpperCase()}` : selectedCategory.toUpperCase()}
+                                    </span>
+                                </div>
+
                                 <div className="gif-results-grid">
-                                    {[
-                                        "https://giphy.com/embed/l0MYt5jPR6QX5pnqM",
-                                        "https://giphy.com/embed/lYjA4tfvCc8UAju1Op",
-                                        "https://giphy.com/embed/GpyS1lJXJYupG",
-                                        "https://giphy.com/embed/PQKlfexeEpnTq",
-                                        "https://giphy.com/embed/PUBxelwT57jsQ",
-                                        "https://giphy.com/embed/P53TSsopKicrm"
-                                    ].map((url, i) => (
-                                        <div key={i} className="gif-picker-item-wrapper">
-                                            <iframe 
-                                                src={`${url}?html5=true`}
-                                                width="100%" 
-                                                height="100%" 
-                                                frameBorder="0" 
-                                                className="giphy-embed-mini" 
-                                                title="Giphy Preview"
-                                                onClick={(e) => {
-                                                    console.log('SocialAction: GIF selected from picker', url);
-                                                    onSendMessage(url, 'gif'); 
-                                                    setShowGifs(false); 
-                                                    setIsGifMode(false);
-                                                }}
-                                            ></iframe>
-                                            <div 
-                                                className="gif-click-overlay" 
+                                    {isLoadingGifs ? (
+                                        <div className="gif-loading-state">
+                                            <div className="gif-pulse-loader" />
+                                            <span>Browsing Giphy...</span>
+                                        </div>
+                                    ) : gifs.length > 0 ? (
+                                        gifs.map((gif) => (
+                                            <div key={gif.id} className="gif-picker-item-wrapper">
+                                                <iframe 
+                                                    src={`https://giphy.com/embed/${gif.id}?html5=true`}
+                                                    width="100%" 
+                                                    height="100%" 
+                                                    frameBorder="0" 
+                                                    className="giphy-embed-mini" 
+                                                    title={gif.title}
+                                                ></iframe>
+                                                <div 
+                                                    className="gif-click-overlay" 
+                                                    onClick={() => {
+                                                        const embedUrl = `https://giphy.com/embed/${gif.id}`;
+                                                        onSendMessage(embedUrl, 'gif'); 
+                                                        setShowGifs(false); 
+                                                        setIsGifMode(false);
+                                                    }}
+                                                />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="gif-empty-state">No GIFs found for this search.</div>
+                                    )}
+                                </div>
                                                 onClick={() => { 
                                                     console.log('SocialAction: GIF selected via overlay', url);
                                                     onSendMessage(url, 'gif'); 
