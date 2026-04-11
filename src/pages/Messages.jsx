@@ -109,7 +109,7 @@ const Messages = () => {
         if (!activeChatId) return;
 
         const newMessage = {
-            [type === 'text' ? 'text' : 'gif']: content,
+            text: content,
             username: userProfile.username || 'Anonymous',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             type,

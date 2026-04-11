@@ -213,19 +213,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                 ></iframe>
                                                 <div className="media-loading-overlay">Loading GIF...</div>
                                             </div>
-                                        ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif') || msg.text.includes('media.giphy.com'))) ? (
-                                            <div className="message-media-wrapper">
-                                                <img 
-                                                    src={msg.text} 
-                                                    alt="GIF" 
-                                                    className="message-gif-media" 
-                                                    onLoad={(e) => e.target.classList.add('loaded')}
-                                                    onError={(e) => {
-                                                        console.error("GIF failed to load:", msg.text);
-                                                        e.target.src = "https://via.placeholder.com/200x200?text=GIF+Error";
-                                                    }}
-                                                />
-                                            </div>
                                         ) : msg.type === 'image' ? (
                                             <img src={msg.text} alt="Shared Photo" className="message-image-media" />
                                         ) : (
