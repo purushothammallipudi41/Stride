@@ -163,20 +163,27 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                 <div className="message-content">
                                     <div className="message-bubble-v2">
                                         {msg.text && msg.text.startsWith('[LOCATION:') ? (
-                                            <div className="stride-map-container">
-                                                <div className="stride-map-header">
-                                                    <span className="stride-map-badge">STRIDE MAPS</span>
-                                                </div>
-                                                <iframe 
-                                                    className="stride-map-iframe"
-                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(msg.text.split(':')[1].split(',')[1]) - 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[0]) - 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[1]) + 0.005}%2C${parseFloat(msg.text.split(':')[1].split(',')[0]) + 0.005}&layer=mapnik&marker=${msg.text.split(':')[1]}`}
-                                                    frameBorder="0"
-                                                    scrolling="no"
-                                                />
-                                                <div className="stride-map-info">
-                                                    Shared Location
-                                                </div>
-                                            </div>
+                                            (() => {
+                                                const parts = msg.text.split(':')[1].replace(']', '').split(',');
+                                                const lat = parseFloat(parts[0]);
+                                                const lon = parseFloat(parts[1]);
+                                                return (
+                                                    <div className="stride-map-container">
+                                                        <div className="stride-map-header">
+                                                            <span className="stride-map-badge">STRIDE MAPS</span>
+                                                        </div>
+                                                        <iframe 
+                                                            className="stride-map-iframe"
+                                                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.005}%2C${lat - 0.005}%2C${lon + 0.005}%2C${lat + 0.005}&layer=mapnik&marker=${lat}%2C${lon}`}
+                                                            frameBorder="0"
+                                                            scrolling="no"
+                                                        />
+                                                        <div className="stride-map-info">
+                                                            Shared Location
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()
                                         ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.endsWith('.gif'))) ? (
                                             <img src={msg.text} alt="GIF" className="message-gif-media" />
                                         ) : msg.type === 'image' ? (
@@ -219,10 +226,12 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                 </div>
                                 <div className="gif-results-grid">
                                     {[
-                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o7TKMGpx4B46vS46I/giphy.gif",
-                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l0HlHFRbmaZtBRhXG/giphy.gif",
-                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/3o6Zt481isdL8EbF6M/giphy.gif",
-                                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJ6cXJ6amx6cWR6amp6amp6amp6amp6amp6amp6amp6amp6amp/l41lTfO7K8W4N2EaE/giphy.gif"
+                                        "https://media.giphy.com/media/l41lTfO7K8W4N2EaE/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKSj06qV99N7fP2/giphy.gif",
+                                        "https://media.giphy.com/media/l41lTfO7K8W4N2EaE/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKVUn7iM8FMEU24/giphy.gif",
+                                        "https://media.giphy.com/media/l41lTfO7K8W4N2EaE/giphy.gif",
+                                        "https://media.giphy.com/media/3o7TKMGpx4B46vS46I/giphy.gif"
                                     ].map((url, i) => (
                                         <img 
                                             key={i} 
