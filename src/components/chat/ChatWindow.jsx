@@ -21,6 +21,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
     
     // Bulletproof Social Archive: Category-specific unique sets
+    const CATEGORY_FALLBACKS = {
         'Trending': [
             { id: 'l0MYt5jPR6QX5pnqM', title: 'Celebrate' }, { id: 'GpyS1lJXJYupG', title: 'Laugh' }, { id: 'PUBxelwT57jsQ', title: 'Wow' }
         ],
@@ -384,14 +385,14 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                 key={gif.id} 
                                                 className="gif-picker-item-wrapper"
                                                 onClick={() => {
-                                                    const mediaUrl = `https://media.giphy.com/media/${gif.id}/giphy.gif`;
-                                                    onSendMessage(mediaUrl, 'gif'); 
+                                                    const directUrl = `https://i.giphy.com/${gif.id}.gif`;
+                                                    onSendMessage(directUrl, 'gif'); 
                                                     setShowGifs(false); 
                                                     setIsGifMode(false);
                                                 }}
                                             >
                                                 <img 
-                                                    src={`https://media.giphy.com/media/${gif.id}/giphy.gif`}
+                                                    src={`https://i.giphy.com/${gif.id}.gif`}
                                                     alt={gif.title}
                                                     className="gif-item-preview"
                                                     onLoad={(e) => e.target.classList.add('loaded')}
