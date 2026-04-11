@@ -18,7 +18,23 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
 
-    const GIPHY_API_KEY = 'dc6zaTOxFJmzC';
+    const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
+    
+    // Social Fail-Safe: Hardcoded verified IDs to ensure the picker is never empty
+    const SOCIAL_FALLBACKS = [
+        { id: 'l0MYt5jPR6QX5pnqM', title: 'Celebrate' },
+        { id: 'lYjA4tfvCc8UAju1Op', title: 'Clapping' },
+        { id: 'GpyS1lJXJYupG', title: 'Lol' },
+        { id: 'PQKlfexeEpnTq', title: 'Heart' },
+        { id: 'PUBxelwT57jsQ', title: 'Wow' },
+        { id: 'P53TSsopKicrm', title: 'Sad' },
+        { id: '3o7TKMGpxSdrR99JJC', title: 'Dance' },
+        { id: 'uTCAwHoVre8Uc', title: 'Angry' },
+        { id: '5GoZ2HXJCZAlW', title: 'Happy' },
+        { id: 'o75ajIFH0LqqA', title: 'Meme' },
+        { id: 'm4jEkv8T5V37W', title: 'Cool' },
+        { id: 'xT9IgG50Fb7MiY99S0', title: 'Applause' }
+    ];
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,9 +57,17 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 
                 const resp = await fetch(url);
                 const data = await resp.json();
-                setGifs(data.data || []);
+                
+                if (data.data && data.data.length > 0) {
+                    setGifs(data.data);
+                } else {
+                    // Use fallbacks if API returns empty but categorize them
+                    console.warn("Giphy API returned empty, using social fallbacks");
+                    setGifs(SOCIAL_FALLBACKS);
+                }
             } catch (err) {
-                console.error("Giphy Fetch Error:", err);
+                console.error("Giphy Fetch Error, reverting to fallbacks:", err);
+                setGifs(SOCIAL_FALLBACKS);
             } finally {
                 setIsLoadingGifs(false);
             }
