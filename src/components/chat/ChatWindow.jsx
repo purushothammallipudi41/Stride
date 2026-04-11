@@ -161,7 +161,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         bottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 70px)',
                         left: '16px',
                         right: '16px',
-                        background: 'rgba(255, 0, 0, 0.95)', // RED SMOKE TEST V3
+                        background: 'rgba(18, 18, 26, 0.95)',
                         backdropFilter: 'blur(24px)',
                         borderRadius: '24px',
                         padding: '24px 16px',
@@ -170,14 +170,12 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        border: '3px solid white'
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}
                 >
-                    <div style={{ display: 'none' }}>DESTRUCTION_V3_MAP</div>
                     <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
                     <div 
                         className="drawer-grid"
-                        id="v4-drawer-container"
                         style={{
                             display: 'flex',
                             justifyContent: 'space-evenly',
@@ -186,14 +184,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         }}
                     >
                         {[
-                            { id: 'v4-gif', label: 'GIFs', icon: '👾', color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
-                            { id: 'v4-gallery', label: 'Gallery', icon: '🖼️', color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                            { id: 'v4-camera', label: 'Camera', icon: '📸', color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                            { id: 'v4-location', label: 'Location', icon: '📍', color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
+                            { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={24} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
+                            { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={24} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                            { id: 'action-camera', label: 'Camera', icon: <Camera size={24} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                            { id: 'action-location', label: 'Location', icon: <Plus size={24} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
                         ].map((item) => (
                             <div 
                                 key={item.id} 
-                                id={item.id}
                                 className="drawer-item" 
                                 onClick={item.action} 
                                 style={{ width: '64px', flexShrink: 0, textAlign: 'center', cursor: 'pointer' }}
@@ -209,13 +206,12 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         display: 'flex', 
                                         alignItems: 'center', 
                                         justifyContent: 'center', 
-                                        margin: '0 auto',
-                                        fontSize: '24px'
+                                        margin: '0 auto'
                                     }}
                                 >
                                     {item.icon}
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '600' }}>{item.label}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500' }}>{item.label}</span>
                             </div>
                         ))}
                     </div>
