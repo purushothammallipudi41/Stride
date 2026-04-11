@@ -59,8 +59,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
         navigator.geolocation.getCurrentPosition((position) => {
             const { latitude, longitude } = position.coords;
-            const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            onSendMessage(`Shared my location: ${mapUrl}`, 'location');
+            // Send the special token format that the Stride Map Engine expects
+            onSendMessage(`[LOCATION:${latitude},${longitude}]`, 'location');
             setShowGifs(false);
         }, () => {
             alert("Unable to retrieve your location. Please check permissions.");
@@ -164,7 +164,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     <div className="message-bubble-v2">
                                         {msg.text && msg.text.includes('[LOCATION:') ? (
                                             (() => {
-                                                const match = msg.text.match(/\[LOCATION:(-?\d+\.\d+),(-?\d+\.\d+)\]/);
+                                                // Matches both decimal and integer coordinates
+                                                const match = msg.text.match(/\[LOCATION:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\]/);
                                                 if (match) {
                                                     const lat = match[1];
                                                     const lon = match[2];
@@ -188,8 +189,19 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                 }
                                                 return msg.text;
                                             })()
-                                        ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.endsWith('.gif'))) ? (
-                                            <img src={msg.text} alt="GIF" className="message-gif-media" onLoad={(e) => e.target.classList.add('loaded')} />
+                                        ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif') || msg.text.includes('media.giphy.com'))) ? (
+                                            <div className="message-media-wrapper">
+                                                <img 
+                                                    src={msg.text} 
+                                                    alt="GIF" 
+                                                    className="message-gif-media" 
+                                                    onLoad={(e) => e.target.classList.add('loaded')}
+                                                    onError={(e) => {
+                                                        console.error("GIF failed to load:", msg.text);
+                                                        e.target.src = "https://via.placeholder.com/200x200?text=GIF+Error";
+                                                    }}
+                                                />
+                                            </div>
                                         ) : msg.type === 'image' ? (
                                             <img src={msg.text} alt="Shared Photo" className="message-image-media" />
                                         ) : (
@@ -250,12 +262,18 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="action-sheet-grid">
                                 {[
-                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => setIsGifMode(true) },
-                                    { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                                    { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                                    { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: handleLocationClick }
+                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => { console.log('SocialAction: GIF clicked'); setIsGifMode(true); } },
+                                    { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: () => { console.log('SocialAction: Gallery clicked'); handleGalleryClick(); } },
+                                    { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: () => { console.log('SocialAction: Camera clicked'); handleCameraClick(); } },
+                                    { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => { console.log('SocialAction: Location clicked'); handleLocationClick(); } }
                                 ].map((item) => (
-                                    <div key={item.id} className="action-sheet-item" onClick={() => { if (item.id !== 'action-gif') setShowGifs(false); item.action(); }}>
+                                    <div key={item.id} className="action-sheet-item" onClick={(e) => { 
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log(`SocialAction: Click captured for ${item.id}`);
+                                        if (item.id !== 'action-gif') setShowGifs(false); 
+                                        item.action(); 
+                                    }}>
                                         <div className="action-sheet-icon-box" style={{ background: item.color, color: item.textColor }}>
                                             {item.icon}
                                         </div>
