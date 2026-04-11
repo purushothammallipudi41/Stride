@@ -580,87 +580,95 @@
         padding-top: calc(14px + env(safe-area-inset-top));
     }
 
-/* Chat Actions Drawer */
-.chat-actions-drawer {
-    position: absolute;
-    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 84px);
-    left: 16px;
-    right: 16px;
-    background: rgba(255, 0, 0, 0.95); /* RED SMOKE TEST */
-    backdrop-filter: blur(var(--glass-blur));
-    border: 3px solid #fff; /* HIGH VISIBILITY */
-    border-radius: 24px;
-    padding: 24px 16px;
-    z-index: 1300;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+/* Mobile Action Sheet Redesign */
+.action-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1500;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.action-sheet-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(18, 18, 26, 0.98);
+    backdrop-filter: blur(32px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px 32px 0 0;
+    padding: 20px 24px calc(20px + env(safe-area-inset-bottom));
+    z-index: 1600;
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
 }
 
-.drawer-handle {
-    width: 36px;
-    height: 4px;
+.action-sheet-handle {
+    width: 40px;
+    height: 5px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+    border-radius: 2.5px;
     margin-bottom: 24px;
-    cursor: pointer;
-    flex-shrink: 0;
 }
 
-.drawer-grid {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: flex-start;
-    gap: 8px;
+.action-sheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
     width: 100%;
 }
 
-.drawer-item {
+.action-sheet-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: transform 0.2s;
-    width: 64px; /* Explicit width to prevent collapse */
-    flex-shrink: 0;
-}
-
-.drawer-item:active {
-    transform: scale(0.9);
-}
-
-.drawer-icon-box {
-    width: 50px;
-    height: 50px;
-    border-radius: 16px;
+    justify-content: center;
     background: rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 20px;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.action-sheet-item:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.action-sheet-icon-box {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.action-sheet-item span {
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--color-text-primary);
 }
 
-.drawer-item span {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    text-align: center;
-    white-space: nowrap;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+@keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }
 
-.animate-slide-up {
-    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@media (max-width: 768px) {
-    .chat-actions-drawer {
-        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 70px);
-    }
+.animate-sheet-up {
+    animation: slideUpSheet 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }

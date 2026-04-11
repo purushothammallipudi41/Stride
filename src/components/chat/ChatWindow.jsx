@@ -153,71 +153,27 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             </div>
 
             {showGifs && (
-                <div 
-                    className="chat-actions-drawer animate-slide-up" 
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                        position: 'absolute',
-                        bottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 70px)',
-                        left: '16px',
-                        right: '16px',
-                        background: 'rgba(18, 18, 26, 0.95)',
-                        backdropFilter: 'blur(24px)',
-                        borderRadius: '24px',
-                        padding: '24px 16px',
-                        zIndex: 2000,
-                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
-                >
-                    <div className="drawer-handle" onClick={() => setShowGifs(false)}></div>
-                    <div 
-                        className="drawer-grid"
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-evenly',
-                            width: '100%',
-                            gap: '12px',
-                            padding: '0 8px'
-                        }}
-                    >
-                        <div style={{ display: 'none' }}>STABLE_SYNC_V5_FINAL</div>
-                        {[
-                            { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={24} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
-                            { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={24} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
-                            { id: 'action-camera', label: 'Camera', icon: <Camera size={24} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
-                            { id: 'action-location', label: 'Location', icon: <Plus size={24} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
-                        ].map((item) => (
-                            <div 
-                                key={item.id} 
-                                className="drawer-item" 
-                                onClick={item.action} 
-                                style={{ width: '64px', flexShrink: 0, textAlign: 'center', cursor: 'pointer' }}
-                            >
-                                <div 
-                                    className="drawer-icon-box" 
-                                    style={{ 
-                                        background: item.color, 
-                                        color: item.textColor, 
-                                        width: '50px', 
-                                        height: '50px', 
-                                        borderRadius: '16px', 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        margin: '0 auto'
-                                    }}
-                                >
-                                    {item.icon}
+                <>
+                    <div className="action-sheet-backdrop" onClick={() => setShowGifs(false)} />
+                    <div className="action-sheet-container animate-sheet-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="action-sheet-handle" />
+                        <div className="action-sheet-grid">
+                            {[
+                                { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={28} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => alert("Giphy loading...") },
+                                { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={28} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: handleGalleryClick },
+                                { id: 'action-camera', label: 'Camera', icon: <Camera size={28} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: handleCameraClick },
+                                { id: 'action-location', label: 'Location', icon: <Plus size={28} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => alert("Location active") }
+                            ].map((item) => (
+                                <div key={item.id} className="action-sheet-item" onClick={() => { item.action(); setShowGifs(false); }}>
+                                    <div className="action-sheet-icon-box" style={{ background: item.color, color: item.textColor }}>
+                                        {item.icon}
+                                    </div>
+                                    <span>{item.label}</span>
                                 </div>
-                                <span style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500' }}>{item.label}</span>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
 
             <div className="chat-input-bar-glass">
