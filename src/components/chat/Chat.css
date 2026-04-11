@@ -889,3 +889,61 @@
 .stride-map-badge {
     animation: fadeIn 1s ease-out;
 }
+
+/* Media Stabilization v2 Styles */
+.media-loading-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.loaded .media-loading-overlay {
+    display: none;
+}
+
+.giphy-embed-player {
+    border-radius: 12px;
+    background: transparent;
+    z-index: 2;
+    position: relative;
+}
+
+.gif-picker-item-wrapper {
+    position: relative;
+    border-radius: 14px;
+    background: rgba(139, 92, 246, 0.05);
+    overflow: hidden;
+    height: 120px;
+}
+
+.gif-click-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.giphy-embed-mini {
+    pointer-events: none;
+    transform: scale(1.1); /* Zoom slightly to hide any Giphy chrome */
+}
+
+.message-media-wrapper {
+    width: 260px;
+    height: 200px;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}

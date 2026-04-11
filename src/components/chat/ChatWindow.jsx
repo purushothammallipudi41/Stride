@@ -169,22 +169,24 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                 if (match) {
                                                     const lat = parseFloat(match[1]);
                                                     const lon = parseFloat(match[2]);
-                                                    // Calculate a stable bbox for the shared point
-                                                    const offset = 0.005;
-                                                    const bbox = [lon - offset, lat - offset, lon + offset, lat + offset].join('%2C');
+                                                    // Calculate a significantly wider bbox for better framing (0.01 degree)
+                                                    const margin = 0.01;
+                                                    const bbox = [lon - margin, lat - margin, lon + margin, lat + margin].join('%2C');
                                                     
                                                     return (
                                                         <div className="stride-map-placeholder-pre" onClick={() => window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank')}>
                                                             <div className="stride-map-header">
-                                                                <span className="stride-map-badge">STRIDE MAPS ENGINE v2</span>
+                                                                <span className="stride-map-badge">STRIDE MAP ENGINE v3</span>
                                                             </div>
                                                             <div className="stride-map-preview-static">
                                                                 <iframe 
                                                                     className="stride-map-iframe"
                                                                     title="Stride Location"
                                                                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`}
-                                                                    onLoad={(e) => console.log('SocialAction: Map rendered')}
+                                                                    onLoad={(e) => console.log('SocialAction: Map fully loaded')}
+                                                                    loading="lazy"
                                                                 />
+                                                                <div className="media-loading-overlay">Loading Map...</div>
                                                             </div>
                                                             <div className="stride-map-footer">
                                                                 Shared Location
@@ -194,6 +196,23 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                 }
                                                 return msg.text;
                                             })()
+                                        ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif'))) ? (
+                                            <div className="message-media-wrapper">
+                                                <iframe 
+                                                    src={`${msg.text.includes('giphy.com/embed') ? msg.text : `https://giphy.com/embed/${msg.text.split('/').pop().split('-').pop()}`}?html5=true`}
+                                                    width="100%" 
+                                                    height="100%" 
+                                                    frameBorder="0" 
+                                                    className="giphy-embed-player" 
+                                                    allowFullScreen
+                                                    title="Giphy"
+                                                    onLoad={(e) => {
+                                                        e.target.parentNode.classList.add('loaded');
+                                                        console.log('SocialAction: GIF player loaded');
+                                                    }}
+                                                ></iframe>
+                                                <div className="media-loading-overlay">Loading GIF...</div>
+                                            </div>
                                         ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif') || msg.text.includes('media.giphy.com'))) ? (
                                             <div className="message-media-wrapper">
                                                 <img 
@@ -247,24 +266,36 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                 </div>
                                 <div className="gif-results-grid">
                                     {[
-                                        "https://media.giphy.com/media/l41lTfO7K8W4N2EaE/giphy.gif",
-                                        "https://media.giphy.com/media/3o7TKSj06qV99N7fP2/giphy.gif",
-                                        "https://media.giphy.com/media/3o7TKVUn7iM8FMEU24/giphy.gif",
-                                        "https://media.giphy.com/media/3o7TKMGpx4B46vS46I/giphy.gif",
-                                        "https://media.giphy.com/media/l0HlHFRbmaZtBRhXG/giphy.gif",
-                                        "https://media.giphy.com/media/3o6Zt481isdL8EbF6M/giphy.gif"
+                                        "https://giphy.com/embed/l41lTfO7K8W4N2EaE",
+                                        "https://giphy.com/embed/3o7TKSj06qV99N7fP2",
+                                        "https://giphy.com/embed/3o7TKVUn7iM8FMEU24",
+                                        "https://giphy.com/embed/3o7TKMGpx4B46vS46I",
+                                        "https://giphy.com/embed/l0HlHFRbmaZtBRhXG",
+                                        "https://giphy.com/embed/3o6Zt481isdL8EbF6M"
                                     ].map((url, i) => (
                                         <div key={i} className="gif-picker-item-wrapper">
-                                            <img 
-                                                src={url} 
-                                                alt="GIF" 
-                                                className="search-gif-item" 
+                                            <iframe 
+                                                src={`${url}?html5=true`}
+                                                width="100%" 
+                                                height="100%" 
+                                                frameBorder="0" 
+                                                className="giphy-embed-mini" 
+                                                title="Giphy Preview"
+                                                onClick={(e) => {
+                                                    console.log('SocialAction: GIF selected from picker', url);
+                                                    onSendMessage(url, 'gif'); 
+                                                    setShowGifs(false); 
+                                                    setIsGifMode(false);
+                                                }}
+                                            ></iframe>
+                                            <div 
+                                                className="gif-click-overlay" 
                                                 onClick={() => { 
-                                                    console.log('SocialAction: GIF selected', url);
+                                                    console.log('SocialAction: GIF selected via overlay', url);
                                                     onSendMessage(url, 'gif'); 
                                                     setShowGifs(false); 
                                                     setIsGifMode(false); 
-                                                }}
+                                                }} 
                                             />
                                         </div>
                                     ))}
