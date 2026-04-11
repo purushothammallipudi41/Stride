@@ -380,7 +380,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         { id: 'Angry', icon: '💢', label: 'Angry' },
                                         { id: 'Wow', icon: '😮', label: 'Wow' },
                                         { id: 'Music', icon: '🎵', label: 'Music' },
-                                        { id: 'Meme', icon: '🤡', label: 'Memes' }
+                                        { id: 'Memes', icon: '🤡', label: 'Memes' }
                                     ].map(cat => (
                                         <button 
                                             key={cat.id} 
