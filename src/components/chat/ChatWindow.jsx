@@ -177,6 +177,10 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                     Shared Location
                                                 </div>
                                             </div>
+                                        ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.endsWith('.gif'))) ? (
+                                            <img src={msg.text} alt="GIF" className="message-gif-media" />
+                                        ) : msg.type === 'image' ? (
+                                            <img src={msg.text} alt="Shared Photo" className="message-image-media" />
                                         ) : (
                                             msg.text
                                         )}
