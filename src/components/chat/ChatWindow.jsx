@@ -77,6 +77,12 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' },
             { id: 'u7ka77eR8Nq92', title: 'Doge' }, { id: '3o84smGVAgT6W8m2vC', title: 'Fine' }
         ],
+        'Meme': [
+            { id: 'xdboJUaNA9qG81rUSa', title: 'Cat' }, { id: 'Lopx9eUi34rbq', title: 'High' },
+            { id: 'e6PwP26WNDO3bBVQ2t', title: 'Rick' }, { id: 'xUPGcKjKAQZGtRvtQY', title: 'Deal' },
+            { id: 'kKolzIJEy8xXXm0544', title: 'Lol' }, { id: 'o75ajIFH0LqqA', title: 'Classic' },
+            { id: 'u7ka77eR8Nq92', title: 'Doge' }, { id: '3o84smGVAgT6W8m2vC', title: 'Fine' }
+        ],
         'Music': [
             { id: 'm5YDMdUgGPKMw', title: 'Listen' }, { id: 'q618imRRVODIMoznGC', title: 'Beat' },
             { id: 'hiLLD9o1wTB3a', title: 'Dance' }, { id: 'wllvWYR1OXVZOmjS4p', title: 'Vinyl' },
