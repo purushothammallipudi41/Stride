@@ -32,11 +32,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             try {
                 let url;
                 if (gifSearch) {
-                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(gifSearch)}&limit=20&rating=pg`;
+                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(gifSearch)}&limit=50&rating=pg`;
                 } else if (selectedCategory !== 'Trending') {
-                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(selectedCategory)}&limit=20&rating=pg`;
+                    url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(selectedCategory)}&limit=50&rating=pg`;
                 } else {
-                    url = `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=20&rating=pg`;
+                    url = `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=50&rating=pg`;
                 }
                 
                 const resp = await fetch(url);
@@ -293,17 +293,28 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     </div>
                                 </div>
 
-                                <div className="gif-categories-bar">
-                                    {['Trending', 'Reactions', 'Love', 'Sad', 'Happy', 'Angry', 'Dance', 'Wow'].map(cat => (
+                                <div className="gif-categories-bar premium-scroll">
+                                    {[
+                                        { id: 'Trending', icon: '🔥', label: 'Trending' },
+                                        { id: 'Reactions', icon: '🎭', label: 'Reactions' },
+                                        { id: 'Love', icon: '💖', label: 'Love' },
+                                        { id: 'Happy', icon: '😊', label: 'Happy' },
+                                        { id: 'Sad', icon: '😢', label: 'Sad' },
+                                        { id: 'Dance', icon: '💃', label: 'Dance' },
+                                        { id: 'Angry', icon: '💢', label: 'Angry' },
+                                        { id: 'Wow', icon: '😮', label: 'Wow' },
+                                        { id: 'Music', icon: '🎵', label: 'Music' },
+                                        { id: 'Meme', icon: '🤡', label: 'Memes' }
+                                    ].map(cat => (
                                         <button 
-                                            key={cat} 
-                                            className={`gif-category-pill ${selectedCategory === cat ? 'active' : ''}`}
+                                            key={cat.id} 
+                                            className={`gif-category-pill ${selectedCategory === cat.id ? 'active' : ''}`}
                                             onClick={() => {
-                                                setSelectedCategory(cat);
+                                                setSelectedCategory(cat.id);
                                                 setGifSearch('');
                                             }}
                                         >
-                                            {cat}
+                                            <span className="cat-icon">{cat.icon}</span> {cat.label}
                                         </button>
                                     ))}
                                 </div>
