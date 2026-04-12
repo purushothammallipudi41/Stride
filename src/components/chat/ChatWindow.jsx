@@ -320,6 +320,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif'))) ? (
                                             <div className="message-media-wrapper">
                                                 {(() => {
+                                                    if (!msg.text) return null;
                                                     const rawId = msg.text.split('/').pop().split('-').pop();
                                                     const gifId = rawId.replace(/\.gif$/i, '');
                                                     return (
