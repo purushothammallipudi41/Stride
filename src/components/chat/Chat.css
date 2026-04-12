@@ -1461,7 +1461,22 @@
 
 .story-secondary-btn {
     flex: 1;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.15);/* Specialized container for standalone media (GIFs, Images, Maps) */
+.message-media-content {
+    background: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+    border-radius: 12px;
+}
+
+/* Ensure the media inside the naked container keeps its corners */
+.message-media-content img,
+.message-media-content iframe {
+    border-radius: 12px;
+}
     backdrop-filter: blur(15px);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.2);

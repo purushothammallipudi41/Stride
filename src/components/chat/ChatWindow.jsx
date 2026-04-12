@@ -332,8 +332,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         return (
                             <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
                                 <div className="message-content">
-                                    <div className="message-bubble-v2">
-                                        {msg.text && msg.text.includes('[LOCATION:') ? (
+                                    {(() => {
+                                        const isMedia = msg.type === 'gif' || msg.type === 'image' || (msg.text && (msg.text.includes('[LOCATION:') || msg.text.includes('giphy.com') || msg.text.includes('.gif')));
+                                        return (
+                                            <div className={isMedia ? 'message-media-content' : 'message-bubble-v2'}>
+                                                {msg.text && msg.text.includes('[LOCATION:') ? (
                                             (() => {
                                                 // Robust regex for coordinates (handles decimals and integers)
                                                 const match = msg.text.match(/\[LOCATION:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\]/);
@@ -386,10 +389,10 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             </div>
                                         ) : msg.type === 'image' ? (
                                             <img src={msg.text} alt="Shared Photo" className="message-image-media" />
-                                        ) : (
-                                            msg.text
                                         )}
-                                    </div>
+                                            </div>
+                                        );
+                                    })()}
                                     {isLastInGroup && (
                                         <div className="message-status-v2">
                                             {msg.isMe ? (msg.readStatus ? 'Seen' : 'Sent') : msg.time}
