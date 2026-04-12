@@ -21,6 +21,12 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
     const recordingIntervalRef = useRef(null);
+    const [showStoryMode, setShowStoryMode] = useState(false);
+    const [cameraStream, setCameraStream] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [isCameraLoading, setIsCameraLoading] = useState(false);
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
 
     const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
     
@@ -134,7 +140,51 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     };
 
     const handleCameraClick = () => {
-        cameraInputRef.current?.click();
+        setPreviewImage(null);
+        setShowStoryMode(true);
+        startCamera();
+    };
+
+    const startCamera = async () => {
+        setIsCameraLoading(true);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user' }, 
+                audio: false 
+            });
+            setCameraStream(stream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error("Camera access failed, falling back to OS picker:", err);
+            setShowStoryMode(false);
+            cameraInputRef.current?.click();
+        } finally {
+            setIsCameraLoading(false);
+        }
+    };
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            setCameraStream(null);
+        }
+        setShowStoryMode(false);
+        setPreviewImage(null);
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            setPreviewImage(dataUrl);
+            console.log('SocialAction: Photo captured');
+        }
     };
 
     const handleLocationClick = () => {
@@ -352,6 +402,61 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     <div ref={messagesEndRef} />
                 </div>
             </div>
+
+            {showStoryMode && createPortal(
+                <div className="story-camera-overlay">
+                    <canvas ref={canvasRef} style={{ display: 'none' }} />
+                    <div className="story-camera-header">
+                        <div className="story-cam-logo">Stride Cam</div>
+                        <button className="story-close-btn" onClick={stopCamera}>Cancel</button>
+                    </div>
+
+                    <div className="story-camera-viewport">
+                        {!previewImage ? (
+                            <div className="video-feed-container">
+                                <video 
+                                    ref={videoRef} 
+                                    autoPlay 
+                                    playsInline 
+                                    muted 
+                                    className="story-video-feed"
+                                />
+                                <div className="cam-corners">
+                                    <div className="corner tl" /><div className="corner tr" />
+                                    <div className="corner bl" /><div className="corner br" />
+                                </div>
+                                {isCameraLoading && <div className="cam-loading">Initializing Lens...</div>}
+                            </div>
+                        ) : (
+                            <div className="story-preview-container">
+                                <img src={previewImage} alt="Preview" className="story-preview-img" />
+                                <div className="preview-branding">SHOT ON STRIDE</div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="story-camera-footer">
+                        {!previewImage ? (
+                            <button 
+                                className="capture-trigger-btn" 
+                                onClick={capturePhoto}
+                                disabled={isCameraLoading}
+                            >
+                                <div className="capture-inner" />
+                            </button>
+                        ) : (
+                            <div className="preview-actions">
+                                <button className="story-secondary-btn" onClick={() => setPreviewImage(null)}>Retake</button>
+                                <button className="story-primary-btn" onClick={() => {
+                                    onSendMessage(previewImage, 'image');
+                                    stopCamera();
+                                }}>Send to Chat</button>
+                            </div>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {showVoiceRecorder && createPortal(
                 <>
