@@ -281,7 +281,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif'))) ? (
                                             <div className="message-media-wrapper">
                                                 {(() => {
-                                                    const gifId = msg.text.split('/').pop().split('-').pop();
+                                                    const rawId = msg.text.split('/').pop().split('-').pop();
+                                                    const gifId = rawId.replace(/\.gif$/i, '');
                                                     return (
                                                         <img 
                                                             src={`https://i.giphy.com/${gifId}.gif`}
