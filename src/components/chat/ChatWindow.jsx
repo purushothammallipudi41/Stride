@@ -454,7 +454,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="chat-input-actions-group">
                                 <button className="chat-action-sm-btn" onClick={handleMicClick} aria-label="Microphone"><Mic size={20} /></button>
-                                <button className="chat-action-sm-btn" onClick={handleGalleryClick} aria-label="Gallery"><ImageIcon size={20} /></button>
                                 <button className="chat-action-sm-btn" onClick={handlePlusClick} aria-label="More options"><Plus size={20} /></button>
                             </div>
                         )}
