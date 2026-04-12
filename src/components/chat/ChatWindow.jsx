@@ -280,19 +280,17 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             })()
                                         ) : msg.type === 'gif' || (msg.text && (msg.text.includes('giphy.com') || msg.text.includes('.gif'))) ? (
                                             <div className="message-media-wrapper">
-                                                <iframe 
-                                                    src={`${msg.text.includes('giphy.com/embed') ? msg.text : `https://giphy.com/embed/${msg.text.split('/').pop().split('-').pop()}`}?html5=true`}
-                                                    width="100%" 
-                                                    height="100%" 
-                                                    frameBorder="0" 
-                                                    className="giphy-embed-player" 
-                                                    allowFullScreen
-                                                    title="Giphy"
-                                                    onLoad={(e) => {
-                                                        e.target.parentNode.classList.add('loaded');
-                                                        console.log('SocialAction: GIF player loaded');
-                                                    }}
-                                                ></iframe>
+                                                {(() => {
+                                                    const gifId = msg.text.split('/').pop().split('-').pop();
+                                                    return (
+                                                        <img 
+                                                            src={`https://i.giphy.com/${gifId}.gif`}
+                                                            alt="Giphy" 
+                                                            className="message-gif-media loaded" 
+                                                            onLoad={(e) => e.target.parentNode.classList.add('loaded')}
+                                                        />
+                                                    );
+                                                })()}
                                                 <div className="media-loading-overlay">Loading GIF...</div>
                                             </div>
                                         ) : msg.type === 'image' ? (

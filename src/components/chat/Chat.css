@@ -1139,6 +1139,19 @@
     pointer-events: none;
 }
 
+.message-gif-media {
+    width: 100%;
+    max-width: 280px;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-gif-media.loaded {
+    opacity: 1;
+}
+
 /* Ensure categories are always visible and distinct */
 .gif-categories-bar {
     background: rgba(0, 0, 0, 0.2);
