@@ -43,7 +43,7 @@ const Messages = () => {
 
                 // Auto-open conversation if navigated from a profile
                 if (openUsername) {
-                    const existing = data.find(c => c.username === openUsername);
+                    const existing = processed.find(c => c.username === openUsername);
                     if (existing) {
                         setActiveChatId(existing.id);
                     } else {

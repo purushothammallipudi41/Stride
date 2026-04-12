@@ -808,23 +808,17 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.message-bubble-v2:has(.message-gif-media), 
-.message-bubble-v2:has(.message-image-media) {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* Legacy phantom bubbles (background logic) removed. Media elements are now perfectly standalone. */
 
 /* Final Map Engine Polish */
 .stride-map-placeholder-pre {
     width: 280px;
-    background: rgba(18, 18, 26, 0.98);
+    background: transparent;
     border-radius: 20px;
     overflow: hidden;
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     cursor: pointer;
     transition: transform 0.2s ease;
+    clip-path: inset(0 0 0 0 round 20px);
 }
 
 .stride-map-placeholder-pre:active {
