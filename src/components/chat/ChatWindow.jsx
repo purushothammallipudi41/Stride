@@ -153,6 +153,21 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         });
     };
 
+    const handleGalleryClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleCameraClick = () => {
+        cameraInputRef.current?.click();
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            onSendMessage(`Sent a photo: ${file.name}`, 'image');
+        }
+    };
+
     useEffect(() => {
         if (isRecording) {
             recordingIntervalRef.current = setInterval(() => {
