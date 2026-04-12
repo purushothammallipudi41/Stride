@@ -2266,6 +2266,22 @@ io.on('connection', (socket) => {
         socket.to(`user_${to}`).emit('call-ended');
     });
 
+    // WebRTC Direct Call Signaling Relays
+    socket.on('call-user', (data) => {
+        const { userToCall, signalData, from, name, type } = data;
+        io.to(`user_${userToCall}`).emit('call-user', {
+            signal: signalData,
+            from,
+            name,
+            type
+        });
+    });
+
+    socket.on('answer-call', (data) => {
+        const { signal, to } = data;
+        io.to(`user_${to}`).emit('call-accepted', signal);
+    });
+
     socket.on('channel_message', async (payload) => {
         const { roomId, message } = payload;
         // roomId format: community_ID_channelName

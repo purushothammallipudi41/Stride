@@ -116,6 +116,9 @@ const CommunityView = () => {
 
     useEffect(() => {
         const handleNewMessage = (msg) => {
+            // CRITICAL: Filter out our own messages to prevent duplication (Optimistic UI handle it)
+            if (msg.username === user.username) return;
+
             setChannelMessages(prev => ({
                 ...prev,
                 [msg.roomId]: [...(prev[msg.roomId] || []), msg]
