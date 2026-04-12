@@ -19,6 +19,9 @@ const Messages = () => {
     const [activeChatId, setActiveChatId] = useState(null);
     const [typingUsers, setTypingUsers] = useState(new Set());
 
+    // Helper to generate deterministic IDs matching the server logic
+    const getChatId = (u1, u2) => [u1, u2].sort().join('-');
+
     useEffect(() => {
         resetMessages();
     }, [resetMessages]);
@@ -27,7 +30,15 @@ const Messages = () => {
         fetch(`${BASE_URL}/api/messages`)
             .then(res => res.json())
             .then(data => {
-                setChats(data);
+                // Determine the "other" person for each chat thread relative to current user
+                const processed = data.map(chat => {
+                    if (chat.participants) {
+                        const otherPerson = chat.participants.find(p => p !== userProfile.username) || userProfile.username;
+                        return { ...chat, username: otherPerson };
+                    }
+                    return chat;
+                });
+                setChats(processed);
                 setIsLoading(false);
 
                 // Auto-open conversation if navigated from a profile
@@ -38,7 +49,7 @@ const Messages = () => {
                     } else {
                         // Create a fresh empty thread so the user can start typing
                         const newChat = {
-                            id: `new_${openUsername}`,
+                            id: getChatId(userProfile.username, openUsername),
                             username: openUsername,
                             name: openUsername,
                             avatar: `https://i.pravatar.cc/150?u=${openUsername}`,
@@ -65,6 +76,9 @@ const Messages = () => {
         socket.emit('join_room', `chat_${activeChatId}`);
 
         const handleNewMessage = (msg) => {
+            // CRITICAL: Filter out our own messages to prevent duplication (Optimistic UI handle it)
+            if (msg.username === userProfile.username) return;
+
             setChats(prevChats => prevChats.map(chat => {
                 if (chat.id === activeChatId) {
                     const isMe = msg.username === userProfile.username;

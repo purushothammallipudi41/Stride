@@ -1483,13 +1483,10 @@ app.get('/api/messages', async (req, res) => {
             const chatId = participants.join('-');
             
             if (!chatsMap.has(chatId)) {
-                // In a real app, 'otherUser' is the participant who isn't 'me'
-                // For this demo, we'll just use the receiver if it's not the first participant
-                const otherUserUsername = msg.receiver; 
-                
+                // Return all participants so the frontend can find the "other" person
                 chatsMap.set(chatId, {
                     id: chatId,
-                    username: otherUserUsername,
+                    participants: participants,
                     messages: [],
                     lastMessage: '',
                     time: '',
@@ -1499,7 +1496,13 @@ app.get('/api/messages', async (req, res) => {
             }
             
             const chat = chatsMap.get(chatId);
-            chat.messages.push(msg);
+            // Convert to frontend-friendly message object
+            chat.messages.push({
+                ...msg.toObject(),
+                id: msg._id,
+                username: msg.sender,
+                time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
             chat.lastMessage = msg.text || 'Attachment';
             chat.time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
