@@ -14,9 +14,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const [gifs, setGifs] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('Trending');
     const [isLoadingGifs, setIsLoadingGifs] = useState(false);
+    const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordTime, setRecordTime] = useState(0);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
+    const recordingIntervalRef = useRef(null);
 
     const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
     
@@ -149,19 +153,41 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         });
     };
 
-    const handleGalleryClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            onSendMessage(`Sent a photo: ${file.name}`, 'image');
+    useEffect(() => {
+        if (isRecording) {
+            recordingIntervalRef.current = setInterval(() => {
+                setRecordTime(prev => prev + 1);
+            }, 1000);
+        } else {
+            clearInterval(recordingIntervalRef.current);
+            setRecordTime(0);
         }
+        return () => clearInterval(recordingIntervalRef.current);
+    }, [isRecording]);
+
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
     const handleMicClick = () => {
-        alert("Voice messages are enabled for your account. Hold to record.");
+        console.log('SocialAction: Mic clicked - Opening recorder');
+        setShowVoiceRecorder(true);
+    };
+
+    const startRecording = () => {
+        setIsRecording(true);
+        console.log('SocialAction: Recording started');
+    };
+
+    const stopRecording = (shouldSend = true) => {
+        setIsRecording(false);
+        if (shouldSend && recordTime > 0) {
+            onSendMessage(`🎤 Voice Message (${formatTime(recordTime)})`, 'text');
+        }
+        setShowVoiceRecorder(false);
+        console.log(`SocialAction: Recording stopped. Sent: ${shouldSend}`);
     };
 
     if (!activeChat) {
@@ -312,6 +338,53 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     <div ref={messagesEndRef} />
                 </div>
             </div>
+
+            {showVoiceRecorder && createPortal(
+                <>
+                    <div className="action-sheet-backdrop" onClick={() => !isRecording && setShowVoiceRecorder(false)} />
+                    <div className="voice-recorder-sheet animate-sheet-up">
+                        <div className="action-sheet-handle" />
+                        <div className="voice-recorder-content">
+                            <div className="recorder-status">
+                                {isRecording ? (
+                                    <div className="status-live">
+                                        <div className="record-dot" />
+                                        <span>RECORDING</span>
+                                    </div>
+                                ) : (
+                                    <span className="status-ready">READY TO RECORD</span>
+                                )}
+                            </div>
+                            
+                            <div className={`mic-visualization ${isRecording ? 'active' : ''}`}>
+                                <div className="pulse-ring" />
+                                <div className="pulse-ring delay-1" />
+                                <div className="pulse-ring delay-2" />
+                                <div className="mic-circle">
+                                    <Mic size={40} color={isRecording ? "#ff4757" : "#fff"} />
+                                </div>
+                            </div>
+
+                            <div className="record-timer">{formatTime(recordTime)}</div>
+
+                            <div className="recorder-actions">
+                                {!isRecording ? (
+                                    <>
+                                        <button className="recorder-secondary-btn" onClick={() => setShowVoiceRecorder(false)}>Cancel</button>
+                                        <button className="recorder-primary-btn" onClick={startRecording}>Start Recording</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button className="recorder-secondary-btn danger" onClick={() => stopRecording(false)}>Discard</button>
+                                        <button className="recorder-primary-btn" onClick={() => stopRecording(true)}>Stop & Send</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>,
+                document.body
+            )}
 
             {showGifs && createPortal(
                 <>

@@ -1152,6 +1152,154 @@
     opacity: 1;
 }
 
+/* Voice Recorder Premium UI */
+.voice-recorder-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 12, 28, 0.95);
+    backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px 24px 0 0;
+    z-index: 2000;
+    padding: 20px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.voice-recorder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 20px 0 40px;
+}
+
+.recorder-status {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.status-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ff4757;
+}
+
+.record-dot {
+    width: 8px;
+    height: 8px;
+    background: #ff4757;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+.mic-visualization {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mic-circle {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.mic-visualization.active .mic-circle {
+    background: rgba(255, 71, 87, 0.1);
+    border-color: rgba(255, 71, 87, 0.3);
+    transform: scale(1.1);
+}
+
+.pulse-ring {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.mic-visualization.active .pulse-ring {
+    animation: pulse-out 2s infinite;
+}
+
+.pulse-ring.delay-1 { animation-delay: 0.6s !important; }
+.pulse-ring.delay-2 { animation-delay: 1.2s !important; }
+
+@keyframes pulse-out {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.record-timer {
+    font-size: 2.5rem;
+    font-weight: 300;
+    font-family: 'Courier New', Courier, monospace;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.recorder-actions {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.recorder-primary-btn {
+    flex: 2;
+    background: linear-gradient(135deg, #a855f7, #6366f1);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.recorder-secondary-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px;
+    border-radius: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.recorder-secondary-btn.danger:hover {
+    background: rgba(255, 71, 87, 0.1);
+    color: #ff4757;
+    border-color: #ff4757;
+}
+
+.recorder-primary-btn:active {
+    transform: scale(0.98);
+}
+
 /* Ensure categories are always visible and distinct */
 .gif-categories-bar {
     background: rgba(0, 0, 0, 0.2);
