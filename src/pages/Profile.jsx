@@ -32,6 +32,22 @@ const Profile = () => {
         fetch(`${BASE_URL}/api/profile/${targetUser}${viewerParam}`)
             .then(res => res.json())
             .then(data => {
+                // Identity Restoration Logic: If this is the logged-in user's profile and 
+                // the server is returning a fallback avatar (pravatar), sync local storage to DB.
+                if (isOwnProfile && currentUser.username && data.avatar?.includes('pravatar.cc')) {
+                    console.warn("[Profile] Detected identity desync. Auto-restoring profile to database...");
+                    fetch(`${BASE_URL}/api/profile/update`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: currentUser.username,
+                            name: currentUser.name,
+                            avatar: currentUser.avatar,
+                            bio: currentUser.bio || "Just a music lover on Stride 🎵"
+                        })
+                    }).catch(e => console.error("Identity restoration failed:", e));
+                }
+
                 setUser(data);
                 setIsLoading(false);
                 // Use server-computed isFollowing (reliable) if available
