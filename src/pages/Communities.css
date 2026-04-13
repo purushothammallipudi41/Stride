@@ -1,5 +1,7 @@
 .communities-discover-container {
-    min-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 0 24px 24px; /* No top padding */
     background: #0f0f1a;
     color: white;

@@ -1,12 +1,13 @@
 .verify-page {
-    min-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--color-bg);
     position: relative;
-    overflow: hidden;
     padding: 20px;
 }
 

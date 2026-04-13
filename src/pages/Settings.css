@@ -1,5 +1,8 @@
 .premium-settings-container {
     width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     max-width: 600px;
     margin: 0 auto;
     padding-bottom: 120px; /* leaves room for bottom dock */

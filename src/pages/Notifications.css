@@ -1,6 +1,8 @@
 .notifications-container {
     background: var(--color-bg-primary);
-    min-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 80px; /* Space for navbar */
 }
 
