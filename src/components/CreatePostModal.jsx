@@ -11,8 +11,14 @@ const CreatePostModal = () => {
     const [tags, setTags] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [mediaPreview, setMediaPreview] = useState(null);
+    const fileInputRef = React.useRef(null);
 
-    const user = getStoredUser();
+    // Ensure state is fresh on mount
+    React.useEffect(() => {
+        setCaption('');
+        setTags('');
+        setMediaPreview(null);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,14 +36,13 @@ const CreatePostModal = () => {
                     caption,
                     content: caption,
                     tags: tags.split(',').map(t => t.trim()).filter(t => t),
-                    contentUrl: mediaPreview || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+                    contentUrl: mediaPreview || null, // No default mock image
                     time: 'Just now'
                 })
             });
 
             if (response.ok) {
                 closeCreateModal();
-                // We'll rely on socket for real-time update in feed
             }
         } catch (err) {
             console.error('Post creation error:', err);
@@ -46,15 +51,19 @@ const CreatePostModal = () => {
         }
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setMediaPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleMediaClick = () => {
-        // Mock media selection
-        const mockImages = [
-            'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
-            'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=80',
-            'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80'
-        ];
-        const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
-        setMediaPreview(randomImage);
+        fileInputRef.current?.click();
     };
 
     return (
@@ -96,6 +105,13 @@ const CreatePostModal = () => {
                     </div>
 
                     <div className="modal-actions">
+                        <input 
+                            type="file" 
+                            hidden 
+                            ref={fileInputRef} 
+                            onChange={handleFileChange}
+                            accept="image/*"
+                        />
                         <div className="attach-options">
                             <button type="button" className="attach-btn" onClick={handleMediaClick} title="Add Image">
                                 <Image size={20} />

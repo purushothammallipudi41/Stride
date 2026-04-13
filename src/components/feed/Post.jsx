@@ -121,6 +121,14 @@ const Post = ({ post }) => {
         }
     };
 
+    const [shareStatus, setShareStatus] = useState('Share');
+    const handleShare = () => {
+        const postUrl = `${window.location.origin}/post/${postId}`;
+        navigator.clipboard.writeText(postUrl);
+        setShareStatus('Copied!');
+        setTimeout(() => setShareStatus('Share'), 2000);
+    };
+
     return (
         <article className="instagram-post" id={`post-${postId}`} ref={postRef}>
             {/* SVG Gradient Definition for icons to use if needed */}
@@ -196,12 +204,13 @@ const Post = ({ post }) => {
                             <MessageCircle size={26} className="icon-comment" />
                         </button>
 
-                        <button className="action-btn" title="Share">
+                        <button className="action-btn" onClick={handleShare} title={shareStatus}>
                             <ArrowUpRight className="icon-gradient" size={26} />
+                            {shareStatus === 'Copied!' && <span className="share-toast animate-fade-in">Copied</span>}
                         </button>
                     </div>
                     <div className="actions-right">
-                        <button className="action-btn" title="Save">
+                        <button className="action-btn" title="Save" onClick={() => alert('Post saved to your collection!')}>
                             <Bookmark size={26} className="icon-save" />
                         </button>
                     </div>

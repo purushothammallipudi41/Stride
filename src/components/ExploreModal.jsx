@@ -15,10 +15,10 @@ const ExploreModal = () => {
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
         { id: 'dashboard', icon: Layout, label: 'Dashboard', path: '/artist-dashboard' },
-        { id: 'music', icon: Music, label: 'Music', path: '/music' },
+        { id: 'music', icon: Music, label: 'Music House', path: '/music' },
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '/achievements' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '/insights' },
-        { id: 'wallet', icon: Wallet, label: 'Wallet', path: '/wallet' },
+        { id: 'wallet', icon: Wallet, label: 'Digital Wallet', path: '/wallet' },
         { id: 'marketplace', icon: ShoppingBag, label: 'Marketplace', path: '/marketplace' },
     ];
 

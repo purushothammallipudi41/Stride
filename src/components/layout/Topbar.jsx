@@ -25,8 +25,14 @@ const Topbar = () => {
                 <div style={{ position: 'relative' }}>
                     <button 
                         className={`topbar-btn ${showNotifPopover ? 'active' : ''}`}
-                        onClick={() => setShowNotifPopover(!showNotifPopover)}
-                        aria-label="Activity Feed"
+                        onClick={() => {
+                            if (window.innerWidth < 768) {
+                                navigate('/notifications');
+                            } else {
+                                setShowNotifPopover(!showNotifPopover);
+                            }
+                        }}
+                        aria-label="Notifications"
                     >
                         <Heart size={24} />
                         {unreadNotifications > 0 && <span className="notification-badge-v2">{unreadNotifications}</span>}
