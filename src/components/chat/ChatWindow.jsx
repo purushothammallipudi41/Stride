@@ -389,6 +389,8 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             </div>
                                         ) : msg.type === 'image' ? (
                                             <img src={msg.text} alt="Shared Photo" className="message-image-media" />
+                                        ) : (
+                                            msg.text
                                         )}
                                             </div>
                                         );
