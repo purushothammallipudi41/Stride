@@ -42,33 +42,8 @@
     -webkit-text-fill-color: transparent;
 }
 
-.topbar-search-container {
+.topbar-spacer {
     flex: 1;
-    max-width: 400px;
-    margin: 0 20px;
-}
-
-.topbar-search-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.search-input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: var(--glass-border);
-    border-radius: var(--radius-full);
-    padding: 10px 16px;
-    color: #fff;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--color-primary);
-    box-shadow: 0 0 15px var(--color-primary-glow);
 }
 
 .topbar-actions {

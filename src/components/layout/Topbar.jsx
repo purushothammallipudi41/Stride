@@ -19,20 +19,7 @@ const Topbar = () => {
                 <span className="topbar-logo-text">Stride</span>
             </div>
 
-            <div className="topbar-search-container">
-                <div className="topbar-search-wrapper">
-                    <input 
-                        type="text" 
-                        placeholder="Search artists, vibes..." 
-                        className="search-input"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && e.target.value.trim()) {
-                                navigate(`/explore?q=${encodeURIComponent(e.target.value.trim())}`);
-                            }
-                        }}
-                    />
-                </div>
-            </div>
+            <div className="topbar-spacer" />
 
             <div className="topbar-actions">
                 <div style={{ position: 'relative' }}>
