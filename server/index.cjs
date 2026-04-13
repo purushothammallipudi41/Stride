@@ -1475,10 +1475,17 @@ app.get('/api/messages', async (req, res) => {
     try {
         const messages = await Message.find().sort({ createdAt: 1 });
         
+        // --- DATA SANITIZATION ---
+        // Dynamically strip out corrupted database records created by the legacy 'new_username' routing bug
+        const cleanMessages = messages.filter(msg => 
+            !msg.sender.includes('new_') && 
+            !msg.receiver.includes('new_')
+        );
+        
         // Group messages by (sender, receiver) pair to create "chats"
         const chatsMap = new Map();
         
-        for (const msg of messages) {
+        for (const msg of cleanMessages) {
             const participants = [msg.sender, msg.receiver].sort();
             const chatId = participants.join('-');
             
