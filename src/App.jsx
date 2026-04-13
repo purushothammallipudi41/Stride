@@ -137,13 +137,11 @@ const AppContent = () => {
                 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              
+              {isCreateModalOpen && <CreatePostModal />}
+              {isExplorerOpen && <ExploreModal />}
             </div>
           </ErrorBoundary>
-        </main>
-      </div>
-      <GlobalNotifications />
-      {isCreateModalOpen && <CreatePostModal />}
-      {isExplorerOpen && <ExploreModal />}
       {isAuthenticated && (
           <OnboardingModal 
             isOpen={!localStorage.getItem('onboardingCompleted')} 

@@ -31,9 +31,9 @@ const CreatePostModal = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: user.username,
-                    name: user.name || user.username,
-                    avatar: user.avatar,
+                    username: user?.username || 'user',
+                    name: user?.name || user?.username || 'user',
+                    avatar: user?.avatar || '🎧',
                     caption,
                     content: caption,
                     tags: tags.split(',').map(t => t.trim()).filter(t => t),
@@ -77,8 +77,8 @@ const CreatePostModal = () => {
                 
                 <form onSubmit={handleSubmit} className="modal-body">
                     <div className="user-indicator">
-                        <img src={user.avatar} alt="User" className="mini-avatar" />
-                        <span className="username">@{user.username}</span>
+                        <img src={user?.avatar || '🎧'} alt="User" className="mini-avatar" />
+                        <span className="username">@{user?.username || 'user'}</span>
                     </div>
 
                     <textarea 
