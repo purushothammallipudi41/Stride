@@ -1476,10 +1476,12 @@ app.get('/api/messages', async (req, res) => {
         const messages = await Message.find().sort({ createdAt: 1 });
         
         // --- DATA SANITIZATION ---
-        // Dynamically strip out corrupted database records created by the legacy 'new_username' routing bug
+        // Dynamically strip out corrupted database records created by legacy routing bugs
         const cleanMessages = messages.filter(msg => 
             !msg.sender.includes('new_') && 
-            !msg.receiver.includes('new_')
+            !msg.receiver.includes('new_') &&
+            !msg.sender.includes('-') &&
+            !msg.receiver.includes('-')
         );
         
         // Group messages by (sender, receiver) pair to create "chats"
@@ -2185,12 +2187,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('private_message', async (payload) => {
-        const { roomId, message } = payload;
-        const recipient = roomId.replace('chat_', '');
+        const { roomId, message, recipient } = payload;
+        // Fallback to legacy string scraping ONLY if explicit recipient is missing
+        const actualRecipient = recipient || roomId.replace('chat_', '').replace(message.username, '').replace('-', '');
         try {
             const fullMessage = await Message.create({
                 sender: message.username,
-                receiver: recipient,
+                receiver: actualRecipient,
                 text: message.text,
                 type: message.type || 'text',
                 timestamp: Date.now()

@@ -143,9 +143,13 @@ const Messages = () => {
             }
             return chat;
         }));
+        // Robustly determine actual recipient
+        const currentChat = chats.find(c => c.id === activeChatId);
+        const recipient = currentChat ? currentChat.username : activeChatId;
 
         socket.emit('private_message', {
             roomId: `chat_${activeChatId}`,
+            recipient: recipient,
             message: newMessage
         });
     };
