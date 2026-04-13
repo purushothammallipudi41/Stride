@@ -34,7 +34,14 @@ const Messages = () => {
                 const processed = data.map(chat => {
                     if (chat.participants) {
                         const otherPerson = chat.participants.find(p => p !== userProfile.username) || userProfile.username;
-                        return { ...chat, username: otherPerson };
+                        
+                        // Hydrate message history with frontend 'isMe' identifier for styling
+                        const hydratedMessages = (chat.messages || []).map(msg => ({
+                            ...msg,
+                            isMe: msg.username === userProfile.username
+                        }));
+
+                        return { ...chat, username: otherPerson, messages: hydratedMessages };
                     }
                     return chat;
                 });
