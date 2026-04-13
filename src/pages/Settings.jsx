@@ -254,6 +254,36 @@ const Settings = () => {
                     </div>
                 </div>
 
+                {/* ADMINISTRATIVE TOOLS (Temporary for Hardening) */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Admin tools</h3>
+                    <div className="ps-list-group">
+                        <div className="ps-list-item">
+                            <div className="ps-item-left">
+                                <Shield size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Database Hardening</span>
+                                    <span className="ps-item-subtitle">Clean legacy records</span>
+                                </div>
+                            </div>
+                            <button 
+                                className="ps-upload-btn" 
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch(`${BASE_URL}/api/admin/migrate-messages`, { method: 'POST' });
+                                        const data = await res.json();
+                                        alert(`Migration successful! Purged ${data.deletedCount} legacy records.`);
+                                    } catch (err) {
+                                        alert("Migration failed: " + err.message);
+                                    }
+                                }}
+                            >
+                                Run Purge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );
