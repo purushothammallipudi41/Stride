@@ -7,6 +7,7 @@ import './CreatePostModal.css';
 
 const CreatePostModal = () => {
     const { closeCreateModal } = useUI();
+    const user = getStoredUser();
     const [caption, setCaption] = useState('');
     const [tags, setTags] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
