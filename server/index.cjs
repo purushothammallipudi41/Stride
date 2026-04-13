@@ -673,11 +673,12 @@ app.get('/api/profile/:username', async (req, res) => {
 
             res.json(userObj);
         } else {
+            // Profile fallback for non-existent but referenced users
             res.json({
                 username,
-                name: "Stride User",
+                name: username, // Default to handle instead of "Stride User"
                 bio: "Just a music lover on Stride 🎵",
-                isVerified: true,
+                isVerified: false,
                 avatar: `https://i.pravatar.cc/150?u=${username}`,
                 posts: [], topTracks: [], followers: [], following: [],
                 followerCount: 0, followingCount: 0, favorites: []
@@ -1705,13 +1706,14 @@ app.post('/api/profile/update', async (req, res) => {
         const updatedUser = await User.findOneAndUpdate(
             { username },
             { name, bio, avatar, avatarFrame, banner, accentColor },
-            { returnDocument: 'after' }
+            { 
+                upsert: true, 
+                new: true, 
+                returnDocument: 'after',
+                setDefaultsOnInsert: true 
+            }
         );
-        if (updatedUser) {
-            res.json({ success: true, user: updatedUser });
-        } else {
-            res.status(404).json({ success: false, message: 'User not found' });
-        }
+        res.json({ success: true, user: updatedUser });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

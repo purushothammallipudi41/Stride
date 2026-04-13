@@ -173,7 +173,9 @@ const Profile = () => {
             });
             const data = await res.json();
             if (data.success) {
+                console.log("[Profile] Identity restored or updated successfully:", data.user.username);
                 // Update local storage and DOM immediately for instant feedback and E2E stability
+                localStorage.removeItem('user'); // Clear old potentially corrupted session
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (data.user.accentColor) {
                     localStorage.setItem('stride_theme_color', data.user.accentColor);
