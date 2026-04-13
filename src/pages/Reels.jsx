@@ -15,9 +15,19 @@ const Reels = () => {
         fetch(`${BASE_URL}/api/reels`)
             .then(res => res.json())
             .then(data => {
-                setReelsData(data);
+                if (data.length > 0) {
+                    setReelsData(data);
+                    setActiveReelId(data[0].id);
+                } else {
+                    // Fallback to premium curated reels if DB is empty
+                    const placeholders = [
+                        { id: 9991, username: 'stride_official', likes: '1.2k', caption: 'Welcome to the Rhythm. #stride #vibes', url: 'https://cdn.pixabay.com/vimeo/459239103/concert-50474.mp4?width=1080&hash=8de26ec090e50f589c316719545371ae23d8c835', avatar: 'https://i.pravatar.cc/150?u=stride' },
+                        { id: 9992, username: 'alex_stride', likes: '840', caption: 'Late night sessions. 🎹 #music #producer', url: 'https://cdn.pixabay.com/vimeo/321151662/music-21583.mp4?width=1080&hash=d1e37bc6093558c356719545371ae23d8c835', avatar: 'https://i.pravatar.cc/150?u=alex' }
+                    ];
+                    setReelsData(placeholders);
+                    setActiveReelId(9991);
+                }
                 setIsLoading(false);
-                if (data.length > 0) setActiveReelId(data[0].id);
             })
             .catch(err => {
                 console.error("Failed to fetch reels:", err);
