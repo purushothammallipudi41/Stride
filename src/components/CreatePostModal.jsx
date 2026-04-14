@@ -28,36 +28,45 @@ const CreatePostModal = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!caption.trim()) return;
+        const trimmedCaption = caption.trim();
+        if (!trimmedCaption) return;
 
         setIsSubmitting(true);
         setError(null);
+        
+        console.log(`[CreatePost] Attempting post for user: ${user?.username}`);
+
         try {
+            const postData = {
+                username: user?.username || 'user',
+                name: user?.name || user?.username || 'user',
+                avatar: user?.avatar || '🎧',
+                caption: trimmedCaption,
+                content: trimmedCaption,
+                tags: tags.split(',').map(t => t.trim()).filter(t => t),
+                contentUrl: mediaPreview || null,
+                time: 'Just now'
+            };
+
             const response = await fetch(`${BASE_URL}/api/feed`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: user?.username || 'user',
-                    name: user?.name || user?.username || 'user',
-                    avatar: user?.avatar || '🎧',
-                    caption,
-                    content: caption,
-                    tags: tags.split(',').map(t => t.trim()).filter(t => t),
-                    contentUrl: mediaPreview || null,
-                    time: 'Just now'
-                })
+                body: JSON.stringify(postData)
             });
 
             if (response.ok) {
+                console.log('[CreatePost] Status: Success');
                 setIsSuccess(true);
                 setTimeout(() => {
                     closeCreateModal();
                 }, 1500);
             } else {
-                setError('Failed to share post. Please try again.');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('[CreatePost] Status: Failed', response.status, errorData);
+                setError(errorData.message || 'Failed to share post. Please try again.');
             }
         } catch (err) {
-            console.error('Post creation error:', err);
+            console.error('[CreatePost] Network Error:', err);
             setError('Connection error. Check your internet or try later.');
         } finally {
             setIsSubmitting(false);
@@ -140,11 +149,20 @@ const CreatePostModal = () => {
                             </div>
                         </div>
 
+                        {isSubmitting && (
+                            <div className="syncing-overlay animate-fade-in">
+                                <div className="syncing-content">
+                                    <Loader2 className="animate-spin" size={40} />
+                                    <p>Syncing to Cloud...</p>
+                                </div>
+                            </div>
+                        )}
+
                         {isSuccess && (
                             <div className="success-overlay animate-fade-in">
                                 <div className="success-content">
                                     <div className="check-icon">✓</div>
-                                    <p>Post Shared! 🎉</p>
+                                    <p>Post Synced! 🚀</p>
                                 </div>
                             </div>
                         )}

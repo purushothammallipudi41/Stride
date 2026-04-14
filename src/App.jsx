@@ -40,8 +40,8 @@ import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
 import OnboardingModal from './components/OnboardingModal';
-import CallOverlay from './components/chat/CallOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import FloatingCreateButton from './components/layout/FloatingCreateButton';
 
 const AppContent = () => {
   const { isCreateModalOpen, isExplorerOpen, callInfo, setCallInfo } = useUI();
@@ -140,6 +140,7 @@ const AppContent = () => {
               
               {isCreateModalOpen && <CreatePostModal />}
               {isExplorerOpen && <ExploreModal />}
+              {isAuthenticated && <FloatingCreateButton />}
             </div>
           </ErrorBoundary>
         </main>

@@ -229,11 +229,20 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
                         )
                     )}
 
+                    {isUploading && (
+                        <div className="syncing-overlay animate-fade-in">
+                            <div className="syncing-content">
+                                <Music className="animate-pulse" size={40} />
+                                <p>Syncing Story to Cloud...</p>
+                            </div>
+                        </div>
+                    )}
+
                     {isSuccess && (
                         <div className="success-overlay animate-fade-in">
                             <div className="success-content">
                                 <div className="check-icon">✓</div>
-                                <p>Story Shared! 🎉</p>
+                                <p>Story Synced! 🚀</p>
                             </div>
                         </div>
                     )}

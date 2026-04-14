@@ -431,15 +431,13 @@
 
 }
 
-/* Premium Success Overlay */
-.success-overlay {
+.success-overlay, .syncing-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(8px);
+    background: rgba(10, 10, 18, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -447,24 +445,15 @@
     border-radius: 40px;
 }
 
-.success-content {
+.success-content, .syncing-content {
     text-align: center;
-    padding: 30px;
+    color: white;
 }
 
-.success-content .check-icon {
-    font-size: 60px;
-    color: #4ade80;
-    margin-bottom: 15px;
-    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.success-content p {
+.syncing-content p {
+    margin-top: 15px;
     font-size: 24px;
     font-weight: 700;
-    color: white;
-    margin: 0;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 /* Floating Error Message */

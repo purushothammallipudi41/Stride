@@ -496,11 +496,20 @@ const Profile = () => {
                                 </div>
                             )}
 
+                            {isUpdating && (
+                                <div className="syncing-overlay animate-fade-in">
+                                    <div className="syncing-content">
+                                        <div className="check-icon animate-spin">⟳</div>
+                                        <p>Syncing Profile...</p>
+                                    </div>
+                                </div>
+                            )}
+
                             {isSuccess && (
                                 <div className="success-overlay animate-fade-in">
                                     <div className="success-content">
                                         <div className="check-icon">✓</div>
-                                        <p>Profile Updated! ✨</p>
+                                        <p>Profile Synced! 🚀</p>
                                     </div>
                                 </div>
                             )}
