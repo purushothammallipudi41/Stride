@@ -142,6 +142,9 @@ const AppContent = () => {
               {isExplorerOpen && <ExploreModal />}
             </div>
           </ErrorBoundary>
+        </main>
+      </div>
+
       {isAuthenticated && (
           <OnboardingModal 
             isOpen={!localStorage.getItem('onboardingCompleted')} 

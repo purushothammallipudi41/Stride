@@ -61,7 +61,7 @@ const ArtistDashboard = () => {
                     <div className="stats-icon plays"><Headphones size={24} /></div>
                     <div className="stats-info">
                         <span className="stats-label">Total Plays</span>
-                        <h2 className="stats-value">{stats.totalPlays ? stats.totalPlays.toLocaleString() : '---'}</h2>
+                        <h2 className="stats-value">{stats.totalPlays != null ? stats.totalPlays.toLocaleString() : '---'}</h2>
                         <span className="stats-trend positive"><ChevronUp size={16} /> {stats.trend || '0%'}</span>
                     </div>
                 </div>
@@ -70,7 +70,7 @@ const ArtistDashboard = () => {
                     <div className="stats-icon revenue"><DollarSign size={24} /></div>
                     <div className="stats-info">
                         <span className="stats-label">Total Earnings</span>
-                        <h2 className="stats-value">{stats.totalTips ? `$${stats.totalTips.toLocaleString()}` : '$0.00'}</h2>
+                        <h2 className="stats-value">{stats.totalTips != null ? `$${stats.totalTips.toLocaleString()}` : '$0.00'}</h2>
                         <span className="stats-trend positive"><ChevronUp size={16} /> +0%</span>
                     </div>
                 </div>
@@ -79,7 +79,7 @@ const ArtistDashboard = () => {
                     <div className="stats-icon listeners"><Users size={24} /></div>
                     <div className="stats-info">
                         <span className="stats-label">Monthly Listeners</span>
-                        <h2 className="stats-value">{stats.monthlyListeners ? stats.monthlyListeners.toLocaleString() : '---'}</h2>
+                        <h2 className="stats-value">{stats.monthlyListeners != null ? stats.monthlyListeners.toLocaleString() : '---'}</h2>
                         <span className="stats-trend positive"><ChevronUp size={16} /> +0%</span>
                     </div>
                 </div>

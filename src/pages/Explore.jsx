@@ -91,6 +91,8 @@ const Explore = () => {
         }
 
         const fetchData = async () => {
+            if (!query) return;
+            setIsLoading(true);
             try {
                 if (query.startsWith('#')) {
                     const tag = query.substring(1);
@@ -104,6 +106,8 @@ const Explore = () => {
                 }
             } catch (err) {
                 console.error("Search error:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
 
