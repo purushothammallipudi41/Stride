@@ -10,7 +10,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 5000; /* Bumped to be above bottom nav (2500) */
     padding: 20px;
 }
 
@@ -65,7 +65,7 @@
 
 .modal-body-scroll {
     padding: 20px;
-    padding-bottom: 30px; /* Base padding */
+    padding-bottom: 80px; /* Increased to ensure content clears mobile browser bars */
     overflow-y: auto;
     flex: 1;
     display: flex;
