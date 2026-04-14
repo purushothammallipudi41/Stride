@@ -1202,21 +1202,6 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
-// Temporary Administrative Migration Route
-app.post('/api/admin/migrate-messages', async (req, res) => {
-    try {
-        const result = await Message.deleteMany({
-            $or: [
-                { _id: { $type: 'string', $regex: '-' } },
-                { id: { $exists: true, $regex: '-' } }
-            ]
-        });
-        res.json({ success: true, deletedCount: result.deletedCount });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // --- TAG DISCOVERY ---
 app.get('/api/search/trending', async (req, res) => {
     try {
