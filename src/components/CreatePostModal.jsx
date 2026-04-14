@@ -29,7 +29,7 @@ const CreatePostModal = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const trimmedCaption = caption.trim();
-        if (!trimmedCaption) return;
+        if (!trimmedCaption && !mediaPreview) return;
 
         setIsSubmitting(true);
         setError(null);
@@ -41,8 +41,8 @@ const CreatePostModal = () => {
                 username: user?.username || 'user',
                 name: user?.name || user?.username || 'user',
                 avatar: user?.avatar || '🎧',
-                caption: trimmedCaption,
-                content: trimmedCaption,
+                caption: trimmedCaption || '',
+                content: trimmedCaption || 'Shared a moment',
                 tags: tags.split(',').map(t => t.trim()).filter(t => t),
                 contentUrl: mediaPreview || null,
                 time: 'Just now'
@@ -193,7 +193,7 @@ const CreatePostModal = () => {
                         <button 
                             type="submit" 
                             className="submit-post-btn text-gradient-bg"
-                            disabled={isSubmitting || !caption.trim()}
+                            disabled={isSubmitting || (!caption.trim() && !mediaPreview)}
                         >
                             {isSubmitting ? (
                                 <Loader2 className="animate-spin" size={20} />
