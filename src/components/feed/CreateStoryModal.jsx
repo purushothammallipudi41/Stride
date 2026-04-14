@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { X, Send, Camera, Music, Image as ImageIcon, Type, BarChart2 } from 'lucide-react';
 import './CreateStoryModal.css';
 
-const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
+const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, error }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [textMode, setTextMode] = useState(false);
     const [isCameraActive, setIsCameraActive] = useState(false);
@@ -133,7 +133,7 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
 
     return (
         <div className="modal-overlay story-modal-overlay animate-fade-in" onClick={onClose}>
-            <div className="story-create-full glass-panel" onClick={e => e.stopPropagation()}>
+            <div className={`story-create-full glass-panel ${error ? 'animate-shake' : ''}`} onClick={e => e.stopPropagation()}>
                 <div className="story-top-actions">
                     <button className="icon-btn-round" onClick={handleClose}><X size={24} /></button>
                     <div className="top-tools">
@@ -227,6 +227,21 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading }) => {
                                 )}
                             </div>
                         )
+                    )}
+
+                    {isSuccess && (
+                        <div className="success-overlay animate-fade-in">
+                            <div className="success-content">
+                                <div className="check-icon">✓</div>
+                                <p>Story Shared! 🎉</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="error-message-floating animate-shake">
+                            {error}
+                        </div>
                     )}
                 </div>
 

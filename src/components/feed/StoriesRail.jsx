@@ -14,6 +14,8 @@ const StoriesRail = () => {
     const [activeStory, setActiveStory] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState('');
     const user = getStoredUser();
     const username = user?.username || 'guest';
 
@@ -48,6 +50,7 @@ const StoriesRail = () => {
         if (username === 'guest') return;
 
         setIsUploading(true);
+        setError('');
         try {
             const response = await fetch(`${BASE_URL}/api/stories`, {
                 method: 'POST',
@@ -59,11 +62,21 @@ const StoriesRail = () => {
                 })
             });
             if (response.ok) {
+                setIsSuccess(true);
                 setHasStory(true);
-                setIsCreateModalOpen(false);
+                
+                // Keep modal open for 1.5s to show success state
+                setTimeout(() => {
+                    setIsCreateModalOpen(false);
+                    setIsSuccess(false);
+                }, 1500);
+            } else {
+                const data = await response.json();
+                setError(data.message || "Failed to post story");
             }
         } catch (err) {
             console.error("Failed to post story:", err);
+            setError("Connection error. Please try again.");
         } finally {
             setIsUploading(false);
         }
@@ -112,6 +125,8 @@ const StoriesRail = () => {
                 onClose={() => setIsCreateModalOpen(false)}
                 onConfirm={handleConfirmUpload}
                 isUploading={isUploading}
+                isSuccess={isSuccess}
+                error={error}
             />
 
             {/* Story Viewer Modal */}

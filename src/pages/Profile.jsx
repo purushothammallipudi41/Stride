@@ -139,6 +139,9 @@ const Profile = () => {
     const [tipStatus, setTipStatus] = useState('');
     const [selectedFrame, setSelectedFrame] = useState('gold');
     const [editData, setEditData] = useState({ username: '', name: '', bio: '', avatar: '', banner: '', accentColor: '' });
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState('');
 
     const openEditModal = useCallback(() => {
         setEditData({ 
@@ -181,6 +184,8 @@ const Profile = () => {
     }, [location.search, user, isOwnProfile, isEditModalOpen, openEditModal]);
 
     const handleUpdateProfile = async () => {
+        setIsUpdating(true);
+        setError('');
         try {
             const res = await fetch(`${BASE_URL}/api/profile/update`, {
                 method: 'POST',
@@ -189,6 +194,7 @@ const Profile = () => {
             });
             const data = await res.json();
             if (data.success) {
+                setIsSuccess(true);
                 console.log("[Profile] Identity restored or updated successfully:", data.user.username);
                 // Update local storage and DOM immediately for instant feedback and E2E stability
                 localStorage.removeItem('user'); // Clear old potentially corrupted session
@@ -199,17 +205,21 @@ const Profile = () => {
                 }
                 
                 setUser(data.user);
-                setIsEditModalOpen(false);
                 
-                // Deterministic reload: wait a tiny bit for React to flush and UI to update
+                // Deterministic reload: wait for the success overlay to be seen
                 setTimeout(() => {
+                    setIsEditModalOpen(false);
+                    setIsSuccess(false);
                     window.location.reload();
-                }, 500);
+                }, 1500);
             } else {
-                console.error("Failed to update:", data.message);
+                setError(data.message || "Failed to update profile");
+                setIsUpdating(false);
             }
         } catch (err) {
             console.error("Failed to update profile:", err);
+            setError("Connection error. Please try again.");
+            setIsUpdating(false);
         }
     };
 
@@ -486,10 +496,27 @@ const Profile = () => {
                                 </div>
                             )}
 
+                            {isSuccess && (
+                                <div className="success-overlay animate-fade-in">
+                                    <div className="success-content">
+                                        <div className="check-icon">✓</div>
+                                        <p>Profile Updated! ✨</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {error && (
+                                <div className="error-message animate-shake">
+                                    {error}
+                                </div>
+                            )}
+
                         </div>
                         <div className="ig-modal-footer">
-                            <button className="ig-btn-cancel" onClick={closeEditModal}>Cancel</button>
-                            <button className="ig-btn-save" onClick={handleUpdateProfile}>Save Changes</button>
+                            <button className="ig-btn-cancel" onClick={closeEditModal} disabled={isUpdating}>Cancel</button>
+                            <button className="ig-btn-save" onClick={handleUpdateProfile} disabled={isUpdating}>
+                                {isUpdating ? "Saving..." : "Save Changes"}
+                            </button>
                         </div>
                     </div>
                 </div>
