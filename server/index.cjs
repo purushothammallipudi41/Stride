@@ -802,8 +802,21 @@ app.get('/api/reels', async (req, res) => {
 
 app.post('/api/feed', async (req, res) => {
     try {
-        const userObj = await User.findOne({ username: req.body.username });
+        let userObj = await User.findOne({ username: req.body.username });
         
+        // SELF-HEALING: If user doesn't exist, create a stub account so posts are persistent
+        if (!userObj && req.body.username) {
+            console.log(`[Self-Healing] Creating missing user: ${req.body.username}`);
+            userObj = await User.create({
+                username: req.body.username,
+                name: req.body.name || req.body.username,
+                avatar: req.body.avatar || `https://i.pravatar.cc/150?u=${req.body.username}`,
+                bio: 'Joined Stride via post sync 🚀',
+                email: `${req.body.username}@thestrideapp.in`,
+                password: 'placeholder_sync_pwd'
+            });
+        }
+
         let contentUrl = req.body.contentUrl;
         let imageUrl = req.body.imageUrl;
         const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
@@ -830,6 +843,7 @@ app.post('/api/feed', async (req, res) => {
         io.emit('content_updated', { type: 'post', data: newPost });
         res.json(newPost);
     } catch (err) {
+        console.error('[POST /api/feed] Error:', err);
         res.status(500).json({ error: err.message });
     }
 });

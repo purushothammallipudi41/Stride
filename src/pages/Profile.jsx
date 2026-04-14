@@ -74,8 +74,17 @@ const Profile = () => {
 
         const handleUpdate = (event) => {
             const currentTarget = routeUsername || loggedUser || JSON.parse(localStorage.getItem('user') || '{}').username;
-            if (event.type === 'follow' && event.username === currentTarget) {
-                setUser(prev => prev ? { ...prev, followerCount: event.followerCount } : prev);
+            console.log(`[Profile/Socket] Received ${event.type} event:`, event);
+            
+            // Reload if post shared by this user OR follow count changed
+            if (event.type === 'post') {
+                // Check if the new post belongs to this profile
+                if (event.data?.username === currentTarget) {
+                    console.log(`[Profile/Socket] Auto-refreshing stats for ${currentTarget}`);
+                    loadProfile();
+                }
+            } else if (event.type === 'follow' && event.username === currentTarget) {
+                loadProfile();
             }
         };
         socket.on('content_updated', handleUpdate);
