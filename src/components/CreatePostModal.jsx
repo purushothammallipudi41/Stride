@@ -11,6 +11,8 @@ const CreatePostModal = () => {
     const [caption, setCaption] = useState('');
     const [tags, setTags] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState(null);
     const [mediaPreview, setMediaPreview] = useState(null);
     const fileInputRef = React.useRef(null);
     const cameraInputRef = React.useRef(null);
@@ -20,6 +22,8 @@ const CreatePostModal = () => {
         setCaption('');
         setTags('');
         setMediaPreview(null);
+        setIsSuccess(false);
+        setError(null);
     }, []);
 
     const handleSubmit = async (e) => {
@@ -27,6 +31,7 @@ const CreatePostModal = () => {
         if (!caption.trim()) return;
 
         setIsSubmitting(true);
+        setError(null);
         try {
             const response = await fetch(`${BASE_URL}/api/feed`, {
                 method: 'POST',
@@ -38,16 +43,22 @@ const CreatePostModal = () => {
                     caption,
                     content: caption,
                     tags: tags.split(',').map(t => t.trim()).filter(t => t),
-                    contentUrl: mediaPreview || null, // No default mock image
+                    contentUrl: mediaPreview || null,
                     time: 'Just now'
                 })
             });
 
             if (response.ok) {
-                closeCreateModal();
+                setIsSuccess(true);
+                setTimeout(() => {
+                    closeCreateModal();
+                }, 1500);
+            } else {
+                setError('Failed to share post. Please try again.');
             }
         } catch (err) {
             console.error('Post creation error:', err);
+            setError('Connection error. Check your internet or try later.');
         } finally {
             setIsSubmitting(false);
         }
@@ -128,6 +139,21 @@ const CreatePostModal = () => {
                                 </button>
                             </div>
                         </div>
+
+                        {isSuccess && (
+                            <div className="success-overlay animate-fade-in">
+                                <div className="success-content">
+                                    <div className="check-icon">✓</div>
+                                    <p>Post Shared! 🎉</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {error && (
+                            <div className="error-message animate-shake">
+                                {error}
+                            </div>
+                        )}
                     </div>
 
                     <div className="modal-footer">
