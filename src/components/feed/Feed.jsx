@@ -32,7 +32,16 @@ const Feed = ({ type = 'foryou' }) => {
         loadFeed();
         
         const handleUpdate = (event) => {
-            if (event.type === 'post') {
+            console.log(`[Feed/Socket] Received ${event.type} update:`, event.data);
+            if (event.type === 'post' && event.data) {
+                // Instant inject new post at the top
+                setPosts(prev => {
+                    const exists = prev.find(p => (p._id || p.id) === (event.data._id || event.data.id));
+                    if (exists) return prev;
+                    return [event.data, ...prev];
+                });
+            } else if (event.type === 'post') {
+                // Fallback for events without data payload
                 loadFeed();
             }
         };

@@ -13,6 +13,7 @@ const Sidebar = () => {
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Compass, label: t('nav.explore'), path: '/explore' },
+        { icon: Plus, label: t('nav.create'), action: 'create' }, // Added central create action
         { icon: User, label: t('nav.profile'), path: '/profile' },
         { icon: Layout, label: t('common.more'), action: 'explore' },
     ];
