@@ -27,11 +27,25 @@ class DiscoveryService {
             const communities = await Community.find({ members: user._id });
             const communityTracks = communities.flatMap(c => c.jukeboxQueue || []);
 
-            // 3. For now, we'll return a weighted list
-            // In a production app, this would be a complex MongoDB aggregation or vector search
+            // 3. Weighting: Mix of trending posts and reels
+            const trendingPosts = await Post.find({ 
+                type: { $ne: 'reel' },
+                imageUrl: { $ne: "" } 
+            }).sort({ likes: -1 }).limit(10).lean();
+
+            const trendingReels = await Post.find({ 
+                type: 'reel' 
+            }).sort({ likes: -1 }).limit(10).lean();
+
+            // Interleave and randomize slightly
+            const discoverGrid = [...trendingPosts, ...trendingReels]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 15);
+
             return {
-                recommendedTracks: communityTracks.slice(0, limit), // Placeholder
-                trendingCommunities: await Community.find({ isPrivate: false }).sort({ memberCount: -1 }).limit(5)
+                recommendedTracks: communityTracks.slice(0, limit),
+                trendingCommunities: await Community.find({ isPrivate: false }).sort({ memberCount: -1 }).limit(5),
+                discoverGrid
             };
         } catch (err) {
             console.error("Discovery failed:", err);

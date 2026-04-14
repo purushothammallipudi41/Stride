@@ -19,7 +19,7 @@ const Explore = () => {
     const urlQuery = searchParams.get('q') || '';
     const [searchQuery, setSearchQuery] = useState(urlQuery);
     const [isSearching, setIsSearching] = useState(!!urlQuery);
-    const [discoverPosts] = useState([]);
+    const [discoverPosts, setDiscoverPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(!urlQuery);
     const [userResults, setUserResults] = useState([]);
     const [trendingHashtags, setTrendingHashtags] = useState([]);
@@ -50,6 +50,13 @@ const Explore = () => {
                 });
                 const data = await res.json();
                 setRecommendedFeed(data);
+                if (data.discoverGrid) {
+                    setDiscoverPosts(data.discoverGrid.map((p, index) => ({
+                        ...p,
+                        size: (index % 5 === 0) ? 'large' : 'small', // Every 5th post is a large featured tile
+                        url: p.contentUrl || p.imageUrl
+                    })));
+                }
             } catch (err) {
                 console.error("Discovery fetch failed:", err);
             }
@@ -294,10 +301,20 @@ const Explore = () => {
                         </div>
                     )}
                     
-                    {!searchQuery.startsWith('#') && (
+                    {(!searchQuery.startsWith('#') || tagResults.posts.length > 0) && (
                         <div className="search-category-section">
                             <h3 className="category-title">Media</h3>
-                            <div className="loading-state">Matching posts and reels...</div>
+                            <div className="instagram-explore-grid">
+                                {tagResults.posts?.length > 0 ? (
+                                    tagResults.posts.map((post, i) => (
+                                        <div key={i} className="explore-post-item size-small" onClick={() => navigate(`/profile/${post.username}`)}>
+                                            <img src={post.contentUrl || post.imageUrl} alt="" loading="lazy" />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="loading-state">Matching posts and reels...</div>
+                                )}
+                            </div>
                         </div>
                     )}
 

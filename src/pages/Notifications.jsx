@@ -15,6 +15,9 @@ const Notifications = () => {
     const { resetNotifications } = useUI();
     const [notifications, setNotifications] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [swipingId, setSwipingId] = useState(null);
+    const [swipeX, setSwipeX] = useState(0);
+    const touchStartRef = useRef(0);
 
     useEffect(() => {
         if (!username) return;
@@ -50,6 +53,38 @@ const Notifications = () => {
             socket.off('new_private_message', fetchNotifications);
         };
     }, [username, resetNotifications]);
+
+    const handleTouchStart = (e, id) => {
+        touchStartRef.current = e.touches[0].clientX;
+        setSwipingId(id);
+    };
+
+    const handleTouchMove = (e) => {
+        if (!swipingId) return;
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - touchStartRef.current;
+        if (diff < 0) { // Only swipe left to dismiss
+            setSwipeX(diff);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (swipeX < -150) {
+            handleDismiss(swipingId);
+        }
+        setSwipeX(0);
+        setSwipingId(null);
+    };
+
+    const handleDismiss = async (id) => {
+        // Optimistic UI
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        try {
+            await fetch(`${BASE_URL}/api/notifications/${id}/dismiss`, { method: 'POST' });
+        } catch (err) {
+            console.error("Failed to dismiss notification:", err);
+        }
+    };
 
     const groupedNotifications = useMemo(() => {
         const groups = {
@@ -97,25 +132,41 @@ const Notifications = () => {
                     <div key={group} className="time-group">
                         <div className="time-group-header">{group}</div>
                         {items?.map(notif => (
-                            <div key={notif.id} className="notification-item-v2">
-                                <div className="notif-v2-avatar-group">
-                                    <Avatar src={notif.fromAvatar} size={44} frame={notif.senderFrame} />
-                                    <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#000', borderRadius: '50%', padding: 2, border: '2px solid var(--color-bg-primary)' }}>
-                                        {getIcon(notif.type)}
+                            <div 
+                                key={notif.id} 
+                                className="notification-swipe-wrapper"
+                                onTouchStart={(e) => handleTouchStart(e, notif.id)}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
+                                style={{ 
+                                    transform: swipingId === notif.id ? `translateX(${swipeX}px)` : 'none',
+                                    opacity: swipingId === notif.id ? 1 + (swipeX / 300) : 1,
+                                    transition: swipingId === notif.id ? 'none' : 'all 0.3s ease'
+                                }}
+                            >
+                                <div className="notification-item-v2">
+                                    <div className="notif-v2-avatar-group">
+                                        <Avatar src={notif.fromAvatar} size={44} frame={notif.senderFrame} />
+                                        <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#000', borderRadius: '50%', padding: 2, border: '2px solid var(--color-bg-primary)' }}>
+                                            {getIcon(notif.type)}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="notif-v2-main-text">
-                                    <span className="notif-v2-username">{notif.from}</span>
-                                    {` ${notif.content || 'is following you'}`}
-                                    <span className="notif-v2-time">{notif.time || '4d'}</span>
-                                </div>
-                                {notif.type === 'like' || notif.type === 'comment' ? (
-                                    <div className="notif-v2-media-preview">
-                                        <img src={notif.postImage || 'https://picsum.photos/100'} alt="post preview" />
+                                    <div className="notif-v2-main-text">
+                                        <span className="notif-v2-username">{notif.from}</span>
+                                        {` ${notif.content || 'is following you'}`}
+                                        <span className="notif-v2-time">{notif.time || '4d'}</span>
                                     </div>
-                                ) : (
-                                    <button className="notif-v2-action-btn">Follow</button>
-                                )}
+                                    {notif.type === 'like' || notif.type === 'comment' ? (
+                                        <div className="notif-v2-media-preview">
+                                            <img src={notif.postImage || 'https://picsum.photos/100'} alt="post preview" />
+                                        </div>
+                                    ) : (
+                                        <button className="notif-v2-action-btn">Follow</button>
+                                    )}
+                                </div>
+                                <div className="dismiss-background">
+                                    <X size={24} color="white" />
+                                </div>
                             </div>
                         ))}
                     </div>

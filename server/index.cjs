@@ -1253,7 +1253,14 @@ app.get('/api/search/trending', async (req, res) => {
 app.get('/api/search/tag/:tag', async (req, res) => {
     try {
         const tag = req.params.tag;
-        const posts = await Post.find({ tags: tag }).limit(10);
+        const posts = await Post.find({ 
+            $or: [
+                { tags: { $in: [tag] } },
+                { caption: { $regex: `#${tag}`, $options: 'i' } },
+                { content: { $regex: `#${tag}`, $options: 'i' } }
+            ]
+        }).sort({ likes: -1 }).limit(15);
+        
         const playlists = await Playlist.find({ tags: tag }).populate('owner', 'username');
         const communities = await Community.find({ tags: tag });
 
@@ -1399,6 +1406,8 @@ app.post('/api/notifications/mark-read/:username', async (req, res) => {
     }
 });
 
+app.post('/api/notifications/:id/dismiss', async (req, res) => { try { const { id } = req.params; await Notification.findByIdAndDelete(id); res.json({ success: true }); } catch (err) { res.status(500).json({ error: err.message }); } });
+
 app.post('/api/notifications/mark-all-read/:username', async (req, res) => {
     const { username } = req.params;
     try {
@@ -1421,7 +1430,7 @@ app.get('/api/users/search', async (req, res) => {
                 { username: { $regex: q, $options: 'i' } },
                 { name: { $regex: q, $options: 'i' } }
             ]
-        }).limit(10);
+        }).limit(20);
         res.json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
