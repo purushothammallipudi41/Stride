@@ -3,6 +3,7 @@ import Post from './Post';
 import socket from '../../services/socket';
 import { BASE_URL } from '../../utils/api';
 import { getStoredUser } from '../../utils/storage';
+import SkeletonPost from '../common/SkeletonPost';
 import './Feed.css';
 
 const Feed = ({ type = 'foryou' }) => {
@@ -53,7 +54,13 @@ const Feed = ({ type = 'foryou' }) => {
 
 
     if (isLoading) {
-        return <div className="feed-loading">Vibing with the server...</div>;
+        return (
+            <div className="feed-container">
+                <SkeletonPost />
+                <SkeletonPost />
+                <SkeletonPost />
+            </div>
+        );
     }
 
     return (

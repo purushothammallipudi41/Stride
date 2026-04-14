@@ -69,6 +69,42 @@ const Profile = () => {
 
 
 
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [pullDistance, setPullDistance] = useState(0);
+    const touchStartRef = useRef(0);
+
+    const handleTouchStart = (e) => {
+        if (e.currentTarget.scrollTop <= 0) {
+            touchStartRef.current = e.touches[0].clientY;
+        } else {
+            touchStartRef.current = 0;
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (touchStartRef.current === 0) return;
+        const touchY = e.touches[0].clientY;
+        const distance = touchY - touchStartRef.current;
+        if (distance > 0 && e.currentTarget.scrollTop <= 0) {
+            setPullDistance(Math.min(distance * 0.5, 80));
+            if (distance > 10) e.preventDefault();
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (pullDistance > 60) {
+            triggerRefresh();
+        }
+        setPullDistance(0);
+        touchStartRef.current = 0;
+    };
+
+    const triggerRefresh = () => {
+        setIsRefreshing(true);
+        loadProfile();
+        setTimeout(() => setIsRefreshing(false), 1200);
+    };
+
     useEffect(() => {
         loadProfile();
 

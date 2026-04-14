@@ -92,19 +92,28 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
         galleryInputRef.current.click();
     };
 
+    const [overlayText, setOverlayText] = useState('');
+    const [isTextFocused, setIsTextFocused] = useState(false);
+
     const handleCameraClick = () => {
         if (isCameraActive) {
             takePhoto();
+            if (navigator.vibrate) navigator.vibrate(15); // Haptic feedback for shutter
         } else {
             startCamera();
         }
     };
 
     const handleTextMode = () => {
-        stopCamera();
         setIsMusicPickerOpen(false);
-        setTextMode(!textMode);
-        setPreviewImage(null);
+        if (previewImage) {
+            // If image exists, toggle overlay input
+            setIsTextFocused(true);
+        } else {
+            // Otherwise toggle full text mode
+            setTextMode(!textMode);
+            setPreviewImage(null);
+        }
     };
 
     const handleMusicPicker = () => {
