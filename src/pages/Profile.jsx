@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles } from 'lucide-react';
 
@@ -327,9 +327,26 @@ const Profile = () => {
     };
 
     return (
-        <div className="ig-profile-container">
+        <div 
+            className="ig-profile-container"
+            onScroll={(e) => {}} // Keep default for scroll tracking if needed
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             {/* Top Header */}
             <PageHeader title={user.username} />
+
+            {/* Pull-to-Refresh Indicator */}
+            <div 
+                className="ptr-indicator" 
+                style={{ 
+                    height: isRefreshing ? '60px' : `${pullDistance}px`,
+                    opacity: (isRefreshing || pullDistance > 20) ? 1 : 0
+                }}
+            >
+                <div className="ptr-spinner"></div>
+            </div>
 
             {/* Profile Info */}
             <div className="ig-profile-bio-block">

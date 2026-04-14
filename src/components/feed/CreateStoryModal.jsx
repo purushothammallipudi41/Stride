@@ -10,6 +10,9 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
     const [selectedTrack, setSelectedTrack] = useState(null);
     const [pollData, setPollData] = useState(null); // { question, option1, option2 }
     const [stream, setStream] = useState(null);
+    const [overlayText, setOverlayText] = useState('');
+    const [isTextFocused, setIsTextFocused] = useState(false);
+
     const cameraInputRef = useRef(null);
     const galleryInputRef = useRef(null);
     const videoRef = useRef(null);
@@ -42,7 +45,6 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
             setPreviewImage(null);
         } catch (err) {
             console.error("Camera access error:", err);
-            // Fallback to file input if webcam fails
             cameraInputRef.current.click();
         }
     };
@@ -92,13 +94,10 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
         galleryInputRef.current.click();
     };
 
-    const [overlayText, setOverlayText] = useState('');
-    const [isTextFocused, setIsTextFocused] = useState(false);
-
     const handleCameraClick = () => {
         if (isCameraActive) {
             takePhoto();
-            if (navigator.vibrate) navigator.vibrate(15); // Haptic feedback for shutter
+            if (navigator.vibrate) navigator.vibrate(15);
         } else {
             startCamera();
         }
@@ -107,10 +106,8 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
     const handleTextMode = () => {
         setIsMusicPickerOpen(false);
         if (previewImage) {
-            // If image exists, toggle overlay input
             setIsTextFocused(true);
         } else {
-            // Otherwise toggle full text mode
             setTextMode(!textMode);
             setPreviewImage(null);
         }
@@ -138,6 +135,11 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
         setPollData(prev => ({ ...prev, [field]: value }));
     };
 
+    const handleShare = () => {
+        if (navigator.vibrate) navigator.vibrate(20);
+        onConfirm(previewImage, { track: selectedTrack, poll: pollData, overlayText });
+    };
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     return (
@@ -160,7 +162,7 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
                         >
                             <BarChart2 size={20} />
                         </button>
-                        <button className="icon-btn-round" onClick={handleTextMode} style={{ color: textMode ? 'var(--theme-accent)' : 'white' }}><Type size={20} /></button>
+                        <button className="icon-btn-round" onClick={handleTextMode} style={{ color: textMode || overlayText ? 'var(--theme-accent)' : 'white' }}><Type size={20} /></button>
                     </div>
                 </div>
 
@@ -180,6 +182,38 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
                     )}
                     
                     <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+                    <div className="story-overlay-layers">
+                        {previewImage && (
+                            <img 
+                                src={previewImage} 
+                                alt="Story Preview" 
+                                className="full-preview-img animate-scale-in"
+                                onError={() => setPreviewImage(null)}
+                            />
+                        )}
+                        
+                        {overlayText && !isTextFocused && (
+                            <div className="text-sticker-display animate-pop-in" onClick={() => setIsTextFocused(true)}>
+                                {overlayText}
+                            </div>
+                        )}
+
+                        {isTextFocused && (
+                            <div className="text-sticker-overlay animate-scale-in">
+                                <textarea
+                                    autoFocus
+                                    className="story-overlay-input"
+                                    placeholder="Type something..."
+                                    value={overlayText}
+                                    onChange={(e) => setOverlayText(e.target.value)}
+                                    onBlur={() => {
+                                        setIsTextFocused(false);
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
 
                     {selectedTrack && (
                         <div className="sticker-item music-sticker animate-scale-in">
@@ -216,26 +250,23 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
                         </div>
                     )}
 
-                    {previewImage && previewImage.startsWith('data:image') ? (
-                        <img 
-                            src={previewImage} 
-                            alt="Story Preview" 
-                            className="full-preview-img animate-scale-in"
-                            onError={() => setPreviewImage(null)}
-                        />
-                    ) : (
-                        !isCameraActive && (
-                            <div className="empty-preview-placeholder">
-                                {textMode ? (
-                                    <textarea className="story-text-input" placeholder="Type something..." autoFocus />
-                                ) : (
-                                    <div className="placeholder-content">
-                                        <ImageIcon size={48} className="opacity-20" />
-                                        <p>Select a photo to start</p>
-                                    </div>
-                                )}
-                            </div>
-                        )
+                    {!previewImage && !isCameraActive && (
+                        <div className="empty-preview-placeholder">
+                            {textMode ? (
+                                <textarea 
+                                    className="story-text-input" 
+                                    placeholder="Type something..." 
+                                    autoFocus 
+                                    value={overlayText}
+                                    onChange={(e) => setOverlayText(e.target.value)}
+                                />
+                            ) : (
+                                <div className="placeholder-content">
+                                    <ImageIcon size={48} className="opacity-20" />
+                                    <p>Select a photo to start</p>
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {isUploading && (
@@ -288,8 +319,8 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
                     </div>
                     <button 
                         className="instagram-share-btn text-gradient-bg" 
-                        onClick={() => onConfirm(previewImage, { track: selectedTrack, poll: pollData })}
-                        disabled={isUploading || (!previewImage && !textMode)}
+                        onClick={handleShare}
+                        disabled={isUploading || (!previewImage && !textMode && !overlayText)}
                     >
                         {isUploading ? "Sharing..." : "Share to Story"}
                         <Send size={18} />

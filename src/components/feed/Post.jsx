@@ -114,7 +114,7 @@ const Post = ({ post }) => {
             });
             const data = await res.json();
             if (data.success) {
-                setLikes(data.likes);
+                if (navigator.vibrate) navigator.vibrate(10); setLikes(data.likes);
             }
         } catch (err) {
             console.error("Failed to like post:", err);
