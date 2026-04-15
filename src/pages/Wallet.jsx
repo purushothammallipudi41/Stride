@@ -1,3 +1,9 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { DollarSign, Wallet as WalletIcon, Plus, ArrowDownLeft, ArrowUpRight, History } from 'lucide-react';
+import { useUI } from '../hooks/useUI';
+import { BASE_URL } from '../utils/api';
+import SEO from '../components/common/SEO';
+import PageHeader from '../components/layout/PageHeader';
 import { getStoredUser } from '../utils/storage';
 import GlobalModal from '../components/common/GlobalModal';
 import './Wallet.css';
