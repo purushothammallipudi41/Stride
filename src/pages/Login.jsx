@@ -169,7 +169,6 @@ const Login = () => {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <span className="checkmark" />
               Remember me
             </label>
           </div>

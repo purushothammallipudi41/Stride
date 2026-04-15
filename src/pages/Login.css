@@ -116,6 +116,29 @@
   margin-bottom: 40px;
 }
 
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.checkbox-container:hover {
+  color: #fff;
+}
+
+.checkbox-container input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #8b5cf6;
+  flex-shrink: 0;
+}
+
 .logo-section {
   display: flex;
   flex-direction: column;
