@@ -92,6 +92,7 @@ const Signup = () => {
                         <label htmlFor="username">Username</label>
                         <div className="input-with-icon">
                             <User className="field-icon" size={18} />
+                            <div className="input-divider" />
                             <input 
                                 type="text" 
                                 id="username" 
@@ -107,6 +108,7 @@ const Signup = () => {
                         <label htmlFor="email">Email Address</label>
                         <div className="input-with-icon">
                             <Mail className="field-icon" size={18} />
+                            <div className="input-divider" />
                             <input 
                                 type="email" 
                                 id="email" 
@@ -122,6 +124,7 @@ const Signup = () => {
                         <label htmlFor="password">Password</label>
                         <div className="input-with-icon">
                             <Lock className="field-icon" size={18} />
+                            <div className="input-divider" />
                             <input 
                                 type="password" 
                                 id="password" 
@@ -137,6 +140,7 @@ const Signup = () => {
                         <label htmlFor="confirmPassword">Confirm Password</label>
                         <div className="input-with-icon">
                             <Lock className="field-icon" size={18} />
+                            <div className="input-divider" />
                             <input 
                                 type="password" 
                                 id="confirmPassword" 

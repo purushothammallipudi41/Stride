@@ -116,6 +116,7 @@ const Login = () => {
           <div className={`input-group floating-input ${emailFocused || email ? 'active' : ''}`}>
             <div className="input-with-icon">
               <Mail className={`field-icon ${emailFocused ? 'focused' : ''}`} size={18} />
+              <div className="input-divider" />
               <input 
                 type="text" 
                 id="email" 
@@ -141,6 +142,7 @@ const Login = () => {
             </div>
             <div className="input-with-icon">
               <Lock className={`field-icon ${passwordFocused ? 'focused' : ''}`} size={18} />
+              <div className="input-divider" />
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password" 
