@@ -342,7 +342,69 @@
     font-size: 0.7rem;
     color: var(--color-text-muted);
     margin-top: 4px;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-icon-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.status-icon {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.status-icon.sent {
+    color: var(--color-text-muted);
+}
+
+.status-icon.seen {
+    color: #3b82f6; /* Premium Blue */
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));
+    animation: seenCheck 0.4s ease-out;
+}
+
+@keyframes seenCheck {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.msg-time-stamp {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+/* Hardened Media Bubbles */
+.message-media-content {
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    transition: transform 0.3s ease;
+}
+
+.message-media-content:hover {
+    transform: scale(1.02);
+}
+
+.message-image-media {
+    width: 100%;
+    max-width: 300px;
+    max-height: 400px;
+    display: block;
+    object-fit: cover;
+    animation: imageFadeIn 0.5s ease;
+}
+
+@keyframes imageFadeIn {
+    from { opacity: 0; filter: blur(10px); }
+    to { opacity: 1; filter: blur(0); }
 }
 
 /* Premium Input Bar - Docked Flush */

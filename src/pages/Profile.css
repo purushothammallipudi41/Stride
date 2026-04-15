@@ -907,3 +907,59 @@
     margin-top: 4px;
     font-style: italic;
 }
+/* Profile Badges - Premium Glassmorphism */
+.profile-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+    perspective: 1000px;
+}
+
+.profile-badge-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 14px;
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    animation: badgeAppear 0.5s ease-out forwards;
+}
+
+@keyframes badgeAppear {
+    from { opacity: 0; transform: translateY(10px) rotateX(-15deg); }
+    to { opacity: 1; transform: translateY(0) rotateX(0); }
+}
+
+.profile-badge-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-primary);
+    color: white;
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4), 0 0 15px var(--theme-primary-glow);
+}
+
+.profile-badge-pill svg {
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 8px var(--theme-primary-glow));
+    transition: transform 0.3s ease;
+}
+
+.profile-badge-pill:hover svg {
+    transform: rotate(15deg) scale(1.2);
+}
+
+@media (max-width: 768px) {
+    .profile-badges-row { margin-top: 12px; gap: 8px; }
+    .profile-badge-pill { padding: 6px 12px; font-size: 0.75rem; border-radius: 10px; }
+}

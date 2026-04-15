@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search } from 'lucide-react';
+import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search, Check, CheckCheck } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
@@ -181,9 +181,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/jpeg');
+            
+            // Premium capture quality
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
             setPreviewImage(dataUrl);
-            console.log('SocialAction: Photo captured');
+            console.log('SocialAction: Photo captured (Base64 length):', dataUrl.length);
         }
     };
 
@@ -212,7 +214,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            onSendMessage(`Sent a photo: ${file.name}`, 'image');
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64Data = event.target.result;
+                onSendMessage(base64Data, 'image');
+                console.log('SocialAction: Image sent from gallery');
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -397,7 +405,17 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     })()}
                                     {isLastInGroup && (
                                         <div className="message-status-v2">
-                                            {msg.isMe ? (msg.readStatus ? 'Seen' : 'Sent') : msg.time}
+                                            {msg.isMe ? (
+                                                <div className={`status-icon-wrapper ${msg.readStatus ? 'seen' : 'sent'}`}>
+                                                    {msg.readStatus ? (
+                                                        <CheckCheck size={14} className="status-icon seen" />
+                                                    ) : (
+                                                        <Check size={14} className="status-icon sent" />
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="msg-time-stamp">{msg.time}</span>
+                                            )}
                                         </div>
                                     )}
                                 </div>

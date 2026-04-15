@@ -965,6 +965,12 @@ app.post('/api/profile/:username/follow', async (req, res) => {
             followerCount
         });
 
+        // Grant Influencer achievement if 10+ followers
+        if (followerCount >= 10 && !updatedTarget.achievements.includes('Influencer')) {
+            await User.findByIdAndUpdate(targetId, { $addToSet: { achievements: 'Influencer' } });
+            io.to(`user_${username}`).emit('achievement_unlocked', { achievement: 'Influencer' });
+        }
+
         res.json({ 
             success: true, 
             isFollowing: !alreadyFollowing,
@@ -1776,6 +1782,18 @@ app.post('/api/favorites/:username', (req, res) => {
     }
     
     writeData(data);
+    
+    // Check Music Maven achievement (5+ favorites)
+    if (favorites.length >= 5) {
+        User.findOne({ username }).then(u => {
+            if (u && !u.achievements.includes('Music Maven')) {
+                u.achievements.push('Music Maven');
+                u.save();
+                io.to(`user_${username}`).emit('achievement_unlocked', { achievement: 'Music Maven' });
+            }
+        });
+    }
+
     res.json(favorites);
 });
 
@@ -2092,6 +2110,20 @@ app.post('/api/monetization/send-tip', async (req, res) => {
             io.to(roomId).emit('new_gift', tipPayload);
         } else {
             io.emit('global_event', tipPayload);
+        }
+
+        // Check Top Tipper achievement (1000+ VP sent)
+        const totalSent = await Transaction.aggregate([
+            { $match: { from: fromId, type: 'tip' } },
+            { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]);
+        if (totalSent.length > 0 && totalSent[0].total >= 1000) {
+            const senderUser = await User.findById(fromId);
+            if (senderUser && !senderUser.achievements.includes('Top Tipper')) {
+                senderUser.achievements.push('Top Tipper');
+                await senderUser.save();
+                io.to(`user_${senderUser.username}`).emit('achievement_unlocked', { achievement: 'Top Tipper' });
+            }
         }
 
         res.json({ success: true, transaction: tx });

@@ -385,6 +385,20 @@ const Profile = () => {
                         {safeUser.isVerified && <VerificationBadge size={18} />}
                     </div>
                     <p className="ig-bio-desc">{safeUser.bio}</p>
+                    
+                    {/* Badges Row */}
+                    {safeUser.achievements?.length > 0 && (
+                        <div className="profile-badges-row">
+                            {safeUser.achievements.map((ach) => (
+                                <div key={ach} className="profile-badge-pill" title={ach}>
+                                    {ach === 'Music Maven' && <Music size={12} />}
+                                    {ach === 'Influencer' && <Users size={12} />}
+                                    {ach === 'Top Tipper' && <Zap size={12} />}
+                                    <span>{ach}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Top Tracks Section */}
