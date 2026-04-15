@@ -4,6 +4,7 @@ import PageHeader from '../components/layout/PageHeader';
 import { DollarSign, Plus, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, History } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
+import { getStoredUser } from '../utils/storage';
 import './Wallet.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
@@ -22,7 +23,8 @@ const Wallet = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [topUpAmount, setTopUpAmount] = useState(100);
 
-    const username = localStorage.getItem('stride_user_username') || 'puru';
+    const userProfile = getStoredUser();
+    const username = userProfile?.username || 'guest';
 
     const fetchBalance = useCallback(async () => {
         try {

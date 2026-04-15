@@ -35,7 +35,6 @@ import Wallet from './pages/Wallet';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
-import Topbar from './components/layout/Topbar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles } from 'lucide-react';
+import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles, Music, Users, Zap } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';

@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Check, Heart, UserPlus, Bell } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Check, Heart, UserPlus, Bell, X } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import PageHeader from '../components/layout/PageHeader';

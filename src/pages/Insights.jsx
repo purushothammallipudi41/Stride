@@ -1,5 +1,10 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, Eye, Satellite, Zap, Calendar, Wallet, BarChart3 } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
+import PageHeader from '../components/layout/PageHeader';
+import './Insights.css';
 
 const Insights = () => {
     const navigate = useNavigate();
@@ -7,8 +12,8 @@ const Insights = () => {
     const [statsData, setStatsData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    const user = getStoredUser();
-    const username = user?.username || 'guest';
+    const userProfile = getStoredUser();
+    const username = userProfile?.username || 'guest';
 
     useEffect(() => {
         fetch(`${BASE_URL}/api/artist/stats/${username}`)
@@ -57,15 +62,11 @@ const Insights = () => {
 
     return (
         <div className="insights-container animate-fade-in">
-            <header className="insights-header">
-                <button className="back-btn-icon" onClick={() => navigate(-1)}>
-                    <ChevronLeft size={24} />
-                </button>
-                <div className="title-group">
-                    <h1>Analytics & Insights</h1>
-                    <p>Deep dive into your content performance and audience reach.</p>
-                </div>
-            </header>
+            <PageHeader title="Analytics & Insights" />
+            
+            <div className="insights-header-subtitle">
+                <p>Deep dive into your content performance and audience reach.</p>
+            </div>
 
             <nav className="insights-tabs">
                 <div className="tabs-wrapper">
@@ -136,7 +137,7 @@ const Insights = () => {
                                 {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
                             </div>
                             <div className="empty-chart-msg">
-                                <BarChart3 size={40} className="opacity-10 mb-2" />
+                                <BarChart3 size={40} className="empty-icon" />
                                 <p>No engagement data yet</p>
                             </div>
                         </div>
