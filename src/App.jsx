@@ -10,6 +10,8 @@ import { MusicProvider } from './context/MusicContext';
 import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
 import { ActivityProvider } from './context/ActivityContext';
+import { Web3Provider } from './context/Web3Provider';
+
 // Pages
 import Home from './pages/Home';
 import Explore from './pages/Explore';
@@ -41,6 +43,20 @@ import ExploreModal from './components/ExploreModal';
 import OnboardingModal from './components/OnboardingModal';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
+// Emergency Global Error Catch
+if (typeof window !== 'undefined') {
+  window.onerror = function(msg, url, line, col, error) {
+    console.error('[GLOBAL_CRASH]', { msg, url, line, col, error });
+    const root = document.getElementById('root');
+    if (root) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:99999;font-family:monospace;';
+      errDiv.innerHTML = `FATAL: ${msg} <br/> at ${url}:${line}:${col}`;
+      document.body.appendChild(errDiv);
+    }
+  };
+}
+
 const AppContent = () => {
   const { isCreateModalOpen, isExplorerOpen, callInfo, setCallInfo } = useUI();
   const location = useLocation();
@@ -50,8 +66,7 @@ const AppContent = () => {
   console.log('[AppContent] Mounting...', { 
     pathname: location.pathname, 
     isAuthenticated, 
-    isPublicPath,
-    isCreateModalOpen 
+    isPublicPath 
   });
 
   useEffect(() => {
@@ -60,7 +75,7 @@ const AppContent = () => {
     if (Capacitor.isNativePlatform()) {
       try {
         StatusBar.setOverlaysWebView({ overlay: true });
-        StatusBar.setStyle({ style: Style.Dark }); // Light content for dark theme
+        StatusBar.setStyle({ style: Style.Dark });
       } catch (e) {
         console.warn('StatusBar plugin not fully available:', e);
       }
@@ -72,8 +87,6 @@ const AppContent = () => {
       const storedColor = localStorage.getItem('stride_theme_color');
       const userColor = userData?.accentColor;
       const themeColor = storedColor || userColor || '#8b5cf6';
-      
-      console.log(`[App] Applying theme color: ${themeColor} (stored: ${storedColor}, user: ${userColor})`);
       
       const root = document.documentElement;
       root.style.setProperty('--theme-primary', themeColor);
@@ -105,13 +118,27 @@ const AppContent = () => {
     };
   }, [setCallInfo]);
 
-
   return (
     <div className="app-layout">
+      {/* DIAGNOSTIC BOOT FLAG */}
+      <div id="diagnostic-flag" style={{ 
+        position: 'fixed', 
+        top: '10px', 
+        left: '10px', 
+        background: 'green', 
+        color: 'white', 
+        fontSize: '12px', 
+        padding: '4px 8px', 
+        zIndex: 100000,
+        fontWeight: 'bold',
+        borderRadius: '4px'
+      }}>
+        STRIDE_BOOT_SUCCESS
+      </div>
+
       {!isPublicPath && <Sidebar />}
       
       <div className="layout-primary">
-
         <main className="main-content">
           <ErrorBoundary>
             <div className="full-view-container">
@@ -122,13 +149,11 @@ const AppContent = () => {
                 <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
                 <Route path="/profile/:username" element={<Profile />} />
                 <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" />} />
-
                 <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/verify" element={<VerifyEmail />} />
                 <Route path="/artist-dashboard" element={isAuthenticated ? <ArtistDashboard /> : <Navigate to="/login" />} />
-
                 <Route path="/music" element={<Music />} />
                 <Route path="/reels" element={<Reels />} />
                 <Route path="/communities/discover" element={<Communities />} />
@@ -140,7 +165,6 @@ const AppContent = () => {
                 <Route path="/insights" element={<Insights />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
-                
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               
@@ -160,22 +184,9 @@ const AppContent = () => {
             }} 
           />
       )}
-      
-      {callInfo.isOpen && (
-        <CallOverlay 
-            isOpen={callInfo.isOpen}
-            isIncoming={callInfo.isIncoming}
-            callerData={callInfo.callerData}
-            callType={callInfo.type}
-            onReject={() => setCallInfo({ ...callInfo, isOpen: false })}
-            onEnd={() => setCallInfo({ ...callInfo, isOpen: false })}
-        />
-      )}
     </div>
   );
 };
-
-import { Web3Provider } from './context/Web3Provider';
 
 function App() {
   return (
@@ -196,7 +207,6 @@ function App() {
     </HelmetProvider>
   );
 }
-
 
 export default App;
 
