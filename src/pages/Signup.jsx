@@ -15,6 +15,10 @@ const Signup = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [usernameFocused, setUsernameFocused] = useState(false);
+    const [emailFocused, setEmailFocused] = useState(false);
+    const [passwordFocused, setPasswordFocused] = useState(false);
+    const [confirmFocused, setConfirmFocused] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -88,67 +92,71 @@ const Signup = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form" noValidate>
-                    <div className="input-group">
-                        <label htmlFor="username">Username</label>
+                    <div className={`input-group floating-input ${usernameFocused || formData.username ? 'active' : ''}`}>
                         <div className="input-with-icon">
-                            <User className="field-icon" size={18} />
+                            <User className={`field-icon ${usernameFocused ? 'focused' : ''}`} size={18} />
                             <div className="input-divider" />
                             <input 
                                 type="text" 
                                 id="username" 
-                                placeholder="stride_creator"
                                 value={formData.username}
                                 onChange={handleChange}
+                                onFocus={() => setUsernameFocused(true)}
+                                onBlur={() => setUsernameFocused(false)}
                                 required
                             />
+                            <label htmlFor="username" className="floating-label">Username</label>
                         </div>
                     </div>
 
-                    <div className="input-group">
-                        <label htmlFor="email">Email Address</label>
+                    <div className={`input-group floating-input ${emailFocused || formData.email ? 'active' : ''}`}>
                         <div className="input-with-icon">
-                            <Mail className="field-icon" size={18} />
+                            <Mail className={`field-icon ${emailFocused ? 'focused' : ''}`} size={18} />
                             <div className="input-divider" />
                             <input 
                                 type="email" 
                                 id="email" 
-                                placeholder="you@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
+                                onFocus={() => setEmailFocused(true)}
+                                onBlur={() => setEmailFocused(false)}
                                 required
                             />
+                            <label htmlFor="email" className="floating-label">Email Address</label>
                         </div>
                     </div>
 
-                    <div className="input-group">
-                        <label htmlFor="password">Password</label>
+                    <div className={`input-group floating-input ${passwordFocused || formData.password ? 'active' : ''}`}>
                         <div className="input-with-icon">
-                            <Lock className="field-icon" size={18} />
+                            <Lock className={`field-icon ${passwordFocused ? 'focused' : ''}`} size={18} />
                             <div className="input-divider" />
                             <input 
                                 type="password" 
                                 id="password" 
-                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
+                                onFocus={() => setPasswordFocused(true)}
+                                onBlur={() => setPasswordFocused(false)}
                                 required
                             />
+                            <label htmlFor="password" className="floating-label">Password</label>
                         </div>
                     </div>
 
-                    <div className="input-group">
-                        <label htmlFor="confirmPassword">Confirm Password</label>
+                    <div className={`input-group floating-input ${confirmFocused || formData.confirmPassword ? 'active' : ''}`}>
                         <div className="input-with-icon">
-                            <Lock className="field-icon" size={18} />
+                            <Lock className={`field-icon ${confirmFocused ? 'focused' : ''}`} size={18} />
                             <div className="input-divider" />
                             <input 
                                 type="password" 
                                 id="confirmPassword" 
-                                placeholder="••••••••"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
+                                onFocus={() => setConfirmFocused(true)}
+                                onBlur={() => setConfirmFocused(false)}
                                 required
                             />
+                            <label htmlFor="confirmPassword" className="floating-label">Confirm Password</label>
                         </div>
                     </div>
 
