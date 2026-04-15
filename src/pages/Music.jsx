@@ -141,7 +141,8 @@ const MusicPage = () => {
     );
 
     return (
-        <div className="music-page" style={{ paddingBottom: '140px' }}>
+        <div className="music-page animate-fade-in" style={{ paddingBottom: '140px' }}>
+            <div className="stride-mesh-bg" />
             <SEO 
                 title="Music & Playlists" 
                 description="Stream high-quality music from Audius, create collaborative playlists, and vibe with the Stride community." 
@@ -268,11 +269,14 @@ const MusicPage = () => {
 
 
             {/* ── Trending on Audius ── */}
-            <section className="music-section">
+            <section className="music-section glass-panel">
                 <div className="section-header">
-                    <h3>Trending on Audius</h3>
+                    <div className="header-info">
+                        <h3>Trending on Audius</h3>
+                        <p>Real-time vibes from the decentralised music community</p>
+                    </div>
                     <button 
-                        className="jukebox-nav-btn" 
+                        className="jukebox-nav-btn glass-card" 
                         onClick={() => navigate('/community/stride-official/jukebox')}
                     >
                         <Music size={16} /> Jukebox
@@ -284,31 +288,41 @@ const MusicPage = () => {
                         return (
                             <div
                                 key={song.id}
-                                className={`song-row${isActive ? ' active' : ''}`}
+                                className={`song-row glass-card${isActive ? ' active' : ''}`}
                                 onClick={() => handlePlaySong(song)}
                             >
-                                <span className="song-num">
-                                    {isActive && isPlaying
-                                        ? <Music size={14} />
-                                        : idx + 1}
-                                </span>
-                                <ImageWithFallback src={song.cover} className="song-cover" alt={song.title} />
+                                <div className="song-rank-area">
+                                    <span className="song-num">
+                                        {isActive && isPlaying
+                                            ? <div className="playing-pulse" />
+                                            : idx + 1}
+                                    </span>
+                                </div>
+                                <div className="song-cover-wrapper">
+                                    <ImageWithFallback src={song.cover} className={`song-cover ${isActive && isPlaying ? 'vinyl-spin' : ''}`} alt={song.title} />
+                                    {isActive && isPlaying && <div className="cover-glow-orb" />}
+                                </div>
                                 <div className="song-info">
                                     <span className="song-title">{song.title}</span>
                                     <span className="song-artist">{song.artist}</span>
                                 </div>
-                                <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
-                                    <Share2 size={16} />
-                                </button>
-                                <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
-                                    <Plus size={16} />
-                                </button>
-                                <span className="song-duration">{formatTime(song.duration)}</span>
+                                <div className="song-action-group">
+                                    <button className="song-share-btn" onClick={(e) => handleShareSong(e, song)}>
+                                        <Share2 size={16} />
+                                    </button>
+                                    <button className="song-add-btn" onClick={(e) => { e.stopPropagation(); setAddingToPlaylist(song); }}>
+                                        <Plus size={16} />
+                                    </button>
+                                    <span className="song-duration">{formatTime(song.duration)}</span>
+                                </div>
                             </div>
                         );
                     })}
                     {allSongs.length === 0 && (
-                        <div className="loading-inline">Discovering vibes on Audius...</div>
+                        <div className="loading-vibe-pulse">
+                            <Music size={40} className="pulse-icon" />
+                            <p>Discovering vibes on Audius...</p>
+                        </div>
                     )}
                 </div>
             </section>

@@ -21,50 +21,66 @@ const Visualizer = ({ analyzer, isPlaying }) => {
             const height = canvas.height;
             ctx.clearRect(0, 0, width, height);
 
-            const barWidth = (width / bufferLength) * 2.5;
+            const barWidth = (width / bufferLength) * 2;
             let barHeight;
             let x = 0;
+
+            // Calculate average frequency for Luminance syncing
+            const average = dataArray.reduce((acc, val) => acc + val, 0) / bufferLength;
+            const glowIntensity = Math.min(average / 128, 1);
 
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = (dataArray[i] / 255) * height;
 
-                // Vibrant Gradient for bars
+                // Premium Palette: Deep Indigo to Hot Pink
                 const gradient = ctx.createLinearGradient(0, height, 0, 0);
-                gradient.addColorStop(0, '#8b5cf6'); // Primary purple
-                gradient.addColorStop(1, '#ec4899'); // Accent pink
+                gradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)');
+                gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.8)');
+                gradient.addColorStop(1, 'rgba(236, 72, 153, 1)');
 
                 ctx.fillStyle = gradient;
                 
-                // Add Glow Effect
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#8b5cf640';
+                // Dynamic Neon Glow
+                ctx.shadowBlur = 15 * glowIntensity;
+                ctx.shadowColor = i % 2 === 0 ? '#8b5cf6' : '#ec4899';
                 
-                // Rounded bar effect
-                const radius = 4;
-                const minHeight = 4;
-                const finalHeight = Math.max(barHeight, minHeight);
-                
-                ctx.beginPath();
-                ctx.roundRect(x, height - finalHeight, barWidth - 3, finalHeight, [radius, radius, 2, 2]);
-                ctx.fill();
+                // Mirror Spectrum Effect
+                const halfWidth = width / 2;
+                const mirrorX_Right = halfWidth + x;
+                const mirrorX_Left = halfWidth - x - barWidth;
+
+                const drawBar = (bx) => {
+                    const radius = 6;
+                    const finalHeight = Math.max(barHeight, 3);
+                    ctx.beginPath();
+                    ctx.roundRect(bx, height - finalHeight, barWidth - 4, finalHeight, [radius, radius, 2, 2]);
+                    ctx.fill();
+                };
+
+                drawBar(mirrorX_Right);
+                drawBar(mirrorX_Left);
 
                 x += barWidth;
+                if (halfWidth + x > width) break;
             }
         };
 
         if (isPlaying) {
             draw();
         } else {
-            // Draw static/empty state
+            // Premium Idle State: Breathing bars
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const barWidth = (canvas.width / bufferLength) * 2.5;
+            const barWidth = (canvas.width / bufferLength) * 2;
+            const halfWidth = canvas.width / 2;
             let x = 0;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
             for (let i = 0; i < bufferLength; i++) {
                 ctx.beginPath();
-                ctx.roundRect(x, canvas.height - 4, barWidth - 2, 4, [2, 2, 0, 0]);
+                ctx.roundRect(halfWidth + x, canvas.height - 4, barWidth - 4, 4, [2, 2, 0, 0]);
+                ctx.roundRect(halfWidth - x - barWidth, canvas.height - 4, barWidth - 4, 4, [2, 2, 0, 0]);
                 ctx.fill();
                 x += barWidth;
+                if (halfWidth + x > canvas.width) break;
             }
         }
 
