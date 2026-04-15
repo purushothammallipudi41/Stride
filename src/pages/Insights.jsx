@@ -1,17 +1,58 @@
-import React, { useState } from 'react';
-import { ChevronLeft, Eye, Satellite, Zap, BarChart3, Calendar, Wallet, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import './Insights.css';
+import { BASE_URL } from '../utils/api';
+import { getStoredUser } from '../utils/storage';
 
 const Insights = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('performance');
+    const [statsData, setStatsData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const user = getStoredUser();
+    const username = user?.username || 'guest';
+
+    useEffect(() => {
+        fetch(`${BASE_URL}/api/artist/stats/${username}`)
+            .then(res => res.json())
+            .then(data => {
+                setStatsData(data);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch stats:", err);
+                setIsLoading(false);
+            });
+    }, [username]);
 
     const stats = [
-        { label: 'IMPRESSIONS', value: '0', change: '0% this week', icon: Eye, color: '#3b82f6' },
-        { label: 'TOTAL REACH', value: '0', change: '0% this week', icon: Satellite, color: '#a855f7' },
-        { label: 'ENGAGEMENT', value: '0%', change: '0% this week', icon: Zap, color: '#eab308' },
-        { label: 'ZAPS RECEIVED', value: '0', change: '8.4% this week', icon: Zap, color: '#ec4899', positive: true },
+        { 
+            label: 'IMPRESSIONS', 
+            value: statsData?.summary?.totalPlays?.toLocaleString() || '0', 
+            change: statsData?.summary?.trend || '0% this week', 
+            icon: Eye, 
+            color: '#3b82f6' 
+        },
+        { 
+            label: 'TOTAL REACH', 
+            value: statsData?.summary?.monthlyListeners?.toLocaleString() || '0', 
+            change: '+2.4% this week', 
+            icon: Satellite, 
+            color: '#a855f7' 
+        },
+        { 
+            label: 'FOLLOWERS', 
+            value: statsData?.summary?.followers?.toLocaleString() || '0', 
+            change: '+12 this week', 
+            icon: Zap, 
+            color: '#eab308' 
+        },
+        { 
+            label: 'ZAPS RECEIVED', 
+            value: statsData?.summary?.totalTips?.toLocaleString() || '0', 
+            change: '+8.4% this week', 
+            icon: Zap, 
+            color: '#ec4899', 
+            positive: true 
+        },
     ];
 
     return (
@@ -71,15 +112,35 @@ const Insights = () => {
                     <div className="chart-header">
                         <h3>Engagement History</h3>
                     </div>
-                    <div className="chart-placeholder">
-                        <div className="chart-lines">
-                            {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
+                    {statsData?.stats?.length > 0 ? (
+                        <div className="chart-container-v2">
+                            <div className="bar-chart-v2">
+                                {statsData.stats.slice(0, 7).map((track, i) => {
+                                    const maxVal = Math.max(...statsData.stats.map(s => s.listens || 1));
+                                    const height = ((track.listens || 0) / maxVal) * 100;
+                                    return (
+                                        <div key={i} className="bar-wrapper">
+                                            <div className="bar-value">{(track.listens || 0)}</div>
+                                            <div className="bar-pill" style={{ height: `${Math.max(height, 5)}%` }}>
+                                                <div className="bar-glow" />
+                                            </div>
+                                            <div className="bar-label">{track.trackId?.substring(0, 6)}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
-                        <div className="empty-chart-msg">
-                            <BarChart3 size={40} className="opacity-10 mb-2" />
-                            <p>No engagement data yet</p>
+                    ) : (
+                        <div className="chart-placeholder">
+                            <div className="chart-lines">
+                                {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
+                            </div>
+                            <div className="empty-chart-msg">
+                                <BarChart3 size={40} className="opacity-10 mb-2" />
+                                <p>No engagement data yet</p>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </main>
         </div>

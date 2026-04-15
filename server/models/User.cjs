@@ -37,7 +37,8 @@ const userSchema = new mongoose.Schema({
     walletAddress: { type: String, default: null },
     hasUnreadMessages: { type: Boolean, default: false },
     balance: { type: Number, default: 100 }, // Starting balance for beta users
-    transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]
+    transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }],
+    achievements: [{ type: String, default: [] }]
 }, { timestamps: true });
 
 
