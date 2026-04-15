@@ -59,6 +59,7 @@ const Sidebar = () => {
                         </>
                     );
 
+                    if (isCreate) {
                         return (
                             <button
                                 key={item.label}
@@ -71,6 +72,7 @@ const Sidebar = () => {
                                 </div>
                             </button>
                         );
+                    }
 
                     if (isExplore) {
                         return (
