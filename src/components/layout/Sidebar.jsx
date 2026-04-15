@@ -1,21 +1,23 @@
-import { Home, Compass, Plus, User, Layout } from 'lucide-react';
+import { Home, Search, Plus, MoreHorizontal } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
+import { getStoredUser } from '../../utils/storage';
+import Avatar from '../common/Avatar';
 import logo from '../../assets/stride-logo.png';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { openCreateModal, openExplorer } = useUI();
     const { t } = useTranslation();
-
+    const user = getStoredUser();
 
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
-        { icon: Compass, label: t('nav.explore'), path: '/explore' },
-        { icon: Plus, label: t('nav.create'), action: 'create' }, // Added central create action
-        { icon: User, label: t('nav.profile'), path: '/profile' },
-        { icon: Layout, label: t('common.more'), action: 'explore' },
+        { icon: Search, label: t('nav.explore'), path: '/explore' },
+        { icon: Plus, label: t('nav.create'), action: 'create' },
+        { icon: 'avatar', label: t('nav.profile'), path: '/profile' },
+        { icon: MoreHorizontal, label: t('common.more'), action: 'explore' },
     ];
 
     return (
@@ -29,13 +31,29 @@ const Sidebar = () => {
             </div>
 
             <nav className="sidebar-nav">
-                {navItems.map((item) => {
+                 {navItems.map((item) => {
                     const isCreate = item.action === 'create';
                     const isExplore = item.action === 'explore';
-                    const linkContent = (
+                    const isAvatar = item.icon === 'avatar';
+
+                    const NavIcon = ({ isActive }) => {
+                        if (isAvatar) {
+                            return (
+                                <div className={`nav-avatar-wrapper ${isActive ? 'active-avatar' : ''}`}>
+                                    <Avatar 
+                                        src={user.avatar || `https://ui-avatars.com/api/?name=${user.username || '?'}&background=random&color=fff`} 
+                                        size={28} 
+                                    />
+                                </div>
+                            );
+                        }
+                        return <item.icon size={26} strokeWidth={isActive ? 2.8 : 2.5} fill={isActive && !isCreate ? 'currentColor' : 'none'} />;
+                    };
+
+                    const linkContent = (isActive) => (
                         <>
                             <div className="nav-icon-wrapper">
-                                <item.icon size={26} strokeWidth={2.5} />
+                                <NavIcon isActive={isActive} />
                             </div>
                             <span className="nav-label">{item.label}</span>
                         </>
@@ -49,7 +67,7 @@ const Sidebar = () => {
                                 onClick={openCreateModal}
                                 aria-label={item.label}
                             >
-                                {linkContent}
+                                {linkContent(false)}
                             </button>
                         );
                     }
@@ -62,7 +80,7 @@ const Sidebar = () => {
                                 onClick={openExplorer}
                                 aria-label={item.label}
                             >
-                                {linkContent}
+                                {linkContent(false)}
                             </button>
                         );
                     }
@@ -74,7 +92,7 @@ const Sidebar = () => {
                             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                             aria-label={item.label}
                         >
-                            {linkContent}
+                            {({ isActive }) => linkContent(isActive)}
                         </NavLink>
                     );
                 })}
