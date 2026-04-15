@@ -1,0 +1,104 @@
+.global-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.global-modal-overlay.is-open {
+    opacity: 1;
+}
+
+.global-modal-container {
+    width: 100%;
+    background: rgba(18, 18, 26, 0.8) !important;
+    border-radius: 28px;
+    position: relative;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.global-modal-overlay.is-open .global-modal-container {
+    transform: translateY(0) scale(1);
+}
+
+.global-modal-header {
+    padding: 24px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.global-modal-title {
+    font-family: var(--font-header);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.global-modal-close {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+}
+
+.global-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.global-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* Animations for closing */
+.global-modal-overlay.is-closing {
+    opacity: 0;
+}
+
+.global-modal-overlay.is-closing .global-modal-container {
+    transform: translateY(10px) scale(0.98);
+}
+
+@media (max-width: 640px) {
+    .global-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .global-modal-container {
+        border-radius: 32px 32px 0 0;
+        max-height: 92vh;
+        transform: translateY(100%);
+    }
+
+    .global-modal-overlay.is-open .global-modal-container {
+        transform: translateY(0);
+    }
+}

@@ -1,6 +1,7 @@
-import { X, Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag, Music, Settings, Layout, LogOut, Wallet } from 'lucide-react';
+import { Sparkles, Film, Radio, Globe, Users, Trophy, BarChart3, ShoppingBag, Music, Settings, Layout, LogOut, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUI } from '../hooks/useUI';
+import GlobalModal from './common/GlobalModal';
 import './ExploreModal.css';
 
 const ExploreModal = () => {
@@ -38,55 +39,55 @@ const ExploreModal = () => {
     };
 
     return (
-        <div className="explore-overlay" onClick={closeExplorer}>
-            <div className="explore-modal shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
-                <button className="explore-close" onClick={closeExplorer}>
-                    <X size={24} />
-                </button>
+        <GlobalModal 
+            isOpen={isExplorerOpen} 
+            onClose={closeExplorer}
+            showClose={true}
+            maxWidth="500px"
+            className="explore-standardized"
+        >
+            <div className="explore-header">
+                <h1 className="explore-title">Explore <span className="text-gradient">Stride</span></h1>
+                <p className="explore-subtitle">Discover everything rhythmically</p>
+            </div>
 
-                <div className="explore-header">
-                    <h1 className="explore-title">Explore <span className="text-gradient">Stride</span></h1>
-                    <p className="explore-subtitle">Discover everything rhythmically</p>
+            <div className="explore-hero-card" onClick={() => handleNavigate('/explore')}>
+                <div className="hero-icon-wrapper">
+                    <Sparkles size={32} className="hero-sparkle" />
                 </div>
-
-                <div className="explore-hero-card" onClick={() => handleNavigate('/explore')}>
-                    <div className="hero-icon-wrapper">
-                        <Sparkles size={32} className="hero-sparkle" />
-                    </div>
-                    <div className="hero-info">
-                        <h3>Stride AI</h3>
-                        <p>Intelligent rhythms</p>
-                    </div>
-                    <div className="hero-dot"></div>
+                <div className="hero-info">
+                    <h3>Stride AI</h3>
+                    <p>Intelligent rhythms</p>
                 </div>
+                <div className="hero-dot"></div>
+            </div>
 
-                <div className="explore-grid">
-                    {mainItems.map((item) => (
-                        <div key={item.id} className="explore-item-card" onClick={() => handleNavigate(item.path)}>
-                            <div className="item-icon-wrapper">
-                                <item.icon size={24} />
-                            </div>
-                            <span>{item.label}</span>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="explore-footer">
-                    <div className="explore-item-card settings" onClick={() => handleNavigate('/settings')}>
+            <div className="explore-grid">
+                {mainItems.map((item) => (
+                    <div key={item.id} className="explore-item-card" onClick={() => handleNavigate(item.path)}>
                         <div className="item-icon-wrapper">
-                            <Settings size={24} />
+                            <item.icon size={24} />
                         </div>
-                        <span>Settings</span>
+                        <span>{item.label}</span>
                     </div>
-                    <div className="explore-item-card logout" onClick={handleLogout}>
-                        <div className="item-icon-wrapper">
-                            <LogOut size={24} />
-                        </div>
-                        <span>Logout</span>
+                ))}
+            </div>
+
+            <div className="explore-footer">
+                <div className="explore-item-card settings" onClick={() => handleNavigate('/settings')}>
+                    <div className="item-icon-wrapper">
+                        <Settings size={24} />
                     </div>
+                    <span>Settings</span>
+                </div>
+                <div className="explore-item-card logout" onClick={handleLogout}>
+                    <div className="item-icon-wrapper">
+                        <LogOut size={24} />
+                    </div>
+                    <span>Logout</span>
                 </div>
             </div>
-        </div>
+        </GlobalModal>
     );
 };
 

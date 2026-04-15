@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Globe, Search, Plus, BookOpen, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Globe, Search, Plus, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/layout/PageHeader';
 import './Articles.css';
 
 const Articles = () => {
@@ -9,36 +10,12 @@ const Articles = () => {
 
     return (
         <div className="articles-container animate-fade-in">
-            <header className="articles-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
-                    <ChevronLeft size={18} /> Back to Dashboard
-                </button>
-
-                <div className="header-main">
-                    <div className="logo-wrapper">
-                        <Globe size={48} className="articles-logo-icon" />
-                    </div>
-                    <h1 className="articles-title">Stride Articles</h1>
-                    <p className="articles-subtitle">
-                        Premium long-form content, deep dives, and creator stories.
-                    </p>
-                </div>
-
-                <div className="header-actions">
-                    <div className="search-wrapper">
-                        <Search size={20} className="search-icon" />
-                        <input 
-                            type="text" 
-                            placeholder="Search articles..." 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <button className="create-article-btn">
-                        <Plus size={20} /> Create Article
-                    </button>
-                </div>
-            </header>
+            <PageHeader title="Stride Articles" />
+            
+            <div className="articles-header-subtitle-area">
+                <Globe size={48} className="articles-logo-icon" />
+                <p>Premium long-form content, deep dives, and creator stories.</p>
+            </div>
 
             <main className="articles-content">
                 <div className="empty-state">

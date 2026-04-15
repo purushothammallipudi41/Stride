@@ -111,6 +111,7 @@ h1, h2, h3, h4, .font-header {
   backdrop-filter: blur(var(--glass-blur));
   border: var(--glass-border);
   box-shadow: var(--shadow-premium);
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .glass-card {
@@ -214,10 +215,24 @@ h1, h2, h3, h4, .font-header {
 .main-content {
   flex: 1;
   position: relative;
-  overflow-y: auto; /* Enable scrolling on the main surface */
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
   height: 100%;
   -webkit-overflow-scrolling: touch;
+  /* Premium Scroll Mask */
+  mask-image: linear-gradient(to bottom, 
+    transparent 0%, 
+    black 40px, 
+    black calc(100% - 80px), 
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, 
+    transparent 0%, 
+    black 40px, 
+    black calc(100% - 80px), 
+    transparent 100%
+  );
 }
 
 .full-view-container {

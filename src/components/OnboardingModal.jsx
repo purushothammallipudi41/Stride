@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronRight, Music, Users, Video, X } from 'lucide-react';
+import { ChevronRight, Music, Users, Video } from 'lucide-react';
+import GlobalModal from './common/GlobalModal';
 import './OnboardingModal.css';
 
 const OnboardingModal = ({ isOpen, onClose }) => {
@@ -43,41 +43,41 @@ const OnboardingModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="onboarding-overlay glass-effect">
-            <div className="onboarding-card glass-card">
-                <button className="onboarding-close" onClick={onClose}>
-                    <X size={20} />
-                </button>
-
-                <div className="onboarding-content">
-                    <div className="onboarding-icon-container" style={{ color: steps[step].color }}>
-                        {steps[step].icon}
-                    </div>
-                    
-                    <h2>{steps[step].title}</h2>
-                    <p>{steps[step].description}</p>
+        <GlobalModal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            showClose={true}
+            maxWidth="480px"
+            className="onboarding-standardized"
+        >
+            <div className="onboarding-content">
+                <div className="onboarding-icon-container" style={{ color: steps[step].color }}>
+                    {steps[step].icon}
                 </div>
-
-                <div className="onboarding-footer">
-                    <div className="onboarding-dots">
-                        {steps.map((_, i) => (
-                            <div key={i} className={`onboarding-dot ${i === step ? 'active' : ''}`} />
-                        ))}
-                    </div>
-                    
-                    <button className="onboarding-next-btn" onClick={handleNext}>
-                        {step === steps.length - 1 ? 'Get Started' : 'Next'}
-                        <ChevronRight size={18} />
-                    </button>
-                    
-                    {step < steps.length - 1 && (
-                        <button className="onboarding-skip" onClick={onClose}>
-                            Skip
-                        </button>
-                    )}
-                </div>
+                
+                <h2>{steps[step].title}</h2>
+                <p>{steps[step].description}</p>
             </div>
-        </div>
+
+            <div className="onboarding-footer">
+                <div className="onboarding-dots">
+                    {steps.map((_, i) => (
+                        <div key={i} className={`onboarding-dot ${i === step ? 'active' : ''}`} />
+                    ))}
+                </div>
+                
+                <button className="onboarding-next-btn" onClick={handleNext}>
+                    {step === steps.length - 1 ? 'Get Started' : 'Next'}
+                    <ChevronRight size={18} />
+                </button>
+                
+                {step < steps.length - 1 && (
+                    <button className="onboarding-skip" onClick={onClose}>
+                        Skip
+                    </button>
+                )}
+            </div>
+        </GlobalModal>
     );
 };
 

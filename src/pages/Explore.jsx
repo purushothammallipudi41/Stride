@@ -26,6 +26,7 @@ const Explore = () => {
     const [tagResults, setTagResults] = useState({ posts: [], playlists: [], communities: [] });
     const [recommendedFeed, setRecommendedFeed] = useState({ recommendedTracks: [], trendingCommunities: [] });
     const [vibeLeaderboard, setVibeLeaderboard] = useState([]);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
 
 
@@ -169,15 +170,17 @@ const Explore = () => {
                 <button className={`explore-tab ${searchQuery === 'vibing' ? 'active' : ''}`} onClick={() => setSearchQuery('vibing')}>Now Vibing</button>
             </div>
 
-            <div className="explore-header-section sticky-search">
-                <div className="explore-search-wrapper">
-                    <Search size={20} className="search-icon-abs" />
+            <div className={`explore-header-section sticky-search ${isSearchFocused ? 'search-focused' : ''}`}>
+                <div className="explore-search-wrapper glass-panel">
+                    <Search size={20} className={`search-icon-abs ${isSearchFocused ? 'focused' : ''}`} />
                     <input 
                         type="text" 
                         placeholder={t('explore.search_placeholder')} 
                         value={searchQuery}
                         onChange={handleSearchInput}
                         onKeyDown={handleSearch}
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
                         className="search-input"
                     />
                     {searchQuery && (
@@ -187,6 +190,8 @@ const Explore = () => {
                     )}
                 </div>
             </div>
+
+            {isSearchFocused && <div className="search-spotlight-overlay animate-fade-in" />}
 
             {searchQuery === 'vibing' ? (
                 <div className="vibing-activity-container animate-fade-in">

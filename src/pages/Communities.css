@@ -2,51 +2,20 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 0 24px 24px; /* No top padding */
+    padding: 24px;
     background: #0f0f1a;
     color: white;
 }
 
-.discover-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: #0f0f1a;
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    padding: calc(20px + env(safe-area-inset-top)) 0 20px;
-    height: calc(85px + env(safe-area-inset-top));
-    margin-bottom: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.back-btn-icon {
-    background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-radius: 12px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-}
-
-.title-group h1 {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-
-.title-group p {
-    color: #64748b;
-    font-size: 14px;
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .search-filter-section {
+    margin-top: 24px;
     margin-bottom: 32px;
+    animation: slideUpFade 0.6s ease-out backwards;
 }
 
 .discover-search-wrapper {
@@ -71,12 +40,25 @@
     padding: 12px 16px 12px 48px;
     color: white;
     font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.discover-search-wrapper input:focus {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #a855f7;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+    outline: none;
 }
 
 .discover-tabs {
     display: flex;
     gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
 }
+
+.discover-tabs::-webkit-scrollbar { display: none; }
 
 .discover-tab-btn {
     padding: 8px 16px;
@@ -91,6 +73,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
 }
 
 .discover-tab-btn:hover {
@@ -102,6 +85,7 @@
     background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
     color: white;
     border: none;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
 }
 
 .sparkle {
@@ -119,6 +103,15 @@
     border-radius: 24px;
     overflow: hidden;
     position: relative;
+    animation: slideUpFade 0.7s ease-out 0.2s backwards;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featured-community-card:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
 
 .community-banner {
@@ -131,7 +124,7 @@
 .banner-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, #0f0f1a, transparent);
+    background: linear-gradient(to top, #0f0f1a 10%, transparent);
 }
 
 .community-card-info {
@@ -154,6 +147,12 @@
     align-items: center;
     justify-content: center;
     color: #a855f7;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+}
+
+.featured-community-card:hover .community-avatar-large {
+    transform: rotate(5deg) scale(1.05);
 }
 
 .community-details {
@@ -202,6 +201,7 @@
     height: 6px;
     border-radius: 50%;
     background: #22c55e;
+    box-shadow: 0 0 10px #22c55e;
 }
 
 .category-label {
@@ -215,7 +215,7 @@
 }
 
 .open-community-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-primary);
     border: none;
     border-radius: 10px;
     padding: 10px 24px;
@@ -223,18 +223,28 @@
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px var(--color-primary-glow);
 }
 
 .open-community-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px var(--color-primary-glow);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-out;
+@media (max-width: 640px) {
+    .community-card-info {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 20px 20px;
+    }
+    
+    .community-avatar-large {
+        margin-top: -60px;
+    }
+    
+    .open-community-btn {
+        width: 100%;
+        margin-top: 16px;
+    }
 }

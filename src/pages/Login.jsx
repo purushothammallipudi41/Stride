@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Globe, Smartphone, Loader2 } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
+import { useUI } from '../hooks/useUI';
 import logo from '../assets/stride-logo.png';
 import './Login.css';
 
@@ -12,7 +12,10 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const navigate = useNavigate();
+  const { addNotification } = useUI();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +84,15 @@ const Login = () => {
       navigate('/');
     }, 1200);
   };
+  
+  const handleForgotClick = (e) => {
+    e.preventDefault();
+    addNotification({
+      title: 'Password Reset',
+      message: 'A reset link has been sent to your registered email address.',
+      type: 'info'
+    });
+  };
 
   return (
     <div className="login-page">
@@ -100,36 +112,44 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form" noValidate>
-          <div className="input-group">
-            <label htmlFor="email">Email or Username</label>
+          <div className={`input-group floating-input ${emailFocused || email ? 'active' : ''}`}>
             <div className="input-with-icon">
-              <Mail className="field-icon" size={18} />
+              <Mail className={`field-icon ${emailFocused ? 'focused' : ''}`} size={18} />
               <input 
                 type="text" 
                 id="email" 
-                placeholder="you@example.com or user123"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
                 required
               />
+              <label htmlFor="email" className="floating-label">Email or Username</label>
             </div>
           </div>
 
-          <div className="input-group">
+          <div className={`input-group floating-input ${passwordFocused || password ? 'active' : ''}`}>
             <div className="label-row">
-              <label htmlFor="password">Password</label>
-              <a href="#forgot" className="forgot-link">Forgot?</a>
+              <button 
+                type="button" 
+                onClick={handleForgotClick} 
+                className="forgot-link-btn"
+              >
+                Forgot?
+              </button>
             </div>
             <div className="input-with-icon">
-              <Lock className="field-icon" size={18} />
+              <Lock className={`field-icon ${passwordFocused ? 'focused' : ''}`} size={18} />
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password" 
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 required
               />
+              <label htmlFor="password" className="floating-label">Password</label>
               <button 
                 type="button" 
                 className="toggle-password" 
@@ -160,6 +180,7 @@ const Login = () => {
             className="login-submit-btn text-gradient-bg"
             disabled={isLoading}
           >
+            <div className="btn-shimmer" />
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>

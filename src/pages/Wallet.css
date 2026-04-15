@@ -197,86 +197,104 @@
 .tx-amount.positive { color: #10b981; }
 .tx-amount.negative { color: #f43f5e; }
 
-/* ── Modal & Top-up ── */
-.wallet-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 10000;
+/* ── Standardized Top-up Modal Content ── */
+.wallet-modal-content {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    flex-direction: column;
 }
 
-.wallet-modal {
-    width: 100%;
-    max-width: 440px;
-    background: var(--color-surface);
-    border: var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    box-shadow: var(--shadow-premium);
+.modal-description {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: 24px;
 }
 
 .amount-options {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 24px 0;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .amount-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    padding: 12px 0;
-    border-radius: 12px;
+    padding: 14px 0;
+    border-radius: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.amount-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .amount-btn.active {
     background: var(--color-primary);
     border-color: var(--color-primary);
-    box-shadow: 0 4px 12px var(--color-primary-glow);
+    box-shadow: 0 4px 15px var(--color-primary-glow);
+    transform: translateY(-2px);
 }
 
 .custom-amount {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.custom-amount label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .custom-amount input {
     width: 100%;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 14px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px;
+    border-radius: 16px;
     color: white;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-top: 8px;
+    font-size: 1.25rem;
+    font-weight: 800;
     outline: none;
+    transition: all 0.3s;
+}
+
+.custom-amount input:focus {
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
 }
 
 .confirm-topup-btn {
     width: 100%;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-    color: white;
+    padding: 18px;
+    border-radius: 20px;
     border: none;
-    padding: 16px;
-    border-radius: 16px;
+    color: white;
     font-weight: 800;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
-    box-shadow: 0 10px 20px var(--color-primary-glow);
-    transition: transform 0.2s;
+    box-shadow: 0 10px 25px var(--color-primary-glow);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.confirm-topup-btn:hover {
-    transform: scale(1.02);
+.confirm-topup-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 15px 35px var(--color-primary-glow);
+}
+
+.confirm-topup-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* ── Web3 Styles ── */

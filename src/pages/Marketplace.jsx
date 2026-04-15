@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShoppingBag, ChevronLeft, Coins, Rocket, Guitar, Bot, Disc, GlassWater, Music, Satellite, BatteryFull } from 'lucide-react';
+import { ShoppingBag, Coins, Rocket, Guitar, Bot, Disc, GlassWater, Music, Satellite, BatteryFull } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/layout/PageHeader';
 import './Marketplace.css';
 
 const Marketplace = () => {
@@ -36,21 +37,19 @@ const Marketplace = () => {
 
     return (
         <div className="marketplace-container animate-fade-in">
-            <header className="marketplace-header">
-                <div className="header-left">
-                    <button className="back-btn-icon" onClick={() => navigate(-1)}>
-                        <ChevronLeft size={24} />
-                    </button>
-                    <div className="title-group">
-                        <h1>Stride Marketplace</h1>
-                        <p>Discover exclusive sticker packs and premium digital assets</p>
+            <PageHeader 
+                title="Stride Marketplace" 
+                rightElement={
+                    <div className="vibe-tokens-badge-v2">
+                        <Coins size={16} className="token-icon" />
+                        <span>950 Vibe Tokens</span>
                     </div>
-                </div>
-                <div className="vibe-tokens-badge">
-                    <Coins size={16} className="token-icon" />
-                    <span>950 Vibe Tokens</span>
-                </div>
-            </header>
+                }
+            />
+            
+            <div className="marketplace-header-subtitle">
+                <p>Discover exclusive sticker packs and premium digital assets</p>
+            </div>
 
             <nav className="marketplace-tabs">
                 <button 

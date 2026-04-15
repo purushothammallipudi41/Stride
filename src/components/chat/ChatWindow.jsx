@@ -314,11 +314,15 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         />
                     </div>
                     <div className="chat-header-info">
-                        <div className="chat-header-name-row">
-                            <span className="chat-header-name">{activeChat.name || activeChat.username}</span>
-                            {activeChat.isVerified && <VerificationBadge size={14} />}
-                        </div>
-                        <span className="chat-header-status">{typingUsers?.has(activeChat.username) ? <span className="text-gradient">typing...</span> : 'Active now'}</span>
+                        <span className="chat-header-status">
+                            {typingUsers?.has(activeChat.username) ? (
+                                <span className="text-gradient-bg" style={{ fontWeight: 800, fontSize: '0.7rem' }}>TYPING...</span>
+                            ) : (
+                                <span className="status-indicator-live">
+                                    <span className="live-dot" /> Active now
+                                </span>
+                            )}
+                        </span>
                     </div>
                 </div>
                 {!hideCallButtons && (
@@ -422,6 +426,16 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             </div>
                         );
                     })}
+                    
+                    {typingUsers?.has(activeChat.username) && (
+                        <div className="message-v2 them">
+                            <div className="typing-indicator-v4">
+                                <span />
+                                <span />
+                                <span />
+                            </div>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
             </div>

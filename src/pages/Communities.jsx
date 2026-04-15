@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Search, Users, ShieldCheck } from 'lucide-react';
+import { Search, Users, ShieldCheck } from 'lucide-react';
+import PageHeader from '../components/layout/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { useServer } from '../hooks/useServer';
 import './Communities.css';
@@ -39,15 +40,7 @@ const Communities = () => {
 
     return (
         <div className="communities-discover-container animate-fade-in">
-            <header className="discover-header">
-                <button className="back-btn-icon" onClick={() => navigate(-1)}>
-                    <ChevronLeft size={24} />
-                </button>
-                <div className="title-group">
-                    <h1>Discover Communities</h1>
-                    <p>Find and join vibrant servers on Stride</p>
-                </div>
-            </header>
+            <PageHeader title="Discover Communities" />
 
             <div className="search-filter-section">
                 <div className="discover-search-wrapper">

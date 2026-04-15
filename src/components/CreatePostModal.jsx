@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { X, Image, Hash, Music, Send, Loader2, Camera, FolderOpen } from 'lucide-react';
+import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { getStoredUser } from '../utils/storage';
 import { BASE_URL } from '../utils/api';
+import GlobalModal from './common/GlobalModal';
 import './CreatePostModal.css';
 
 const CreatePostModal = () => {
-    const { closeCreateModal } = useUI();
+    const { isCreateModalOpen, closeCreateModal } = useUI();
     const user = getStoredUser();
     const [caption, setCaption] = useState('');
     const [tags, setTags] = useState('');
@@ -93,118 +93,117 @@ const CreatePostModal = () => {
     };
 
     return (
-        <div className="modal-overlay animate-fade-in" onClick={closeCreateModal}>
-            <div className="create-post-modal glass-panel" onClick={e => e.stopPropagation()}>
-                <div className="modal-top">
-                    <h3>Create New Post</h3>
-                    <button className="close-btn" onClick={closeCreateModal}><X size={20} /></button>
+        <GlobalModal 
+            isOpen={isCreateModalOpen} 
+            onClose={closeCreateModal}
+            title="Create New Post"
+            maxWidth="550px"
+            className="create-post-standardized"
+        >
+            <form onSubmit={handleSubmit} className="modal-content-wrapper">
+                <div className="modal-body-scroll">
+                    <div className="user-indicator">
+                        <img src={user?.avatar || '🎧'} alt="User" className="mini-avatar" />
+                        <span className="username">@{user?.username || 'user'}</span>
+                    </div>
+
+                    <textarea 
+                        placeholder="What's the rhythm today?" 
+                        value={caption}
+                        onChange={(e) => setCaption(e.target.value)}
+                        autoFocus
+                    />
+
+                    {mediaPreview && (
+                        <div className="media-preview">
+                            <img src={mediaPreview} alt="Preview" />
+                            <button type="button" className="remove-media" onClick={() => setMediaPreview(null)}><X size={14} /></button>
+                        </div>
+                    )}
+
+                    <div className="tag-input-wrapper">
+                        <Hash size={16} className="tag-icon" />
+                        <input 
+                            type="text" 
+                            placeholder="Add tags (comma separated)" 
+                            value={tags}
+                            onChange={(e) => setTags(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="attachment-section">
+                        <p className="section-label">ADD TO YOUR POST</p>
+                        <div className="attachment-grid">
+                            <button type="button" className="attachment-tile" onClick={handleMediaClick}>
+                                <div className="tile-icon gallery-bg"><FolderOpen size={20} /></div>
+                                <span>Gallery</span>
+                            </button>
+                            <button type="button" className="attachment-tile" onClick={handleCameraClick}>
+                                <div className="tile-icon camera-bg"><Camera size={20} /></div>
+                                <span>Camera</span>
+                            </button>
+                            <button type="button" className="attachment-tile">
+                                <div className="tile-icon music-bg"><Music size={20} /></div>
+                                <span>Music</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {isSubmitting && (
+                        <div className="syncing-overlay animate-fade-in">
+                            <div className="syncing-content">
+                                <Loader2 className="animate-spin" size={40} />
+                                <p>Syncing to Cloud...</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {isSuccess && (
+                        <div className="success-overlay animate-fade-in">
+                            <div className="success-content">
+                                <div className="check-icon">✓</div>
+                                <p>Post Synced! 🚀</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="error-message animate-shake">
+                            {error}
+                        </div>
+                    )}
                 </div>
-                
-                <form onSubmit={handleSubmit} className="modal-content-wrapper">
-                    <div className="modal-body-scroll">
-                        <div className="user-indicator">
-                            <img src={user?.avatar || '🎧'} alt="User" className="mini-avatar" />
-                            <span className="username">@{user?.username || 'user'}</span>
-                        </div>
 
-                        <textarea 
-                            placeholder="What's the rhythm today?" 
-                            value={caption}
-                            onChange={(e) => setCaption(e.target.value)}
-                            autoFocus
-                        />
-
-                        {mediaPreview && (
-                            <div className="media-preview">
-                                <img src={mediaPreview} alt="Preview" />
-                                <button type="button" className="remove-media" onClick={() => setMediaPreview(null)}><X size={14} /></button>
-                            </div>
+                <div className="modal-footer">
+                    <input 
+                        type="file" 
+                        hidden 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange}
+                        accept="image/*"
+                    />
+                    <input 
+                        type="file" 
+                        hidden 
+                        ref={cameraInputRef} 
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        capture="environment"
+                    />
+                    <button 
+                        type="submit" 
+                        className="submit-post-btn text-gradient-bg"
+                        disabled={isSubmitting || (!caption.trim() && !mediaPreview)}
+                    >
+                        {isSubmitting ? (
+                            <Loader2 className="animate-spin" size={20} />
+                        ) : (
+                            <><Send size={18} /> Post</>
                         )}
-
-                        <div className="tag-input-wrapper">
-                            <Hash size={16} className="tag-icon" />
-                            <input 
-                                type="text" 
-                                placeholder="Add tags (comma separated)" 
-                                value={tags}
-                                onChange={(e) => setTags(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="attachment-section">
-                            <p className="section-label">ADD TO YOUR POST</p>
-                            <div className="attachment-grid">
-                                <button type="button" className="attachment-tile" onClick={handleMediaClick}>
-                                    <div className="tile-icon gallery-bg"><FolderOpen size={20} /></div>
-                                    <span>Gallery</span>
-                                </button>
-                                <button type="button" className="attachment-tile" onClick={handleCameraClick}>
-                                    <div className="tile-icon camera-bg"><Camera size={20} /></div>
-                                    <span>Camera</span>
-                                </button>
-                                <button type="button" className="attachment-tile">
-                                    <div className="tile-icon music-bg"><Music size={20} /></div>
-                                    <span>Music</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {isSubmitting && (
-                            <div className="syncing-overlay animate-fade-in">
-                                <div className="syncing-content">
-                                    <Loader2 className="animate-spin" size={40} />
-                                    <p>Syncing to Cloud...</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {isSuccess && (
-                            <div className="success-overlay animate-fade-in">
-                                <div className="success-content">
-                                    <div className="check-icon">✓</div>
-                                    <p>Post Synced! 🚀</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className="error-message animate-shake">
-                                {error}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="modal-footer">
-                        <input 
-                            type="file" 
-                            hidden 
-                            ref={fileInputRef} 
-                            onChange={handleFileChange}
-                            accept="image/*"
-                        />
-                        <input 
-                            type="file" 
-                            hidden 
-                            ref={cameraInputRef} 
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            capture="environment"
-                        />
-                        <button 
-                            type="submit" 
-                            className="submit-post-btn text-gradient-bg"
-                            disabled={isSubmitting || (!caption.trim() && !mediaPreview)}
-                        >
-                            {isSubmitting ? (
-                                <Loader2 className="animate-spin" size={20} />
-                            ) : (
-                                <><Send size={18} /> Post</>
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                    </button>
+                </div>
+            </form>
+        </GlobalModal>
     );
 };
 

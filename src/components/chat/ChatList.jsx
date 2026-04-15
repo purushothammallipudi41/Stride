@@ -16,8 +16,8 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
             <div className="chat-list-header-v2">
                 <div className="chat-header-top">
                     <div className="chat-header-user" onClick={() => setShowAccounts(!showAccounts)}>
-                        <span className="text-gradient">{currentUser || 'purushotham_m'}</span>
-                        <ChevronDown size={18} />
+                        <span className="text-gradient-bg" style={{ fontWeight: 800 }}>{currentUser || 'purushotham_m'}</span>
+                        <ChevronDown size={18} className="ml-1" />
                         {unreadNotifications > 0 && (
                             <div className="notification-dot-v2" />
                         )}
@@ -71,11 +71,11 @@ const ChatList = ({ chats, activeChatId, onSelectChat, typingUsers, currentUser 
                             />
                             <div className="chat-item-info">
                                 <div className="chat-item-name-row">
-                                    <span className="chat-item-name">{chat.username}</span>
+                                    <span className="chat-item-name">{chat.name || chat.username}</span>
                                     {chat.isVerified && <VerificationBadge size={14} />}
                                 </div>
                                 <span className="chat-item-status">
-                                    {isTyping ? <span className="text-gradient">typing...</span> : (chat.lastMessageStatus || `Sent ${chat.time || '10h ago'}`)}
+                                    {isTyping ? <span className="text-gradient-bg" style={{ fontWeight: 700 }}>typing...</span> : (chat.lastMessageStatus || chat.lastMessage || `Sent ${chat.time || '10h ago'}`)}
                                 </span>
                             </div>
                             <Camera size={22} className="chat-item-action" />

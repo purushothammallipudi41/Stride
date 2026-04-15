@@ -1,10 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import SEO from '../components/common/SEO';
-import PageHeader from '../components/layout/PageHeader';
-import { DollarSign, Plus, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, History } from 'lucide-react';
-import { useUI } from '../hooks/useUI';
-import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
+import GlobalModal from '../components/common/GlobalModal';
 import './Wallet.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
@@ -217,40 +212,46 @@ const Wallet = () => {
                 </section>
             </div>
 
-            {/* Top-up Modal */}
-            {showTopUp && (
-                <div className="wallet-modal-overlay" onClick={() => setShowTopUp(false)}>
-                    <div className="wallet-modal animate-slide-up" onClick={e => e.stopPropagation()}>
-                        <h3>Add Credits</h3>
-                        <p>Purchase Stride credits to tip creators and unlock premium features.</p>
-                        
-                        <div className="amount-options">
-                            {[100, 500, 1000, 5000].map(amt => (
-                                <button 
-                                    key={amt} 
-                                    className={`amount-btn ${topUpAmount === amt ? 'active' : ''}`}
-                                    onClick={() => setTopUpAmount(amt)}
-                                >
-                                    {amt}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="custom-amount">
-                            <label>Custom Amount</label>
-                            <input 
-                                type="number" 
-                                value={topUpAmount} 
-                                onChange={(e) => setTopUpAmount(e.target.value)}
-                            />
-                        </div>
-
-                        <button className="confirm-topup-btn" onClick={handleTopUp} disabled={isProcessing}>
-                            {isProcessing ? 'Processing...' : 'Confirm Payment'}
-                        </button>
+            <GlobalModal 
+                isOpen={showTopUp} 
+                onClose={() => setShowTopUp(false)}
+                title="Add Credits"
+                maxWidth="480px"
+                className="wallet-topup-standardized"
+            >
+                <div className="wallet-modal-content">
+                    <p className="modal-description">Purchase Stride credits to tip creators and unlock premium features.</p>
+                    
+                    <div className="amount-options">
+                        {[100, 500, 1000, 5000].map(amt => (
+                            <button 
+                                key={amt} 
+                                className={`amount-btn ${topUpAmount === amt ? 'active' : ''}`}
+                                onClick={() => setTopUpAmount(amt)}
+                            >
+                                {amt}
+                            </button>
+                        ))}
                     </div>
+
+                    <div className="custom-amount">
+                        <label>Custom Amount</label>
+                        <input 
+                            type="number" 
+                            value={topUpAmount} 
+                            onChange={(e) => setTopUpAmount(e.target.value)}
+                        />
+                    </div>
+
+                    <button 
+                        className="confirm-topup-btn text-gradient-bg" 
+                        onClick={handleTopUp} 
+                        disabled={isProcessing}
+                    >
+                        {isProcessing ? 'Processing...' : 'Confirm Payment'}
+                    </button>
                 </div>
-            )}
+            </GlobalModal>
         </div>
     );
 };
