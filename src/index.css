@@ -220,19 +220,6 @@ h1, h2, h3, h4, .font-header {
   padding: 0;
   height: 100%;
   -webkit-overflow-scrolling: touch;
-  /* Premium Scroll Mask */
-  mask-image: linear-gradient(to bottom, 
-    transparent 0%, 
-    black 40px, 
-    black calc(100% - 80px), 
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(to bottom, 
-    transparent 0%, 
-    black 40px, 
-    black calc(100% - 80px), 
-    transparent 100%
-  );
 }
 
 .full-view-container {

@@ -21,22 +21,34 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 
 const queryClient = new QueryClient();
 
-const config = getDefaultConfig({
-  appName: 'Stride',
-  projectId: 'YOUR_PROJECT_ID_PLACEHOLDER', // In a real app, this would be an env var
-  chains: [polygon, polygonAmoy],
-  transports: {
-    [polygon.id]: http(),
-    [polygonAmoy.id]: http(),
-  },
-});
-
 export const Web3Provider = ({ children }) => {
+  const projectId = 'YOUR_PROJECT_ID_PLACEHOLDER';
+
   // Silent E2E mode or Production Fail-Safe to avoid 403 Config errors stalling the app
   const isE2E = typeof window !== 'undefined' && 
     (window.location.hostname === '127.0.0.1' || 
-     config.projectId === 'YOUR_PROJECT_ID_PLACEHOLDER');
+     projectId === 'YOUR_PROJECT_ID_PLACEHOLDER');
   
+  // Safe config initialization inside component scope
+  const config = useMemo(() => {
+    if (isE2E) return null;
+    
+    try {
+      return getDefaultConfig({
+        appName: 'Stride',
+        projectId: projectId,
+        chains: [polygon, polygonAmoy],
+        transports: {
+          [polygon.id]: http(),
+          [polygonAmoy.id]: http(),
+        },
+      });
+    } catch (err) {
+      console.error('[Web3Provider] Failed to initialize Wagmi config:', err);
+      return null;
+    }
+  }, [isE2E, projectId]);
+
   // Solana config
   const network = 'devnet';
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
@@ -45,7 +57,9 @@ export const Web3Provider = ({ children }) => {
     new SolflareWalletAdapter(),
   ], []);
 
-  if (isE2E) {
+  console.log('[Web3Provider] Initializing with isE2E:', isE2E);
+
+  if (isE2E || !config) {
     return (
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>

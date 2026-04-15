@@ -47,7 +47,15 @@ const AppContent = () => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
 
+  console.log('[AppContent] Mounting...', { 
+    pathname: location.pathname, 
+    isAuthenticated, 
+    isPublicPath,
+    isCreateModalOpen 
+  });
+
   useEffect(() => {
+    console.log('[AppContent] Component mounted');
     // Configure mobile status bar
     if (Capacitor.isNativePlatform()) {
       try {
