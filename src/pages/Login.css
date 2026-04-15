@@ -184,7 +184,7 @@
 
 .input-with-icon input {
   width: 100%;
-  padding: 20px 20px 20px 56px;
+  padding: 20px 20px 20px 64px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
@@ -208,7 +208,7 @@
 /* Floating Labels */
 .floating-label {
   position: absolute;
-  left: 56px;
+  left: 64px;
   top: 50%;
   transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.4);
