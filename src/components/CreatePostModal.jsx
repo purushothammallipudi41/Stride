@@ -1,4 +1,5 @@
-import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen, X } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { getStoredUser } from '../utils/storage';
 import { BASE_URL } from '../utils/api';
@@ -14,11 +15,11 @@ const CreatePostModal = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState(null);
     const [mediaPreview, setMediaPreview] = useState(null);
-    const fileInputRef = React.useRef(null);
-    const cameraInputRef = React.useRef(null);
+    const fileInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
 
     // Ensure state is fresh on mount
-    React.useEffect(() => {
+    useEffect(() => {
         setCaption('');
         setTags('');
         setMediaPreview(null);

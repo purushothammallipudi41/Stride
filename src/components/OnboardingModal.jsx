@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ChevronRight, Music, Users, Video } from 'lucide-react';
 import GlobalModal from './common/GlobalModal';
 import './OnboardingModal.css';

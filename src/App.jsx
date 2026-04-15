@@ -41,21 +41,8 @@ import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
 import OnboardingModal from './components/OnboardingModal';
+import CallOverlay from './components/CallOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
-
-// Emergency Global Error Catch
-if (typeof window !== 'undefined') {
-  window.onerror = function(msg, url, line, col, error) {
-    console.error('[GLOBAL_CRASH]', { msg, url, line, col, error });
-    const root = document.getElementById('root');
-    if (root) {
-      const errDiv = document.createElement('div');
-      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:99999;font-family:monospace;';
-      errDiv.innerHTML = `FATAL: ${msg} <br/> at ${url}:${line}:${col}`;
-      document.body.appendChild(errDiv);
-    }
-  };
-}
 
 const AppContent = () => {
   const { isCreateModalOpen, isExplorerOpen, callInfo, setCallInfo } = useUI();
@@ -63,14 +50,7 @@ const AppContent = () => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
 
-  console.log('[AppContent] Mounting...', { 
-    pathname: location.pathname, 
-    isAuthenticated, 
-    isPublicPath 
-  });
-
   useEffect(() => {
-    console.log('[AppContent] Component mounted');
     // Configure mobile status bar
     if (Capacitor.isNativePlatform()) {
       try {
@@ -120,22 +100,6 @@ const AppContent = () => {
 
   return (
     <div className="app-layout">
-      {/* DIAGNOSTIC BOOT FLAG */}
-      <div id="diagnostic-flag" style={{ 
-        position: 'fixed', 
-        top: '10px', 
-        left: '10px', 
-        background: 'green', 
-        color: 'white', 
-        fontSize: '12px', 
-        padding: '4px 8px', 
-        zIndex: 100000,
-        fontWeight: 'bold',
-        borderRadius: '4px'
-      }}>
-        STRIDE_BOOT_SUCCESS
-      </div>
-
       {!isPublicPath && <Sidebar />}
       
       <div className="layout-primary">
@@ -183,6 +147,17 @@ const AppContent = () => {
                 window.location.reload();
             }} 
           />
+      )}
+      
+      {callInfo.isOpen && (
+        <CallOverlay 
+            isOpen={callInfo.isOpen}
+            isIncoming={callInfo.isIncoming}
+            callerData={callInfo.callerData}
+            callType={callInfo.type}
+            onReject={() => setCallInfo({ ...callInfo, isOpen: false })}
+            onEnd={() => setCallInfo({ ...callInfo, isOpen: false })}
+        />
       )}
     </div>
   );
