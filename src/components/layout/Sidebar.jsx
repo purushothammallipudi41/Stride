@@ -59,18 +59,18 @@ const Sidebar = () => {
                         </>
                     );
 
-                    if (isCreate) {
                         return (
                             <button
                                 key={item.label}
-                                className="nav-item create-btn"
+                                className="nav-item create-btn-premium"
                                 onClick={openCreateModal}
                                 aria-label={item.label}
                             >
-                                {linkContent(false)}
+                                <div className="create-icon-wrapper">
+                                    <Plus size={32} strokeWidth={3} />
+                                </div>
                             </button>
                         );
-                    }
 
                     if (isExplore) {
                         return (

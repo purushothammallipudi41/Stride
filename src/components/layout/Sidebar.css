@@ -203,39 +203,73 @@
         display: none;
     }
 
-    .sidebar .create-btn {
+    .sidebar .create-btn-premium {
         margin: 0;
         padding: 0;
-        width: 52px;
-        height: 52px;
+        width: 58px;
+        height: 58px;
         border-radius: 50% !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--color-primary) !important;
-        box-shadow: 0 0 20px var(--color-primary-glow) !important;
-        flex-shrink: 0;
-        border: 2px solid rgba(255, 255, 255, 0.2) !important;
-        color: white !important;
-        transform: translateY(-12px) !important;
+        background: linear-gradient(135deg, var(--color-primary) 0%, #a855f7 100%) !important;
+        position: relative;
+        transform: translateY(-16px) !important;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4) !important;
+        overflow: visible;
+        z-index: 2;
     }
 
-    .sidebar .create-btn:active {
-        transform: translateY(-12px) scale(0.9) !important;
-    }
-    
-    .sidebar .create-btn svg {
-        color: white !important;
-        stroke-width: 3px !important;
+    .create-icon-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        position: relative;
+        z-index: 3;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
     }
 
-    .create-btn span {
-        display: none;
+    .sidebar .create-btn-premium::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        padding: 4px;
+        background: linear-gradient(135deg, #fff, transparent, #fff);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0.6;
     }
 
-    .create-btn svg {
-        margin: 0;
+    .sidebar .create-btn-premium::after {
+        content: '';
+        position: absolute;
+        inset: -10px;
+        background: var(--color-primary);
+        filter: blur(20px);
+        opacity: 0.2;
+        border-radius: 50%;
+        z-index: -1;
+        animation: breath 3s infinite ease-in-out;
+    }
+
+    @keyframes breath {
+        0%, 100% { transform: scale(1); opacity: 0.2; }
+        50% { transform: scale(1.2); opacity: 0.4; }
+    }
+
+    .sidebar .create-btn-premium:active {
+        transform: translateY(-16px) scale(0.9) !important;
     }
 
     .sidebar-nav {
