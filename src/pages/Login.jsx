@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, Globe } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
 import { useUI } from '../hooks/useUI';
 import logo from '../assets/stride-logo.png';
