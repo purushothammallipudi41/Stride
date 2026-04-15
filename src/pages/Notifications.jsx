@@ -144,10 +144,16 @@ const Notifications = () => {
                                     transition: swipingId === notif.id ? 'none' : 'all 0.3s ease'
                                 }}
                             >
-                                <div className="notification-item-v2">
+                                <div className="notification-item-v2 glass-card">
                                     <div className="notif-v2-avatar-group">
-                                        <Avatar src={notif.fromAvatar} size={44} frame={notif.senderFrame} />
-                                        <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#000', borderRadius: '50%', padding: 2, border: '2px solid var(--color-bg-primary)' }}>
+                                        <Avatar 
+                                            src={notif.fromAvatar || `https://ui-avatars.com/api/?name=${notif.from}&background=random&color=fff`} 
+                                            size={48} 
+                                            frame={notif.senderFrame} 
+                                        />
+                                        <div className="notif-type-icon-wrapper" style={{ 
+                                            background: notif.type === 'like' ? 'var(--color-accent)' : 'var(--color-primary)' 
+                                        }}>
                                             {getIcon(notif.type)}
                                         </div>
                                     </div>

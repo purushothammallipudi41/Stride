@@ -35,7 +35,7 @@ const Sidebar = () => {
                     const linkContent = (
                         <>
                             <div className="nav-icon-wrapper">
-                                <item.icon size={24} />
+                                <item.icon size={26} strokeWidth={2.5} />
                             </div>
                             <span className="nav-label">{item.label}</span>
                         </>
