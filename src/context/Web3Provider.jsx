@@ -32,8 +32,10 @@ const config = getDefaultConfig({
 });
 
 export const Web3Provider = ({ children }) => {
-  // Silent E2E mode for localhost to avoid 403 Config errors stalling the app
-  const isE2E = typeof window !== 'undefined' && window.location.hostname === '127.0.0.1';
+  // Silent E2E mode or Production Fail-Safe to avoid 403 Config errors stalling the app
+  const isE2E = typeof window !== 'undefined' && 
+    (window.location.hostname === '127.0.0.1' || 
+     config.projectId === 'YOUR_PROJECT_ID_PLACEHOLDER');
   
   // Solana config
   const network = 'devnet';
