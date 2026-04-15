@@ -62,6 +62,7 @@ const Insights = () => {
 
     return (
         <div className="insights-container animate-fade-in">
+            <div className="stride-mesh-bg" />
             <PageHeader title="Analytics & Insights" />
             
             <div className="insights-header-subtitle">
@@ -97,7 +98,11 @@ const Insights = () => {
                         <div key={idx} className="stat-card glass-panel">
                             <div className="stat-header">
                                 <span className="stat-label">{stat.label}</span>
-                                <div className="stat-icon-wrapper" style={{ color: stat.color, background: `${stat.color}15` }}>
+                                <div className="stat-icon-wrapper" style={{ 
+                                    color: stat.color, 
+                                    background: `${stat.color}15`,
+                                    boxShadow: `0 0 15px ${stat.color}30` 
+                                }}>
                                     <stat.icon size={20} />
                                 </div>
                             </div>
@@ -111,7 +116,11 @@ const Insights = () => {
 
                 <div className="chart-section glass-panel">
                     <div className="chart-header">
-                        <h3>Engagement History</h3>
+                        <div className="header-info">
+                            <h3>Engagement History</h3>
+                            <p>Activity across your latest content</p>
+                        </div>
+                        <BarChart3 className="header-icon" size={24} />
                     </div>
                     {statsData?.stats?.length > 0 ? (
                         <div className="chart-container-v2">
@@ -120,10 +129,11 @@ const Insights = () => {
                                     const maxVal = Math.max(...statsData.stats.map(s => s.listens || 1));
                                     const height = ((track.listens || 0) / maxVal) * 100;
                                     return (
-                                        <div key={i} className="bar-wrapper">
+                                        <div key={i} className="bar-wrapper" style={{ animationDelay: `${i * 0.1}s` }}>
                                             <div className="bar-value">{(track.listens || 0)}</div>
-                                            <div className="bar-pill" style={{ height: `${Math.max(height, 5)}%` }}>
+                                            <div className="bar-pill" style={{ height: `${Math.max(height, 8)}%` }}>
                                                 <div className="bar-glow" />
+                                                <div className="bar-shimmer" />
                                             </div>
                                             <div className="bar-label">{track.trackId?.substring(0, 6)}</div>
                                         </div>
@@ -137,8 +147,9 @@ const Insights = () => {
                                 {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
                             </div>
                             <div className="empty-chart-msg">
-                                <BarChart3 size={40} className="empty-icon" />
-                                <p>No engagement data yet</p>
+                                <BarChart3 size={48} className="empty-icon-pulse" />
+                                <p>Scanning for frequencies...</p>
+                                <span className="empty-subtext">Content interaction data will appear here.</span>
                             </div>
                         </div>
                     )}

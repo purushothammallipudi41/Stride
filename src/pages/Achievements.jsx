@@ -5,27 +5,42 @@ import { getStoredUser } from '../utils/storage';
 import PageHeader from '../components/layout/PageHeader';
 import './Achievements.css';
 
-const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked }) => (
+const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked, requirement, progress = 0, total = 5 }) => (
   <div className={`achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`} style={{ '--accent-color': color }}>
     <div className="card-glass" />
+    <div className="card-shimmer" />
     <div className="card-content">
-      <div className="icon-wrapper">
-        <Icon size={24} className="icon" />
-        {isUnlocked ? (
-          <div className="status-badge">
-            <ShieldCheck size={12} /> Unlocked
-          </div>
-        ) : (
-          <div className="status-badge locked">
-            <Lock size={12} /> Locked
-          </div>
-        )}
+      <div className="icon-area">
+        <div className="icon-wrapper glass-panel">
+          <Icon size={28} className="icon" />
+          {isUnlocked ? (
+            <div className="status-badge unlocked">
+              <ShieldCheck size={14} /> Legandary
+            </div>
+          ) : (
+            <div className="status-badge locked">
+              <Lock size={14} /> Locked
+            </div>
+          )}
+        </div>
       </div>
       <div className="text-content">
         <h3>{title}</h3>
         <p>{description}</p>
+        
+        {!isUnlocked && (
+           <div className="progress-container">
+             <div className="progress-label">
+                <span>Progress</span>
+                <span>{progress}/{total}</span>
+             </div>
+             <div className="progress-bar-bg">
+                <div className="progress-bar-fill" style={{ width: `${(progress/total)*100}%` }} />
+             </div>
+           </div>
+        )}
       </div>
-      {isUnlocked && <Star size={20} className="star-corner" />}
+      {isUnlocked && <Star size={24} className="star-corner animate-pulse-glow" />}
     </div>
   </div>
 );
@@ -82,7 +97,8 @@ const Achievements = () => {
     const earnedAchievements = user?.achievements || [];
 
     return (
-        <div className="achievements-page">
+        <div className="achievements-page animate-fade-in">
+            <div className="stride-mesh-bg" />
             <PageHeader title="Hall of Fame" />
             
             <main className="achievements-content">
@@ -104,6 +120,9 @@ const Achievements = () => {
                             icon={ach.icon}
                             color={ach.color}
                             isUnlocked={earnedAchievements.includes(ach.id)}
+                            requirement={ach.requirement}
+                            progress={ach.id === 'Music Maven' ? (user?.favoritesCount || 2) : 0}
+                            total={ach.id === 'Music Maven' ? 5 : 10}
                         />
                     ))}
                 </div>
