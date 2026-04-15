@@ -41,7 +41,7 @@ import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
 import OnboardingModal from './components/OnboardingModal';
-import CallOverlay from './components/CallOverlay';
+import CallOverlay from './components/chat/CallOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
