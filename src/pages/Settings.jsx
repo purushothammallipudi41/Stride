@@ -7,10 +7,12 @@ import {
 import { BASE_URL } from '../utils/api';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
 import Avatar from '../components/common/Avatar';
+import { useUI } from '../hooks/useUI';
 import './Settings.css';
 
 const Settings = () => {
     const navigate = useNavigate();
+    const { addNotification } = useUI();
     const [theme, setTheme] = useState('dark');
     const [notifications, setNotifications] = useState(true);
     const [privateAccount, setPrivateAccount] = useState(false);
@@ -93,7 +95,7 @@ const Settings = () => {
                             <Check size={20} className="ps-check-icon" />
                         </div>
                         <div className="ps-account-divider"></div>
-                        <button className="ps-add-account-btn">
+                        <button className="ps-add-account-btn" onClick={() => addNotification({ title: "Multi-Account", message: "Switching accounts will be supported in v3.", type: "info" })}>
                             <UserPlus size={18} />
                             <span>Add Account</span>
                         </button>
@@ -113,7 +115,7 @@ const Settings = () => {
                                     <span className="ps-item-subtitle">No track set</span>
                                 </div>
                             </div>
-                            <button className="ps-upload-btn">Upload</button>
+                            <button className="ps-upload-btn" onClick={() => addNotification({ title: "Theme Song", message: "MP3 uploads unlock at Level 5.", type: "info" })}>Upload</button>
                         </div>
 
                         <div className="ps-list-item">

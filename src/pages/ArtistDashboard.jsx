@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, DollarSign, Headphones, Users, ChevronUp, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import { useMusic } from '../hooks/useMusic';
 import { BASE_URL } from '../utils/api';
@@ -7,6 +8,8 @@ import './ArtistDashboard.css';
 
 const ArtistDashboard = () => {
     const { username } = useMusic();
+    const navigate = useNavigate();
+    const [timeFilter, setTimeFilter] = useState('7D');
     const [stats, setStats] = useState({
         totalPlays: 0,
         totalTips: 0,
@@ -91,9 +94,9 @@ const ArtistDashboard = () => {
                     <div className="panel-header">
                         <h3>Plays Overview</h3>
                         <div className="time-filters">
-                            <button className="active">7D</button>
-                            <button>1M</button>
-                            <button>1Y</button>
+                            <button className={timeFilter === '7D' ? "active" : ""} onClick={() => setTimeFilter('7D')}>7D</button>
+                            <button className={timeFilter === '1M' ? "active" : ""} onClick={() => setTimeFilter('1M')}>1M</button>
+                            <button className={timeFilter === '1Y' ? "active" : ""} onClick={() => setTimeFilter('1Y')}>1Y</button>
                         </div>
                     </div>
                     <div className="chart-container">
@@ -157,7 +160,7 @@ const ArtistDashboard = () => {
                             </div>
                         ))}
                     </div>
-                    <button className="view-all-btn">View All Transactions</button>
+                    <button className="view-all-btn" onClick={() => navigate('/wallet')}>View All Transactions</button>
                 </div>
             </div>
         </div>
