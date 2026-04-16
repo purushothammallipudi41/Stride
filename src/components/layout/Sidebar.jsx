@@ -15,8 +15,6 @@ const Sidebar = () => {
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Search, label: t('nav.explore'), path: '/explore' },
-        { icon: Play, label: 'Clips', path: '/reels' }, // Internal route is /reels
-        { icon: Camera, label: 'Studio', path: '/studio' },
         { icon: Plus, label: t('nav.create'), action: 'create' },
         { icon: 'avatar', label: t('nav.profile'), path: '/profile' },
         { icon: MoreHorizontal, label: t('common.more'), action: 'explore' },

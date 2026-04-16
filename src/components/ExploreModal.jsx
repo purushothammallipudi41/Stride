@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Hash, TrendingUp, Music2, Film, Radio, Globe, Users, Layout, Music, Trophy, BarChart3, Wallet, ShoppingBag, Settings, LogOut } from 'lucide-react';
+import { Search, Hash, TrendingUp, Music2, Film, Radio, Globe, Users, Layout, Music, Trophy, BarChart3, Wallet, ShoppingBag, Settings, LogOut, Camera } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import GlobalModal from './common/GlobalModal';
 import Avatar from './common/Avatar';
 import { BASE_URL } from '../utils/api';
+import './ExploreModal.css';
 
 const ExploreModal = () => {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ const ExploreModal = () => {
 
     const mainItems = [
         { id: 'reels', icon: Film, label: 'Reels', path: '/reels' },
+        { id: 'studio', icon: Camera, label: 'Studio', path: '/studio' },
         { id: 'spaces', icon: Radio, label: 'Spaces', path: '/servers' },
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
