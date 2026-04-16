@@ -1,16 +1,27 @@
 import { ExternalLink, ShieldCheck, TrendingUp, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './AdCard.css';
 
 const AdCard = ({ adData }) => {
+    const navigate = useNavigate();
+
     const defaultAd = {
         title: "Upgrade to Stride Pro",
         description: "Unlock exclusive vibe passes, premium avatar frames, and 2x rhythmic rewards.",
         image: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format&fit=crop",
         cta: "Go Premium",
-        link: "/settings/pro"
+        link: "/settings"
     };
 
     const data = adData || defaultAd;
+
+    const handleCtaClick = () => {
+        if (data.link.startsWith('http')) {
+            window.open(data.link, '_blank');
+        } else {
+            navigate(data.link);
+        }
+    };
 
     return (
         <div className="ad-card-v2 glass-panel animate-fade-in">
@@ -30,7 +41,7 @@ const AdCard = ({ adData }) => {
                     <p className="ad-desc">{data.description}</p>
                     
                     <div className="ad-actions-v2">
-                        <button className="ad-cta-btn" onClick={() => window.open(data.link, '_blank')}>
+                        <button className="ad-cta-btn" onClick={handleCtaClick}>
                             {data.cta} <ExternalLink size={14} />
                         </button>
                         <button className="ad-info-btn" title="About this ad">
