@@ -68,7 +68,7 @@ const Sidebar = () => {
                                 aria-label={item.label}
                             >
                                 <div className="create-icon-wrapper">
-                                    <Plus size={28} strokeWidth={2.5} />
+                                    <Plus size={24} strokeWidth={2.5} />
                                 </div>
                             </button>
                         );
