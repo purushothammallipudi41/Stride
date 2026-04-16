@@ -103,20 +103,6 @@ const Home = () => {
                         <StoriesRail />
                     </section>
 
-                    <div className="feed-tabs">
-                        <button 
-                            className={`feed-tab ${feedType === 'foryou' ? 'active' : ''}`}
-                            onClick={() => setFeedType('foryou')}
-                        >
-                            For You
-                        </button>
-                        <button 
-                            className={`feed-tab ${feedType === 'following' ? 'active' : ''}`}
-                            onClick={() => setFeedType('following')}
-                        >
-                            Following
-                        </button>
-                    </div>
 
                     <section className="feed-section">
                         <Feed key={`${feedType}-${refreshKey}`} type={feedType} />

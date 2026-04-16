@@ -20,6 +20,10 @@ const Post = ({ post }) => {
     
     const postId = post._id || post.id;
     const user = getStoredUser();
+    
+    // Safety Guard: if post is malformed, don't crash
+    if (!postId) return null;
+
     const postRef = useRef(null);
     const optionsRef = useRef(null);
     const [showOptions, setShowOptions] = useState(false);
@@ -238,26 +242,37 @@ const Post = ({ post }) => {
 
             <div className="post-media">
                 {!mediaError ? (
-                    (post.contentUrl || post.imageUrl || post.url)?.endsWith('.mp4') ? (
-                        <video 
-                            src={post.contentUrl || post.imageUrl || post.url} 
-                            controls={false}
-                            autoPlay 
-                            muted 
-                            loop 
-                            playsInline
-                            className="post-video"
-                            style={{ width: '100%', borderRadius: '4px' }}
-                            onError={() => setMediaError(true)}
-                        />
-                    ) : (
-                        <img 
-                            src={post.contentUrl || post.imageUrl || post.url} 
-                            alt="Post content" 
-                            loading="lazy" 
-                            onError={() => setMediaError(true)}
-                        />
-                    )
+                    (() => {
+                        const mediaUrl = post.contentUrl || post.imageUrl || post.url;
+                        if (!mediaUrl) return <div className="media-missing-placeholder" />;
+                        
+                        const fullUrl = mediaUrl.startsWith('http') ? mediaUrl : `${BASE_URL}${mediaUrl}`;
+                        const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.mov');
+
+                        if (isVideo) {
+                            return (
+                                <video 
+                                    src={fullUrl} 
+                                    controls={false}
+                                    autoPlay 
+                                    muted 
+                                    loop 
+                                    playsInline
+                                    className="post-video"
+                                    onError={() => setMediaError(true)}
+                                />
+                            );
+                        } else {
+                            return (
+                                <img 
+                                    src={fullUrl} 
+                                    alt="Post content" 
+                                    loading="lazy" 
+                                    onError={() => setMediaError(true)}
+                                />
+                            );
+                        }
+                    })()
                 ) : (
                     <div className="post-media-placeholder glass-panel" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                         <div style={{ textAlign: 'center' }}>
