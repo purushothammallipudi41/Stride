@@ -66,7 +66,7 @@ const Feed = ({ type: initialType = 'foryou' }) => {
         return () => socket.off('content_updated', handleUpdate);
     }, [loadFeed, activeTab]);
 
-
+    const user = getStoredUser();
 
     return (
         <div className="feed-container">
