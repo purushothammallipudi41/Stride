@@ -1,0 +1,186 @@
+.studio-container {
+    height: 100vh;
+    width: 100vw;
+    background: #000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.studio-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+}
+
+.studio-close-btn, .studio-icon-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.studio-close-btn:hover, .studio-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.studio-title {
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.studio-live-badge {
+    background: #ff4757;
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.studio-viewport {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.studio-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #111;
+}
+
+.studio-grain-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.15;
+    background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+.studio-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 100;
+}
+
+.studio-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px 20px;
+    justify-content: center;
+}
+
+.studio-filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.studio-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.studio-filter-btn.active {
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.2);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.studio-record-btn {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 4px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.studio-record-btn .inner-circle {
+    width: 60px;
+    height: 60px;
+    background: #ff4757;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.studio-record-btn.recording {
+    border-color: #ff4757;
+}
+
+.studio-record-btn.recording .inner-circle {
+    border-radius: 8px;
+    transform: scale(0.5);
+}
+
+.studio-record-timer {
+    position: absolute;
+    top: -40px;
+    color: white;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    font-size: 1.2rem;
+}

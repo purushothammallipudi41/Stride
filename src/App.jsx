@@ -34,6 +34,7 @@ import Achievements from './pages/Achievements';
 import Insights from './pages/Insights';
 import Marketplace from './pages/Marketplace';
 import Wallet from './pages/Wallet';
+import Studio from './pages/Studio';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -133,6 +134,7 @@ const AppContent = () => {
                 <Route path="/insights" element={<Insights />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
+                <Route path="/studio" element={isAuthenticated ? <Studio /> : <Navigate to="/login" />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               

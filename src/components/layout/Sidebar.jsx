@@ -1,4 +1,4 @@
-import { Home, Search, Plus, MoreHorizontal, Play } from 'lucide-react';
+import { Home, Search, Plus, MoreHorizontal, Play, Camera } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ const Sidebar = () => {
         { icon: Home, label: t('nav.home'), path: '/' },
         { icon: Search, label: t('nav.explore'), path: '/explore' },
         { icon: Play, label: 'Clips', path: '/reels' }, // Internal route is /reels
+        { icon: Camera, label: 'Studio', path: '/studio' },
         { icon: Plus, label: t('nav.create'), action: 'create' },
         { icon: 'avatar', label: t('nav.profile'), path: '/profile' },
         { icon: MoreHorizontal, label: t('common.more'), action: 'explore' },
@@ -108,9 +109,9 @@ const Sidebar = () => {
                     padding: '10px', 
                     textAlign: 'center', 
                     fontWeight: '900',
-                    color: '#8b5cf6',
-                    textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
-                }}>v1.2.5-ULTIMATE</div>
+                    color: '#a855f7',
+                    textShadow: '0 0 10px rgba(168, 85, 247, 0.5)'
+                }}>v2.1.0-STUDIO</div>
             </div>
         </aside>
     );

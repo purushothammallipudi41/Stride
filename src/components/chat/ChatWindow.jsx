@@ -21,6 +21,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
     const recordingIntervalRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
     const [showStoryMode, setShowStoryMode] = useState(false);
     const [cameraStream, setCameraStream] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
@@ -126,12 +127,26 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
     const handleInputChange = (e) => {
         setMsgText(e.target.value);
+
+        // High-Fidelity Presence Pulse
+        if (roomId && currentUser) {
+            socket.emit('typing_start', { roomId, username: currentUser });
+            
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+            typingTimeoutRef.current = setTimeout(() => {
+                socket.emit('typing_stop', { roomId, username: currentUser });
+            }, 2000);
+        }
     };
 
     const handleSendText = () => {
         if (msgText.trim()) {
             onSendMessage(msgText, 'text');
             setMsgText('');
+            
+            // Hard reset presence on send
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+            socket.emit('typing_stop', { roomId, username: currentUser });
         }
     };
 
