@@ -1,20 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Hash } from 'lucide-react';
+import { Plus, Users, Hash, Play } from 'lucide-react';
 import { useServer } from '../hooks/useServer';
+import { useUI } from '../hooks/useUI';
 import PageHeader from '../components/layout/PageHeader';
 import './Servers.css';
 
 const Servers = () => {
     const { servers, addCommunity, realTimeActivity } = useServer();
+    const { setLiveInfo } = useUI();
     const navigate = useNavigate();
     const [newServerName, setNewServerName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
-    // For now, let's show the most recent global activity on all relevant cards 
-    // or specifically on "Lo-Fi Lounge" for demo purposes.
-    // In a real app, this would be filtered by server room.
-    const latestActivity = realTimeActivity.length > 0 ? realTimeActivity[realTimeActivity.length - 1] : null;
+    // Filter activity by current server
+    const getActivityForServer = (server) => {
+        const activity = realTimeActivity.find(a => String(a.communityId) === String(server._id));
+        if (activity) return activity;
+        
+        // Mock activity for "Stride Official" to showcase the feature if no real activity exists
+        if (server.name === 'Stride Official') {
+            return {
+                username: 'StrideBot',
+                track: { title: 'Social Nexus Launch Event' }
+            };
+        }
+        return null;
+    };
 
     const handleCreateServer = (e) => {
         e.preventDefault();
@@ -58,32 +70,52 @@ const Servers = () => {
             )}
 
             <div className="servers-grid">
-                {servers.map(server => (
-                    <div
-                        key={server.id}
-                        className="server-card glass-card"
-                        onClick={() => navigate(`/community/${server._id}`)}
-                    >
-                        <div className="server-icon-large">
-                            {server.icon}
-                        </div>
-                        <div className="server-info">
-                            <h3>{server.name}</h3>
-                            <div className="server-members">
-                                <Users size={14} />
-                                <span>{server.memberCount || server.members?.length || 0} members</span>
+                {servers.map(server => {
+                    const activity = getActivityForServer(server);
+                    return (
+                        <div
+                            key={server.id}
+                            className="server-card glass-card"
+                            onClick={() => navigate(`/community/${server._id}`)}
+                        >
+                            <div className="server-icon-large">
+                                {server.icon}
                             </div>
-                            {latestActivity && (
-                                <div className="server-now-playing">
-                                    <div className="pulse-dot"></div>
-                                    <span className="playing-text">
-                                        @{latestActivity.username}: {latestActivity.track.title}
-                                    </span>
+                            <div className="server-info">
+                                <h3>{server.name}</h3>
+                                <div className="server-members">
+                                    <Users size={14} />
+                                    <span>{server.memberCount || server.members?.length || 0} members</span>
                                 </div>
+                                {activity && (
+                                    <div className="server-now-playing">
+                                        <div className="pulse-dot"></div>
+                                        <span className="playing-text">
+                                            @{activity.username}: {activity.track.title}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            {activity && (
+                                <button 
+                                    className="join-stream-mini-btn"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setLiveInfo({ 
+                                            isOpen: true, 
+                                            streamerName: activity.username, 
+                                            communityName: server.name,
+                                            streamId: server._id 
+                                        });
+                                    }}
+                                >
+                                    <Play size={12} fill="currentColor" />
+                                    <span>Join</span>
+                                </button>
                             )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

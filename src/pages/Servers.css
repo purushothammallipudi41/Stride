@@ -168,3 +168,29 @@
     color: var(--color-primary);
     letter-spacing: 0.02em;
 }
+
+.join-stream-mini-btn {
+    margin-left: auto;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.join-stream-mini-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+.join-stream-mini-btn svg {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}

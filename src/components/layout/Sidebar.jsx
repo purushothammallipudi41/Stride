@@ -109,7 +109,7 @@ const Sidebar = () => {
                     fontWeight: '900',
                     color: '#a855f7',
                     textShadow: '0 0 10px rgba(168, 85, 247, 0.5)'
-                }}>v2.1.0-STUDIO</div>
+                }}>v2.3.0-SOCIAL NEXUS</div>
             </div>
         </aside>
     );

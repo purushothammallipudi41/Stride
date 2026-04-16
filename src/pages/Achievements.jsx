@@ -52,7 +52,10 @@ const Achievements = () => {
     const currentUser = getStoredUser();
 
     useEffect(() => {
-        if (!currentUser?.username) return;
+        if (!currentUser?.username) {
+            setIsLoading(false);
+            return;
+        }
         fetch(`${BASE_URL}/api/profile/${currentUser.username}`)
             .then(res => res.json())
             .then(data => {
@@ -89,6 +92,22 @@ const Achievements = () => {
             icon: Zap,
             color: '#ec4899',
             requirement: '1,000 VP Sent'
+        },
+        {
+            id: 'Content Creator',
+            title: 'Content Creator',
+            description: 'Publish your first high-fidelity clip using Stride Studio.',
+            icon: Star,
+            color: '#10b981',
+            requirement: '1 Studio Post'
+        },
+        {
+            id: 'Market Maverick',
+            title: 'Market Maverick',
+            description: 'Acquire a premium digital asset from the Stride Marketplace.',
+            icon: Trophy,
+            color: '#f59e0b',
+            requirement: '1 Purchase'
         }
     ];
 
@@ -111,6 +130,14 @@ const Achievements = () => {
                     <p>Unlock prestigious badges through community contribution and musical exploration.</p>
                 </div>
 
+                {!currentUser?.username && (
+                    <div className="login-prompt-banner glass-panel animate-slide-up">
+                        <Lock size={20} />
+                        <span>Log in to track your personal achievements and claim your spot in the Hall of Fame.</span>
+                        <button className="auth-redirect-btn" onClick={() => navigate('/login')}>Sign In</button>
+                    </div>
+                )}
+
                 <div className="achievement-grid">
                     {achievementsList.map((ach) => (
                         <AchievementCard
@@ -121,8 +148,16 @@ const Achievements = () => {
                             color={ach.color}
                             isUnlocked={earnedAchievements.includes(ach.id)}
                             requirement={ach.requirement}
-                            progress={ach.id === 'Music Maven' ? (user?.favoritesCount || 2) : 0}
-                            total={ach.id === 'Music Maven' ? 5 : 10}
+                            progress={
+                                ach.id === 'Music Maven' ? (user?.favoritesCount || 2) : 
+                                ach.id === 'Influencer' ? (user?.followerCount || 0) :
+                                ach.id === 'Top Tipper' ? (user?.totalTips || 0) : 0
+                            }
+                            total={
+                                ach.id === 'Music Maven' ? 5 : 
+                                ach.id === 'Influencer' ? 10 :
+                                ach.id === 'Top Tipper' ? 1000 : 1
+                            }
                         />
                     ))}
                 </div>
