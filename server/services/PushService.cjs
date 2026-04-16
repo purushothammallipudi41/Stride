@@ -1,19 +1,25 @@
 const webpush = require('web-push');
 const User = require('../models/User.cjs');
 
-// VAPID keys should be generated once and stored in .env
-// For this environment, I'll generate them or use these placeholders
-// Generate: webpush.generateVAPIDKeys()
 const vapidKeys = {
-    publicKey: process.env.VAPID_PUBLIC_KEY || 'BF_296-sQ_Y827Z-qF68-rFm9-e_6-f5_v2-f9_v2-f9_v2-f9_v2-f9_v2-f9_v2-f9_v2-f9_v2', // Placeholder
-    privateKey: process.env.VAPID_PRIVATE_KEY || 'placeholder_private_key'
+    publicKey: process.env.VAPID_PUBLIC_KEY || 'BLYw4hzos3fJvyOZR33U_zu7rMf6QCxvdlgvwgRAnLWfKx8UP1W3UeM0Yeh4TFxT5-4nSUHza25tHhE5cviByvI',
+    privateKey: process.env.VAPID_PRIVATE_KEY || 'IiXMKNrJ3xdzI-20nTMHD5M2tEs7QmNJJ6SYJeu1Mos'
 };
 
-webpush.setVapidDetails(
-    'mailto:support@stride.social',
-    vapidKeys.publicKey,
-    vapidKeys.privateKey
-);
+try {
+    if (vapidKeys.publicKey && vapidKeys.publicKey !== 'placeholder' && !vapidKeys.publicKey.startsWith('BF_')) {
+        webpush.setVapidDetails(
+            'mailto:support@stride.social',
+            vapidKeys.publicKey,
+            vapidKeys.privateKey
+        );
+        console.log('[PushService] VAPID intelligence initialized successfully.');
+    } else {
+        console.warn('[PushService] Warning: VAPID keys not configured. Push notifications will be inactive.');
+    }
+} catch (err) {
+    console.error('[PushService] Critical Error: VAPID initialization failed. Push notifications disabled.', err.message);
+}
 
 class PushService {
     static async sendNotification(userId, payload) {
