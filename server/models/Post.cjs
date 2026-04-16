@@ -13,7 +13,9 @@ const postSchema = new mongoose.Schema({
     tags: [String],
     type: { type: String, enum: ['post', 'reel', 'image', 'video'], default: 'post' },
     isMemberOnly: { type: Boolean, default: false },
-    music: { type: String, default: "" }
+    isPremium: { type: Boolean, default: false }, // Tiered subscription gate
+    music: { type: String, default: "" },
+    uniqueViews: [{ type: String, default: [] }], // For Ad Rev-Share logic
 }, { timestamps: true });
 
 postSchema.index({ createdAt: -1 });

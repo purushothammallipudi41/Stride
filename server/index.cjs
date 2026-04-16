@@ -30,7 +30,9 @@ const Transaction = require('./models/Transaction.cjs');
 
 
 const Notification = require('./models/Notification.cjs');
+const Thread = require('./models/Thread.cjs');
 const VibeService = require('./services/VibeService.cjs');
+const MonetizationService = require('./services/MonetizationService.cjs');
 const Event = require('./models/Event.cjs');
 const VibePass = require('./models/VibePass.cjs');
 const Stake = require('./models/Stake.cjs');
@@ -2368,6 +2370,27 @@ app.post('/api/analytics/listen', async (req, res) => {
     }
 });
 
+// --- MONETIZATION & ADS ---
+app.post('/api/monetization/impression/:postId', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const result = await MonetizationService.handleImpression(req.params.postId, username);
+        res.json({ success: true, result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/monetization/check-subscription/:creatorUsername', async (req, res) => {
+    try {
+        const { viewerId } = req.query;
+        const hasAccess = await MonetizationService.checkAccess(req.params.creatorUsername, viewerId);
+        res.json({ success: true, hasAccess });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // Socket.io Logic
 const userActivity = new Map();
@@ -2679,6 +2702,38 @@ io.on('connection', (socket) => {
                     });
                 }
             });
+        }
+    });
+
+    socket.on('join_community', (communityId) => {
+        socket.join(`community_${communityId}`);
+        console.log(`[Socket] User ${socket.id} joined community: ${communityId}`);
+    });
+
+    socket.on('start_live_stream', async ({ username, communityId }) => {
+        try {
+            await User.findOneAndUpdate({ username }, { isLive: true, liveStreamId: `stream_${username}` });
+            if (communityId) {
+                await Community.findByIdAndUpdate(communityId, { isLive: true });
+            }
+            io.emit('live_update', { type: 'start', username, communityId, streamId: `stream_${username}` });
+            console.log(`[Socket] User ${username} started streaming in community: ${communityId}`);
+        } catch (err) {
+            console.error("Socket start_live_stream error:", err);
+        }
+    });
+
+    socket.on('stop_live_stream', async ({ username, communityId }) => {
+        try {
+            await User.findOneAndUpdate({ username }, { isLive: false, liveStreamId: "" });
+            if (communityId) {
+                // Check if any other streamers still live in community? (Simplification: 1 stream per community for now)
+                await Community.findByIdAndUpdate(communityId, { isLive: false });
+            }
+            io.emit('live_update', { type: 'stop', username, communityId });
+            console.log(`[Socket] User ${username} stopped streaming.`);
+        } catch (err) {
+            console.error("Socket stop_live_stream error:", err);
         }
     });
 

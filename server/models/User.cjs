@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema({
     transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }],
     achievements: [{ type: String, default: [] }],
     vibeScores: { type: Map, of: Number, default: {} }, // Affinity tracking (tag: score)
+    isLive: { type: Boolean, default: false }, // New: Live Streaming status
+    liveStreamId: { type: String, default: "" }, // New: Dynamic room ID for streams
 }, { timestamps: true });
 
 

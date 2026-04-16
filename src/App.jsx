@@ -43,10 +43,11 @@ import ExploreModal from './components/ExploreModal';
 import VaultModal from './components/social/VaultModal';
 import OnboardingModal from './components/OnboardingModal';
 import CallOverlay from './components/chat/CallOverlay';
+import LiveOverlay from './components/chat/LiveOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
-  const { isCreateModalOpen, isExplorerOpen, isVaultOpen, callInfo, setCallInfo } = useUI();
+  const { isCreateModalOpen, isExplorerOpen, isVaultOpen, callInfo, setCallInfo, liveInfo, setLiveInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
@@ -159,6 +160,15 @@ const AppContent = () => {
             callType={callInfo.type}
             onReject={() => setCallInfo({ ...callInfo, isOpen: false })}
             onEnd={() => setCallInfo({ ...callInfo, isOpen: false })}
+        />
+      )}
+
+      {liveInfo?.isOpen && (
+        <LiveOverlay 
+            streamId={liveInfo.streamId}
+            streamerName={liveInfo.streamerName}
+            communityName={liveInfo.communityName}
+            onClose={() => setLiveInfo({ ...liveInfo, isOpen: false })}
         />
       )}
     </div>

@@ -28,7 +28,7 @@ const CommunityView = () => {
     const navigate = useNavigate();
     const { servers, updateMemberRole, kickMember } = useServer();
     const user = getStoredUser();
-    const { addNotification } = useUI();
+    const { addNotification, liveInfo, setLiveInfo } = useUI();
     const { isUserListening } = useActivity();
     const { joinMusicRoom, leaveMusicRoom } = useContext(MusicContextObject);
     const [activeChannel, setActiveChannel] = useState(channelId || 'general');
@@ -342,6 +342,23 @@ const CommunityView = () => {
         }
     };
 
+    const handleGoLive = () => {
+        if (!isMod) return;
+        socket.emit('start_live_stream', { username: user.username, communityId: community._id || community.id });
+        setLiveInfo({ 
+            isOpen: true, 
+            streamerName: user.username, 
+            communityName: community.name, 
+            streamId: `stream_${user.username}` 
+        });
+        addNotification({ title: 'Live Now!', message: 'Your community broadcast has started.', type: 'success' });
+    };
+
+    const handleStopLive = () => {
+        socket.emit('stop_live_stream', { username: user.username, communityId: community._id || community.id });
+        setLiveInfo({ isOpen: false, streamerName: '', communityName: '', streamId: '' });
+    };
+
     const channels = [
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
@@ -456,6 +473,11 @@ const CommunityView = () => {
                         <h3>{activeChannelObj?.name}</h3>
                     </div>
                      <div className="header-right">
+                        {isMod && (
+                            <button className="go-live-action-btn" onClick={handleGoLive}>
+                                <Video size={18} /> Go Live
+                            </button>
+                        )}
                         <Volume2 size={20} className={`icon-btn ${isMuted ? 'muted' : ''}`} onClick={() => setIsMuted(!isMuted)} aria-label={isMuted ? "Unmute" : "Mute"} />
                         <Users size={20} className={`icon-btn ${showMemberSidebar ? 'active' : ''}`} onClick={() => setShowMemberSidebar(!showMemberSidebar)} aria-label="Toggle Member List" />
                         <div className="header-search">

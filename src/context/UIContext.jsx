@@ -13,6 +13,7 @@ export const UIProvider = ({ children }) => {
     const [unreadNotifications, setUnreadNotifications] = useState(0);
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [callInfo, setCallInfo] = useState({ isOpen: false, isIncoming: false, callerData: null, type: 'video' });
+    const [liveInfo, setLiveInfo] = useState({ isOpen: false, streamerName: '', communityName: '', streamId: '' });
 
     const user = getStoredUser();
     const username = user?.username || 'guest';
@@ -119,7 +120,9 @@ export const UIProvider = ({ children }) => {
         openVault,
         closeVault,
         callInfo,
-        setCallInfo
+        setCallInfo,
+        liveInfo,
+        setLiveInfo
     };
 
     return (

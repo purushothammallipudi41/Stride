@@ -1,0 +1,210 @@
+.vertical-feed-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: #000;
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.vertical-feed-overlay::-webkit-scrollbar {
+    display: none;
+}
+
+.video-clip-item {
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+}
+
+.clip-source {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clip-vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, transparent 30%, transparent 70%, rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+}
+
+/* Control Buttons */
+.close-clips-btn, .mute-toggle-btn {
+    position: fixed;
+    z-index: 1200;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.close-clips-btn { top: 24px; left: 24px; }
+.mute-toggle-btn { top: 24px; right: 24px; }
+
+/* Clip Overlays */
+.clip-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+}
+
+.clip-left-info {
+    max-width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: auto;
+}
+
+.clip-author-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.clip-username {
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+}
+
+.follow-btn-v2 {
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.clip-caption {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.clip-music-tag {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 6px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    width: fit-content;
+    overflow: hidden;
+}
+
+.music-icon-scroller {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: marquee 10s linear infinite;
+}
+
+.music-scrolling-text {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Right Actions Column */
+.clip-right-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    pointer-events: auto;
+}
+
+.clip-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-circle {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.action-circle:active {
+    transform: scale(0.9);
+}
+
+.clip-action span {
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+
+.active-heart {
+    animation: heart-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.music-disc-record {
+    width: 50px;
+    height: 50px;
+    background: #111;
+    border: 8px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    animation: rotate-disc 4s linear infinite;
+}
+
+.record-center {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(20%); }
+    100% { transform: translateX(-100%); }
+}
+
+@keyframes rotate-disc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes heart-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+    .clip-left-info { max-width: 80%; }
+}

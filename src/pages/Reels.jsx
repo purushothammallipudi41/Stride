@@ -1,74 +1,68 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SEO from '../components/common/SEO';
-import ReelItem from '../components/reels/ReelItem';
-import '../components/reels/Reels.css';
-
+import VerticalFeed from '../components/feed/VerticalFeed';
 import { BASE_URL } from '../utils/api';
 
 const Reels = () => {
-    const [activeReelId, setActiveReelId] = useState(null);
+    const navigate = useNavigate();
     const [reelsData, setReelsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const containerRef = useRef(null);
 
     useEffect(() => {
-        fetch(`${BASE_URL}/api/reels`)
+        // Fetch posts of type 'video' or 'reel'
+        fetch(`${BASE_URL}/api/feed?type=video`)
             .then(res => res.json())
             .then(data => {
-                if (data.length > 0) {
-                    setReelsData(data);
-                    setActiveReelId(data[0].id);
+                const videos = Array.isArray(data) ? data : [];
+                if (videos.length > 0) {
+                    setReelsData(videos);
                 } else {
-                    // Fallback to premium curated reels if DB is empty
-                    const placeholders = [
-                        { id: 9991, username: 'stride_official', likes: '1.2k', caption: 'Welcome to the Rhythm. #stride #vibes', url: 'https://cdn.pixabay.com/vimeo/459239103/concert-50474.mp4?width=1080&hash=8de26ec090e50f589c316719545371ae23d8c835', avatar: 'https://i.pravatar.cc/150?u=stride' },
-                        { id: 9992, username: 'alex_stride', likes: '840', caption: 'Late night sessions. 🎹 #music #producer', url: 'https://cdn.pixabay.com/vimeo/321151662/music-21583.mp4?width=1080&hash=d1e37bc6093558c356719545371ae23d8c835', avatar: 'https://i.pravatar.cc/150?u=alex' }
-                    ];
-                    setReelsData(placeholders);
-                    setActiveReelId(9991);
+                    // Premium placeholders for initial WOW factor
+                    setReelsData([
+                        { 
+                            _id: 'v1', 
+                            username: 'stride_official', 
+                            likes: 1200, 
+                            caption: 'Welcome to the Rhythm. #stride #social', 
+                            contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-man-dancing-under-neon-lights-23101-large.mp4',
+                            avatar: 'https://i.pravatar.cc/150?u=stride',
+                            type: 'video',
+                            isVerified: true,
+                            music: 'Stride Theme - Original'
+                        },
+                        { 
+                            _id: 'v2', 
+                            username: 'rhythmic_aura', 
+                            likes: 850, 
+                            caption: 'Late night lo-fi sessions. 🎹', 
+                            contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-recording-studio-with-dj-mixing-music-23097-large.mp4',
+                            avatar: 'https://i.pravatar.cc/150?u=aura',
+                            type: 'video',
+                            music: 'Lofi Nights - Aura'
+                        }
+                    ]);
                 }
                 setIsLoading(false);
             })
             .catch(err => {
-                console.error("Failed to fetch reels:", err);
+                console.error("Failed to fetch clips:", err);
                 setIsLoading(false);
             });
     }, []);
 
-    useEffect(() => {
-        if (isLoading || reelsData.length === 0) return;
-
-        const observerOptions = {
-            root: containerRef.current,
-            threshold: 0.8
-        };
-
-        const handleIntersection = (entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    setActiveReelId(Number(entry.target.dataset.id));
-                }
-            });
-        };
-
-        const observer = new IntersectionObserver(handleIntersection, observerOptions);
-        const elements = containerRef.current.querySelectorAll('.reel-item-wrapper');
-        elements.forEach(el => observer.observe(el));
-
-        return () => observer.disconnect();
-    }, [isLoading, reelsData]);
+    if (isLoading) return <div className="loading-v2">Synthesizing rhythm clips...</div>;
 
     return (
-        <div className="reels-container" ref={containerRef}>
+        <div className="reels-page-wrapper">
             <SEO 
-                title="Reels" 
-                description="Discover short, engaging music videos and creative reels from the Stride community." 
+                title="Rhythmic Clips" 
+                description="Experience full-screen immersive video rhythm on Stride." 
             />
-            {reelsData.map(video => (
-                <div key={video.id} className="reel-item-wrapper" data-id={video.id}>
-                    <ReelItem video={video} isActive={activeReelId === video.id} />
-                </div>
-            ))}
+            <VerticalFeed 
+                posts={reelsData} 
+                onClose={() => navigate('/')} 
+            />
         </div>
     );
 };
