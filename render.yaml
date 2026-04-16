@@ -21,8 +21,9 @@ services:
         value: "20.11.1"
 
   # Frontend Static Site
-  - type: static_site
+  - type: web
     name: stride-frontend
+    runtime: static
     buildCommand: npm ci --legacy-peer-deps && npm run build
     staticPublishPath: dist
     envVars:
