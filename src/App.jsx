@@ -40,12 +40,13 @@ import Sidebar from './components/layout/Sidebar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
 import ExploreModal from './components/ExploreModal';
+import VaultModal from './components/social/VaultModal';
 import OnboardingModal from './components/OnboardingModal';
 import CallOverlay from './components/chat/CallOverlay';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
-  const { isCreateModalOpen, isExplorerOpen, callInfo, setCallInfo } = useUI();
+  const { isCreateModalOpen, isExplorerOpen, isVaultOpen, callInfo, setCallInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
@@ -134,6 +135,7 @@ const AppContent = () => {
               
               {isCreateModalOpen && <CreatePostModal />}
               {isExplorerOpen && <ExploreModal />}
+              {isVaultOpen && <VaultModal />}
             </div>
           </ErrorBoundary>
         </main>

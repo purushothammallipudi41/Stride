@@ -87,33 +87,42 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                         <p>No activity yet. When someone likes your tracks or follows you, you'll see it here.</p>
                     </div>
                 ) : (
-                    notifications.map((notif) => (
-                        <div key={notif._id} className={`notification-item-v2 ${notif.readStatus ? 'read' : 'unread'}`}>
-                            <div className="notif-avatar-v2">
-                                <Avatar 
-                                    src={notif.avatar || `https://i.pravatar.cc/150?u=${notif.from}`} 
-                                    size={44} 
-                                    frame={notif.senderFrame || 'none'} 
-                                />
-                                <div className="notif-type-icon">
-                                    {getIcon(notif.type)}
+                    notifications.map((notif) => {
+                        const othersCount = (notif.actors?.length || 1) - 1;
+                        const actorList = (notif.actors || [notif.from]);
+                        const mainActor = actorList[0];
+
+                        return (
+                            <div key={notif._id} className={`notification-item-v2 ${notif.readStatus ? 'read' : 'unread'}`}>
+                                <div className="notif-avatar-v2">
+                                    <Avatar 
+                                        src={notif.avatar || `https://i.pravatar.cc/150?u=${mainActor}`} 
+                                        size={44} 
+                                        frame={notif.senderFrame || 'none'} 
+                                    />
+                                    <div className="notif-type-icon">
+                                        {getIcon(notif.type)}
+                                    </div>
                                 </div>
+                                <div className="notif-content-v2">
+                                    <p>
+                                        <span className="notif-username">{mainActor}</span>
+                                        {othersCount > 0 && (
+                                            <span className="notif-others"> and {othersCount} {othersCount === 1 ? 'other' : 'others'}</span>
+                                        )}
+                                        {" "}{notif.content}
+                                        <span className="notif-time-v2">{notif.time}</span>
+                                    </p>
+                                </div>
+                                {notif.type === 'follow' && (
+                                    <button className="notif-action-btn follow-btn">Follow</button>
+                                )}
+                                {notif.type === 'message' && (
+                                    <button className="notif-action-btn reply-btn" onClick={() => window.location.href='/messages'}>Reply</button>
+                                )}
                             </div>
-                            <div className="notif-content-v2">
-                                <p>
-                                    <span className="notif-username">{notif.from}</span>
-                                    {" "}{notif.content}
-                                    <span className="notif-time-v2">{notif.time}</span>
-                                </p>
-                            </div>
-                            {notif.type === 'follow' && (
-                                <button className="notif-action-btn follow-btn">Follow</button>
-                            )}
-                            {notif.type === 'message' && (
-                                <button className="notif-action-btn reply-btn" onClick={() => window.location.href='/messages'}>Reply</button>
-                            )}
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
             

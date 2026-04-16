@@ -1,0 +1,288 @@
+.vault-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.vault-back-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--color-text);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vault-back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-2px);
+}
+
+.header-info h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.header-info p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin: 4px 0 0;
+}
+
+.vault-secure-icon {
+    margin-left: auto;
+    color: var(--color-primary);
+    opacity: 0.8;
+}
+
+/* Balance Hero Card */
+.balance-hero-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(217, 70, 239, 0.2) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 28px;
+    padding: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15);
+}
+
+.balance-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.balance-amount {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 8px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.currency-symbol {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: var(--color-primary);
+}
+
+.balance-trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.balance-trend.positive {
+    color: #10b981;
+}
+
+/* Action Buttons */
+.action-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.action-pill.primary {
+    background: white;
+    color: black;
+}
+
+.action-pill.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Stats Grid */
+.vault-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-icon {
+    margin-bottom: 12px;
+}
+
+.stat-icon.purple { color: #a855f7; }
+.stat-icon.blue { color: #3b82f6; }
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* Vault Sections */
+.vault-section {
+    margin-bottom: 32px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.view-all-link {
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Tipper Chips */
+.tippers-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.tipper-chip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.tipper-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tipper-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.tipper-total {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.tipper-medal {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    font-size: 1.2rem;
+}
+
+/* Transaction List */
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.transaction-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+.tx-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tx-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+.tx-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tx-from {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.tx-date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.tx-right {
+    font-weight: 700;
+}
+
+.tx-right.positive { color: #10b981; }
+
+.tx-empty {
+    text-align: center;
+    padding: 32px;
+    color: var(--color-text-muted);
+    font-style: italic;
+}

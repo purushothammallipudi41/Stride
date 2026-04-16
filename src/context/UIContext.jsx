@@ -7,6 +7,7 @@ import { getStoredUser } from '../utils/storage';
 export const UIProvider = ({ children }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
+    const [isVaultOpen, setIsVaultOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [notifications, setNotifications] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -60,6 +61,12 @@ export const UIProvider = ({ children }) => {
     const openExplorer = () => setIsExplorerOpen(true);
     const closeExplorer = () => setIsExplorerOpen(false);
 
+    const openVault = () => {
+        setIsVaultOpen(true);
+        setIsExplorerOpen(false); // Focus on vault
+    };
+    const closeVault = () => setIsVaultOpen(false);
+
     const removeNotification = useCallback((id) => {
         setNotifications(prev => prev.filter(n => n.id !== id));
     }, []);
@@ -108,6 +115,9 @@ export const UIProvider = ({ children }) => {
         unreadMessages,
         incrementMessages,
         resetMessages,
+        isVaultOpen,
+        openVault,
+        closeVault,
         callInfo,
         setCallInfo
     };

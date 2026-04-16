@@ -861,8 +861,10 @@ app.post('/api/feed/:id/like', async (req, res) => {
                 user: post.username,
                 type: 'like',
                 from: likerUsername,
-                senderFrame: 'none', // Simple placeholder
+                senderFrame: 'none',
                 content: 'liked your post',
+                relatedId: post._id,
+                actors: [likerUsername],
                 time: 'Just now'
             });
             await User.findOneAndUpdate({ username: post.username }, { hasUnreadNotifications: true });
@@ -943,6 +945,8 @@ app.post('/api/profile/:username/follow', async (req, res) => {
                 type: 'follow',
                 from: followerUsername || 'someone',
                 content: 'started following you',
+                relatedId: targetId,
+                actors: [followerUsername || 'someone'],
                 time: 'Just now'
             });
             io.to(`user_${username}`).emit('new_notification', {
@@ -1197,18 +1201,20 @@ app.post('/api/playlists/:id/collaborate', async (req, res) => {
 app.get('/api/search', async (req, res) => {
     try {
         const { q } = req.query;
-        if (!q) return res.json({ users: [], communities: [], tags: [] });
+        if (!q) return res.json({ users: [], communities: [], tags: [], posts: [] });
 
         const query = q.toLowerCase();
         
-        // Mock search logic targeting Users and Communities
+        // 1. Communities Search
         const communities = await Community.find({
             $or: [
                 { name: { $regex: query, $options: 'i' } },
-                { description: { $regex: query, $options: 'i' } }
+                { description: { $regex: query, $options: 'i' } },
+                { tags: { $in: [query] } }
             ]
         }).limit(5);
 
+        // 2. Users Search
         const users = await User.find({
             $or: [
                 { username: { $regex: query, $options: 'i' } },
@@ -1216,7 +1222,22 @@ app.get('/api/search', async (req, res) => {
             ]
         }).limit(10);
 
-        res.json({ users, communities, tags: { posts: [], playlists: [], communities: [] } });
+        // 3. Posts Search (New)
+        const posts = await Post.find({
+            $or: [
+                { caption: { $regex: query, $options: 'i' } },
+                { content: { $regex: query, $options: 'i' } },
+                { tags: { $in: [query] } },
+                { username: { $regex: query, $options: 'i' } }
+            ]
+        }).sort({ createdAt: -1 }).limit(10);
+
+        res.json({ 
+            users: users.map(u => ({ username: u.username, name: u.name, avatar: u.avatar, isVerified: u.isVerified, avatarFrame: u.avatarFrame })), 
+            communities, 
+            posts,
+            tags: [] // Populated by trending logic
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1370,10 +1391,44 @@ app.post('/api/communities/:id/join', async (req, res) => {
 app.get('/api/notifications/:username', async (req, res) => {
     const { username } = req.params;
     try {
-        const notifications = await Notification.find({ user: username }).sort({ createdAt: -1 });
+        const rawNotifications = await Notification.find({ user: username }).sort({ createdAt: -1 });
+        
+        // --- SMART GROUPING ENGINE ---
+        const grouped = rawNotifications.reduce((acc, current) => {
+            const key = `${current.type}_${current.relatedId || 'no_id'}_${current.readStatus}`;
+            const existing = acc.find(item => {
+                const itemKey = `${item.type}_${item.relatedId || 'no_id'}_${item.readStatus}`;
+                return itemKey === key;
+            });
+
+            if (existing && current.type !== 'message' && current.type !== 'gift') {
+                if (!existing.actors.includes(current.from)) {
+                    existing.actors.push(current.from);
+                }
+                // Update content based on aggregate count
+                if (existing.actors.length > 1) {
+                    const othersCount = existing.actors.length - 1;
+                    if (existing.type === 'like') {
+                        existing.content = `and ${othersCount} others liked your post`;
+                    } else if (existing.type === 'follow') {
+                        existing.content = `and ${othersCount} others followed you`;
+                    }
+                }
+                return acc;
+            }
+
+            // If not groupable or new type, push as a single item with initialized actors
+            const notifObj = current.toObject();
+            if (!notifObj.actors || notifObj.actors.length === 0) {
+                notifObj.actors = [current.from];
+            }
+            acc.push(notifObj);
+            return acc;
+        }, []);
+
         const user = await User.findOne({ username });
         res.json({
-            notifications,
+            notifications: grouped,
             hasUnread: user ? user.hasUnreadNotifications : false
         });
     } catch (err) {
@@ -2152,35 +2207,50 @@ app.post('/api/monetization/send-tip', async (req, res) => {
     }
 });
 
-app.get('/api/artist/stats/:username', async (req, res) => {
+app.get('/api/vault/stats/:username', async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.params.username });
-        if (!user) return res.status(404).json({ error: "Artist not found" });
+        const { username } = req.params;
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: "User not found" });
 
-        const stats = await Analytics.find({ artistId: user._id });
-        const recentTxs = await Transaction.find({ to: user._id })
+        // Calculate earnings from tips
+        const earningsStats = await Transaction.aggregate([
+            { $match: { to: user._id, type: 'tip' } },
+            { $group: { 
+                _id: null, 
+                totalEarnings: { $sum: '$amount' },
+                count: { $sum: 1 }
+            }}
+        ]);
+
+        const recentTransactions = await Transaction.find({ to: user._id })
             .sort({ timestamp: -1 })
             .limit(10)
-            .populate('from', 'username name');
-        
-        const totalPlays = stats.reduce((acc, curr) => acc + (curr.listens || 0), 0);
-        const totalTips = stats.reduce((acc, curr) => acc + (curr.tips || 0), 0);
-        
-        res.json({ 
-            stats, 
-            recentTransactions: recentTxs,
-            summary: {
-                totalPlays,
-                totalTips,
-                monthlyListeners: Math.floor(totalPlays * 0.15), // Mocked proportional to plays
-                followers: user.followers?.length || 0,
-                trend: '+5.4%' // Static for now
-            },
-            artist: {
-                username: user.username,
-                name: user.name,
-                avatar: user.avatar
-            }
+            .populate('from', 'username name avatar');
+
+        const topTippers = await Transaction.aggregate([
+            { $match: { to: user._id, type: 'tip' } },
+            { $group: { 
+                _id: '$from', 
+                total: { $sum: '$amount' }
+            }},
+            { $sort: { total: -1 } },
+            { $limit: 3 }
+        ]);
+
+        // Resolve top tipper identities
+        const populatedTippers = await Promise.all(topTippers.map(async (t) => {
+            const u = await User.findById(t._id);
+            return { username: u?.username, total: t.total };
+        }));
+
+        res.json({
+            balance: user.balance,
+            totalEarnings: earningsStats[0]?.totalEarnings || 0,
+            tipCount: earningsStats[0]?.count || 0,
+            recentTransactions,
+            topTippers: populatedTippers,
+            monthlyTrend: '+12.4%' // Mocked for now
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
