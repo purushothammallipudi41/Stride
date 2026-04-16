@@ -8,8 +8,9 @@ import MusicContextObject from '../context/MusicContextObject';
 import { useUI } from '../hooks/useUI';
 
 
-import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock } from 'lucide-react';
+import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock, MessageSquare } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
+import CommunityBoard from '../components/community/CommunityBoard';
 import AnalyticsDashboard from '../components/content/AnalyticsDashboard';
 import TrackCard from '../components/chat/TrackCard';
 import ErrorBoundary from '../components/common/ErrorBoundary';
@@ -345,6 +346,7 @@ const CommunityView = () => {
         { id: 'general', name: 'general', type: 'text', icon: Hash },
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
         { id: 'jukebox', name: 'jukebox', type: 'text', icon: Music },
+        { id: 'board', name: 'discussion-board', type: 'text', icon: MessageSquare },
         { id: 'events', name: 'upcoming-events', type: 'text', icon: Hash },
         { id: 'backstage', name: 'backstage-lounge', type: 'text', icon: Lock, isGated: true },
         ...(isMod ? [{ id: 'analytics', name: 'insights', type: 'analytics', icon: BarChart3 }] : [])
@@ -540,6 +542,8 @@ const CommunityView = () => {
                                 hideCallButtons={true}
                             />
                         </div>
+                    ) : activeChannel === 'board' ? (
+                        <CommunityBoard communityId={communityId} user={user} isMember={isMember} />
                     ) : (isGatedChannel && !hasVibePass && !isMod) ? (
                         <div className="locked-channel-overlay animate-fade-in">
                             <div className="lock-content">

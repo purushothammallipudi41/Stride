@@ -30,6 +30,7 @@ const Transaction = require('./models/Transaction.cjs');
 
 
 const Notification = require('./models/Notification.cjs');
+const VibeService = require('./services/VibeService.cjs');
 const Event = require('./models/Event.cjs');
 const VibePass = require('./models/VibePass.cjs');
 const Stake = require('./models/Stake.cjs');
@@ -37,6 +38,7 @@ const VibeAnalytics = require('./models/VibeAnalytics.cjs');
 const Message = require('./models/Message.cjs');
 const Comment = require('./models/Comment.cjs');
 const Analytics = require('./models/Analytics.cjs');
+const Thread = require('./models/Thread.cjs');
 
 
 // Database Connection
@@ -868,6 +870,11 @@ app.post('/api/feed/:id/like', async (req, res) => {
                 time: 'Just now'
             });
             await User.findOneAndUpdate({ username: post.username }, { hasUnreadNotifications: true });
+            
+            // AI Vibe Engine: Update user affinities
+            if (post.tags && post.tags.length > 0) {
+                VibeService.updateVibeScore(likerUsername, post.tags, 1);
+            }
 
             // Targeted notification for post author
             io.to(`user_${post.username}`).emit('new_notification', {
@@ -1297,6 +1304,17 @@ app.get('/api/search/tag/:tag', async (req, res) => {
     }
 });
 
+// AI Vibe Matching Discovery
+app.get('/api/discovery/vibe-matches/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+        const matches = await VibeService.getRhythmicMatches(username);
+        res.json({ success: true, matches });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- SOCIAL FEED & ACTIVITY ---
 
 
@@ -1306,6 +1324,80 @@ app.get('/api/communities', async (req, res) => {
             .populate('owner', 'username')
             .populate('members', '_id username avatar avatarFrame');
         res.json(communities);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- COMMUNITY BOARDS (THREADS) ---
+app.get('/api/communities/:id/threads', async (req, res) => {
+    try {
+        const threads = await Thread.find({ community: req.params.id }).sort({ isPinned: -1, lastActive: -1 });
+        res.json({ success: true, threads });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/threads/:id', async (req, res) => {
+    try {
+        const thread = await Thread.findById(req.params.id);
+        if (!thread) return res.status(404).json({ error: "Thread not found" });
+        res.json({ success: true, thread });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/threads', async (req, res) => {
+    try {
+        const { communityId, author, authorAvatar, title, content, tags } = req.body;
+        const thread = await Thread.create({
+            community: communityId,
+            author,
+            authorAvatar,
+            title,
+            content,
+            tags: tags || []
+        });
+        res.status(201).json({ success: true, thread });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/threads/:id/reply', async (req, res) => {
+    try {
+        const { author, avatar, content } = req.body;
+        const thread = await Thread.findById(req.params.id);
+        if (!thread) return res.status(404).json({ error: "Thread not found" });
+
+        thread.replies.push({ author, avatar, content });
+        thread.lastActive = Date.now();
+        await thread.save();
+
+        res.json({ success: true, thread });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/threads/:id/like', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const thread = await Thread.findById(req.params.id);
+        if (!thread) return res.status(404).json({ error: "Thread not found" });
+
+        if (thread.likedBy.includes(username)) {
+            thread.likedBy = thread.likedBy.filter(u => u !== username);
+            thread.likes = Math.max(0, thread.likes - 1);
+        } else {
+            thread.likedBy.push(username);
+            thread.likes += 1;
+        }
+
+        await thread.save();
+        res.json({ success: true, likes: thread.likes });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1551,6 +1643,11 @@ app.post('/api/posts/:id/comments', async (req, res) => {
                 content: 'commented on your post',
                 postId: post._id
             });
+            
+            // AI Vibe Engine: Update user affinities for deeper engagement
+            if (post.tags && post.tags.length > 0) {
+                VibeService.updateVibeScore(username, post.tags, 2); // Comments carry more weight
+            }
         }
 
         io.emit('content_updated', { type: 'comment', postId: post._id, commentCount: post.commentCount });

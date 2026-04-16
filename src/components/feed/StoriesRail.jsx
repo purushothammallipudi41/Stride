@@ -4,6 +4,7 @@ import socket from '../../services/socket';
 import CreateStoryModal from './CreateStoryModal';
 import VerificationBadge from '../common/VerificationBadge';
 import Avatar from '../common/Avatar';
+import StoryViewer from '../social/StoryViewer';
 import { BASE_URL } from '../../utils/api';
 import { getStoredUser } from '../../utils/storage';
 import './StoriesRail.css';
@@ -129,47 +130,12 @@ const StoriesRail = () => {
                 error={error}
             />
 
-            {/* Story Viewer Modal */}
             {activeStory && (
-                <div className="story-viewer-modal">
-                    <div className="story-viewer-content">
-                        <button className="close-story-btn" onClick={() => setActiveStory(null)}>
-                            <X size={24} />
-                        </button>
-                        <div className="story-progress-bar">
-                            <div className="story-progress-fill animate-story-progress" />
-                        </div>
-                        <div className="story-viewer-header">
-                            <img src={activeStory.avatar} alt={activeStory.username} className="viewer-avatar" loading="lazy" />
-                            <span className="viewer-username">{activeStory.username}</span>
-                            {activeStory.isVerified && <VerificationBadge size={14} />}
-                        </div>
-                        <div className="story-viewer-media">
-                            <img src={activeStory.contentUrl} alt="Story Content" loading="lazy" />
-                            
-                            {/* Render Stickers */}
-                            {activeStory.metadata?.track && (
-                                <div className="sticker-item music-sticker viewer-sticker">
-                                    <img src={activeStory.metadata.track.cover} alt="Cover" className="sticker-cover" loading="lazy" />
-                                    <div className="sticker-info">
-                                        <span className="sticker-title font-bold">{activeStory.metadata.track.title}</span>
-                                        <span className="sticker-artist">{activeStory.metadata.track.artist}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeStory.metadata?.poll && (
-                                <div className="sticker-item poll-sticker viewer-sticker glass-panel animate-scale-in">
-                                    <div className="poll-question-viewer">{activeStory.metadata.poll.question}</div>
-                                    <div className="poll-options">
-                                        <button className="poll-option-btn">{activeStory.metadata.poll.option1}</button>
-                                        <button className="poll-option-btn">{activeStory.metadata.poll.option2}</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <StoryViewer 
+                    stories={friendStories}
+                    initialStoryId={activeStory.id}
+                    onClose={() => setActiveStory(null)}
+                />
             )}
         </div>
     );

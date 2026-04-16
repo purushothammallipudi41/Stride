@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema({
     hasUnreadMessages: { type: Boolean, default: false },
     balance: { type: Number, default: 100 }, // Starting balance for beta users
     transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }],
-    achievements: [{ type: String, default: [] }]
+    achievements: [{ type: String, default: [] }],
+    vibeScores: { type: Map, of: Number, default: {} }, // Affinity tracking (tag: score)
 }, { timestamps: true });
 
 
