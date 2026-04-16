@@ -21,6 +21,8 @@ const Post = ({ post }) => {
     const postId = post._id || post.id;
     const user = getStoredUser();
     const postRef = useRef(null);
+    const optionsRef = useRef(null);
+    const [showOptions, setShowOptions] = useState(false);
 
     const fetchComments = useCallback(async () => {
         try {
@@ -59,6 +61,16 @@ const Post = ({ post }) => {
         socket.on('content_updated', handleUpdate);
         return () => socket.off('content_updated', handleUpdate);
     }, [postId, showComments, fetchComments]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+                setShowOptions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         const currentRef = postRef.current;
@@ -127,6 +139,14 @@ const Post = ({ post }) => {
         navigator.clipboard.writeText(postUrl);
         setShareStatus('Copied!');
         setTimeout(() => setShareStatus('Share'), 2000);
+        setShowOptions(false);
+    };
+
+    const handleDelete = () => {
+        if (window.confirm("Delete this vibe permanently?")) {
+            alert("Post removed from your record.");
+            setShowOptions(false);
+        }
     };
 
     return (
@@ -157,9 +177,30 @@ const Post = ({ post }) => {
                         </div>
                     </div>
                 </Link>
-                <button className="more-btn">
-                    <MoreHorizontal size={20} />
-                </button>
+                <div className="post-header-actions" ref={optionsRef}>
+                    <button className="more-btn" onClick={() => setShowOptions(!showOptions)}>
+                        <MoreHorizontal size={20} />
+                    </button>
+                    
+                    {showOptions && (
+                        <div className="post-options-dropdown glass-card animate-scale-in">
+                            <Link to={`/profile/${post.username}`} className="option-item" onClick={() => setShowOptions(false)}>
+                                <span className="option-label">View Profile</span>
+                            </Link>
+                            <button className="option-item" onClick={handleShare}>
+                                <span className="option-label">Copy Link</span>
+                            </button>
+                            <button className="option-item report" onClick={() => { alert('Reported to the Council.'); setShowOptions(false); }}>
+                                <span className="option-label">Report Post</span>
+                            </button>
+                            {(post.username === user.username) && (
+                                <button className="option-item delete" onClick={handleDelete}>
+                                    <span className="option-label">Delete</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="post-media">
