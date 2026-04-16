@@ -23,6 +23,8 @@ const Post = ({ post }) => {
     const postRef = useRef(null);
     const optionsRef = useRef(null);
     const [showOptions, setShowOptions] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempCaption, setTempCaption] = useState(post.caption || post.content || "");
 
     const fetchComments = useCallback(async () => {
         try {
@@ -149,6 +151,32 @@ const Post = ({ post }) => {
         }
     };
 
+    const handleSaveEdit = async () => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/posts/${postId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-username': user.username 
+                },
+                body: JSON.stringify({ caption: tempCaption })
+            });
+
+            if (res.ok) {
+                const updatedPost = await res.json();
+                // Optionally update local state if needed, but the socket will likely handle it
+                setIsEditing(false);
+            }
+        } catch (err) {
+            console.error("Failed to update post:", err);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setTempCaption(post.caption || post.content || "");
+        setIsEditing(false);
+    };
+
     return (
         <article className="instagram-post" id={`post-${postId}`} ref={postRef}>
             {/* SVG Gradient Definition for icons to use if needed */}
@@ -187,21 +215,26 @@ const Post = ({ post }) => {
                             <Link to={`/profile/${post.username}`} className="option-item" onClick={() => setShowOptions(false)}>
                                 <span className="option-label">View Profile</span>
                             </Link>
-                            <button className="option-item" onClick={handleShare}>
-                                <span className="option-label">Copy Link</span>
-                            </button>
-                            <button className="option-item report" onClick={() => { alert('Reported to the Council.'); setShowOptions(false); }}>
-                                <span className="option-label">Report Post</span>
-                            </button>
-                            {(post.username === user.username) && (
-                                <button className="option-item delete" onClick={handleDelete}>
-                                    <span className="option-label">Delete</span>
+                                <button className="option-item" onClick={handleShare}>
+                                    <span className="option-label">Copy Link</span>
                                 </button>
-                            )}
-                        </div>
-                    )}
+                                <button className="option-item report" onClick={() => { alert('Reported to the Council.'); setShowOptions(false); }}>
+                                    <span className="option-label">Report Post</span>
+                                </button>
+                                {(post.username === user.username) && (
+                                    <>
+                                        <button className="option-item edit" onClick={() => { setIsEditing(true); setShowOptions(false); }}>
+                                            <span className="option-label">Edit Post</span>
+                                        </button>
+                                        <button className="option-item delete" onClick={handleDelete}>
+                                            <span className="option-label">Delete</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
 
             <div className="post-media">
                 {!mediaError ? (
@@ -267,7 +300,22 @@ const Post = ({ post }) => {
                         <span className="caption-username" style={{ margin: 0 }}>{post.username}</span>
                         {post.isVerified && <VerificationBadge size={12} />}
                     </div>
-                    <span className="caption-text">{post.caption || post.content}</span>
+                    {isEditing ? (
+                        <div className="post-edit-container animate-fade-in">
+                            <textarea 
+                                className="post-edit-input glass-card"
+                                value={tempCaption}
+                                onChange={(e) => setTempCaption(e.target.value)}
+                                autoFocus
+                            />
+                            <div className="post-edit-actions">
+                                <button className="edit-btn cancel" onClick={handleCancelEdit}>Cancel</button>
+                                <button className="edit-btn save" onClick={handleSaveEdit}>Save Changes</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <span className="caption-text">{tempCaption}</span>
+                    )}
                 </div>
 
                 {commentCount > 0 && (

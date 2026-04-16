@@ -316,3 +316,74 @@
     opacity: 0.3;
     cursor: default;
 }
+
+/* Post Edit Mode */
+.post-edit-container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.post-edit-input {
+    width: 100%;
+    min-height: 80px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    color: var(--color-text) !important;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.post-edit-input:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.post-edit-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.edit-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.edit-btn.cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+}
+
+.edit-btn.cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.edit-btn.save {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.edit-btn.save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.edit-btn.save:active {
+    transform: translateY(0);
+}

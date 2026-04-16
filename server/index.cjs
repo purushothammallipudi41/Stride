@@ -1426,6 +1426,26 @@ app.post('/api/notifications/mark-all-read/:username', async (req, res) => {
 });
 
 
+app.patch('/api/posts/:id', async (req, res) => {
+    const { caption } = req.body;
+    const username = req.headers['x-user-username'];
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+        // Security check: only owner can edit
+        if (post.username !== username) return res.status(403).json({ error: 'Unauthorized' });
+
+        post.caption = caption;
+        if (!post.tags) post.tags = []; // Ensure tags exists
+        await post.save();
+        
+        io.emit('content_updated', { type: 'post_update', postId: post._id, caption: post.caption });
+        res.json(post);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/users/search', async (req, res) => {
 
     const { q } = req.query;
