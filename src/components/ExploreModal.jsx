@@ -1,4 +1,8 @@
-import { Search, Hash, TrendingUp, Music2 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Hash, TrendingUp, Music2, Film, Radio, Globe, Users, Layout, Music, Trophy, BarChart3, Wallet, ShoppingBag, Settings, LogOut } from 'lucide-react';
+import { useUI } from '../hooks/useUI';
+import GlobalModal from './common/GlobalModal';
 import Avatar from './common/Avatar';
 import { BASE_URL } from '../utils/api';
 
