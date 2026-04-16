@@ -44,6 +44,8 @@ import VaultModal from './components/social/VaultModal';
 import OnboardingModal from './components/OnboardingModal';
 import CallOverlay from './components/chat/CallOverlay';
 import LiveOverlay from './components/chat/LiveOverlay';
+import OfflineStatus from './components/common/OfflineStatus';
+import PushManager from './components/notifications/PushManager';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
@@ -171,6 +173,9 @@ const AppContent = () => {
             onClose={() => setLiveInfo({ ...liveInfo, isOpen: false })}
         />
       )}
+
+      <OfflineStatus />
+      <PushManager />
     </div>
   );
 };

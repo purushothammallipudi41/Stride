@@ -32,7 +32,9 @@ const Transaction = require('./models/Transaction.cjs');
 const Notification = require('./models/Notification.cjs');
 const Thread = require('./models/Thread.cjs');
 const VibeService = require('./services/VibeService.cjs');
+const SocialAIService = require('./services/SocialAIService.cjs');
 const MonetizationService = require('./services/MonetizationService.cjs');
+const PushService = require('./services/PushService.cjs');
 const Event = require('./models/Event.cjs');
 const VibePass = require('./models/VibePass.cjs');
 const Stake = require('./models/Stake.cjs');
@@ -40,7 +42,6 @@ const VibeAnalytics = require('./models/VibeAnalytics.cjs');
 const Message = require('./models/Message.cjs');
 const Comment = require('./models/Comment.cjs');
 const Analytics = require('./models/Analytics.cjs');
-const Thread = require('./models/Thread.cjs');
 
 
 // Database Connection
@@ -695,9 +696,19 @@ app.get('/api/profile/:username', async (req, res) => {
 
 app.get('/api/feed', async (req, res) => {
     try {
-        const postsArray = await Post.find().populate('user').sort({ createdAt: -1 }).lean();
+        const { username, type } = req.query;
+        let postsArray;
+
+        if (type === 'personalized' && username) {
+            // High-fidelity AI Discovery Brain
+            postsArray = await VibeService.getPersonalizedFeed(username, 50);
+        } else {
+            // Chronological Social Rhythm
+            postsArray = await Post.find().populate('user').sort({ createdAt: -1 }).limit(50).lean();
+        }
+
         const enhancedPosts = await Promise.all(postsArray.map(async (post) => {
-            const user = await User.findById(post.user);
+            const user = await User.findById(post.user || post.authorId);
             return {
                 ...post,
                 user: user ? user.username : (post.username || 'Stride User'),
@@ -861,6 +872,8 @@ app.post('/api/feed/:id/like', async (req, res) => {
             
             // Notification for post owner
             const likerUsername = req.headers['x-user-username'] || 'someone';
+            const postOwner = await User.findOne({ username: post.username });
+            
             await Notification.create({
                 user: post.username,
                 type: 'like',
@@ -871,11 +884,21 @@ app.post('/api/feed/:id/like', async (req, res) => {
                 actors: [likerUsername],
                 time: 'Just now'
             });
-            await User.findOneAndUpdate({ username: post.username }, { hasUnreadNotifications: true });
+
+            if (postOwner) {
+                await User.findByIdAndUpdate(postOwner._id, { hasUnreadNotifications: true });
+                
+                // Trigger Native Push
+                PushService.sendNotification(postOwner._id, {
+                    title: 'New Vibe Like',
+                    body: `${likerUsername} liked your rhythm.`,
+                    data: { postId: post._id }
+                });
+            }
             
-            // AI Vibe Engine: Update user affinities
+            // AI Vibe Engine: Update user affinities with weighted signals
             if (post.tags && post.tags.length > 0) {
-                VibeService.updateVibeScore(likerUsername, post.tags, 1);
+                VibeService.updateVibeScore(likerUsername, post.tags, 'like');
             }
 
             // Targeted notification for post author
@@ -903,13 +926,19 @@ app.post('/api/feed/:id/like', async (req, res) => {
 });
 
 app.post('/api/posts/:id/view', async (req, res) => {
+    const username = req.headers['x-user-username'] || 'guest';
     try {
         const post = await Post.findByIdAndUpdate(
             req.params.id, 
-            { $inc: { viewCount: 1 } }, 
+            { $inc: { viewCount: 1, uniqueViews: 1 } }, 
             { returnDocument: 'after' }
         );
         if (post) {
+            // AI Vibe Engine: Update user affinities with passive view rhythm
+            if (username !== 'guest' && post.tags && post.tags.length > 0) {
+                VibeService.updateVibeScore(username, post.tags, 'view');
+            }
+
             io.emit('content_updated', { 
                 type: 'view', 
                 postId: post._id, 
@@ -957,6 +986,13 @@ app.post('/api/profile/:username/follow', async (req, res) => {
                 relatedId: targetId,
                 actors: [followerUsername || 'someone'],
                 time: 'Just now'
+            });
+
+            // Trigger Native Push
+            PushService.sendNotification(targetId, {
+                title: 'New Rhythm Follower',
+                body: `${followerUsername || 'Someone'} followed your rhythm!`,
+                icon: followerUser.avatar
             });
             io.to(`user_${username}`).emit('new_notification', {
                 type: 'follow',
@@ -1331,6 +1367,16 @@ app.get('/api/communities', async (req, res) => {
     }
 });
 
+// Community Vibe Pulse (AI Social Recap)
+app.get('/api/communities/:id/pulse', async (req, res) => {
+    try {
+        const pulse = await SocialAIService.generateCommunityPulse(req.params.id);
+        res.json(pulse);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- COMMUNITY BOARDS (THREADS) ---
 app.get('/api/communities/:id/threads', async (req, res) => {
     try {
@@ -1568,6 +1614,24 @@ app.post('/api/notifications/mark-all-read/:username', async (req, res) => {
     try {
         await User.findOneAndUpdate({ username }, { hasUnreadNotifications: false });
         await Notification.updateMany({ user: username }, { readStatus: true });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/notifications/subscribe', async (req, res) => {
+    try {
+        const { userId, subscription } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Storage logic for push subscriptions
+        const exists = user.pushSubscriptions.find(s => s.endpoint === subscription.endpoint);
+        if (!exists) {
+            user.pushSubscriptions.push(subscription);
+            await user.save();
+        }
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -2712,9 +2776,24 @@ io.on('connection', (socket) => {
 
     socket.on('start_live_stream', async ({ username, communityId }) => {
         try {
-            await User.findOneAndUpdate({ username }, { isLive: true, liveStreamId: `stream_${username}` });
+            const user = await User.findOneAndUpdate({ username }, { isLive: true, liveStreamId: `stream_${username}` });
             if (communityId) {
-                await Community.findByIdAndUpdate(communityId, { isLive: true });
+                const community = await Community.findByIdAndUpdate(communityId, { isLive: true }).populate('members');
+                
+                // Broadcast Native Push to all members
+                if (community && community.members) {
+                    community.members.forEach(member => {
+                        // Skip if it's the streamer themselves
+                        const memberId = member._id || member;
+                        if (String(memberId) !== String(user?._id)) {
+                            PushService.sendNotification(memberId, {
+                                title: `${username} is LIVE! 🎥`,
+                                body: `Join the immersive broadcast in ${community.name}.`,
+                                data: { communityId, streamId: `stream_${username}`, type: 'live' }
+                            });
+                        }
+                    });
+                }
             }
             io.emit('live_update', { type: 'start', username, communityId, streamId: `stream_${username}` });
             console.log(`[Socket] User ${username} started streaming in community: ${communityId}`);

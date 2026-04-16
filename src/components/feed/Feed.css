@@ -1,10 +1,66 @@
 .feed-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+    gap: 0; /* Gap handled by internal components */
+    padding: 0;
     max-width: 800px;
     margin: 0 auto;
+}
+
+.feed-tabs-v2 {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    background: rgba(15, 15, 20, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 20px;
+}
+
+.feed-tab-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 16px 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    letter-spacing: -0.01em;
+}
+
+.feed-tab-btn.active {
+    color: #fff;
+}
+
+.tab-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #8b5cf6;
+    border-radius: 4px 4px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.feed-tab-btn.active .tab-indicator {
+    transform: scaleX(1);
+}
+
+.feed-tab-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.posts-scroll-area {
+    padding: 24px 16px;
 }
 
 .monetized-post-wrapper {

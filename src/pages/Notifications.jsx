@@ -7,6 +7,7 @@ import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
 import socket from '../services/socket';
 import { getStoredUser } from '../utils/storage';
+import { requestPushPermission } from '../components/notifications/PushManager';
 import './Notifications.css';
 
 const Notifications = () => {
@@ -17,6 +18,7 @@ const Notifications = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [swipingId, setSwipingId] = useState(null);
     const [swipeX, setSwipeX] = useState(0);
+    const [showPushInvite, setShowPushInvite] = useState(false);
     const touchStartRef = useRef(0);
 
     useEffect(() => {
@@ -48,11 +50,23 @@ const Notifications = () => {
         socket.on('content_updated', handleUpdate);
         socket.on('new_private_message', fetchNotifications);
 
+        // Check for push permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            setShowPushInvite(true);
+        }
+
         return () => {
             socket.off('content_updated', handleUpdate);
             socket.off('new_private_message', fetchNotifications);
         };
     }, [username, resetNotifications]);
+
+    const handleEnablePush = async () => {
+        const success = await requestPushPermission(userProfile._id);
+        if (success) {
+            setShowPushInvite(false);
+        }
+    };
 
     const handleTouchStart = (e, id) => {
         touchStartRef.current = e.touches[0].clientX;
@@ -128,6 +142,21 @@ const Notifications = () => {
             </div>
 
             <div className="notifications-list">
+                {showPushInvite && (
+                    <div className="push-invite-banner glass-card animate-slide-up">
+                        <div className="push-invite-icon">
+                            <Bell size={24} className="pulse-icon-purple" />
+                        </div>
+                        <div className="push-invite-text">
+                            <h3>Never Miss a Rhythm</h3>
+                            <p>Enable system alerts for mentions, follows, and community broadcasts.</p>
+                        </div>
+                        <div className="push-invite-actions">
+                            <button className="enable-push-btn" onClick={handleEnablePush}>Enable</button>
+                            <button className="dismiss-push-btn" onClick={() => setShowPushInvite(false)}><X size={16} /></button>
+                        </div>
+                    </div>
+                )}
                 {groupedNotifications?.map(([group, items]) => (
                     <div key={group} className="time-group">
                         <div className="time-group-header">{group}</div>

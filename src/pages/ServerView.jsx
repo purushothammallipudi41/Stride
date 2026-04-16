@@ -8,8 +8,9 @@ import MusicContextObject from '../context/MusicContextObject';
 import { useUI } from '../hooks/useUI';
 
 
-import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock, MessageSquare } from 'lucide-react';
+import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock, MessageSquare, Sparkles } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
+import VibePulse from '../components/chat/VibePulse';
 import CommunityBoard from '../components/community/CommunityBoard';
 import AnalyticsDashboard from '../components/content/AnalyticsDashboard';
 import TrackCard from '../components/chat/TrackCard';
@@ -52,6 +53,8 @@ const CommunityView = () => {
     const [hasVibePass, setHasVibePass] = useState(false);
     const [isMinting, setIsMinting] = useState(false);
     const [showMintModal, setShowMintModal] = useState(false);
+    const [showPulse, setShowPulse] = useState(false);
+    const [pulseData, setPulseData] = useState(null);
     const [newEventData, setNewEventData] = useState({
         title: '',
         description: '',
@@ -354,6 +357,18 @@ const CommunityView = () => {
         addNotification({ title: 'Live Now!', message: 'Your community broadcast has started.', type: 'success' });
     };
 
+    const handleFetchPulse = async () => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/communities/${community._id}/pulse`);
+            const data = await res.json();
+            setPulseData(data);
+            setShowPulse(true);
+        } catch (err) {
+            console.error("Pulse fetch failed:", err);
+            addNotification({ title: 'Pulse Error', message: 'Intelligence recalibrating. Try again soon.', type: 'info' });
+        }
+    };
+
     const handleStopLive = () => {
         socket.emit('stop_live_stream', { username: user.username, communityId: community._id || community.id });
         setLiveInfo({ isOpen: false, streamerName: '', communityName: '', streamId: '' });
@@ -472,7 +487,10 @@ const CommunityView = () => {
                         {activeChannelObj?.icon && <activeChannelObj.icon size={24} className="icon-muted" />}
                         <h3>{activeChannelObj?.name}</h3>
                     </div>
-                     <div className="header-right">
+                    <div className="header-right">
+                        <button className="vibe-pulse-trigger-btn" onClick={handleFetchPulse} title="Catch Up with AI Pulse">
+                            <Sparkles size={18} /> Vibe Pulse
+                        </button>
                         {isMod && (
                             <button className="go-live-action-btn" onClick={handleGoLive}>
                                 <Video size={18} /> Go Live
@@ -834,6 +852,7 @@ const CommunityView = () => {
                     </div>
                 </div>
             )}
+            {showPulse && <VibePulse pulseData={pulseData} onClose={() => setShowPulse(false)} />}
         </div>
     );
 };

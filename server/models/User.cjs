@@ -42,6 +42,14 @@ const userSchema = new mongoose.Schema({
     vibeScores: { type: Map, of: Number, default: {} }, // Affinity tracking (tag: score)
     isLive: { type: Boolean, default: false }, // New: Live Streaming status
     liveStreamId: { type: String, default: "" }, // New: Dynamic room ID for streams
+    pushSubscriptions: [{
+        endpoint: String,
+        expirationTime: Number,
+        keys: {
+            p256dh: String,
+            auth: String
+        }
+    }]
 }, { timestamps: true });
 
 

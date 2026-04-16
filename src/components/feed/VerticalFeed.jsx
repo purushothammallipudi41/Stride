@@ -26,14 +26,21 @@ const VerticalFeed = ({ posts, onClose }) => {
                 {muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
             </button>
 
-            {videoPosts.map((post, index) => (
-                <VideoClip 
-                    key={post._id || post.id} 
-                    post={post} 
-                    isActive={index === activeIndex} 
-                    muted={muted}
-                />
-            ))}
+            {videoPosts.map((post, index) => {
+                // Adaptive Viewport Culling: Only render active and neighbor clips
+                const isVisible = Math.abs(index - activeIndex) <= 1;
+                
+                if (!isVisible) return <div key={post._id || post.id} className="video-clip-placeholder" />;
+
+                return (
+                    <VideoClip 
+                        key={post._id || post.id} 
+                        post={post} 
+                        isActive={index === activeIndex} 
+                        muted={muted}
+                    />
+                );
+            })}
 
             {videoPosts.length === 0 && (
                 <div className="empty-clips">

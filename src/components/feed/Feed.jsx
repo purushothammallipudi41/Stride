@@ -7,17 +7,31 @@ import SkeletonPost from '../common/SkeletonPost';
 import AdCard from './AdCard';
 import './Feed.css';
 
-const Feed = ({ type = 'foryou' }) => {
+const Feed = ({ type: initialType = 'foryou' }) => {
+    const [activeTab, setActiveTab] = useState(initialType);
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const loadFeed = useCallback(() => {
         const user = getStoredUser();
-        const userId = user._id || user.id || user.username;
-        const url = type === 'following' && userId && userId !== 'guest'
-            ? `${BASE_URL}/api/feed/following?userId=${userId}`
-            : `${BASE_URL}/api/feed`;
+        const username = user?.username;
+        const userId = user?._id || user?.id;
+        
+        // Build the discovery rhythm URL
+        let url = `${BASE_URL}/api/feed`;
+        const queryParams = new URLSearchParams();
 
+        if (activeTab === 'following' && username) {
+            url = `${BASE_URL}/api/feed/following`;
+            queryParams.append('username', username);
+        } else if (activeTab === 'foryou') {
+            queryParams.append('type', 'personalized');
+            if (username) queryParams.append('username', username);
+        }
+
+        if (queryParams.toString()) url += `?${queryParams.toString()}`;
+
+        setIsLoading(true);
         fetch(url)
             .then(res => res.json())
             .then(data => {
@@ -50,30 +64,51 @@ const Feed = ({ type = 'foryou' }) => {
         
         socket.on('content_updated', handleUpdate);
         return () => socket.off('content_updated', handleUpdate);
-    }, [loadFeed]);
+    }, [loadFeed, activeTab]);
 
 
-
-    if (isLoading) {
-        return (
-            <div className="feed-container">
-                <SkeletonPost />
-                <SkeletonPost />
-                <SkeletonPost />
-            </div>
-        );
-    }
-
-    const user = getStoredUser();
 
     return (
         <div className="feed-container">
-            {posts.map((post, index) => (
-                <div key={post._id || post.id}>
-                    <MonetizedPost post={post} user={user} />
-                    {(index + 1) % 5 === 0 && <AdCard />}
+            <div className="feed-tabs-v2 glass-panel">
+                <button 
+                    className={`feed-tab-btn ${activeTab === 'foryou' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('foryou')}
+                >
+                    For You
+                    <div className="tab-indicator"></div>
+                </button>
+                <button 
+                    className={`feed-tab-btn ${activeTab === 'following' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('following')}
+                >
+                    Following
+                    <div className="tab-indicator"></div>
+                </button>
+            </div>
+
+            {isLoading ? (
+                <div className="feed-loading-state">
+                    <SkeletonPost />
+                    <SkeletonPost />
                 </div>
-            ))}
+            ) : (
+                <div className="posts-scroll-area">
+                    {posts.map((post, index) => (
+                        <div key={post._id || post.id}>
+                            <MonetizedPost post={post} user={user} />
+                            {(index + 1) % 5 === 0 && <AdCard />}
+                        </div>
+                    ))}
+                    
+                    {posts.length === 0 && (
+                        <div className="empty-feed-v2">
+                            <i className="ri-pulse-line"></i>
+                            <p>No rhythms found in this channel.</p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

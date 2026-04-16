@@ -1,13 +1,20 @@
 const User = require('../models/User.cjs');
+const Post = require('../models/Post.cjs');
+
+// Weighted signals for high-fidelity discovery
+const SIGNAL_WEIGHTS = {
+    'view': 1,
+    'like': 5,
+    'share': 8,
+    'comment': 12,
+    'monetized_view': 3
+};
 
 const VibeService = {
     /**
-     * Updates a user's vibeScores based on the tags of a post they interacted with.
-     * @param {string} username - Target user
-     * @param {string[]} tags - Tags to increment (e.g., ['#lofi', '#abstract'])
-     * @param {number} increment - How much to add (default 1)
+     * Updates vibeScores with weighted interaction signaling.
      */
-    updateVibeScore: async (username, tags, increment = 1) => {
+    updateVibeScore: async (username, tags, signalType = 'view') => {
         if (!tags || tags.length === 0) return;
         
         try {
@@ -15,11 +22,12 @@ const VibeService = {
             if (!user) return;
 
             if (!user.vibeScores) user.vibeScores = new Map();
+            const weight = SIGNAL_WEIGHTS[signalType] || 1;
 
             tags.forEach(tag => {
                 const cleanTag = tag.toLowerCase().replace('#', '');
                 const currentScore = user.vibeScores.get(cleanTag) || 0;
-                user.vibeScores.set(cleanTag, currentScore + increment);
+                user.vibeScores.set(cleanTag, currentScore + weight);
             });
 
             await user.save();
@@ -29,10 +37,49 @@ const VibeService = {
     },
 
     /**
-     * Finds users with similar top vibe profiles.
-     * @param {string} username - The user to match for
-     * @returns {Promise<User[]>} - List of potential rhythmic matches
+     * Personalized Feed Ranking Algorithm
+     * ((TagAffinity * 0.7) + (SocialProximity * 0.3)) + DiscoveryJitter
      */
+    getPersonalizedFeed: async (username, limit = 50) => {
+        try {
+            const currentUser = await User.findOne({ username });
+            const allPosts = await Post.find({}).sort({ createdAt: -1 }).limit(100);
+            
+            if (!currentUser || !currentUser.vibeScores || currentUser.vibeScores.size === 0) {
+                return allPosts.slice(0, limit);
+            }
+
+            const scoredPosts = allPosts.map(post => {
+                let score = 0;
+                
+                // 1. Tag Affinity (70% weight)
+                if (post.tags && post.tags.length > 0) {
+                    post.tags.forEach(tag => {
+                        const cleanTag = tag.toLowerCase().replace('#', '');
+                        score += (currentUser.vibeScores.get(cleanTag) || 0) * 0.7;
+                    });
+                }
+
+                // 2. Social Proximity (30% weight - boost if followed)
+                const isFollowed = currentUser.following.some(id => id.toString() === post.authorId?.toString());
+                if (isFollowed) score += 50 * 0.3;
+
+                // 3. Discovery Jitter (Prevents echo chambers)
+                const jitter = Math.random() * 10;
+                
+                return { post, finalScore: score + jitter };
+            });
+
+            return scoredPosts
+                .sort((a, b) => b.finalScore - a.finalScore)
+                .slice(0, limit)
+                .map(item => item.post);
+        } catch (err) {
+            console.error('VibeService Ranking Error:', err);
+            return [];
+        }
+    },
+
     getRhythmicMatches: async (username) => {
         try {
             const currentUser = await User.findOne({ username });
@@ -44,8 +91,6 @@ const VibeService = {
                 .slice(0, 3)
                 .map(v => v[0]);
 
-            // Find users who have at least one of these in their top vibes
-            // Note: In a large DB, this would use a more complex aggregation.
             const potentialMatches = await User.find({ 
                 username: { $ne: username },
                 vibeScores: { $exists: true }
@@ -54,7 +99,7 @@ const VibeService = {
             const scoredMatches = potentialMatches.map(u => {
                 const userVibes = Array.from(u.vibeScores.entries())
                     .sort((a, b) => b[1] - a[1])
-                    .slice(0, 5) // Look at top 5 for overlap
+                    .slice(0, 5) 
                     .map(v => v[0]);
 
                 const overlap = myVibes.filter(v => userVibes.includes(v)).length;
@@ -67,7 +112,6 @@ const VibeService = {
                 .slice(0, 5)
                 .map(m => m.user);
         } catch (err) {
-            console.error('VibeService Error getting matches:', err);
             return [];
         }
     }
