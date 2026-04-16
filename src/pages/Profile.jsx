@@ -424,7 +424,7 @@ const Profile = () => {
                     {isOwnProfile ? (
                         <>
                             <button className="ig-action-btn-main" onClick={openEditModal}>Edit profile</button>
-                            <button className="ig-action-btn-main">Share profile</button>
+                            <button className="ig-action-btn-main" onClick={handleShare}>Share profile</button>
                         </>
                     ) : (
                         <>
