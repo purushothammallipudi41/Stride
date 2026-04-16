@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Smartphone, Loader2 } from 'lucide-react';
 import logo from '../assets/stride-logo.png';
+import { auth } from '../services/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { BASE_URL } from '../utils/api';
-import './Login.css'; // Reuse Login styles for consistency
+import './Login.css';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -39,37 +41,39 @@ const Signup = () => {
         setIsLoading(true);
 
         try {
-            // 1. Create Account
-            const response = await fetch(`${BASE_URL}/api/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+            // 1. Create Identity Profile
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            const firebaseUser = userCredential.user;
+
+            // 2. Burn Username into Identity
+            await updateProfile(firebaseUser, {
+                displayName: formData.username,
+                photoURL: `https://i.pravatar.cc/150?u=${firebaseUser.uid}`
             });
-            const data = await response.json();
 
-            if (data.success) {
-                // 2. Trigger Verification Code
-                await fetch(`${BASE_URL}/api/send-code`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: formData.email })
-                });
+            const token = await firebaseUser.getIdToken();
 
-                // 3. Link user data for session
-                localStorage.setItem('user', JSON.stringify({
-                    username: formData.username,
-                    email: formData.email,
-                    avatar: `https://i.pravatar.cc/150?u=${formData.username}`
-                }));
+            // 3. Link user data for local session pulse
+            localStorage.setItem('user', JSON.stringify({
+                _id: firebaseUser.uid,
+                username: formData.username,
+                email: formData.email,
+                avatar: firebaseUser.photoURL || `https://i.pravatar.cc/150?u=${firebaseUser.uid}`,
+                isVerified: false
+            }));
+            localStorage.setItem('token', token);
 
-                // 4. Navigate to Verification
-                navigate('/verify', { state: { email: formData.email } });
-            } else {
-                setError(data.message || 'Signup failed. Please try again.');
-            }
+            // 4. Navigate to Verification Rhythm
+            navigate('/verify', { state: { email: formData.email } });
         } catch (err) {
-            console.error('Signup error:', err);
-            setError('Connection error. Please try again later.');
+            console.error('Firebase Signup error:', err);
+            if (err.code === 'auth/email-already-in-use') {
+                 setError('Email is already registered.');
+            } else if (err.code === 'auth/weak-password') {
+                 setError('Password must be at least 6 characters.');
+            } else {
+                 setError(err.message || 'Connection error. Please try again later.');
+            }
         } finally {
             setIsLoading(false);
         }

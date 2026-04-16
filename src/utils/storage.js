@@ -4,7 +4,15 @@ export const getStoredUser = () => {
     if (!userStr || userStr === 'undefined' || userStr === "[object Object]") {
       return {};
     }
-    return JSON.parse(userStr);
+    const userObj = JSON.parse(userStr);
+    
+    // High-Fidelity Firebase Auth Synchronization
+    // Ensure raw Firebase tokens with 'uid' seamlessly map to Stride's legacy '_id' 
+    if (userObj && !userObj._id && userObj.uid) {
+        userObj._id = userObj.uid;
+    }
+    
+    return userObj;
   } catch (err) {
     console.error("[Storage] Failed to parse user from local storage:", err);
     return {};
