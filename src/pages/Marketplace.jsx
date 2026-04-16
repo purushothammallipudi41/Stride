@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
-import { ShoppingBag, Coins, Rocket, Guitar, Bot, Disc, GlassWater, Music, Satellite, BatteryFull } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, Coins, Rocket, Guitar, Bot, Disc, GlassWater, Music, Satellite, BatteryFull, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
+import PurchaseModal from '../components/social/PurchaseModal';
+import { useUI } from '../hooks/useUI';
 import './Marketplace.css';
 
 const Marketplace = () => {
     const navigate = useNavigate();
+    const { addNotification } = useUI();
     const [activeTab, setActiveTab] = useState('store');
+    const [userBalance, setUserBalance] = useState(1250); // Initial live balance mock
+    const [libraryItems, setLibraryItems] = useState([]);
+    const [selectedAsset, setSelectedAsset] = useState(null);
+    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
     const sections = [
         {
@@ -35,14 +42,22 @@ const Marketplace = () => {
         }
     ];
 
+    const handlePurchaseConfirm = (asset) => {
+        setUserBalance(prev => prev - asset.price);
+        setLibraryItems(prev => [...prev, { ...asset, acquiredAt: new Date().toISOString() }]);
+        setIsCheckoutOpen(false);
+        setSelectedAsset(null);
+        addNotification({ title: 'Minting Successful', message: `${asset.name} was added to your library!`, type: 'success' });
+    };
+
     return (
         <div className="marketplace-container animate-fade-in">
             <PageHeader 
                 title="Stride Marketplace" 
                 rightElement={
-                    <div className="vibe-tokens-badge-v2">
+                    <div className="vibe-tokens-badge-v2" onClick={() => navigate('/wallet')} style={{ cursor: 'pointer' }}>
                         <Coins size={16} className="token-icon" />
-                        <span>950 Vibe Tokens</span>
+                        <span>{userBalance.toLocaleString()} Vibe Tokens</span>
                     </div>
                 }
             />
@@ -67,31 +82,75 @@ const Marketplace = () => {
             </nav>
 
             <main className="marketplace-content">
-                {sections.map((section, sIdx) => (
-                    <section key={sIdx} className="market-section">
+                {activeTab === 'store' ? (
+                    sections.map((section, sIdx) => (
+                        <section key={sIdx} className="market-section">
+                            <div className="section-header">
+                                <h2>{section.title}</h2>
+                                <p>{section.subtitle}</p>
+                                <div className="items-count">{section.items.length} stickers</div>
+                            </div>
+                            <div className="items-grid">
+                                {section.items.map((item, iIdx) => (
+                                    <div 
+                                        key={iIdx} 
+                                        className="market-item-card glass-panel"
+                                        onClick={() => {
+                                            setSelectedAsset(item);
+                                            setIsCheckoutOpen(true);
+                                        }}
+                                    >
+                                        {item.badge && <span className="item-badge">{item.badge}</span>}
+                                        <div className="item-icon-box">
+                                            <item.icon size={32} />
+                                            <span className="item-name">@{item.name}</span>
+                                        </div>
+                                        <div className="item-price">
+                                            <Coins size={12} />
+                                            <span>{item.price}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    ))
+                ) : (
+                    <section className="market-section animate-fade-in">
                         <div className="section-header">
-                            <h2>{section.title}</h2>
-                            <p>{section.subtitle}</p>
-                            <div className="items-count">{section.items.length} stickers</div>
+                            <h2>My Library</h2>
+                            <p>Premium assets and stickers you've collected.</p>
+                            <div className="items-count">{libraryItems.length} items</div>
                         </div>
-                        <div className="items-grid">
-                            {section.items.map((item, iIdx) => (
-                                <div key={iIdx} className="market-item-card glass-panel">
-                                    {item.badge && <span className="item-badge">{item.badge}</span>}
-                                    <div className="item-icon-box">
-                                        <item.icon size={32} />
-                                        <span className="item-name">@{item.name}</span>
+                        {libraryItems.length > 0 ? (
+                            <div className="items-grid">
+                                {libraryItems.map((item, iIdx) => (
+                                    <div key={iIdx} className="market-item-card glass-panel owned">
+                                        <div className="item-icon-box">
+                                            <item.icon size={32} />
+                                            <span className="item-name">@{item.name}</span>
+                                        </div>
                                     </div>
-                                    <div className="item-price">
-                                        <Coins size={12} />
-                                        <span>{item.price}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="library-empty-state">
+                                <Wallet size={48} className="empty-icon" />
+                                <h3>Your vault is empty</h3>
+                                <p>Discover premium drops in the marketplace to grow your collection.</p>
+                                <button className="explore-store-btn" onClick={() => setActiveTab('store')}>Browse Store</button>
+                            </div>
+                        )}
                     </section>
-                ))}
+                )}
             </main>
+
+            <PurchaseModal 
+                isOpen={isCheckoutOpen}
+                onClose={() => setIsCheckoutOpen(false)}
+                asset={selectedAsset}
+                userBalance={userBalance}
+                onConfirm={handlePurchaseConfirm}
+            />
         </div>
     );
 };

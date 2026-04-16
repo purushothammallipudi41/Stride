@@ -1,0 +1,157 @@
+.purchase-modal-content {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.purchase-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.purchase-header h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.purchase-header p {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+.purchase-asset-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(20,20,22, 0.8) 0%, rgba(30,30,35, 0.8) 100%);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 20px;
+    margin-bottom: 24px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.asset-icon-glow {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+    50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.7); }
+    100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+}
+
+.purchase-asset-preview h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.premium-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #FFD700;
+    color: #000;
+    font-weight: 900;
+    font-size: 0.7rem;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.purchase-ledger {
+    background: #18191c;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ledger-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: #d0d0d0;
+}
+
+.ledger-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: white;
+}
+
+.ledger-row.deduction .ledger-value {
+    color: #ff4757;
+}
+
+.ledger-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+.ledger-value.insufficient {
+    color: #ff4757;
+}
+
+.confirm-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 800;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.confirm-btn.active {
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+.confirm-btn.active:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+.confirm-btn.locked {
+    background: #2d2e33;
+    color: #808080;
+    cursor: not-allowed;
+}
+
+.confirm-btn.processing {
+    background: #25262b;
+    color: #a0a0a0;
+    cursor: wait;
+}
+
+.minting-loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    animation: search-spin 1s linear infinite;
+}
