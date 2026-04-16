@@ -80,6 +80,14 @@ const logVibeEvent = async (communityId, userId, eventType, metadata = {}) => {
 };
 const connectDB = async () => {
     try {
+        if (process.env.USE_FIREBASE === 'true') {
+            console.log('🔥 USE_FIREBASE is true. Routing database pulse to Cloud Firestore.');
+            // Initializing FirestoreModels will automatically set up the Firebase Admin SDK connection
+            require('./services/FirestoreModels.cjs');
+            console.log('🔥 Cloud Firestore connection established via Admin SDK.');
+            return;
+        }
+
         let uri = process.env.MONGODB_URI;
         if (!uri) {
             if (process.env.NODE_ENV === 'production') {
