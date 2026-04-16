@@ -42,7 +42,7 @@ const Feed = ({ type: initialType = 'foryou' }) => {
                 console.error("Failed to fetch feed:", err);
                 setIsLoading(false);
             });
-    }, [type]);
+    }, [activeTab]);
 
     useEffect(() => {
         loadFeed();
