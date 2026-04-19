@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen, X, ChevronRight, Zap, Plus } from 'lucide-react';
+import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen, X, ChevronRight, Zap, Plus, Play } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { getStoredUser } from '../utils/storage';
 import { BASE_URL } from '../utils/api';
@@ -95,11 +95,12 @@ const CreatePostModal = () => {
                 name: user?.name || user?.username || 'user',
                 avatar: user?.avatar || '🎧',
                 caption: trimmedCaption || '',
-                content: trimmedCaption || 'Shared a moment',
+                content: trimmedCaption || (creationType === 'REEL' ? 'Shared a reel' : 'Shared a moment'),
                 tags: tags.split(',').map(t => t.trim()).filter(t => t),
                 contentUrl: mediaPreview || null,
                 isHD: editData.isHD,
                 filterApplied: editData.filter,
+                type: creationType === 'REEL' ? 'reel' : 'post',
                 time: 'Just now'
             };
 
@@ -157,7 +158,11 @@ const CreatePostModal = () => {
         <GlobalModal 
             isOpen={isCreateModalOpen} 
             onClose={closeCreateModal}
-            title={creationType === 'COMMUNITY' ? 'Establish New Community' : 'Create New Post'}
+            title={
+                creationType === 'COMMUNITY' ? 'Establish New Community' : 
+                creationType === 'REEL' ? 'Create New Reel' : 
+                'Create New Post'
+            }
             maxWidth="550px"
             className="create-post-standardized"
         >
@@ -238,6 +243,10 @@ const CreatePostModal = () => {
                                         <div className="tile-icon camera-bg"><Camera size={20} /></div>
                                         <span>Camera</span>
                                     </button>
+                                    <button type="button" className="attachment-tile" onClick={() => { setCreationType('REEL'); handleMediaClick(); }}>
+                                        <div className="tile-icon reels-bg" style={{ background: 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}><Play size={20} /></div>
+                                        <span>Reel</span>
+                                    </button>
                                     <button type="button" className="attachment-tile">
                                         <div className="tile-icon music-bg"><Music size={20} /></div>
                                         <span>Music</span>
@@ -248,7 +257,7 @@ const CreatePostModal = () => {
                     ) : (
                         <div className="post-stage animate-fade-in">
                             <textarea 
-                                placeholder="What's the rhythm today?" 
+                                placeholder={creationType === 'REEL' ? "Write a caption for your reel..." : "What's the rhythm today?"} 
                                 value={caption}
                                 onChange={(e) => setCaption(e.target.value)}
                                 autoFocus
@@ -344,7 +353,7 @@ const CreatePostModal = () => {
                                 {isSubmitting ? (
                                     <Loader2 className="animate-spin" size={20} />
                                 ) : (
-                                    <><Send size={18} /> Share to Feed</>
+                                    <><Send size={18} /> {creationType === 'REEL' ? 'Share Reel' : 'Share to Feed'}</>
                                 )}
                             </button>
                         )

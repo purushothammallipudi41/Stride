@@ -103,7 +103,7 @@ const Marketplace = () => {
     };
 
     return (
-        <div className="marketplace-container animate-fade-in">
+        <div className="marketplace-container-outer">
             <PageHeader 
                 title="Stride Marketplace" 
                 rightElement={
@@ -113,6 +113,7 @@ const Marketplace = () => {
                     </div>
                 }
             />
+            <div className="marketplace-container animate-fade-in">
             
             <div className="marketplace-header-subtitle">
                 <p>Discover exclusive sticker packs and premium digital assets</p>
@@ -203,6 +204,7 @@ const Marketplace = () => {
                 userBalance={userBalance}
                 onConfirm={handlePurchaseConfirm}
             />
+            </div>
         </div>
     );
 };

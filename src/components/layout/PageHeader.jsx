@@ -9,10 +9,12 @@ const PageHeader = ({ title, rightElement, hideBack }) => {
     return (
         <header className="mobile-page-header">
             {!hideBack ? (
-                <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
-                    <ChevronLeft className="icon-gradient" size={32} />
-                </button>
-            ) : <div />}
+                <div className="back-btn-container">
+                    <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+                        <ChevronLeft className="icon-gradient" size={28} />
+                    </button>
+                </div>
+            ) : <div className="back-btn-container" />}
             <div className="header-title-container">
                 <h1 className="mobile-page-title">{title}</h1>
             </div>

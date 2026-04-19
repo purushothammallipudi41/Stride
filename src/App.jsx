@@ -199,6 +199,16 @@ function App() {
               <UIProvider>
                 <Router>
                   <AppContent />
+                  
+                  {/* Global Branding Gradients */}
+                  <svg style={{ width: 0, height: 0, position: 'absolute' }} aria-hidden="true">
+                    <defs>
+                      <linearGradient id="stride-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="var(--color-primary)" />
+                        <stop offset="100%" stopColor="var(--color-accent)" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </Router>
               </UIProvider>
             </ServerProvider>
