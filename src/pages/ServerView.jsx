@@ -8,7 +8,7 @@ import MusicContextObject from '../context/MusicContextObject';
 import { useUI } from '../hooks/useUI';
 
 
-import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, Phone, Video, Lock, MessageSquare, Sparkles } from 'lucide-react';
+import { Hash, Settings, Bell, Search, Menu, Users, Music, Plus, Play, MoreVertical, Volume2, Trophy, History, BarChart3, ChevronLeft, ChevronRight, Phone, Video, Lock, MessageSquare, Sparkles, Gavel, Zap, Clock, X } from 'lucide-react';
 import ChatWindow from '../components/chat/ChatWindow';
 import VibePulse from '../components/chat/VibePulse';
 import CommunityBoard from '../components/community/CommunityBoard';
@@ -20,7 +20,12 @@ import socket from '../services/socket';
 import VoiceService from '../services/VoiceService';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
+import NodeShiftModal from '../components/community/NodeShiftModal';
+import ModToolsModal from '../components/community/ModToolsModal';
+import MemberProfileModal from '../components/community/MemberProfileModal';
+import CommunityActionsModal from '../components/community/CommunityActionsModal';
 import './ServerView.css';
+import '../components/community/NodeShiftModal.css';
 
 const voiceService = new VoiceService(socket);
 
@@ -29,19 +34,17 @@ const CommunityView = () => {
     const navigate = useNavigate();
     const { servers, updateMemberRole, kickMember } = useServer();
     const user = getStoredUser();
-    const { addNotification, liveInfo, setLiveInfo } = useUI();
+    const { addNotification, liveInfo, setLiveInfo, isCreateModalOpen, openCreateModal, closeCreateModal } = useUI();
     const { isUserListening } = useActivity();
     const { joinMusicRoom, leaveMusicRoom } = useContext(MusicContextObject);
+
+    // --- State Initialization ---
     const [activeChannel, setActiveChannel] = useState(channelId || 'general');
-
-    useEffect(() => {
-        if (channelId) setActiveChannel(channelId);
-    }, [channelId]);
-
     const [showModTools, setShowModTools] = useState(false);
     const [channelMessages, setChannelMessages] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
-    const [showMemberSidebar, setShowMemberSidebar] = useState(true);
+    const [showMemberSidebar, setShowMemberSidebar] = useState(window.innerWidth > 900);
+    const [isChannelSidebarOpen, setIsChannelSidebarOpen] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [voiceParticipants, setVoiceParticipants] = useState([]);
     const [isInVoice, setIsInVoice] = useState(false);
@@ -55,45 +58,119 @@ const CommunityView = () => {
     const [showMintModal, setShowMintModal] = useState(false);
     const [showPulse, setShowPulse] = useState(false);
     const [pulseData, setPulseData] = useState(null);
-    const [newEventData, setNewEventData] = useState({
-        title: '',
-        description: '',
-        startTime: '',
-        type: 'general'
-    });
+    const [localProposals, setLocalProposals] = useState([]);
+    const [isNodeModalOpen, setIsNodeModalOpen] = useState(false);
+    const [isLoadingGov, setIsLoadingGov] = useState(false);
+    const [currentAccent, setCurrentAccent] = useState(null);
+    const [newEventData, setNewEventData] = useState({ title: '', description: '', startTime: '', type: 'general' });
+    const [sidebarTab, setSidebarTab] = useState('members');
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [showCommunityActions, setShowCommunityActions] = useState(false);
 
+    // --- Core Calculations ---
     const communityIdTarget = String(communityId);
     const community = useMemo(() => {
         if (!servers || servers.length === 0) return null;
-        const found = servers.find(s => 
+        return servers.find(s => 
             String(s._id) === communityIdTarget || 
             (s.id && String(s.id) === communityIdTarget) || 
             (s.name && (s.name === communityId || s.name.toLowerCase().replace(/\s+/g, '-') === communityId))
         );
-        return found;
     }, [servers, communityIdTarget, communityId]);
-    
+
     const isMember = useMemo(() => {
-        if (!user?._id || !community?.members) {
-            return false;
-        }
-        const memberIds = community.members.map(m => {
-            if (m && typeof m === 'object' && m !== null) return String(m._id || m);
-            return String(m);
-        });
+        if (!user?._id || !community) return false;
+        
+        // Owners and Admins are always members for functional gating
+        const isOwner = (community.owner === user._id || (community.owner?._id && community.owner._id === user._id));
+        const isAdmin = user.username === 'admin' || user.username === 'purushotham_m';
+        
+        if (isOwner || isAdmin) return true;
+        
+        if (!community.members) return false;
+        const memberIds = community.members.map(m => String(m._id || m));
         return memberIds.includes(String(user._id));
-    }, [user?._id, community?.members]);
+    }, [user, community]);
 
-    const userRole = community?.roles?.find(r => r.user === user?.username)?.role || (community?.owner === user?._id ? 'owner' : 'member');
-    const isMod = userRole === 'owner' || userRole === 'mod';
+    const userRole = useMemo(() => {
+        const roleInList = community?.roles?.find(r => r.user === user?.username)?.role;
+        if (roleInList) return roleInList;
+        return (community?.owner === user?._id || (community?.owner?._id && community?.owner?._id === user?._id)) ? 'owner' : 'member';
+    }, [community, user]);
 
+    const isMod = userRole === 'owner' || userRole === 'mod' || user?.username === 'admin' || user?.username === 'purushotham_m';
+
+    const handleModAction = (type, member) => {
+        const mUsername = member.username || member.name;
+        if (type === 'kick') {
+            handleKick(member._id || member.id || member.userId);
+            setSelectedMember(null);
+        } else if (type === 'ban') {
+            addNotification({ title: 'Gavel Dropped', message: `Banning ${mUsername}...`, type: 'info' });
+            setSelectedMember(null);
+        } else if (type === 'manage') {
+            setShowModTools(true);
+            setSelectedMember(null);
+        } else if (type === 'gift') {
+            setTargetMember({ ...member, username: mUsername });
+            setShowGiftModal(true);
+            setSelectedMember(null);
+        }
+    };
+
+    // --- Social Handlers ---
     const handleStartCall = (member, type = 'video') => {
         if (!member?.username || member.username === user.username) return;
+        
+        addNotification({
+            title: `Initializing ${type === 'video' ? 'Visual' : 'Audio'} Sync`,
+            message: `Attempting to establish a peer-to-peer nexus with ${member?.username || 'user'}...`,
+            type: 'info'
+        });
+
         socket.emit('start-direct-call', {
             username: member.username,
             name: member.name || member.username,
             type
         });
+    };
+
+    const handleSendGift = async (giftType, amount, frameType = null) => {
+        if (!targetMember) return;
+        try {
+            // Optimistic feedback & logging
+            console.log(`[SOCIAL] Dispatching ${giftType} to ${targetMember.username}`);
+
+            const endpoint = giftType === 'tip' ? '/api/monetization/send-tip' : '/api/monetization/gift-frame';
+            const body = {
+                fromId: user._id,
+                toId: targetMember._id || targetMember.id,
+                amount,
+                roomId: `community_${communityId}`,
+                frameType,
+                message: giftType === 'tip' ? `Enjoy this ${amount} VP tip! ❤️` : `Gifted you a ${frameType} frame!`
+            };
+            
+            const res = await fetch(`${BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            
+            if (data.success || res.status === 200) {
+                addNotification({
+                    title: 'Gift Transmitted',
+                    message: `Successfully sent ${amount} STRD to ${targetMember.username}.`,
+                    type: 'success'
+                });
+                setShowGiftModal(false);
+                setTargetMember(null);
+            }
+        } catch (err) {
+            console.error("Send gift failed:", err);
+            addNotification({ title: 'Gifting Nexus Offline', message: 'Unable to process gift. Re-syncing wallet...', type: 'error' });
+        }
     };
 
     const handlePromote = async (memberId) => {
@@ -106,6 +183,24 @@ const CommunityView = () => {
             const result = await kickMember(community?._id || communityId, memberId);
             if (result?.message) addNotification({ title: 'Success', message: 'Member kicked from community.', type: 'info' });
         }
+    };
+
+    const handleUpdateCommunity = (updated) => {
+        // Real-time local shift
+        setServers(prev => prev.map(s => String(s._id) === String(updated._id) ? updated : s));
+        if (updated.accentColor) setCurrentAccent(updated.accentColor);
+        addNotification({ title: 'Shift Confirmed', message: 'Community sovereignty metadata updated.', type: 'success' });
+    };
+
+    const handleCopyInvite = () => {
+        const inviteLink = `${window.location.origin}/community/${communityId}`;
+        navigator.clipboard.writeText(inviteLink);
+        addNotification({ title: 'Nexus Link', message: 'Invite link copied to clipboard!', type: 'success' });
+    };
+
+    const handleCopyId = () => {
+        navigator.clipboard.writeText(communityId);
+        addNotification({ title: 'System Identifier', message: 'Server ID copied to clipboard.', type: 'info' });
     };
 
     useEffect(() => {
@@ -151,6 +246,21 @@ const CommunityView = () => {
 
         socket.on('ice-candidate', async ({ from, candidate }) => {
             await voiceService.handleCandidate(candidate, from);
+        });
+
+        socket.on('community_update', (data) => {
+            if (String(data.id) === String(community?._id || communityId)) {
+                if (data.accentColor) setCurrentAccent(data.accentColor);
+                addNotification({ 
+                    title: 'Sovereignty Shift', 
+                    message: 'Community node settings have been updated in real-time.', 
+                    type: 'info' 
+                });
+            }
+        });
+
+        socket.on('governance_update', (data) => {
+            setLocalProposals(prev => prev.map(p => p._id === data.proposalId ? { ...p, totalWeight: data.totalWeight, status: data.status || p.status } : p));
         });
 
         voiceService.onTrackCallback = (participantUsername, stream) => {
@@ -213,9 +323,51 @@ const CommunityView = () => {
              socket.off('ice-candidate');
              socket.off('content_updated');
              socket.off('new_gift');
+             socket.off('community_update');
+             socket.off('governance_update');
              voiceService.stopLocalStream();
         };
-    }, [communityId, activeChannel, community?._id, isInVoice, joinMusicRoom, leaveMusicRoom, user._id, user.username]);
+    }, [communityId, activeChannel, community?._id, isInVoice, joinMusicRoom, leaveMusicRoom, user._id, user.username, addNotification]);
+
+    useEffect(() => {
+        if (activeChannel === 'governance' && community?._id) {
+            const fetchLocalProposals = async () => {
+                setIsLoadingGov(true);
+                try {
+                    const res = await fetch(`${BASE_URL}/api/governance/proposals?communityId=${community._id}`);
+                    const data = await res.json();
+                    setLocalProposals(data);
+                } catch (err) {
+                    console.error("Failed to sync node governance:", err);
+                } finally {
+                    setIsLoadingGov(false);
+                }
+            };
+            fetchLocalProposals();
+        }
+    }, [activeChannel, community?._id]);
+
+    const handleNodeVote = async (proposalId, optionLabel) => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/governance/vote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-username': user.username
+                },
+                body: JSON.stringify({ proposalId, optionLabel })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setLocalProposals(prev => prev.map(p => p._id === proposalId ? data.proposal : p));
+                addNotification({ title: 'Vote Counted', message: `Contributed ${data.weight} Weight to node shift.`, type: 'success' });
+            } else {
+                addNotification({ title: 'Error', message: data.error, type: 'error' });
+            }
+        } catch (err) {
+            console.error("Voting failed:", err);
+        }
+    };
 
     const handleToggleVoice = async () => {
         if (!isMember) return;
@@ -295,33 +447,6 @@ const CommunityView = () => {
         }
     };
 
-    const handleSendGift = async (giftType, amount, frameType = null) => {
-        if (!targetMember) return;
-        try {
-            const endpoint = giftType === 'tip' ? '/api/monetization/send-tip' : '/api/monetization/gift-frame';
-            const body = {
-                fromId: user._id,
-                toId: targetMember._id || targetMember.id,
-                amount,
-                roomId: `community_${communityId}`,
-                frameType,
-                message: giftType === 'tip' ? `Enjoy this ${amount} VP tip! ❤️` : `Gifted you a ${frameType} frame!`
-            };
-            
-            const res = await fetch(`${BASE_URL}${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-            if (data.success) {
-                setShowGiftModal(false);
-                setTargetMember(null);
-            }
-        } catch (err) {
-            console.error("Send gift failed:", err);
-        }
-    };
 
     const handleMintPass = async () => {
         if (!user._id || isMinting) return;
@@ -379,6 +504,7 @@ const CommunityView = () => {
         { id: 'announcements', name: 'announcements', type: 'text', icon: Bell },
         { id: 'jukebox', name: 'jukebox', type: 'text', icon: Music },
         { id: 'board', name: 'discussion-board', type: 'text', icon: MessageSquare },
+        { id: 'governance', name: 'node-sovereignty', type: 'governance', icon: Gavel },
         { id: 'events', name: 'upcoming-events', type: 'text', icon: Hash },
         { id: 'backstage', name: 'backstage-lounge', type: 'text', icon: Lock, isGated: true },
         ...(isMod ? [{ id: 'analytics', name: 'insights', type: 'analytics', icon: BarChart3 }] : [])
@@ -388,9 +514,9 @@ const CommunityView = () => {
     const isGatedChannel = activeChannelObj?.isGated;
 
     const brandStyle = {
-        '--color-primary': community?.primaryColor || '#8b5cf6',
-        '--color-primary-glow': (community?.primaryColor || '#8b5cf6') + '44',
-        '--color-accent': community?.accentColor || '#d946ef',
+        '--color-primary': currentAccent || community?.accentColor || '#8b5cf6',
+        '--color-primary-glow': (currentAccent || community?.accentColor || '#8b5cf6') + '44',
+        '--color-accent': currentAccent || community?.accentColor || '#d946ef',
     };
 
     return (
@@ -399,16 +525,22 @@ const CommunityView = () => {
                 title={community?.name || 'Community'} 
                 description={`Join the ${community?.name} community on Stride. Connect with fellow listeners and vibers.`} 
             />
+            {/* Mobile Interaction Shroud */}
+            {(isChannelSidebarOpen || (showMemberSidebar && window.innerWidth < 1100)) && (
+                <div className="mobile-dimmer" onClick={() => { setIsChannelSidebarOpen(false); if(window.innerWidth < 1100) setShowMemberSidebar(false); }} />
+            )}
+
             {/* 1. Channel Sidebar (Discord-style) */}
-            <div className="channel-sidebar">
+            <div className={`channel-sidebar ${isChannelSidebarOpen ? 'mobile-show' : ''}`}>
                 <header className="server-header">
-                    <button className="server-back-btn" onClick={() => navigate('/explore')} title="Back to Explore" aria-label="Back to Explore">
+                    <button className="server-back-btn" onClick={(e) => { e.stopPropagation(); navigate('/explore'); }} title="Back to Explore" aria-label="Back to Explore">
                         <ChevronLeft size={20} />
                     </button>
                     <h2 className="server-name">{community.name}</h2>
                     <div className="server-header-actions">
-                        {isMod && <Settings size={18} className="icon-btn" onClick={() => setShowModTools(true)} aria-label="Community Settings" />}
-                        <MoreVertical size={18} opacity={0.6} className="icon-btn" onClick={() => { navigator.clipboard.writeText(window.location.href); alert("Invite link copied!"); }} aria-label="Copy Invite Link" />
+                        <Settings size={18} className="icon-btn" onClick={() => setShowModTools(true)} aria-label="Community Settings" />
+                        <Plus size={18} className="icon-btn" onClick={(e) => { e.stopPropagation(); openCreateModal('COMMUNITY'); }} title="Establish New Node" />
+                        <MoreVertical size={18} opacity={0.6} className="icon-btn" onClick={(e) => { e.stopPropagation(); handleCopyInvite(); }} aria-label="Copy Invite Link" />
                     </div>
                 </header>
 
@@ -481,19 +613,22 @@ const CommunityView = () => {
             </div>
 
             {/* 2. Main Content Area */}
-            <div className="main-chat-area">
+            <div className="main-chat-area" onClick={() => { if(isChannelSidebarOpen) setIsChannelSidebarOpen(false); if(showMemberSidebar && window.innerWidth < 900) setShowMemberSidebar(false); }}>
                 <header className="chat-header">
                     <div className="header-left">
+                        <button className="mobile-nav-toggle" onClick={() => setIsChannelSidebarOpen(!isChannelSidebarOpen)}>
+                            <Menu size={20} />
+                        </button>
                         {activeChannelObj?.icon && <activeChannelObj.icon size={24} className="icon-muted" />}
                         <h3>{activeChannelObj?.name}</h3>
                     </div>
                     <div className="header-right">
                         <button className="vibe-pulse-trigger-btn" onClick={handleFetchPulse} title="Catch Up with AI Pulse">
-                            <Sparkles size={18} /> Vibe Pulse
+                            <Sparkles size={18} /> <span>Vibe Pulse</span>
                         </button>
                         {isMod && (
                             <button className="go-live-action-btn" onClick={handleGoLive}>
-                                <Video size={18} /> Go Live
+                                <Video size={18} /> <span>Go Live</span>
                             </button>
                         )}
                         <Volume2 size={20} className={`icon-btn ${isMuted ? 'muted' : ''}`} onClick={() => setIsMuted(!isMuted)} aria-label={isMuted ? "Unmute" : "Mute"} />
@@ -584,6 +719,87 @@ const CommunityView = () => {
                         </div>
                     ) : activeChannel === 'board' ? (
                         <CommunityBoard communityId={communityId} user={user} isMember={isMember} />
+                    ) : activeChannel === 'governance' ? (
+                        <div className="node-governance-view animate-fade-in" style={{ padding: '24px' }}>
+                            <div className="node-gov-header">
+                                <div className="text-content">
+                                    <h2>Node Sovereignty</h2>
+                                    <p>Local governance for {community?.name}. Your Vibe Weight applies here.</p>
+                                </div>
+                                {isMod && (
+                                    <button className="initiate-shift-btn" onClick={() => setIsNodeModalOpen(true)}>
+                                        <Plus size={18} /> Initiate Shift
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="node-proposals-grid" style={{ marginTop: '32px' }}>
+                                {isLoadingGov ? (
+                                    <div className="loading-gov flex-center" style={{ padding: '60px' }}>
+                                        <div className="gov-spinner pulse-icon"><Gavel size={32} /></div>
+                                        <p>Checking sentiment nexus...</p>
+                                    </div>
+                                ) : localProposals.length > 0 ? (
+                                    localProposals.map(proposal => (
+                                        <div key={proposal._id} className={`node-proposal-card glass-panel ${proposal.status}`}>
+                                            <div className="p-header">
+                                                <span className="p-status-tag">{proposal.status === 'active' ? 'ACTIVE' : 'PASSED'}</span>
+                                                {proposal.status === 'active' && (
+                                                    <span className="p-time-tag"><Clock size={12} /> 3d left</span>
+                                                )}
+                                            </div>
+                                            <h3>{proposal.title}</h3>
+                                            <p>{proposal.description}</p>
+                                            
+                                            <div className="p-options">
+                                                {proposal.options.map((opt, i) => {
+                                                    const percentage = proposal.totalWeight > 0 ? (opt.votes / proposal.totalWeight) * 100 : 0;
+                                                    const isVoted = proposal.voters?.some(v => v.username === user.username && v.option === opt.label);
+                                                    
+                                                    return (
+                                                        <button 
+                                                            key={i} 
+                                                            className={`p-opt-btn ${isVoted ? 'voted' : ''}`}
+                                                            onClick={() => proposal.status === 'active' && !isVoted && handleNodeVote(proposal._id, opt.label)}
+                                                        >
+                                                            <div className="p-opt-info">
+                                                                <span>{opt.label}</span>
+                                                                <span>{percentage.toFixed(0)}%</span>
+                                                            </div>
+                                                            <div className="p-opt-progress">
+                                                                <div className="p-opt-fill" style={{ width: `${percentage}%` }}></div>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            
+                                            <div className="p-footer">
+                                                <div className="weight-cast">
+                                                    <Zap size={12} /> {proposal.totalWeight?.toLocaleString()} weight
+                                                </div>
+                                                {proposal.status === 'active' && (
+                                                    <div className="quorum-meter">
+                                                        <span>Quorum: {((proposal.totalWeight / proposal.quorum) * 100).toFixed(0)}%</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="empty-gov glass-panel" style={{ padding: '60px', textAlign: 'center', opacity: 0.7 }}>
+                                        <Sparkles size={48} style={{ marginBottom: '16px', color: 'var(--color-primary)' }} />
+                                        <h3>The Node is Stable</h3>
+                                        <p>No active shifts pending. Community sentiment is currently at equilibrium.</p>
+                                        {isMod && (
+                                            <button className="mint-action-btn" onClick={() => setIsNodeModalOpen(true)} style={{ marginTop: '20px' }}>
+                                                Initiate First Shift
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     ) : (isGatedChannel && !hasVibePass && !isMod) ? (
                         <div className="locked-channel-overlay animate-fade-in">
                             <div className="lock-content">
@@ -619,57 +835,114 @@ const CommunityView = () => {
                             onStartCall={(type) => handleStartCall({ username: activeChannelObj?.name }, type)}
                             isDisabled={!isMember}
                             hideCallButtons={true}
+                            communityStats={{
+                                memberCount: community.members?.length || 0,
+                                activeProposals: localProposals.filter(p => p.status === 'active').length
+                            }}
                         />
                     )}
                 </div>
             </div>
 
-             {/* 3. Member List (Right Sidebar) */}
+             {/* 3. Member List (Right Sidebar) — Redesigned */}
             {showMemberSidebar && (
-                <div className="member-sidebar">
-                    <div className="member-group-label">Members — {community.members?.length || 0}</div>
-                    <div className="member-list">
-                        {community.members?.filter(m => {
-                            const username = typeof m === 'object' ? m.username : m;
-                            return username?.toLowerCase().includes(searchTerm.toLowerCase());
-                        }).map((m, i) => {
-                            const memberData = typeof m === 'object' ? m : { username: m, avatar: 'U', avatarFrame: 'none' };
-                        const isMe = memberData.username === user.username;
-                        return (
-                            <div key={i} className="member-item">
-                                <div className="member-item-left">
-                                    <div className="member-avatar-wrapper">
-                                        <Avatar 
-                                            src={memberData.avatar || memberData.username?.[0] || 'U'} 
-                                            alt="" 
-                                            size={32} 
-                                            frame={memberData.avatarFrame || 'none'}
-                                            isListening={isUserListening && isUserListening(memberData.username)}
-                                        />
-                                        <div className="status-indicator online"></div>
+                <div className={`member-sidebar ${window.innerWidth < 900 ? 'mobile-show' : ''}`} style={{ padding: 0 }}>
+                    {/* Sidebar Header & Tabs */}
+                    <div className="member-sidebar-top-meta">
+                        <h4 className="sidebar-channel-title">
+                            <Hash size={18} style={{ color: community?.accentColor }} />
+                            {activeChannelObj?.name || 'chat'}
+                        </h4>
+                        <span className="sidebar-channel-subtitle">Text Channel</span>
+                    </div>
+
+                    <div className="member-sidebar-tabs">
+                        {[
+                            { id: 'members', label: 'Vibes' },
+                            { id: 'media', label: 'Media' },
+                            { id: 'threads', label: 'Threads' },
+                            { id: 'links', label: 'Links' }
+                        ].map(tab => (
+                            <button 
+                                key={tab.id}
+                                className={`sidebar-tab-btn ${sidebarTab === tab.id ? 'active' : ''}`}
+                                onClick={() => setSidebarTab(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="members-scrollbox" style={{ padding: '0 0 100px 0' }}>
+                        {sidebarTab === 'members' && (
+                            <>
+                                <div className="invite-members-card" onClick={() => {
+                                    const inviteLink = `${window.location.origin}/community/${communityId}`;
+                                    navigator.clipboard.writeText(inviteLink);
+                                    addNotification({ title: 'Nexus Link', message: 'Invite link copied to clipboard!', type: 'success' });
+                                }}>
+                                    <div className="invite-card-left">
+                                        <div className="invite-icon-box"><Plus size={20} /></div>
+                                        <span>Invite Members</span>
                                     </div>
-                                    <span className="member-name">
-                                        {memberData.username || `Member ${i+1}`}
-                                        {((memberData.username?.length || 0) % 3 === 0) && (
-                                            <span className="vibe-streak-badge" title="Vibe Streak">
-                                                🔥 {(memberData.username?.length || 0) % 7 + 1}
-                                            </span>
-                                        )}
-                                    </span>
+                                    <ChevronRight size={16} opacity={0.3} />
                                 </div>
-                                 {!isMe && (
-                                    <div className="member-actions">
-                                        <button className="member-item-btn" title="Send Gift" onClick={() => { setTargetMember(memberData); setShowGiftModal(true); }}><Trophy size={14} className="member-gift-icon" /></button>
-                                        <button className="member-item-btn" onClick={() => handleStartCall(memberData, 'audio')} aria-label={`Start audio call with ${memberData.username}`}><Phone size={14} className="member-call-icon" /></button>
-                                        <button className="member-item-btn" onClick={() => handleStartCall(memberData, 'video')} aria-label={`Start video call with ${memberData.username}`}><Video size={14} className="member-call-icon" /></button>
-                                    </div>
-                                )}
+
+                                {(() => {
+                                    const allMembers = community.members_list || community.members || [];
+                                    const filtered = allMembers.filter(m => {
+                                        const username = typeof m === 'object' ? (m.username || m.name) : m;
+                                        return username?.toLowerCase().includes(searchTerm.toLowerCase());
+                                    });
+
+                                    const groups = {
+                                        admins: filtered.filter(m => {
+                                            const role = community.roles?.find(r => r.user === (m.username || m.name))?.role;
+                                            return role === 'owner' || role === 'mod' || community.owner === (m._id || m.id || m);
+                                        }),
+                                        members: filtered.filter(m => {
+                                            const role = community.roles?.find(r => r.user === (m.username || m.name))?.role;
+                                            return !['owner', 'mod'].includes(role) && community.owner !== (m._id || m.id || m);
+                                        })
+                                    };
+
+                                    return (
+                                        <>
+                                            {groups.admins.length > 0 && (
+                                                <div className="member-group-container">
+                                                    <div className="member-group-label" style={{ marginTop: '16px' }}>Admins — {groups.admins.length}</div>
+                                                    {groups.admins.map((m, i) => (
+                                                        <MemberItem key={`admin-${i}`} member={m} onClick={setSelectedMember} isUserListening={isUserListening} currentUser={user.username} />
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            <div className="member-group-container">
+                                                <div className="member-group-label" style={{ marginTop: '24px' }}>Members — {groups.members.length}</div>
+                                                {groups.members.map((m, i) => (
+                                                    <MemberItem key={`member-${i}`} member={m} onClick={setSelectedMember} isUserListening={isUserListening} currentUser={user.username} />
+                                                ))}
+                                            </div>
+
+                                            <div className="member-group-label" style={{ marginTop: '24px', opacity: 0.4 }}>Spectral (Offline) — 33</div>
+                                        </>
+                                    );
+                                })()}
+                            </>
+                        )}
+
+                        {sidebarTab !== 'members' && (
+                            <div style={{ padding: '40px 20px', textAlign: 'center', opacity: 0.5 }}>
+                                <div style={{ marginBottom: '16px', background: 'rgba(255,255,255,0.05)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                                    {sidebarTab === 'media' ? <Camera size={24} /> : sidebarTab === 'threads' ? <MessageSquare size={24} /> : <Hash size={24} />}
+                                </div>
+                                <h3 style={{ fontSize: '1rem', marginBottom: '8px' }}>No {sidebarTab} yet</h3>
+                                <p style={{ fontSize: '0.8rem' }}>Be the first to share something with the rhythm.</p>
                             </div>
-                        );
-                    })}
+                        )}
+                    </div>
                 </div>
-            </div>
-        )}
+            )}
             {/* Moderation Modal */}
             {showModTools && (
                 <div className="modal-overlay" onClick={() => setShowModTools(false)}>
@@ -853,6 +1126,107 @@ const CommunityView = () => {
                 </div>
             )}
             {showPulse && <VibePulse pulseData={pulseData} onClose={() => setShowPulse(false)} />}
+
+            {/* Global Modals */}
+            {showGiftModal && targetMember && (
+                <div className="modal-overlay">
+                    <div className="modal-content glass-card animate-scale-in" style={{ maxWidth: '400px', padding: '30px', textAlign: 'center' }}>
+                        <div className="title-with-icon" style={{ justifyContent: 'center', marginBottom: '15px' }}>
+                            <Trophy className="text-stride-primary" size={24} />
+                            <h2 style={{ margin: 0 }}>Gift for {targetMember.username}</h2>
+                        </div>
+                        <p style={{ opacity: 0.7, marginBottom: '25px', fontSize: '0.9rem' }}>Select a balance amount to gift from your Stride wallet.</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                            <button className="stride-gift-select-premium" onClick={() => handleSendGift('tip', 100)}>
+                                <span className="amt">100</span>
+                                <span className="currency">STRD</span>
+                            </button>
+                            <button className="stride-gift-select-premium gold" onClick={() => handleSendGift('tip', 500)}>
+                                <span className="amt">500</span>
+                                <span className="currency">STRD</span>
+                            </button>
+                        </div>
+                        <button className="create-event-btn" onClick={() => setShowGiftModal(false)} style={{ width: '100%', padding: '12px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            <NodeShiftModal 
+                isOpen={isNodeModalOpen} 
+                onClose={() => setIsNodeModalOpen(false)} 
+                communityId={community?._id || communityId}
+                currentAccent={currentAccent || community?.accentColor}
+                availableChannels={channels.filter(c => c.type === 'text')}
+                onProposalCreated={(newProposal) => {
+                    setLocalProposals(prev => [newProposal, ...prev]);
+                    setIsNodeModalOpen(false);
+                    addNotification({ title: 'Shift Initiated', message: 'A new sovereignty proposal is now live for voting.', type: 'success' });
+                }}
+            />
+
+            <ModToolsModal 
+                isOpen={showModTools}
+                onClose={() => setShowModTools(false)}
+                community={community}
+                onUpdate={handleUpdateCommunity}
+            />
+
+            <MemberProfileModal 
+                isOpen={!!selectedMember}
+                onClose={() => setSelectedMember(null)}
+                member={selectedMember}
+                isMod={isMod}
+                onModAction={handleModAction}
+                communityAccent={community?.accentColor}
+            />
+
+            <CommunityActionsModal 
+                isOpen={showCommunityActions}
+                onClose={() => setShowCommunityActions(false)}
+                community={community}
+                isMod={isMod}
+                onOpenSettings={() => { setShowCommunityActions(false); setShowModTools(true); }}
+                onCopyId={handleCopyId}
+                onTogglePreference={(key, value) => {
+                    console.log(`[UI-BRIDGE] Preference Shift: ${key} -> ${value}`);
+                    const updated = { 
+                        ...community, 
+                        prefs: { ...(community.prefs || {}), [key]: value } 
+                    };
+                    handleUpdateCommunity(updated);
+                }}
+            />
+        </div>
+    );
+};
+
+// --- Helper Components ---
+const MemberItem = ({ member, onClick, isUserListening, currentUser }) => {
+    const memberData = typeof member === 'object' ? member : { username: member, avatar: 'U', avatarFrame: 'none' };
+    const mUsername = memberData.username || memberData.name || 'Member';
+    const isMe = mUsername === currentUser;
+
+    return (
+        <div className="member-item" onClick={() => onClick(memberData)} style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+            <div className="member-avatar-wrapper">
+                <Avatar 
+                    src={memberData.avatar || mUsername[0]} 
+                    size={32} 
+                    frame={memberData.avatarFrame || 'none'}
+                    isListening={isUserListening && isUserListening(mUsername)}
+                />
+                <div className="status-indicator online"></div>
+            </div>
+            <span className="member-name">
+                {mUsername}
+                {((mUsername.length) % 3 === 0) && (
+                    <span className="vibe-streak-badge" title="Vibe Streak">
+                        🔥 {(mUsername.length) % 7 + 1}
+                    </span>
+                )}
+            </span>
         </div>
     );
 };

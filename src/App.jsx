@@ -35,11 +35,14 @@ import Insights from './pages/Insights';
 import Marketplace from './pages/Marketplace';
 import Wallet from './pages/Wallet';
 import Studio from './pages/Studio';
+import LiveStage from './pages/LiveStage';
+import Governance from './pages/Governance';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
 import GlobalNotifications from './components/GlobalNotifications';
 import CreatePostModal from './components/CreatePostModal';
+import CreateArticleModal from './components/CreateArticleModal';
 import ExploreModal from './components/ExploreModal';
 import VaultModal from './components/social/VaultModal';
 import OnboardingModal from './components/OnboardingModal';
@@ -50,7 +53,7 @@ import PushManager from './components/notifications/PushManager';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
-  const { isCreateModalOpen, isExplorerOpen, isVaultOpen, callInfo, setCallInfo, liveInfo, setLiveInfo } = useUI();
+  const { isCreateModalOpen, isExplorerOpen, isVaultOpen, isStoryModalOpen, callInfo, setCallInfo, liveInfo, setLiveInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
@@ -105,7 +108,7 @@ const AppContent = () => {
 
   return (
     <div className="app-layout">
-      {!isPublicPath && <Sidebar />}
+      {!isPublicPath && !isStoryModalOpen && !location.pathname.startsWith('/live/') && <Sidebar />}
       
       <div className="layout-primary">
         <main className="main-content">
@@ -126,7 +129,7 @@ const AppContent = () => {
                 <Route path="/music" element={<Music />} />
                 <Route path="/reels" element={<Reels />} />
                 <Route path="/communities/discover" element={<Communities />} />
-                <Route path="/servers" element={<Servers />} />
+                <Route path="/communities/joined" element={<Servers />} />
                 <Route path="/community/:communityId/:channelId?" element={<ServerView />} />
                 <Route path="/playlist/:id" element={<PlaylistView />} />
                 <Route path="/articles" element={<Articles />} />
@@ -135,10 +138,13 @@ const AppContent = () => {
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/wallet" element={isAuthenticated ? <Wallet /> : <Navigate to="/login" />} />
                 <Route path="/studio" element={isAuthenticated ? <Studio /> : <Navigate to="/login" />} />
+                <Route path="/live/:username" element={<LiveStage />} />
+                <Route path="/governance" element={isAuthenticated ? <Governance /> : <Navigate to="/login" />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               
               {isCreateModalOpen && <CreatePostModal />}
+              <CreateArticleModal />
               {isExplorerOpen && <ExploreModal />}
               {isVaultOpen && <VaultModal />}
             </div>
@@ -178,6 +184,7 @@ const AppContent = () => {
 
       <OfflineStatus />
       <PushManager />
+      <GlobalNotifications />
     </div>
   );
 };

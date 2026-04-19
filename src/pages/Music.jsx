@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import SEO from '../components/common/SEO';
-import { Play, Pause, Music, SkipBack, SkipForward, Share2, Plus, DollarSign, Award } from 'lucide-react';
+import { Play, Pause, Music, SkipBack, SkipForward, Share2, Plus, DollarSign, Award, ChevronLeft } from 'lucide-react';
 
 
 
@@ -147,7 +147,33 @@ const MusicPage = () => {
                 title="Music & Playlists" 
                 description="Stream high-quality music from Audius, create collaborative playlists, and vibe with the Stride community." 
             />
-            <PageHeader title="Music" />
+            <PageHeader title="Music" hideBack={true} />
+            
+            <div className="music-back-action-area" style={{ padding: '24px 24px 0', marginTop: '12px', marginBottom: '8px', display: 'flex', gap: '12px' }}>
+                <button 
+                    className="back-btn-content"
+                    onClick={() => navigate(-1)}
+                    style={{
+                        padding: '12px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '16px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+                    }}
+                >
+                    <ChevronLeft size={24} strokeWidth={2.5} />
+                </button>
+            </div>
             
             <div className="music-search">
                 <Music size={20} className="search-icon" />
@@ -220,7 +246,7 @@ const MusicPage = () => {
                 <div className="modal-bg-gradient" style={{ backgroundImage: `url(${currentTrack?.cover})` }} />
                 <div className="modal-header">
                     <button className="close-btn" onClick={() => setIsExpanded(false)}>
-                        <Music size={20} />
+                        <ChevronLeft size={24} strokeWidth={3} />
                     </button>
                     <div className="modal-header-info">
                         <span className="header-label">PLAYING FROM ALBUM</span>

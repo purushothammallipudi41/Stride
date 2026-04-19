@@ -6,6 +6,7 @@ import { BASE_URL } from '../../utils/api';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
 import socket from '../../services/socket';
+import SubscribeButton from '../profile/SubscribeButton';
 import './Post.css';
 
 const Post = ({ post }) => {
@@ -194,22 +195,26 @@ const Post = ({ post }) => {
             </svg>
 
             <div className="post-header">
-                <Link to={`/profile/${post.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="post-user-info">
-                        <Avatar 
-                            src={post.avatar} 
-                            alt={post.username} 
-                            size={32} 
-                            className="post-avatar" 
-                            frame={post.avatarFrame || 'none'}
-                        />
-                        <div className="user-details" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span className="username">{post.username}</span>
+                <Link to={`/profile/${post.username}`} className="post-user-linked">
+                    <Avatar 
+                        src={post.avatar || `https://i.pravatar.cc/150?u=${post.username}`} 
+                        size={36} 
+                        isVerified={post.isVerified}
+                    />
+                    <div className="post-user-meta">
+                        <div className="post-username-row">
+                            <span className="post-author-name">{post.username}</span>
                             {post.isVerified && <VerificationBadge size={14} />}
                         </div>
+                        <span className="post-time-ago">{post.timeAgo || 'Just now'}</span>
                     </div>
                 </Link>
                 <div className="post-header-actions" ref={optionsRef}>
+                    {post.isMemberOnly && (
+                        <div className="member-only-ribbon">
+                            <ArrowUpRight size={12} /> Member Only
+                        </div>
+                    )}
                     <button className="more-btn" onClick={() => setShowOptions(!showOptions)}>
                         <MoreHorizontal size={20} />
                     </button>
@@ -240,8 +245,21 @@ const Post = ({ post }) => {
                     </div>
                 </div>
 
-            <div className="post-media">
-                {!mediaError ? (
+            <div className={`post-media ${post.isLocked ? 'locked' : ''}`}>
+                {post.isLocked ? (
+                    <div className="locked-stage-overlay animate-fade-in">
+                        <div className="locked-content glass-card">
+                            <div className="locked-icon-pulse"><ArrowUpRight size={32} /></div>
+                            <h3>Exclusive Vibe</h3>
+                            <p>Support @{post.username} to unlock this premium media.</p>
+                            <SubscribeButton 
+                                creatorUsername={post.username} 
+                                subscriberUsername={user?.username}
+                                price={50}
+                            />
+                        </div>
+                    </div>
+                ) : !mediaError ? (
                     (() => {
                         const mediaUrl = post.contentUrl || post.imageUrl || post.url;
                         if (!mediaUrl) return <div className="media-missing-placeholder" />;

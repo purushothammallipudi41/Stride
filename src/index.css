@@ -33,7 +33,7 @@
 
   /* Layout */
   --sidebar-width: 280px;
-  --bottom-nav-height: 72px;
+  --bottom-nav-height: 64px;
   --player-height: 90px;
   --glass-blur: 40px;
   --z-index-fab: 9999;
@@ -330,7 +330,7 @@ h1, h2, h3, h4, .font-header {
 
   .main-content {
     padding: 0;
-    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px);
+    padding-bottom: var(--bottom-nav-height);
     height: 100%;
     min-height: 0;
   }
@@ -449,5 +449,108 @@ h1, h2, h3, h4, .font-header {
 
 .haptic-pulse {
     animation: haptic-pulse 0.1s ease;
+}
+
+/* --- Premium Subscriber Echo Buttons --- */
+.subscribe-btn-premium {
+    background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%);
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.subscribe-btn-premium:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+    filter: brightness(1.1);
+}
+
+.subscribe-btn-premium:active {
+    transform: scale(0.98);
+}
+
+.subscribe-btn-premium.loading {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+.subscribed-badge-btn {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+}
+
+.price-tag {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 4px;
+}
+
+/* --- Stride Premium Gift Actions --- */
+.stride-gift-select-premium {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stride-gift-select-premium:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+}
+
+.stride-gift-select-premium .amt {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.stride-gift-select-premium .currency {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    letter-spacing: 0.1em;
+}
+
+.stride-gift-select-premium.gold {
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.stride-gift-select-premium.gold:hover {
+    border-color: #ffd700;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
+}
+
+.stride-gift-select-premium.gold .amt {
+    color: #ffd700;
 }
 

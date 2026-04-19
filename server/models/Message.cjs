@@ -6,6 +6,16 @@ const messageSchema = new mongoose.Schema({
     text: { type: String },
     type: { type: String, enum: ['text', 'image', 'music', 'gif'], default: 'text' },
     track: { type: Object }, // For shared music metadata
+    reactions: [{
+        username: String,
+        emoji: String,
+        timestamp: { type: Number, default: Date.now }
+    }],
+    metadata: {
+        type: { type: String }, // 'tip', 'sticker', 'collab_wave', etc.
+        value: mongoose.Schema.Types.Mixed,
+        displayMeta: mongoose.Schema.Types.Mixed
+    },
     isMe: { type: Boolean },
     timestamp: { type: Number, default: () => Date.now() },
     readStatus: { type: Boolean, default: false }

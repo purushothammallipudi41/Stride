@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search, Check, CheckCheck } from 'lucide-react';
+import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search, Check, CheckCheck, Users, Gavel, Zap } from 'lucide-react';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
 import './Chat.css';
 
-const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers }) => {
+const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers, communityStats }) => {
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
     const [isGifMode, setIsGifMode] = useState(false);
@@ -26,8 +26,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     const [cameraStream, setCameraStream] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [isCameraLoading, setIsCameraLoading] = useState(false);
+    const [audioData, setAudioData] = useState(new Uint8Array(0));
+    const [longPressedMsg, setLongPressedMsg] = useState(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const audioCtxRef = useRef(null);
+    const analyserRef = useRef(null);
+    const audioStreamRef = useRef(null);
 
     const GIPHY_API_KEY = 'L8S8CWv6I6I05A0A101';
     
@@ -262,18 +267,70 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         setShowVoiceRecorder(true);
     };
 
-    const startRecording = () => {
-        setIsRecording(true);
-        console.log('SocialAction: Recording started');
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioStreamRef.current = stream;
+            
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+            analyserRef.current = audioCtxRef.current.createAnalyser();
+            const source = audioCtxRef.current.createMediaStreamSource(stream);
+            source.connect(analyserRef.current);
+            analyserRef.current.fftSize = 64;
+            const bufferLength = analyserRef.current.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const drawWave = () => {
+                if (!isRecording && !audioStreamRef.current) return;
+                analyserRef.current.getByteFrequencyData(dataArray);
+                setAudioData(new Uint8Array(dataArray));
+                requestAnimationFrame(drawWave);
+            };
+            
+            setIsRecording(true);
+            drawWave();
+            console.log('SocialAction: Recording & Visualizer started');
+        } catch (err) {
+            console.error("Mic access denied:", err);
+        }
     };
 
     const stopRecording = (shouldSend = true) => {
         setIsRecording(false);
+        if (audioStreamRef.current) {
+            audioStreamRef.current.getTracks().forEach(track => track.stop());
+            audioStreamRef.current = null;
+        }
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close();
+        }
+        
         if (shouldSend && recordTime > 0) {
             onSendMessage(`🎤 Voice Message (${formatTime(recordTime)})`, 'text');
         }
         setShowVoiceRecorder(false);
+        setAudioData(new Uint8Array(0));
         console.log(`SocialAction: Recording stopped. Sent: ${shouldSend}`);
+    };
+
+    const handleMessageVibe = async (messageId, emoji) => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/messages/${messageId}/react`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, emoji })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // UI local update if socket doesn't loop back fast enough?
+                // For Stride, we rely on the socket event 'message_vibe_updated' 
+                // but we can also emit a pulse immediately for 'WOW' factor
+                socket.emit('message_vibe', { roomId, messageId, username: currentUser, emoji });
+            }
+        } catch (err) {
+            console.error("Reaction failed:", err);
+        }
+        setLongPressedMsg(null);
     };
 
     if (!activeChat) {
@@ -357,7 +414,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     {activeChat.messages.map((msg, index) => {
                         const isLastInGroup = index === activeChat.messages.length - 1 || activeChat.messages[index + 1].username !== msg.username;
                         return (
-                            <div key={msg.id || index} className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}>
+                            <div 
+                                key={msg.id || index} 
+                                className={`message-v2 ${msg.isMe ? 'me' : 'them'}`}
+                                onContextMenu={(e) => { e.preventDefault(); setLongPressedMsg(msg); }}
+                            >
                                 <div className="message-content">
                                     {(() => {
                                         const isMedia = msg.type === 'gif' || msg.type === 'image' || (msg.text && (msg.text.includes('[LOCATION:') || msg.text.includes('giphy.com') || msg.text.includes('.gif')));
@@ -365,32 +426,18 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             <div className={isMedia ? 'message-media-content' : 'message-bubble-v2'}>
                                                 {msg.text && msg.text.includes('[LOCATION:') ? (
                                             (() => {
-                                                // Robust regex for coordinates (handles decimals and integers)
                                                 const match = msg.text.match(/\[LOCATION:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\]/);
                                                 if (match) {
                                                     const lat = parseFloat(match[1]);
                                                     const lon = parseFloat(match[2]);
-                                                    // Calculate a significantly wider bbox for better framing (0.01 degree)
                                                     const margin = 0.01;
                                                     const bbox = [lon - margin, lat - margin, lon + margin, lat + margin].join('%2C');
                                                     
                                                     return (
                                                         <div className="stride-map-placeholder-pre" onClick={() => window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank')}>
-                                                            <div className="stride-map-header">
-                                                                <span className="stride-map-badge">STRIDE MAP ENGINE v3</span>
-                                                            </div>
+                                                            <div className="stride-map-header"><span className="stride-map-badge">STRIDE MAP ENGINE v3</span></div>
                                                             <div className="stride-map-preview-static">
-                                                                <iframe 
-                                                                    className="stride-map-iframe"
-                                                                    title="Stride Location"
-                                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`}
-                                                                    onLoad={(e) => console.log('SocialAction: Map fully loaded')}
-                                                                    loading="lazy"
-                                                                />
-                                                                <div className="media-loading-overlay">Loading Map...</div>
-                                                            </div>
-                                                            <div className="stride-map-footer">
-                                                                Shared Location
+                                                                <iframe className="stride-map-iframe" title="Stride Location" src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`} loading="lazy" />
                                                             </div>
                                                         </div>
                                                     );
@@ -401,18 +448,9 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             <div className="message-media-wrapper">
                                                 {(() => {
                                                     if (!msg.text) return null;
-                                                    const rawId = msg.text.split('/').pop().split('-').pop();
-                                                    const gifId = rawId.replace(/\.gif$/i, '');
-                                                    return (
-                                                        <img 
-                                                            src={`https://i.giphy.com/${gifId}.gif`}
-                                                            alt="Giphy" 
-                                                            className="message-gif-media loaded" 
-                                                            onLoad={(e) => e.target.parentNode.classList.add('loaded')}
-                                                        />
-                                                    );
+                                                    const gifId = msg.text.split('/').pop().split('-').pop().replace(/\.gif$/i, '');
+                                                    return <img src={`https://i.giphy.com/${gifId}.gif`} alt="Giphy" className="message-gif-media" />;
                                                 })()}
-                                                <div className="media-loading-overlay">Loading GIF...</div>
                                             </div>
                                         ) : msg.type === 'image' ? (
                                             <img src={msg.text} alt="Shared Photo" className="message-image-media" />
@@ -422,15 +460,20 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                             </div>
                                         );
                                     })()}
+                                    
+                                    {msg.reactions?.length > 0 && (
+                                        <div className="message-reactions-pill glass-panel">
+                                            {msg.reactions.map((r, i) => (
+                                                <span key={i} title={r.username}>{r.emoji}</span>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     {isLastInGroup && (
                                         <div className="message-status-v2">
                                             {msg.isMe ? (
                                                 <div className={`status-icon-wrapper ${msg.readStatus ? 'seen' : 'sent'}`}>
-                                                    {msg.readStatus ? (
-                                                        <CheckCheck size={14} className="status-icon seen" />
-                                                    ) : (
-                                                        <Check size={14} className="status-icon sent" />
-                                                    )}
+                                                    {msg.readStatus ? <CheckCheck size={14} className="status-icon seen" /> : <Check size={14} className="status-icon sent" />}
                                                 </div>
                                             ) : (
                                                 <span className="msg-time-stamp">{msg.time}</span>
@@ -438,6 +481,13 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                         </div>
                                     )}
                                 </div>
+                                {longPressedMsg?.id === msg.id && (
+                                    <div className="reaction-picker-v2 animate-pop-in">
+                                        {['🔥', '❤️', '🙌', '💯', '😲', '😂'].map(emoji => (
+                                            <button key={emoji} onClick={() => handleMessageVibe(msg.id, emoji)}>{emoji}</button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -528,9 +578,23 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                             </div>
                             
                             <div className={`mic-visualization ${isRecording ? 'active' : ''}`}>
-                                <div className="pulse-ring" />
-                                <div className="pulse-ring delay-1" />
-                                <div className="pulse-ring delay-2" />
+                                {isRecording ? (
+                                    <div className="waveform-container">
+                                        {Array.from(audioData).map((val, i) => (
+                                            <div 
+                                                key={i} 
+                                                className="waveform-bar" 
+                                                style={{ height: `${(val / 255) * 100}%` }} 
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="pulse-ring" />
+                                        <div className="pulse-ring delay-1" />
+                                        <div className="pulse-ring delay-2" />
+                                    </>
+                                )}
                                 <div className="mic-circle">
                                     <Mic size={40} color={isRecording ? "#ff4757" : "#fff"} />
                                 </div>
@@ -654,6 +718,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                     { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => { console.log('SocialAction: GIF clicked'); setIsGifMode(true); } },
                                     { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: () => { console.log('SocialAction: Gallery clicked'); handleGalleryClick(); } },
                                     { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: () => { console.log('SocialAction: Camera clicked'); handleCameraClick(); } },
+                                    { id: 'action-tip', label: 'Send Tip', icon: <Zap size={20} />, color: 'rgba(245, 158, 11, 0.2)', textColor: '#f59e0b', action: () => { onSendMessage(`⚡ Sent a Vibe Tip of 50 Tokens`, 'text'); setShowGifs(false); } },
                                     { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => { console.log('SocialAction: Location clicked'); handleLocationClick(); } }
                                 ].map((item) => (
                                     <div key={item.id} className="action-sheet-item" onClick={(e) => { 
@@ -676,34 +741,68 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 document.body
             )}
 
-            <div className="chat-input-bar-glass">
-                <div className="chat-input-wrapper-premium">
-                    <div className="chat-input-prefix">
-                        <button className="chat-camera-btn" onClick={handleCameraClick} aria-label="Camera">
-                            <Camera size={20} color="#fff" strokeWidth={2.5} />
-                        </button>
-                    </div>
-                    <input 
-                        type="text" 
-                        placeholder={isDisabled ? "Join community to chat" : "Message..."} 
-                        className="chat-input-field" 
-                        value={msgText}
-                        onChange={handleInputChange}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
-                        disabled={isDisabled}
-                    />
-                    <div className="chat-input-suffix">
-                        {msgText.trim() ? (
-                            <button className="chat-send-btn" onClick={handleSendText}>Send</button>
-                        ) : (
-                            <div className="chat-input-actions-group">
-                                <button className="chat-action-sm-btn" onClick={handleMicClick} aria-label="Microphone"><Mic size={20} /></button>
-                                <button className="chat-action-sm-btn" onClick={handlePlusClick} aria-label="More options"><Plus size={20} /></button>
+            {(() => {
+                const inputContent = isDisabled ? (
+                    <div className="gating-nexus-bar animate-sheet-up">
+                        <div className="nexus-stats">
+                            <div className="nexus-stat">
+                                <Users size={14} />
+                                <span>{communityStats?.memberCount?.toLocaleString() || '0'} Striders</span>
                             </div>
-                        )}
+                            <div className="nexus-stat">
+                                <Gavel size={14} />
+                                <span>{communityStats?.activeProposals || '0'} Active Shifts</span>
+                            </div>
+                        </div>
+                        <div className="nexus-action">
+                             Join community to chat
+                        </div>
                     </div>
-                </div>
-            </div>
+                ) : (
+                    <div className="chat-input-wrapper-premium">
+                        <div className="chat-input-prefix">
+                            <button className="chat-camera-btn" onClick={handleCameraClick} aria-label="Camera">
+                                <Camera size={20} color="#fff" strokeWidth={2.5} />
+                            </button>
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Message..." 
+                            className="chat-input-field" 
+                            value={msgText}
+                            onChange={handleInputChange}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
+                            disabled={isDisabled}
+                        />
+                        <div className="chat-input-suffix">
+                            {msgText.trim() ? (
+                                <button className="chat-send-btn" onClick={handleSendText}>Send</button>
+                            ) : (
+                                <div className="chat-input-actions-group">
+                                    <button className="chat-action-sm-btn" onClick={handleMicClick} aria-label="Microphone"><Mic size={20} /></button>
+                                    <button className="chat-action-sm-btn" onClick={handlePlusClick} aria-label="More options"><Plus size={20} /></button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+
+                // Portal to document.body on mobile to bypass any parent transforms/layout constraints
+                if (window.innerWidth <= 768) {
+                    return createPortal(
+                        <div className="chat-input-bar-glass mobile-portal">
+                            {inputContent}
+                        </div>,
+                        document.body
+                    );
+                }
+
+                return (
+                    <div className="chat-input-bar-glass">
+                        {inputContent}
+                    </div>
+                );
+            })()}
         </div>
     );
 };

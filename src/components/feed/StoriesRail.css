@@ -320,3 +320,37 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+/* Live Integration Styles */
+.live-avatar-ring {
+    position: relative;
+    padding: 3px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #a855f7, #ec4899);
+}
+
+.live-avatar-ring.pulse {
+    animation: ring-pulse 2s infinite;
+}
+
+@keyframes ring-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+}
+
+.live-overlay-tag {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4757;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 2px solid #000;
+    letter-spacing: 1px;
+    z-index: 5;
+    box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4);
+}

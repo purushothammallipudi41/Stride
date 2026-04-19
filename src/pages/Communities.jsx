@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Search, Users, ShieldCheck } from 'lucide-react';
+import { Search, Users, ShieldCheck, Plus, ChevronLeft } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { useServer } from '../hooks/useServer';
+import { useUI } from '../hooks/useUI';
 import './Communities.css';
 
 const Communities = () => {
     const navigate = useNavigate();
     const { servers } = useServer();
+    const ui = useUI();
+    const openCreateModal = ui?.openCreateModal;
     const [activeTab, setActiveTab] = useState('for-you');
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -66,9 +69,55 @@ const Communities = () => {
 
     return (
         <div className="communities-discover-container animate-fade-in">
-            <PageHeader title="Discovery Hub" />
+            <PageHeader title="Discovery Hub" hideBack={true} />
 
             <div className="search-filter-section">
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '15px' }}>
+                    <button 
+                        className="back-btn-content animate-scale-in"
+                        onClick={() => navigate(-1)}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '14px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '56px'
+                        }}
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <button 
+                        className="establish-community-btn animate-scale-in"
+                        onClick={() => openCreateModal('COMMUNITY')}
+                        style={{
+                            flex: 1,
+                            padding: '16px',
+                            background: 'linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-accent) 100%)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            fontWeight: '900',
+                            fontSize: '0.95rem',
+                            boxShadow: '0 0 25px var(--theme-primary-glow)',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s',
+                            textTransform: 'uppercase'
+                        }}
+                    >
+                        <Plus size={20} strokeWidth={3} />
+                        <span>Establish New Community</span>
+                    </button>
+                </div>
+
                 <div className="discover-search-wrapper glass-panel">
                     <Search size={20} className="search-icon" />
                     <input 

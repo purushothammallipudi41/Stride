@@ -3,14 +3,16 @@ import { ChevronLeft } from 'lucide-react';
 import VerificationBadge from '../common/VerificationBadge';
 import './PageHeader.css';
 
-const PageHeader = ({ title, rightElement }) => {
+const PageHeader = ({ title, rightElement, hideBack }) => {
     const navigate = useNavigate();
 
     return (
         <header className="mobile-page-header">
-            <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
-                <ChevronLeft className="icon-gradient" size={32} />
-            </button>
+            {!hideBack ? (
+                <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+                    <ChevronLeft className="icon-gradient" size={32} />
+                </button>
+            ) : <div />}
             <div className="header-title-container">
                 <h1 className="mobile-page-title">{title}</h1>
             </div>

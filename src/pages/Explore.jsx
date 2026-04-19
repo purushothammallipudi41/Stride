@@ -5,7 +5,7 @@ import { useActivity } from '../hooks/useActivity';
 import { useTranslation } from 'react-i18next';
 import { BASE_URL } from '../utils/api';
 
-import { Search, X, Film, Layers, Music, Trophy } from 'lucide-react';
+import { Search, X, Film, Layers, Music, Trophy, ChevronLeft } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Avatar from '../components/common/Avatar';
 import VerificationBadge from '../components/common/VerificationBadge';
@@ -164,7 +164,33 @@ const Explore = () => {
                 title={t('nav.explore')} 
                 description="Search for artists, hashtags, vibing activity, and trending social communities on Stride." 
             />
-            <PageHeader title={t('nav.explore')} />
+            <PageHeader title={t('nav.explore')} hideBack={true} />
+            
+            <div className="explore-back-action-area" style={{ padding: '24px 16px 0', marginTop: '12px', marginBottom: '8px', display: 'flex', gap: '12px' }}>
+                <button 
+                    className="back-btn-content"
+                    onClick={() => navigate(-1)}
+                    style={{
+                        padding: '12px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '16px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+                    }}
+                >
+                    <ChevronLeft size={24} strokeWidth={2.5} />
+                </button>
+            </div>
             <div className="explore-tabs">
                 <button className={`explore-tab ${!isSearching && searchQuery === '' ? 'active' : ''}`} onClick={() => setSearchQuery('')}>Trend</button>
                 <button className={`explore-tab ${searchQuery === 'vibing' ? 'active' : ''}`} onClick={() => setSearchQuery('vibing')}>Now Vibing</button>

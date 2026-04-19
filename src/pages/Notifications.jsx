@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, Heart, UserPlus, Bell, X } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Check, Heart, UserPlus, Bell, X, ChevronLeft } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
@@ -130,7 +130,29 @@ const Notifications = () => {
 
     return (
         <div className="notifications-container">
-            <PageHeader title="Notifications" />
+            <PageHeader title="Notifications" hideBack={true} />
+
+            <div className="notifications-back-action-area" style={{ padding: '0 16px', marginTop: '12px', marginBottom: '16px', display: 'flex', gap: '12px' }}>
+                <button 
+                    className="back-btn-content"
+                    onClick={() => navigate(-1)}
+                    style={{
+                        padding: '12px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '14px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <ChevronLeft size={24} />
+                </button>
+            </div>
 
             <div className="notifications-content">
                 <div className="caught-up-section">

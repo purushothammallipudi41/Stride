@@ -114,14 +114,28 @@ const Messages = () => {
             });
         };
 
+        const handleVibeUpdated = ({ messageId, reactions }) => {
+            setChats(prevChats => prevChats.map(chat => {
+                if (chat.id === activeChatId) {
+                    return {
+                        ...chat,
+                        messages: chat.messages.map(m => m.id === messageId ? { ...m, reactions } : m)
+                    };
+                }
+                return chat;
+            }));
+        };
+
         socket.on('new_private_message', handleNewMessage);
         socket.on('user_typing_start', handleTypingStart);
         socket.on('user_typing_stop', handleTypingStop);
+        socket.on('message_vibe_updated', handleVibeUpdated);
 
         return () => {
             socket.off('new_private_message', handleNewMessage);
             socket.off('user_typing_start', handleTypingStart);
             socket.off('user_typing_stop', handleTypingStop);
+            socket.off('message_vibe_updated', handleVibeUpdated);
         };
 
     }, [activeChatId, userProfile.username]);

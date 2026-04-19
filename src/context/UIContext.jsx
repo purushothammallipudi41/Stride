@@ -6,6 +6,8 @@ import { getStoredUser } from '../utils/storage';
 
 export const UIProvider = ({ children }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createType, setCreateType] = useState('POST');
+    const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isExplorerOpen, setIsExplorerOpen] = useState(false);
     const [isVaultOpen, setIsVaultOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
@@ -14,6 +16,7 @@ export const UIProvider = ({ children }) => {
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [callInfo, setCallInfo] = useState({ isOpen: false, isIncoming: false, callerData: null, type: 'video' });
     const [liveInfo, setLiveInfo] = useState({ isOpen: false, streamerName: '', communityName: '', streamId: '' });
+    const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
     const user = getStoredUser();
     const username = user?.username || 'guest';
@@ -56,8 +59,14 @@ export const UIProvider = ({ children }) => {
         };
     }, [username]);
     
-    const openCreateModal = () => setIsCreateModalOpen(true);
+    const openCreateModal = (type = 'POST') => {
+        setCreateType(type);
+        setIsCreateModalOpen(true);
+    };
     const closeCreateModal = () => setIsCreateModalOpen(false);
+
+    const openArticleModal = () => setIsArticleModalOpen(true);
+    const closeArticleModal = () => setIsArticleModalOpen(false);
 
     const openExplorer = () => setIsExplorerOpen(true);
     const closeExplorer = () => setIsExplorerOpen(false);
@@ -101,9 +110,11 @@ export const UIProvider = ({ children }) => {
 
 
     const value = {
-        isCreateModalOpen,
         openCreateModal,
         closeCreateModal,
+        isArticleModalOpen,
+        openArticleModal,
+        closeArticleModal,
         isExplorerOpen,
         openExplorer,
         closeExplorer,
@@ -122,7 +133,9 @@ export const UIProvider = ({ children }) => {
         callInfo,
         setCallInfo,
         liveInfo,
-        setLiveInfo
+        setLiveInfo,
+        isStoryModalOpen,
+        setIsStoryModalOpen
     };
 
     return (

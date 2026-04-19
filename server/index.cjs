@@ -42,6 +42,7 @@ const VibeAnalytics = require('./models/VibeAnalytics.cjs');
 const Message = require('./models/Message.cjs');
 const Comment = require('./models/Comment.cjs');
 const Analytics = require('./models/Analytics.cjs');
+const Proposal = require('./models/Proposal.cjs');
 
 
 // Database Connection
@@ -745,16 +746,42 @@ app.get('/api/profile/:username', async (req, res) => {
             userObj.followerCount = user.followers?.length || 0;
             userObj.followingCount = user.following?.length || 0;
 
+            const viewerUser = viewer ? await User.findOne({ username: viewer }) : null;
+
+            // SECURITY: Gating logic for Profile Grid
+            if (userObj.posts && userObj.posts.length > 0) {
+                userObj.posts = userObj.posts.map(post => {
+                    let isLocked = false;
+                    let finalContentUrl = post.contentUrl;
+                    let finalImageUrl = post.imageUrl;
+
+                    if (post.isMemberOnly) {
+                        const isAuthor = viewerUser && viewerUser.username === user.username;
+                        const isSubscriber = viewerUser && user.subscribers?.some(id => id.toString() === viewerUser._id.toString());
+                        
+                        if (!isAuthor && !isSubscriber) {
+                            isLocked = true;
+                            finalContentUrl = null;
+                            finalImageUrl = null;
+                        }
+                    }
+
+                    return {
+                        ...post,
+                        isLocked,
+                        contentUrl: finalContentUrl,
+                        imageUrl: finalImageUrl
+                    };
+                });
+            }
+
             // Server-side isFollowing check for the viewer
-            if (viewer) {
-                const viewerUser = await User.findOne({ username: viewer });
-                if (viewerUser) {
-                    userObj.isFollowing = user.followers.some(
-                        id => id.toString() === viewerUser._id.toString()
-                    );
-                    // Also send viewer's real followingCount
-                    userObj.viewerFollowingCount = viewerUser.following?.length || 0;
-                }
+            if (viewerUser) {
+                userObj.isFollowing = user.followers.some(
+                    id => id.toString() === viewerUser._id.toString()
+                );
+                // Also send viewer's real followingCount
+                userObj.viewerFollowingCount = viewerUser.following?.length || 0;
             }
 
             res.json(userObj);
@@ -789,16 +816,37 @@ app.get('/api/feed', async (req, res) => {
         }
 
         const enhancedPosts = await Promise.all(postsArray.map(async (post) => {
-            const user = await User.findById(post.user || post.authorId);
+            const author = await User.findById(post.user || post.authorId);
+            const requester = username ? await User.findOne({ username }) : null;
+            
+            // SECURITY: Gating Logic for Subscriber Echo
+            let isLocked = false;
+            let finalContentUrl = post.contentUrl;
+            let finalImageUrl = post.imageUrl;
+
+            if (post.isMemberOnly && author) {
+                const isAuthor = requester && requester.username === author.username;
+                const isSubscriber = requester && author.subscribers?.some(id => id.toString() === requester._id.toString());
+                
+                if (!isAuthor && !isSubscriber) {
+                    isLocked = true;
+                    finalContentUrl = null; // Censor for unauthorized access
+                    finalImageUrl = null;
+                }
+            }
+
             return {
                 ...post,
-                user: user ? user.username : (post.username || 'Stride User'),
-                avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${post.username || 'stride'}`,
-                avatarFrame: user ? user.avatarFrame : 'none',
-                isVerified: user ? user.isVerified : false,
+                user: author ? author.username : (post.username || 'Stride User'),
+                avatar: author ? author.avatar : `https://i.pravatar.cc/150?u=${post.username || 'stride'}`,
+                avatarFrame: author ? author.avatarFrame : 'none',
+                isVerified: author ? author.isVerified : false,
                 comments: post.comments?.length || 0,
                 likes: post.likes?.length || 0,
-                shares: 0
+                shares: 0,
+                isLocked,
+                contentUrl: finalContentUrl,
+                imageUrl: finalImageUrl
             };
         }));
 
@@ -1034,6 +1082,297 @@ app.post('/api/posts/:id/view', async (req, res) => {
     }
 });
 
+app.post('/api/creator/subscribe/:username', async (req, res) => {
+    const { username } = req.params;
+    const { subscriberUsername } = req.body;
+    
+    try {
+        const creator = await User.findOne({ username });
+        const subscriber = await User.findOne({ username: subscriberUsername });
+        
+        if (!creator) return res.status(404).json({ error: 'Creator not found' });
+        if (!subscriber) return res.status(404).json({ error: 'Subscriber not found' });
+        
+        const price = creator.subscriptionPrice || 50;
+        
+        if (subscriber.balance < price) {
+            return res.status(400).json({ error: 'Insufficient Vibe Tokens' });
+        }
+
+        // Atomic Updates
+        await User.updateOne(
+            { _id: creator._id },
+            { $addToSet: { subscribers: subscriber._id } }
+        );
+        
+        await User.updateOne(
+            { _id: subscriber._id },
+            { 
+                $addToSet: { subscriptions: creator._id },
+                $inc: { balance: -price }
+            }
+        );
+
+        // Transaction Log
+        const newTx = await Transaction.create({
+            user: subscriberUsername,
+            type: 'subscription',
+            amount: price,
+            target: username,
+            description: `Subscription to @${username}`
+        });
+
+        // Supporter Notification
+        await Notification.create({
+            user: username,
+            type: 'subscription',
+            from: subscriberUsername,
+            content: `is now a premium supporter! ⚡`,
+            relatedId: subscriber._id,
+            actors: [subscriberUsername],
+            time: 'Just now'
+        });
+
+        // Native Push
+        PushService.sendNotification(creator._id, {
+            title: 'New Subscriber Echo',
+            body: `${subscriberUsername} joined your premium rhythm!`,
+            icon: subscriber.avatar
+        });
+
+        io.emit('wallet_updated', { username: subscriberUsername, balance: subscriber.balance - price });
+        io.to(`user_${username}`).emit('new_notification', {
+            type: 'subscription',
+            from: subscriberUsername,
+            content: 'is now a premium supporter!'
+        });
+
+        res.json({ success: true, balance: subscriber.balance - price });
+    } catch (err) {
+        console.error('[POST /api/creator/subscribe] Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- VibeCast v2.7: Live Studio Endpoints ---
+
+app.get('/api/feed/live', async (req, res) => {
+    try {
+        const liveUsers = await User.find({ isLive: true })
+            .select('username avatar liveStreamId')
+            .limit(20);
+        res.json(liveUsers);
+    } catch (err) {
+        console.error('Live feed error:', err);
+        res.status(500).json({ error: 'Failed to fetch live streams' });
+    }
+});
+
+// --- AI Muse v2.9: Intelligence Layer ---
+app.get('/api/studio/muse/suggest', async (req, res) => {
+    const { filterId, mode } = req.query;
+    
+    // Heuristic Muse Logic
+    const suggestions = {
+        normal: {
+            captions: ["Finding my rhythm today 🎧", "Pure Stride vibes only.", "Clear vision, clear beats."],
+            tags: ["#stride", "#rhythm", "#daily", "#vibe", "#nexus"]
+        },
+        cyberpunk: {
+            captions: ["Neon pulse in the veins 🌃", "The future is rhythmic.", "Cyber Stride active."],
+            tags: ["#cyberpunk", "#neon", "#future", "#hacker", "#tech"]
+        },
+        vaporwave: {
+            captions: ["Aesthetic waves only 🌊", "Retro-future rhythm.", "Vapor Stride pulse."],
+            tags: ["#vaporwave", "#aesthetic", "#retro", "#lofi", "#chill"]
+        },
+        golden: {
+            captions: ["Chasing the sunset rhythm ☀️", "Golden hour, golden beats.", "Sunset VibeCast active."],
+            tags: ["#goldenhour", "#sunset", "#warm", "#vibes", "#glow"]
+        },
+        noir: {
+            captions: ["Midnight rhythms 🌙", "Deep bass, deep noir.", "The shadow of the beat."],
+            tags: ["#noir", "#midnight", "#dark", "#deep", "#rhythm"]
+        },
+        acid: {
+            captions: ["Tripping on the rhythm 🍄", "High-frequency vibes.", "Acid Stride pulse ACTIVE."],
+            tags: ["#acid", "#psychedelic", "#trippy", "#energy", "#rave"]
+        },
+        vintage: {
+            captions: ["Classic rhythms never die 📼", "Lo-fi nostalgia.", "Vintage Stride echo."],
+            tags: ["#vintage", "#lofi", "#retro", "#classic", "#echo"]
+        }
+    };
+
+    const active = suggestions[filterId] || suggestions.normal;
+    const vibeScore = mode === 'stage' ? Math.floor(85 + Math.random() * 10) : Math.floor(70 + Math.random() * 20);
+    const peakTime = Math.floor(Math.random() * 60);
+
+    res.json({
+        captions: active.captions,
+        hashtags: active.tags,
+        vibeScore,
+        peakTime,
+        message: "The Muse has spoken. ✨"
+    });
+});
+
+// --- Governance v3.0: Sovereignty Nexus ---
+app.get('/api/governance/proposals', async (req, res) => {
+    try {
+        const { communityId } = req.query;
+        const query = communityId ? { communityId } : { communityId: 'global' };
+        const proposals = await Proposal.find(query).sort({ timestamp: -1 });
+        res.json(proposals);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/governance/proposals', async (req, res) => {
+    const username = req.headers['x-user-username'];
+    const { title, description, type, options, impactValue, communityId } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user || (!user.isVerified && !user.isPremium)) {
+            return res.status(403).json({ error: 'Only Verified/Premium users can initiate proposals.' });
+        }
+
+        const proposal = await Proposal.create({
+            title,
+            description,
+            type,
+            creator: username,
+            options: options.map(opt => ({ label: opt, votes: 0 })),
+            impactValue,
+            communityId: communityId || 'global',
+            expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 day duration
+        });
+
+        res.status(201).json(proposal);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/governance/vote', async (req, res) => {
+    const username = req.headers['x-user-username'];
+    const { proposalId, optionLabel } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        const proposal = await Proposal.findById(proposalId);
+        
+        if (!user || !proposal) return res.status(404).json({ error: 'User or Proposal not found' });
+        if (proposal.status !== 'active') return res.status(400).json({ error: 'Proposal is already closed' });
+        
+        const existingVote = proposal.voters.find(v => v.username === username);
+        if (existingVote) return res.status(400).json({ error: 'You have already voted on this proposal' });
+
+        // Calculate Vibe Weight: Balance * (1 + (vibeScore / 100))
+        const vibeScore = user.vibeScores ? (user.vibeScores.get(proposal.type) || 0) : 0;
+        const weight = Math.floor(user.balance * (1 + vibeScore / 100)) || 1;
+
+        // Update option votes
+        const option = proposal.options.find(opt => opt.label === optionLabel);
+        if (!option) return res.status(400).json({ error: 'Invalid option selected' });
+        
+        option.votes += weight;
+        proposal.totalWeight += weight;
+        proposal.voters.push({ username, weight, option: optionLabel });
+
+        await proposal.save();
+        
+        // Stride v3.1: Check for Quorum & Apply Sovereignty Shifts
+        if (proposal.totalWeight >= proposal.quorum && proposal.status === 'active') {
+            proposal.status = 'passed';
+            await proposal.save();
+
+            if (proposal.type === 'node' && proposal.communityId !== 'global') {
+                const community = await Community.findById(proposal.communityId);
+                if (community) {
+                    // Determine winning option
+                    const winner = proposal.options.sort((a, b) => b.votes - a.votes)[0];
+                    console.log(`[SOVEREIGNTY] Proposal PASSED for ${community.name}. Winner: ${winner.label}`);
+
+                    // Apply Shift (Simplistic mapping for v3.1)
+                    if (winner.label.toLowerCase().includes('color')) {
+                        community.accentColor = proposal.impactValue || winner.label.split(': ')[1];
+                    }
+                    if (winner.label.toLowerCase().includes('gate')) {
+                        const channel = winner.label.split(' ')[1];
+                        if (!community.gatedChannels.includes(channel)) {
+                            community.gatedChannels.push(channel);
+                        }
+                    }
+                    
+                    await community.save();
+
+                    // Broadcast shift to all node members
+                    io.to(`community_${proposal.communityId}`).emit('community_update', {
+                        id: community._id,
+                        accentColor: community.accentColor,
+                        gatedChannels: community.gatedChannels
+                    });
+                }
+            }
+        }
+
+        // Real-time broadcast
+        io.to(proposal.communityId === 'global' ? 'stride_global' : `community_${proposal.communityId}`)
+          .emit('governance_update', { 
+              proposalId, 
+              totalWeight: proposal.totalWeight,
+              status: proposal.status 
+          });
+
+        res.json({ success: true, weight, proposal });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/studio/live/start', async (req, res) => {
+    const { username } = req.body;
+    try {
+        const user = await User.findOneAndUpdate(
+            { username },
+            { 
+                isLive: true, 
+                liveStreamId: `pulse_${Date.now()}_${Math.random().toString(36).substr(2, 5)}` 
+            },
+            { new: true }
+        );
+        
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Global broadcast to notify discovery rails
+        io.emit('live_pulse_updated', { 
+            username, 
+            isLive: true, 
+            liveStreamId: user.liveStreamId,
+            avatar: user.avatar 
+        });
+
+        res.json({ success: true, liveStreamId: user.liveStreamId });
+    } catch (err) {
+        console.error('Live start error:', err);
+        res.status(500).json({ error: 'Failed to start broadcast' });
+    }
+});
+
+app.post('/api/studio/live/stop', async (req, res) => {
+    const { username } = req.body;
+    try {
+        await User.updateOne({ username }, { isLive: false, liveStreamId: null });
+        
+        io.emit('live_pulse_updated', { username, isLive: false });
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Live stop error:', err);
+        res.status(500).json({ error: 'Failed to stop broadcast' });
+    }
+});
+
 app.post('/api/profile/:username/follow', async (req, res) => {
     const { username } = req.params;
     const { followerUsername } = req.body;
@@ -1147,6 +1486,53 @@ app.post('/api/wallet/topup', async (req, res) => {
 
         io.to(`user_${username}`).emit('wallet_updated', { balance: user.balance });
         res.json({ success: true, balance: user.balance, transaction });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/marketplace/purchase', async (req, res) => {
+    const { username, assetName, price } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        if (user.balance < price) {
+            return res.status(400).json({ error: 'Insufficient Vibe Tokens' });
+        }
+
+        // Atomic update: Deduct balance and add to inventory
+        const updatedUser = await User.findOneAndUpdate(
+            { username },
+            { 
+                $inc: { balance: -price },
+                $addToSet: { inventory: assetName }
+            },
+            { new: true }
+        );
+
+        // Record transaction
+        const transaction = await Transaction.create({
+            user: username,
+            type: 'purchase',
+            amount: -price,
+            description: `Purchased @${assetName}`,
+            status: 'completed'
+        });
+
+        // Add transaction to user record
+        updatedUser.transactions.push(transaction._id);
+        await updatedUser.save();
+
+        // Emit real-time update
+        io.to(`user_${username}`).emit('wallet_updated', { balance: updatedUser.balance });
+        
+        res.json({ 
+            success: true, 
+            balance: updatedUser.balance, 
+            inventory: updatedUser.inventory,
+            transaction 
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1453,6 +1839,74 @@ app.get('/api/communities/:id/pulse', async (req, res) => {
     try {
         const pulse = await SocialAIService.generateCommunityPulse(req.params.id);
         res.json(pulse);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Stride v3.1: Sovereignty Settings & Mod Tools
+app.post('/api/communities/:id/settings', async (req, res) => {
+    const { id } = req.params;
+    const { accentColor, gatedChannels, description, name } = req.body;
+    const username = req.headers['x-user-username'];
+
+    try {
+        const community = await Community.findById(id);
+        if (!community) return res.status(404).json({ error: 'Community not found' });
+
+        // Check if user is Mod/Owner
+        const userRole = community.roles.find(r => r.user === username);
+        const isAuthorized = userRole && (userRole.role === 'mod' || userRole.role === 'owner');
+
+        if (!isAuthorized) {
+            return res.status(403).json({ error: 'Sovereignty denied. Moderator privileges required.' });
+        }
+
+        // Apply Shifts
+        if (accentColor) community.accentColor = accentColor;
+        if (gatedChannels) community.gatedChannels = gatedChannels;
+        if (description) community.description = description;
+        if (name) community.name = name;
+
+        await community.save();
+
+        // Broadcast Shift to all node members
+        io.to(`community_${id}`).emit('community_update', {
+            id,
+            accentColor: community.accentColor,
+            name: community.name,
+            description: community.description,
+            gatedChannels: community.gatedChannels
+        });
+
+        console.log(`[SOVEREIGNTY] Community ${id} updated by ${username}`);
+        res.json({ success: true, community });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete Community - Absolute Sovereignty
+app.delete('/api/communities/:id', async (req, res) => {
+    const { id } = req.params;
+    const username = req.headers['x-user-username'];
+
+    try {
+        const community = await Community.findById(id);
+        if (!community) return res.status(404).json({ error: 'Community not found' });
+
+        // Absolute check: Only owner can delete
+        const ownerRole = community.roles.find(r => r.role === 'owner' && r.user === username);
+        if (!ownerRole && community.owner !== username) {
+            return res.status(403).json({ error: 'Absolute Sovereignty required. Only the owner can decompose this node.' });
+        }
+
+        await Community.findByIdAndDelete(id);
+
+        // Notify all members of decommissioning
+        io.to(`community_${id}`).emit('community_deleted', { id });
+        
+        res.json({ success: true, message: 'Node successfully decommissioned from the Stride nexus.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -1882,6 +2336,38 @@ app.get('/api/messages', async (req, res) => {
     }
 });
 
+app.post('/api/messages/:messageId/react', async (req, res) => {
+    const { messageId } = req.params;
+    const { username, emoji } = req.body;
+    try {
+        const msg = await Message.findById(messageId);
+        if (!msg) return res.status(404).json({ error: 'Message not found' });
+
+        // Toggle logic: If user already reacted with this emoji, remove it
+        if (!msg.reactions) msg.reactions = [];
+        const existingIndex = msg.reactions.findIndex(r => r.username === username && r.emoji === emoji);
+        if (existingIndex > -1) {
+            msg.reactions.splice(existingIndex, 1);
+        } else {
+            msg.reactions.push({ username, emoji });
+        }
+
+        await msg.save();
+        
+        // Broadcast the vibe to the room
+        const roomId = `chat_${[msg.sender, msg.receiver].sort().join('-')}`;
+        io.to(roomId).emit('message_vibe_updated', { 
+            messageId, 
+            reactions: msg.reactions 
+        });
+
+        res.json({ success: true, reactions: msg.reactions });
+    } catch (err) {
+        console.error('Reaction error:', err);
+        res.status(500).json({ error: 'Failed to react' });
+    }
+});
+
 
 // Mock Authentication Endpoint
 // In-memory store for verification codes
@@ -2008,6 +2494,15 @@ app.post('/api/verify-code', async (req, res) => {
     } else {
         res.status(400).json({ success: false, message: 'Invalid or expired code' });
     }
+});
+
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    console.log(`[AUTH] Simulated password reset link sent to: ${email}`);
+    // Simulate high-fidelity backend delay
+    setTimeout(() => {
+        res.json({ success: true, message: 'Reset pulse dispatched.' });
+    }, 800);
 });
 
 app.post('/api/login', async (req, res) => {
@@ -2292,49 +2787,59 @@ app.post('/api/monetization/tip', async (req, res) => {
 app.post('/api/monetization/gift-frame', async (req, res) => {
     const { fromId, toId, frameType, amount, roomId } = req.body;
     try {
-        const tx = new Transaction({ from: fromId, to: toId, amount, type: 'gift' });
+        const sender = await User.findOne({ $or: [{ _id: fromId }, { username: fromId }] });
+        const recipient = await User.findOne({ $or: [{ _id: toId }, { username: toId }] });
+        
+        if (!sender || !recipient) {
+            return res.status(404).json({ error: 'Sync error. Users not found.' });
+        }
+
+        const tx = new Transaction({ 
+            user: sender.username, 
+            target: recipient.username, 
+            amount: Number(amount), 
+            type: 'purchase',
+            description: `Gifted ${frameType} Frame to ${recipient.username}`,
+            status: 'completed'
+        });
         await tx.save();
 
         // Update recipient's avatar frame
-        const updatedUser = await User.findByIdAndUpdate(toId, { avatarFrame: frameType }, { new: true });
-
-        // Broadcast the gift and create notification
-        const sender = await User.findById(fromId);
-        const recipient = await User.findById(toId);
-        
-        if (recipient && sender) {
-            await Notification.create({
-                user: recipient.username,
-                type: 'gift',
-                from: sender.username,
-                senderFrame: sender.avatarFrame || 'none',
-                content: `gifted you a ${frameType} avatar frame!`,
-                time: 'Just now'
-            });
-            await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
-        }
+        recipient.avatarFrame = frameType;
+        const updatedUser = await recipient.save();
 
         const giftPayload = {
             type: 'FRAME_GIFTED',
             data: { 
-                from: sender?.username || fromId, 
-                to: recipient?.username || toId, 
+                from: sender.username, 
+                to: recipient.username, 
                 frameType,
                 amount
             },
             timestamp: Date.now()
         };
 
-        // Broadcast to specific room if provided, otherwise global
+        // Broadcast
         if (roomId) {
             io.to(roomId).emit('new_gift', giftPayload);
         } else {
             io.emit('global_event', giftPayload);
         }
 
+        await Notification.create({
+            user: recipient.username,
+            type: 'tip',
+            from: sender.username,
+            senderFrame: sender.avatarFrame || 'none',
+            content: `gifted you a ${frameType} avatar frame! ✨`,
+            time: 'Just now'
+        });
+        await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
+        
         res.json({ success: true, user: updatedUser, transaction: tx });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[MONETIZATION] Gift Frame Failed:', err);
+        res.status(500).json({ error: 'Internal Nexus Failure' });
     }
 });
 
@@ -2396,29 +2901,46 @@ app.post('/api/payments/verify', async (req, res) => {
 app.post('/api/monetization/send-tip', async (req, res) => {
     const { fromId, toId, amount, roomId, message } = req.body;
     try {
-        const tx = new Transaction({ from: fromId, to: toId, amount, type: 'tip', message });
-        await tx.save();
+        const sender = await User.findOne({ $or: [{ _id: fromId }, { username: fromId }] });
+        const recipient = await User.findOne({ $or: [{ _id: toId }, { username: toId }] });
 
-        const sender = await User.findById(fromId);
-        const recipient = await User.findById(toId);
-
-        if (recipient && sender) {
-            await Notification.create({
-                user: recipient.username,
-                type: 'tip',
-                from: sender.username,
-                senderFrame: sender.avatarFrame || 'none',
-                content: `sent you a tip of ${amount} Vibe Points! ${message ? `"${message}"` : ''}`,
-                time: 'Just now'
-            });
-            await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
+        if (!sender || !recipient) {
+            return res.status(404).json({ error: 'User Nexus out of sync. Sender or recipient not found.' });
         }
 
+        // Correctly align with Transaction schema (user: username, target: recipient_username)
+        const tx = new Transaction({ 
+            user: sender.username, 
+            target: recipient.username, 
+            amount: Number(amount), 
+            type: 'tip', 
+            description: `Tip to ${recipient.username}: ${message || 'No message'}`,
+            status: 'completed'
+        });
+        await tx.save();
+
+        // Update balances (simulated or real)
+        if (sender.balance >= amount) {
+            sender.balance -= amount;
+            recipient.balance = (recipient.balance || 0) + Number(amount);
+            await sender.save();
+            await recipient.save();
+        }
+
+        await Notification.create({
+            user: recipient.username,
+            type: 'tip',
+            from: sender.username,
+            senderFrame: sender.avatarFrame || 'none',
+            content: `sent you a tip of ${amount} Vibe Points! ${message ? `"${message}"` : ''}`,
+            time: 'Just now'
+        });
+        await User.findOneAndUpdate({ username: recipient.username }, { hasUnreadNotifications: true });
         const tipPayload = {
             type: 'TIP_SENT',
             data: { 
-                from: sender?.username || fromId, 
-                to: recipient?.username || toId, 
+                from: sender.username, 
+                to: recipient.username, 
                 amount,
                 message
             },
@@ -2433,23 +2955,26 @@ app.post('/api/monetization/send-tip', async (req, res) => {
 
         // Check Top Tipper achievement (1000+ VP sent)
         const totalSent = await Transaction.aggregate([
-            { $match: { from: fromId, type: 'tip' } },
-            { $group: { _id: null, total: { $sum: '$amount' } } }
+            { $match: { user: sender.username, type: 'tip' } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
         ]);
-        if (totalSent.length > 0 && totalSent[0].total >= 1000) {
-            const senderUser = await User.findById(fromId);
-            if (senderUser && !senderUser.achievements.includes('Top Tipper')) {
-                senderUser.achievements.push('Top Tipper');
-                await senderUser.save();
-                io.to(`user_${senderUser.username}`).emit('achievement_unlocked', { achievement: 'Top Tipper' });
-            }
-        }
 
-        res.json({ success: true, transaction: tx });
+        if (totalSent.length > 0 && totalSent[0].total >= 1000) {
+            await Notification.create({
+                user: sender.username,
+                type: 'achievement',
+                content: 'Unlocked: Top Tipper! 🏆 You have sent over 1000 VP in gifts.',
+                time: 'Just now'
+            });
+        }
+        
+        res.json({ success: true, balance: sender.balance });
     } catch (err) {
+        console.error('[MONETIZATION] Send Tip Failed:', err);
         res.status(500).json({ error: err.message });
     }
 });
+
 
 app.get('/api/vault/stats/:username', async (req, res) => {
     try {
@@ -2579,6 +3104,55 @@ io.on('connection', (socket) => {
         
         // Broadcast updated room members
         updateRoomMembers(roomId);
+    });
+
+    // --- VibeCast Stage Handlers ---
+    socket.on('join_stage', ({ stageId, username }) => {
+        const stageRoom = `stage_${stageId}`;
+        socket.join(stageRoom);
+        
+        // Add to room occupancy for real-time tracking
+        if (!roomOccupancy.has(stageRoom)) roomOccupancy.set(stageRoom, new Set());
+        roomOccupancy.get(stageRoom).add(socket.id);
+        
+        // Broadcast joined event and full member list
+        io.to(stageRoom).emit('viewer_joined', { username });
+        updateRoomMembers(stageRoom);
+        
+        console.log(`[VibeCast] ${username} joined stage ${stageId}`);
+    });
+
+    socket.on('leave_stage', ({ stageId, username }) => {
+        const stageRoom = `stage_${stageId}`;
+        socket.leave(stageRoom);
+        
+        // Remove from room occupancy
+        if (roomOccupancy.has(stageRoom)) {
+            roomOccupancy.get(stageRoom).delete(socket.id);
+            updateRoomMembers(stageRoom);
+        }
+        
+        io.to(stageRoom).emit('viewer_left', { username });
+    });
+
+    socket.on('stage_reaction', ({ stageId, type, username }) => {
+        // Broadcast high-fidelity reactions (fire, heart, etc) to all viewers
+        io.to(`stage_${stageId}`).emit('new_reaction', { type, username, id: Date.now() });
+    });
+
+    socket.on('stage_comment', ({ stageId, message, username }) => {
+        io.to(`stage_${stageId}`).emit('new_stage_comment', { 
+            username, 
+            message, 
+            id: Date.now(),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    });
+
+    // --- Sonic Collab Chat Handlers ---
+    socket.on('message_vibe', ({ roomId, messageId, username, emoji }) => {
+        // Instant broadcast for UI feedback before DB sync if needed
+        io.to(roomId).emit('message_vibe_pulse', { messageId, username, emoji });
     });
 
     const updateRoomMembers = (roomId) => {
@@ -2955,7 +3529,7 @@ io.on('connection', (socket) => {
             });
             socket.leave(`voice_${communityId}`);
         } catch (err) {
-            console.error("Leave voice failed:", err);
+            console.error('Self-healing failed:', err);
         }
     });
 

@@ -32,11 +32,36 @@ const Login = () => {
     setError('');
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
-      const token = await firebaseUser.getIdToken();
+      let firebaseUser, token;
+      
+      try {
+        // Priority 1: High-Fidelity Firebase Auth
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        firebaseUser = userCredential.user;
+        token = await firebaseUser.getIdToken();
+      } catch (authErr) {
+        console.warn('Firebase Auth Pulse Halted. Falling back to Core Backend Auth:', authErr.code);
+        
+        // Priority 2: Core Stride Backend Fallback (Unblocks dev and config-error states)
+        const backRes = await fetch(`${BASE_URL}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const backData = await backRes.json();
+        if (backData.success) {
+          localStorage.setItem('user', JSON.stringify(backData.user));
+          localStorage.setItem('token', backData.token);
+          localStorage.setItem('isAuthenticated', 'true');
+          navigate('/');
+          return;
+        } else {
+          throw authErr; // Re-throw original if fallback also fails
+        }
+      }
 
-      // Synchronize with Local Environment temporarily to respect V1.0 logic paths
+      // Finalize Firebase session
       const mockSocialUser = {
         _id: firebaseUser.uid,
         username: firebaseUser.email.split('@')[0],
@@ -49,21 +74,11 @@ const Login = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('isAuthenticated', 'true');
 
-      // Check verification rhythm
-      if (firebaseUser.emailVerified || !firebaseUser.emailVerified /* Dev Mode Bypass */) {
-         navigate('/');
-      } else {
-         navigate('/verify', { state: { email: firebaseUser.email } });
-      }
+      navigate('/');
 
     } catch (err) {
-      console.error('Firebase Login error:', err);
-      // More sophisticated error pulse coming in a later patch
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Invalid credentials.');
-      } else {
-        setError(err.message || 'Connection error. Check console.');
-      }
+      console.error('Unified Auth error:', err);
+      setError(err.message || 'Connection error. Check console.');
     } finally {
       setIsLoading(false);
     }
@@ -103,13 +118,58 @@ const Login = () => {
     }
   };
   
-  const handleForgotClick = (e) => {
+  const [forgotPulse, setForgotPulse] = useState(false);
+
+  const handleForgotClick = async (e) => {
     e.preventDefault();
-    addNotification({
-      title: 'Password Reset',
-      message: 'A reset link has been sent to your registered email address.',
-      type: 'info'
-    });
+    if (!email) {
+      setForgotPulse(true);
+      setTimeout(() => setForgotPulse(false), 800);
+      setError('Please enter your email to receive a reset pulse.');
+      return;
+    }
+
+    try {
+      addNotification({
+        title: 'Initializing Shield',
+        message: 'Synchronizing with Stride Auth Nexus...',
+        type: 'info'
+      });
+      
+      const { sendPasswordResetEmail } = await import('firebase/auth');
+      await sendPasswordResetEmail(auth, email);
+      
+      addNotification({
+        title: 'Reset Email Sent',
+        message: `A password reset link has been sent to ${email}.`,
+        type: 'success'
+      });
+      setError('');
+    } catch (err) {
+      console.warn('Firebase Reset Pulse Halted. Moving to Stride Backend Fallback:', err.code);
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          addNotification({
+            title: 'Reset Pulse Dispatched',
+            message: `A synchronization link has been sent to ${email} (via Backend).`,
+            type: 'success'
+          });
+          setError('');
+        } else {
+          throw new Error('Fallback failed.');
+        }
+      } catch (backErr) {
+        setError('Account recovery is currently offline. Please contact Stride Support.');
+      }
+    }
   };
 
   return (
@@ -130,9 +190,9 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form" noValidate>
-          <div className={`input-group floating-input ${emailFocused || email ? 'active' : ''}`}>
+          <div className={`input-group floating-input ${emailFocused || email ? 'active' : ''} ${forgotPulse ? 'forgot-pulse' : ''}`}>
             <div className="input-with-icon">
-              <Mail className={`field-icon ${emailFocused ? 'focused' : ''}`} size={18} />
+              <Mail className={`field-icon ${emailFocused || forgotPulse ? 'focused' : ''}`} size={18} />
               <div className="input-divider" />
               <input 
                 type="text" 

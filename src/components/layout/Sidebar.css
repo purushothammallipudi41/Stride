@@ -53,25 +53,33 @@
     font-weight: 600;
 }
 
-.create-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    margin: 24px 0;
-    background: var(--color-primary);
-    border: none;
-    border-radius: var(--radius-lg);
-    color: white;
-    font-weight: 700;
+.create-btn-premium {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 24px;
+    padding: 12px;
+    border-radius: var(--radius-md) !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    color: var(--color-primary) !important;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 15px var(--color-primary-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.create-btn:hover {
+.create-btn-premium:hover {
+    background: var(--color-primary) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--color-primary-glow);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px var(--color-primary-glow);
+}
+
+.create-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar-nav {
@@ -93,6 +101,10 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
 }
 
 .nav-item:hover {
@@ -175,7 +187,7 @@
         bottom: 0;
         left: 0;
         width: 100%;
-        height: calc(64px + env(safe-area-inset-bottom));
+        height: 64px;
         background: rgba(10, 10, 18, 0.7);
         backdrop-filter: blur(40px) saturate(180%);
         -webkit-backdrop-filter: blur(40px) saturate(180%);
@@ -187,7 +199,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-evenly;
-        padding: 0 10px env(safe-area-inset-bottom);
+        padding: 0 10px;
         pointer-events: auto;
     }
 
@@ -206,18 +218,18 @@
     .sidebar .create-btn-premium {
         margin: 0;
         padding: 0;
-        width: 44px;
-        height: 44px;
-        border-radius: 14px !important;
+        width: 48px;
+        height: 48px;
+        border-radius: 16px !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--color-primary) 0%, #a855f7 100%) !important;
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--theme-accent) 100%) !important;
         position: relative;
         transform: none !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: none !important;
-        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2) !important;
+        box-shadow: 0 4px 20px var(--theme-primary-glow) !important;
         z-index: 2;
     }
 
@@ -230,9 +242,9 @@
         color: white;
         position: relative;
         z-index: 3;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .sidebar .create-btn-premium:active {
@@ -242,15 +254,13 @@
     .sidebar-nav {
         display: flex;
         flex-direction: row;
-        flex: 1;
         width: 100%;
-        overflow-x: auto;
-        overflow-y: visible; /* Prevent clipping of button and shadow */
-        gap: 0;
+        margin: 0;
         justify-content: space-evenly;
         align-items: center;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        padding: 0;
+        gap: 0;
+        flex: 1;
     }
 
     .sidebar-nav::-webkit-scrollbar {
@@ -259,8 +269,8 @@
 
     .nav-item {
         padding: 0;
-        min-width: 54px;
-        height: 100%;
+        width: 100%; /* In row flex, this allows it to fill the flex-1 slot */
+        height: 64px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -269,7 +279,7 @@
         background: transparent !important;
         box-shadow: none !important;
         margin: 0;
-        flex-shrink: 0;
+        flex: 1; /* Force equal width for all items */
         transition: all 0.3s ease;
         color: var(--color-text-secondary);
         position: relative;

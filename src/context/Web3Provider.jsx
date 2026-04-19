@@ -31,12 +31,10 @@ export const Web3Provider = ({ children }) => {
   
   // Safe config initialization inside component scope
   const config = useMemo(() => {
-    if (isE2E) return null;
-    
     try {
       return getDefaultConfig({
         appName: 'Stride',
-        projectId: projectId,
+        projectId: projectId === 'YOUR_PROJECT_ID_PLACEHOLDER' ? '00000000000000000000000000000000' : projectId,
         chains: [polygon, polygonAmoy],
         transports: {
           [polygon.id]: http(),
@@ -47,7 +45,7 @@ export const Web3Provider = ({ children }) => {
       console.error('[Web3Provider] Failed to initialize Wagmi config:', err);
       return null;
     }
-  }, [isE2E, projectId]);
+  }, [projectId]);
 
   // Solana config
   const network = 'devnet';
@@ -57,9 +55,9 @@ export const Web3Provider = ({ children }) => {
     new SolflareWalletAdapter(),
   ], []);
 
-  console.log('[Web3Provider] Initializing with isE2E:', isE2E);
+  console.log('[Web3Provider] Initializing...');
 
-  if (isE2E || !config) {
+  if (!config) {
     return (
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>

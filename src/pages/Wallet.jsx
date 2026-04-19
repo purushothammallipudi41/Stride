@@ -11,6 +11,8 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import socket from '../services/socket';
+import { ShoppingBag } from 'lucide-react';
 
 const Wallet = () => {
     const { addNotification } = useUI();
@@ -44,6 +46,17 @@ const Wallet = () => {
 
     useEffect(() => {
         fetchBalance();
+
+        const handleWalletUpdate = ({ balance: newBalance }) => {
+            setBalance(newBalance);
+            fetchBalance(); // Refresh transaction list
+        };
+
+        socket.on('wallet_updated', handleWalletUpdate);
+
+        return () => {
+            socket.off('wallet_updated', handleWalletUpdate);
+        };
     }, [fetchBalance]);
 
     const loadRazorpay = () => {
@@ -182,7 +195,7 @@ const Wallet = () => {
                         <ArrowUpRight className="text-rose-400" />
                         <div>
                             <span>Total Spent</span>
-                            <h4>{transactions.filter(t => t.type === 'tip' && t.amount < 0).reduce((acc, t) => acc + Math.abs(t.amount), 0)}</h4>
+                            <h4>{transactions.filter(t => ['tip', 'purchase', 'subscription'].includes(t.type) && t.amount < 0).reduce((acc, t) => acc + Math.abs(t.amount), 0)}</h4>
                         </div>
                     </div>
                 </div>
@@ -197,7 +210,8 @@ const Wallet = () => {
                             transactions.map((tx) => (
                                 <div key={tx._id} className="transaction-item">
                                     <div className={`tx-icon ${tx.type}`}>
-                                        {tx.type === 'topup' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
+                                        {tx.type === 'topup' ? <ArrowDownLeft size={18} /> : 
+                                         tx.type === 'purchase' ? <ShoppingBag size={18} /> : <ArrowUpRight size={18} />}
                                     </div>
                                     <div className="tx-info">
                                         <span className="tx-desc">{tx.description}</span>

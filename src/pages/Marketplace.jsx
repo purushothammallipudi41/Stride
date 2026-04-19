@@ -4,13 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import PurchaseModal from '../components/social/PurchaseModal';
 import { useUI } from '../hooks/useUI';
+import { getStoredUser } from '../utils/storage';
+import { BASE_URL } from '../utils/api';
+import socket from '../services/socket';
 import './Marketplace.css';
 
 const Marketplace = () => {
     const navigate = useNavigate();
     const { addNotification } = useUI();
+    const currentUser = getStoredUser();
     const [activeTab, setActiveTab] = useState('store');
-    const [userBalance, setUserBalance] = useState(1250); // Initial live balance mock
+    const [userBalance, setUserBalance] = useState(0); 
     const [libraryItems, setLibraryItems] = useState([]);
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -42,12 +46,60 @@ const Marketplace = () => {
         }
     ];
 
-    const handlePurchaseConfirm = (asset) => {
-        setUserBalance(prev => prev - asset.price);
-        setLibraryItems(prev => [...prev, { ...asset, acquiredAt: new Date().toISOString() }]);
-        setIsCheckoutOpen(false);
-        setSelectedAsset(null);
-        addNotification({ title: 'Minting Successful', message: `${asset.name} was added to your library!`, type: 'success' });
+    useEffect(() => {
+        if (!currentUser?.username) return;
+
+        // Fetch user profile to get balance and inventory
+        fetch(`${BASE_URL}/api/profile/${currentUser.username}`)
+            .then(res => res.json())
+            .then(data => {
+                setUserBalance(data.balance || 0);
+                // Map inventory strings to asset objects in the sections
+                const allAvailableItems = sections.flatMap(s => s.items);
+                const owned = (data.inventory || []).map(name => allAvailableItems.find(i => i.name === name)).filter(Boolean);
+                setLibraryItems(owned);
+            })
+            .catch(err => console.error("Failed to fetch marketplace data:", err));
+
+        // Listen for wallet updates
+        socket.on('wallet_updated', ({ balance }) => {
+            setUserBalance(balance);
+        });
+
+        return () => {
+            socket.off('wallet_updated');
+        };
+    }, [currentUser?.username]);
+
+    const handlePurchaseConfirm = async (asset) => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/marketplace/purchase`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: currentUser.username,
+                    assetName: asset.name,
+                    price: asset.price
+                })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                setUserBalance(data.balance);
+                const allAvailableItems = sections.flatMap(s => s.items);
+                const owned = (data.inventory || []).map(name => allAvailableItems.find(i => i.name === name)).filter(Boolean);
+                setLibraryItems(owned);
+                
+                setIsCheckoutOpen(false);
+                setSelectedAsset(null);
+                addNotification({ title: 'Minting Successful', message: `${asset.name} was added to your library!`, type: 'success' });
+            } else {
+                addNotification({ title: 'Purchase Failed', message: data.error || 'Transaction rejected.', type: 'error' });
+            }
+        } catch (err) {
+            console.error("Purchase error:", err);
+            addNotification({ title: 'Purchase Error', message: 'Unable to connect to economy pulse.', type: 'error' });
+        }
     };
 
     return (

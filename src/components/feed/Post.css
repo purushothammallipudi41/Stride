@@ -57,9 +57,26 @@
 }
 
 .post-header-actions {
-    position: relative;
     display: flex;
     align-items: center;
+    gap: 12px;
+}
+
+.member-only-ribbon {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 8px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
 }
 
 .more-btn {
@@ -150,6 +167,90 @@
     max-height: 585px;
     object-fit: cover !important;
     display: block;
+}
+
+/* Locked Stage Styling */
+.post-media.locked {
+    position: relative;
+}
+
+.locked-stage-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    z-index: 5;
+    padding: 24px;
+}
+
+.locked-content {
+    text-align: center;
+    padding: 32px 24px;
+    max-width: 320px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.locked-icon-pulse {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    animation: gold-pulse 2s infinite;
+}
+
+@keyframes gold-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.locked-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: #fff;
+    font-weight: 800;
+}
+
+.locked-content p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+/* Subscribe Button In Feed */
+.locked-content .subscribe-btn-premium {
+    width: 100%;
+    background: #ffd700;
+    color: #000;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.locked-content .subscribe-btn-premium:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
 }
 
 .post-footer {

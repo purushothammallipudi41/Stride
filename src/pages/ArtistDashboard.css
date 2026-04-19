@@ -31,6 +31,12 @@
 .stats-icon.plays { background: rgba(139, 92, 246, 0.1); color: var(--color-primary); }
 .stats-icon.revenue { background: rgba(16, 185, 129, 0.1); color: var(--color-success); }
 .stats-icon.listeners { background: rgba(236, 72, 153, 0.1); color: var(--color-accent); }
+.stats-icon.subscribers { background: rgba(255, 215, 0, 0.1); color: #ffd700; }
+
+.stats-card.subscriber-echo {
+    border: 1px solid rgba(255, 214, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 214, 0, 0.05);
+}
 
 .stats-info {
     flex: 1;

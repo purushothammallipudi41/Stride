@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, DollarSign, Headphones, Users, ChevronUp, ChevronDown } from 'lucide-react';
+import { TrendingUp, DollarSign, Headphones, Users, ChevronUp, ChevronDown, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import { useMusic } from '../hooks/useMusic';
@@ -15,6 +15,8 @@ const ArtistDashboard = () => {
         totalTips: 0,
         monthlyListeners: 0,
         followers: 0,
+        subscribers: 0,
+        subscriptionPrice: 50,
         trend: '0%'
     });
 
@@ -56,7 +58,29 @@ const ArtistDashboard = () => {
 
     return (
         <div className="dashboard-container">
-            <PageHeader title={`Artist Dashboard — Welcome back, ${username || 'Artist'}`} />
+            <PageHeader title={`Artist Dashboard — Welcome back, ${username || 'Artist'}`} hideBack={true} />
+            
+            <div className="dashboard-back-action-area" style={{ padding: '0 24px', marginTop: '12px', marginBottom: '16px', display: 'flex', gap: '12px' }}>
+                <button 
+                    className="back-btn-content"
+                    onClick={() => navigate(-1)}
+                    style={{
+                        padding: '12px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '14px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <ChevronLeft size={24} />
+                </button>
+            </div>
             
             <div className="dashboard-grid">
                 {/* Stats Cards */}
@@ -84,6 +108,15 @@ const ArtistDashboard = () => {
                         <span className="stats-label">Monthly Listeners</span>
                         <h2 className="stats-value">{stats.monthlyListeners != null ? stats.monthlyListeners.toLocaleString() : '---'}</h2>
                         <span className="stats-trend positive"><ChevronUp size={16} /> +0%</span>
+                    </div>
+                </div>
+
+                <div className="stats-card glass-panel subscriber-echo">
+                    <div className="stats-icon subscribers"><Headphones size={24} /></div>
+                    <div className="stats-info">
+                        <span className="stats-label">Subscriber Pulse</span>
+                        <h2 className="stats-value">{stats.subscribers != null ? stats.subscribers.toLocaleString() : '0'}</h2>
+                        <span className="stats-trend positive">Proj. ${(stats.subscribers * (stats.subscriptionPrice || 50)).toLocaleString()}/mo</span>
                     </div>
                 </div>
             </div>

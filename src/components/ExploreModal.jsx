@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Hash, TrendingUp, Music2, Film, Radio, Globe, Users, Layout, Music, Trophy, BarChart3, Wallet, ShoppingBag, Settings, LogOut, Camera } from 'lucide-react';
+import { Search, Hash, TrendingUp, Music2, Film, Radio, Globe, Users, Layout, Music, Trophy, BarChart3, Wallet, ShoppingBag, Settings, LogOut, Camera, Gavel } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import GlobalModal from './common/GlobalModal';
 import Avatar from './common/Avatar';
@@ -21,13 +21,13 @@ const ExploreModal = () => {
     const mainItems = [
         { id: 'reels', icon: Film, label: 'Reels', path: '/reels' },
         { id: 'studio', icon: Camera, label: 'Studio', path: '/studio' },
-        { id: 'spaces', icon: Radio, label: 'Spaces', path: '/servers' },
         { id: 'articles', icon: Globe, label: 'Articles', path: '/articles' },
         { id: 'communities', icon: Users, label: 'Communities', path: '/communities/discover' },
         { id: 'dashboard', icon: Layout, label: 'Dashboard', path: '/artist-dashboard' },
         { id: 'music', icon: Music, label: 'Music House', path: '/music' },
         { id: 'achievements', icon: Trophy, label: 'Achievements', path: '/achievements' },
         { id: 'insights', icon: BarChart3, label: 'Insights', path: '/insights' },
+        { id: 'governance', icon: Gavel, label: 'Governance', path: '/governance' },
         { id: 'vault', icon: Wallet, label: 'Creator Vault', action: openVault },
         { id: 'marketplace', icon: ShoppingBag, label: 'Marketplace', path: '/marketplace' },
     ];

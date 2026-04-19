@@ -335,7 +335,7 @@ const Profile = () => {
             onTouchEnd={handleTouchEnd}
         >
             {/* Top Header */}
-            <PageHeader title={user.username} />
+            <PageHeader title={user.username} hideBack={true} />
 
             {/* Pull-to-Refresh Indicator */}
             <div 
@@ -489,8 +489,18 @@ const Profile = () => {
             {/* Grid Content */}
             <div className="ig-profile-grid">
                 {user.posts?.map((post, i) => (
-                    <div key={i} className="ig-grid-item">
-                        <img src={post.contentUrl || post.image} alt="Post" loading="lazy" />
+                    <div key={i} className={`ig-grid-item ${post.isLocked ? 'locked-item' : ''}`}>
+                        <img src={post.isLocked ? 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=10&w=200&blur=100' : (post.contentUrl || post.image)} alt="Post" loading="lazy" />
+                        {post.isMemberOnly && (
+                            <div className="grid-member-badge">
+                                <Crown size={14} />
+                            </div>
+                        )}
+                        {post.isLocked && (
+                            <div className="grid-lock-overlay">
+                                <Zap size={20} />
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

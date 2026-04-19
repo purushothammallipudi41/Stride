@@ -13,8 +13,10 @@ const postSchema = new mongoose.Schema({
     tags: [String],
     type: { type: String, enum: ['post', 'reel', 'image', 'video'], default: 'post' },
     isMemberOnly: { type: Boolean, default: false },
-    isPremium: { type: Boolean, default: false }, // Tiered subscription gate
+     isPremium: { type: Boolean, default: false }, // Tiered subscription gate
     music: { type: String, default: "" },
+    isHD: { type: Boolean, default: false }, // 4K/HD quality flag
+    filterApplied: { type: String, default: "normal" }, // Filter metadata
     uniqueViews: [{ type: String, default: [] }], // For Ad Rev-Share logic
 }, { timestamps: true });
 

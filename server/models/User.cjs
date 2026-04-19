@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema({
     hasUnreadMessages: { type: Boolean, default: false },
     balance: { type: Number, default: 100 }, // Starting balance for beta users
     transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }],
+    inventory: [{ type: String, default: [] }], // Asset IDs or names collected
     achievements: [{ type: String, default: [] }],
     vibeScores: { type: Map, of: Number, default: {} }, // Affinity tracking (tag: score)
     isLive: { type: Boolean, default: false }, // New: Live Streaming status

@@ -46,7 +46,11 @@ const VibePulse = ({ pulseData, onClose }) => {
 
                 <div className="pulse-card-footer">
                     <span className="pulse-timestamp">
-                        Captured {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {timestamp ? (
+                            `Captured ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                        ) : (
+                            'Pulse Synced'
+                        )}
                     </span>
                     <div className="pulse-ai-branding">
                         <Sparkles size={12} />

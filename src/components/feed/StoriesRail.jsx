@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, X } from 'lucide-react';
 import socket from '../../services/socket';
 import CreateStoryModal from './CreateStoryModal';
@@ -7,17 +8,20 @@ import Avatar from '../common/Avatar';
 import StoryViewer from '../social/StoryViewer';
 import { BASE_URL } from '../../utils/api';
 import { getStoredUser } from '../../utils/storage';
+import { useUI } from '../../hooks/useUI';
 import './StoriesRail.css';
 
 const StoriesRail = () => {
     const [friendStories, setFriendStories] = useState([]);
+    const [liveStreams, setLiveStreams] = useState([]);
     const [hasStory, setHasStory] = useState(false);
     const [activeStory, setActiveStory] = useState(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const { isStoryModalOpen, setIsStoryModalOpen } = useUI();
     const [isUploading, setIsUploading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
     const user = getStoredUser();
+    const navigate = useNavigate();
     const username = user?.username || 'guest';
 
     const loadStories = () => {
@@ -29,22 +33,47 @@ const StoriesRail = () => {
             .catch(err => console.error("Failed to fetch stories:", err));
     };
 
+    const loadLive = () => {
+        fetch(`${BASE_URL}/api/feed/live`)
+            .then(res => res.json())
+            .then(data => setLiveStreams(data))
+            .catch(err => console.error("Failed to fetch live streams:", err));
+    };
+
     useEffect(() => {
         loadStories();
+        loadLive();
         
         const handleUpdate = (event) => {
             if (event.type === 'story') {
                 loadStories();
             }
         };
+
+        const handlePulse = (data) => {
+            setLiveStreams(prev => {
+                if (data.isLive) {
+                    const exists = prev.find(s => s.username === data.username);
+                    if (exists) return prev;
+                    return [data, ...prev];
+                } else {
+                    return prev.filter(s => s.username !== data.username);
+                }
+            });
+        };
         
         socket.on('content_updated', handleUpdate);
-        return () => socket.off('content_updated', handleUpdate);
+        socket.on('live_pulse_updated', handlePulse);
+        
+        return () => {
+            socket.off('content_updated', handleUpdate);
+            socket.off('live_pulse_updated', handlePulse);
+        };
     }, []);
 
     const handleAddStory = (e) => {
         if (e) e.stopPropagation();
-        setIsCreateModalOpen(true);
+        setIsStoryModalOpen(true);
     };
 
     const handleConfirmUpload = async (contentUrl, musicTrack) => {
@@ -68,7 +97,7 @@ const StoriesRail = () => {
                 
                 // Keep modal open for 1.5s to show success state
                 setTimeout(() => {
-                    setIsCreateModalOpen(false);
+                    setIsStoryModalOpen(false);
                     setIsSuccess(false);
                 }, 1500);
             } else {
@@ -103,27 +132,47 @@ const StoriesRail = () => {
                 <span className="story-username">Your Story</span>
             </div>
 
-            {/* Friends' Stories */}
-            {friendStories.map(story => (
-                <div key={story.id} className="story-item" onClick={() => setActiveStory(story)}>
-                    <div className="story-avatar-container has-story">
-                        <Avatar 
-                            src={story.avatar} 
-                            alt={story.username} 
-                            size={72} 
-                        />
+            {/* Friends' Live Streams */}
+            {liveStreams.map((stream) => (
+                <div 
+                    key={`live-${stream.username}`} 
+                    className="story-item"
+                    onClick={() => navigate(`/live/${stream.username}`)}
+                >
+                    <div className="story-avatar-container live-avatar-ring pulse">
+                        <Avatar src={stream.avatar} size={72} alt={stream.username} />
+                        <div className="live-overlay-tag">LIVE</div>
                     </div>
-                    <div className="story-username-container" style={{ display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'center' }}>
-                        <span className="story-username" style={{ margin: 0 }}>{story.username}</span>
-                        {story.isVerified && <VerificationBadge size={10} />}
-                    </div>
+                    <span className="story-username">@{stream.username}</span>
                 </div>
             ))}
 
+            {/* Friends' Stories */}
+            {friendStories.map(story => {
+                // Skip if this user is already shown in LiveRail
+                if (liveStreams.find(s => s.username === story.username)) return null;
+
+                return (
+                    <div key={story.id} className="story-item" onClick={() => setActiveStory(story)}>
+                        <div className="story-avatar-container has-story">
+                            <Avatar 
+                                src={story.avatar} 
+                                alt={story.username} 
+                                size={72} 
+                            />
+                        </div>
+                        <div className="story-username-container" style={{ display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'center' }}>
+                            <span className="story-username" style={{ margin: 0 }}>{story.username}</span>
+                            {story.isVerified && <VerificationBadge size={10} />}
+                        </div>
+                    </div>
+                );
+            })}
+
             <CreateStoryModal 
-                key={isCreateModalOpen}
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
+                key={isStoryModalOpen}
+                isOpen={isStoryModalOpen}
+                onClose={() => setIsStoryModalOpen(false)}
                 onConfirm={handleConfirmUpload}
                 isUploading={isUploading}
                 isSuccess={isSuccess}

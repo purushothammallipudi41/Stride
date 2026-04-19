@@ -1,5 +1,5 @@
-import { Home, Search, Plus, MoreHorizontal, Play, Camera } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { Home, Search, Plus, MoreHorizontal, Play, Camera, Gavel } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
 import { getStoredUser } from '../../utils/storage';
@@ -11,6 +11,7 @@ const Sidebar = () => {
     const { openCreateModal, openExplorer } = useUI();
     const { t } = useTranslation();
     const user = getStoredUser();
+    const location = useLocation();
 
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
@@ -64,7 +65,7 @@ const Sidebar = () => {
                             <button
                                 key={item.label}
                                 className="nav-item create-btn-premium"
-                                onClick={openCreateModal}
+                                onClick={() => openCreateModal('POST')}
                                 aria-label={item.label}
                             >
                                 <div className="create-icon-wrapper">
@@ -109,7 +110,7 @@ const Sidebar = () => {
                     fontWeight: '900',
                     color: '#a855f7',
                     textShadow: '0 0 10px rgba(168, 85, 247, 0.5)'
-                }}>v2.3.0-SOCIAL NEXUS</div>
+                }}>v3.1.0-MOD-SOVEREIGNTY</div>
             </div>
         </aside>
     );

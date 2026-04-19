@@ -207,6 +207,17 @@
   box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
 }
 
+.input-group.forgot-pulse .input-with-icon {
+  animation: fieldPulse 0.8s ease-in-out;
+  border-color: #ef4444;
+}
+
+@keyframes fieldPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
 .field-icon {
   width: 60px;
   display: flex;

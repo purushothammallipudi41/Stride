@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Hash, Play } from 'lucide-react';
+import { Plus, Users, Hash, Play, ChevronLeft } from 'lucide-react';
 import { useServer } from '../hooks/useServer';
 import { useUI } from '../hooks/useUI';
 import PageHeader from '../components/layout/PageHeader';
@@ -39,18 +39,53 @@ const Servers = () => {
 
     return (
         <div className="servers-page">
-            <PageHeader 
-                title="Servers" 
-                rightElement={
-                    <button
-                        className="create-server-btn"
-                        onClick={() => setIsCreating(!isCreating)}
-                        style={{ padding: '6px' }}
+            <PageHeader title="My Communities" hideBack={true} />
+            
+            <div className="servers-content-container" style={{ padding: '0 24px' }}>
+                <div className="action-row-premium" style={{ display: 'flex', gap: '12px', marginTop: '12px', marginBottom: '20px' }}>
+                    <button 
+                        className="back-btn-content"
+                        onClick={() => navigate(-1)}
+                        style={{
+                            padding: '12px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '14px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '56px'
+                        }}
                     >
-                        <Plus size={24} />
+                        <ChevronLeft size={24} />
                     </button>
-                }
-            />
+                    <button
+                        className="create-server-btn-content"
+                        onClick={() => setIsCreating(!isCreating)}
+                        style={{
+                            flex: 1,
+                            padding: '16px',
+                            background: 'linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-accent) 100%)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            borderRadius: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            fontWeight: '900',
+                            fontSize: '0.95rem',
+                            boxShadow: '0 0 25px var(--theme-primary-glow)',
+                            cursor: 'pointer',
+                            textTransform: 'uppercase'
+                        }}
+                    >
+                        <Plus size={20} strokeWidth={3} />
+                        <span>Establish New Community</span>
+                    </button>
+                </div>
             {isCreating && (
                 <div className="create-server-panel glass-panel">
                     <h3>Create a New Community</h3>
@@ -116,6 +151,7 @@ const Servers = () => {
                         </div>
                     );
                 })}
+                </div>
             </div>
         </div>
     );
