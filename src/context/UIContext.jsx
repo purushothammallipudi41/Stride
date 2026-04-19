@@ -110,6 +110,8 @@ export const UIProvider = ({ children }) => {
 
 
     const value = {
+        isCreateModalOpen,
+        createType,
         openCreateModal,
         closeCreateModal,
         isArticleModalOpen,
