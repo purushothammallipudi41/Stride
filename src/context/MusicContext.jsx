@@ -41,6 +41,7 @@ export const MusicProvider = ({ children }) => {
     const [playlists, setPlaylists] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [isPublicSession, setIsPublicSession] = useState(false);
+    const [isPreparing, setIsPreparing] = useState(false);
 
 
     
@@ -236,16 +237,7 @@ export const MusicProvider = ({ children }) => {
             return [fallbackTrack, ...filtered].slice(0, 10);
         });
 
-        // Emit activity to real-time backend
-        console.log(`Emitting activity: ${fallbackTrack.title}`);
-        socket.emit('update_activity', {
-            username: username,
-            track: {
-                title: fallbackTrack.title,
-                artist: fallbackTrack.artist,
-                id: fallbackTrack.id
-            }
-        });
+        setIsPreparing(true);
         
         try {
             // Add timeout for host discovery/streaming
@@ -256,7 +248,13 @@ export const MusicProvider = ({ children }) => {
 
             if (streamUrl) {
                 audioRef.current.src = streamUrl;
-                audioRef.current.play().catch(e => console.error("Play failed", e));
+                setIsPreparing(false);
+                setIsPlaying(true);
+                
+                audioRef.current.play().catch(e => {
+                    console.error("Play failed", e);
+                    setIsPlaying(false);
+                });
                 
                 socket.emit('playback_update', {
                     username,
@@ -264,24 +262,16 @@ export const MusicProvider = ({ children }) => {
                     isPlaying: true
                 });
 
-                if (isPublicSession) {
-                    socket.emit('broadcast_session', {
-                        username,
-                        track: fallbackTrack,
-                        isPublic: true
-                    });
-                }
-
             } else {
                 throw new Error("No stream URL");
             }
 
         } catch (e) {
             console.error("Audius Playback Error:", e.message);
+            setIsPreparing(false);
             setIsPlaying(false);
-            // Optionally try another node here in a real app
         }
-    }, [currentTrack, togglePlay, username, isPublicSession]);
+    }, [username, getStreamUrl]);
 
 
     const nextTrack = useCallback(() => {
@@ -338,16 +328,17 @@ export const MusicProvider = ({ children }) => {
 
     useEffect(() => {
         const audio = audioRef.current;
-        if (isPlaying && audio.src) {
-
+        if (isPlaying && audio.src && !isPreparing) {
             audio.play().catch(e => {
-                console.error("Playback failed", e);
-                setIsPlaying(false);
+                console.error("Playback failed check:", e);
+                if (e.name !== 'AbortError') {
+                    setIsPlaying(false);
+                }
             });
-        } else {
+        } else if (!isPlaying) {
             audio.pause();
         }
-    }, [isPlaying]);
+    }, [isPlaying, isPreparing]);
 
     const toggleFavorite = useCallback(async (track) => {
         try {
