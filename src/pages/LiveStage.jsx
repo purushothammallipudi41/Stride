@@ -5,7 +5,9 @@ import socket from '../services/socket';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
 import Avatar from '../components/common/Avatar';
+import { hapticImpact, hapticNotification } from '../utils/haptics';
 import './LiveStage.css';
+import { ImpactStyle } from '@capacitor/haptics';
 
 const LiveStage = () => {
     const { username } = useParams();
@@ -170,10 +172,36 @@ const LiveStage = () => {
         }
     };
 
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = () => {
+        if (!streamData || isSyncing) return;
+        socket.emit('vibe_sync_trigger', { stageId: streamData.liveStreamId, username: user.username });
+        setIsSyncing(true);
+        hapticImpact(ImpactStyle.Heavy);
+        setTimeout(() => setIsSyncing(false), 2000);
+    };
+
+    useEffect(() => {
+        const handleSyncTriggered = (data) => {
+            setIsSyncing(true);
+            hapticImpact(ImpactStyle.Medium);
+            setTimeout(() => setIsSyncing(false), 2000);
+        };
+        socket.on('vibe_sync_triggered', handleSyncTriggered);
+        return () => socket.off('vibe_sync_triggered', handleSyncTriggered);
+    }, []);
+
     if (!streamData) return <div className="loading-screen">Entering the Stage...</div>;
 
     return (
         <div className="live-stage-container">
+            {isSyncing && (
+                <div className="vibe-sync-overlay">
+                    <div className="sync-pulse-ring" />
+                    <div className="sync-pulse-ring" style={{ animationDelay: '0.2s' }} />
+                </div>
+            )}
             <div className="live-bg-visuals">
                 <img src={streamData.avatar} alt="Vibe Source" className="vibe-bg-blur" />
                 <div className="vibe-glimmer-overlay" />
@@ -299,6 +327,9 @@ const LiveStage = () => {
                         </button>
                         <button className="stage-btn react" onClick={() => sendReaction('zap')}>
                             <Zap size={24} />
+                        </button>
+                        <button className={`stage-btn sync-btn ${isSyncing ? 'disabled' : ''}`} onClick={handleSync} title="Vibe-Sync">
+                            <Music size={28} />
                         </button>
                         <div className="tip-trigger-wrap">
                             <button className="tip-btn-premium" onClick={() => handleTip(50)}>

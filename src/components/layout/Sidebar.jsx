@@ -1,10 +1,12 @@
-import { Home, Search, Plus, MoreHorizontal, Play, Camera, Gavel } from 'lucide-react';
+import { Home, Search, Plus, MoreHorizontal, Play, Camera, Gavel, HelpCircle } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
 import { getStoredUser } from '../../utils/storage';
 import Avatar from '../common/Avatar';
 import logo from '../../assets/stride-logo.png';
+import SupportModal from '../social/SupportModal';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -12,6 +14,7 @@ const Sidebar = () => {
     const { t } = useTranslation();
     const user = getStoredUser();
     const location = useLocation();
+    const [isSupportOpen, setIsSupportOpen] = useState(false);
 
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
@@ -100,8 +103,15 @@ const Sidebar = () => {
                         </NavLink>
                     );
                 })}
+                <button className="nav-item support-trigger" onClick={() => setIsSupportOpen(true)}>
+                    <div className="nav-icon-wrapper">
+                        <HelpCircle size={26} strokeWidth={2.5} />
+                    </div>
+                    <span className="nav-label">Help & Support</span>
+                </button>
             </nav>
 
+            <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
             <div className="sidebar-footer">
                 <div className="version-tag animate-pulse-purple" style={{ 

@@ -123,7 +123,6 @@ export const MusicProvider = ({ children }) => {
     // Listen for global and sync events
     useEffect(() => {
         socket.on('global_event', (event) => {
-            console.log('Global Event received:', event);
         });
 
         let user = {};
@@ -410,7 +409,6 @@ export const MusicProvider = ({ children }) => {
         hapticImpactLight();
         // This is a stub for the Phase 7 direct sharing feature
         // In a real app, this would emit a socket event or call an API
-        console.log(`Sending beat ${track.title} to ${targetUsername}`);
         socket.emit('send_message', {
             to: targetUsername,
             from: username,

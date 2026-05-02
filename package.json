@@ -7,6 +7,8 @@
     "dev": "vite",
     "server": "node server/index.cjs",
     "build": "vite build",
+    "build:prod": "NODE_ENV=production vite build && npx cap sync",
+    "vibe:check": "node scripts/vibe-check.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:start": "concurrently \"npm run dev > /tmp/stride_vite.log 2>&1\" \"npm run server > /tmp/stride_server.log 2>&1\"",

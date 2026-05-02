@@ -38,6 +38,12 @@ import Studio from './pages/Studio';
 import LiveStage from './pages/LiveStage';
 import Governance from './pages/Governance';
 import Checkout from './pages/Checkout';
+import VerifiedApplication from './pages/VerifiedApplication';
+import Maintenance from './pages/Maintenance';
+import WelcomeTour from './components/common/WelcomeTour';
+import AdminDashboard from './pages/AdminDashboard';
+import SplashScreen from './components/common/SplashScreen';
+import Legal from './pages/Legal';
 
 // Components
 import Sidebar from './components/layout/Sidebar';
@@ -54,6 +60,7 @@ import PushManager from './components/notifications/PushManager';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
+  const [isAppBooting, setIsAppBooting] = useState(true);
   const { isCreateModalOpen, isExplorerOpen, isVaultOpen, isStoryModalOpen, callInfo, setCallInfo, liveInfo, setLiveInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -85,8 +92,24 @@ const AppContent = () => {
         }
 
         requestEssentialPermissions();
+    const [isMaintenance, setIsMaintenance] = useState(false);
 
-        const user = getStoredUser();
+    useEffect(() => {
+        const checkMaintenance = async () => {
+            try {
+                const res = await fetch(`${BASE_URL}/api/system/config`);
+                const data = await res.json();
+                if (data.maintenance) setIsMaintenance(true);
+            } catch (err) {
+                console.warn("Could not fetch system config", err);
+            }
+        };
+        checkMaintenance();
+    }, []);
+
+    const user = getStoredUser();
+
+    if (isMaintenance) return <Maintenance />;
 
     const applyTheme = (userData = {}) => {
       const storedColor = localStorage.getItem('stride_theme_color');
@@ -124,8 +147,10 @@ const AppContent = () => {
   }, [setCallInfo]);
 
   return (
-    <div className="app-layout">
-      {!isPublicPath && !isStoryModalOpen && !location.pathname.startsWith('/live/') && <Sidebar />}
+    <>
+      {isAppBooting && <SplashScreen onComplete={() => setIsAppBooting(false)} />}
+      <div className="app-layout">
+        {!isPublicPath && !isStoryModalOpen && !location.pathname.startsWith('/live/') && <Sidebar />}
       
       <div className="layout-primary">
         <main className="main-content">
@@ -139,6 +164,7 @@ const AppContent = () => {
                 <Route path="/profile/:username" element={isAuthenticated ? <Profile /> : <Navigate to="/login" replace />} />
                 <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/login" replace />} />
                 <Route path="/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/login" replace />} />
+                <Route path="/legal" element={<Legal />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
                 <Route path="/verify" element={<VerifyEmail />} />
@@ -160,9 +186,12 @@ const AppContent = () => {
                 <Route path="/live/:username" element={isAuthenticated ? <LiveStage /> : <Navigate to="/login" replace />} />
                 <Route path="/governance" element={isAuthenticated ? <Governance /> : <Navigate to="/login" replace />} />
                 <Route path="/checkout" element={isAuthenticated ? <Checkout /> : <Navigate to="/login" replace />} />
+                <Route path="/verify/apply" element={isAuthenticated ? <VerifiedApplication /> : <Navigate to="/login" replace />} />
+                <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               
+              <WelcomeTour />
               {isCreateModalOpen && <CreatePostModal />}
               <CreateArticleModal />
               {isExplorerOpen && <ExploreModal />}
@@ -206,6 +235,7 @@ const AppContent = () => {
       <PushManager />
       <GlobalNotifications />
     </div>
+    </>
   );
 };
 

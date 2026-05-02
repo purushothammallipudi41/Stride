@@ -37,11 +37,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { addNotification } = useUI();
   
+  const [isIntro, setIsIntro] = useState(true);
+  
   // High-Fidelity Master Reset Pulse
   useEffect(() => {
+    const timer = setTimeout(() => setIsIntro(false), 2000);
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('reset') === 'true') {
-        console.log('⚡ DATABASE_PULSE: Initializing Master Reset...');
         localStorage.clear();
         sessionStorage.clear();
         addNotification({
@@ -52,6 +54,7 @@ const Login = () => {
         // Clear URL params without reloading to prevent infinite loop
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+    return () => clearTimeout(timer);
   }, [addNotification]);
 
 
@@ -255,6 +258,14 @@ const Login = () => {
 
   return (
     <div className="login-page">
+      {isIntro && (
+        <div className="login-intro-overlay animate-fade-out">
+          <div className="intro-content">
+            <div className="intro-spinner animate-spin" />
+            <p>Recalibrating Stage...</p>
+          </div>
+        </div>
+      )}
       <div className="login-bg-decoration">
         <div className="blob blob-1" />
         <div className="blob blob-2" />

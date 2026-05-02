@@ -14,7 +14,6 @@ class MonetizationService {
         
         try {
             if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
-                console.log('💎 MonetizationService: Initializing RevenueCat...');
                 await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
                 this.initialized = true;
                 

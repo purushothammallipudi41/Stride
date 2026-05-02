@@ -23,12 +23,6 @@ const app = !getApps().length
   : (getApps().find(a => a.name === 'stride-primary') || getApps()[0]);
 const auth = getAuth(app);
 
-// DIAGNOSTIC ALERT
-if (typeof window !== 'undefined') {
-  console.log('Firebase Config Active:', firebaseConfig.projectId);
-  // alert('Firebase Config Loaded: ' + firebaseConfig.projectId);
-}
-
 const Signup = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({

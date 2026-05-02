@@ -1,4 +1,5 @@
 import React from 'react';
+import './ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -17,47 +18,27 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="error-fallback" style={{ 
-          padding: '40px 20px', 
-          textAlign: 'center', 
-          color: 'white',
-          background: '#0f0f13',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#8b5cf6' }}>Oops! Something went wrong.</h2>
-          <p style={{ marginBottom: '2rem', opacity: 0.8 }}>The rhythm took a wrong turn. Let's get you back on track.</p>
-          <button 
-            onClick={() => window.location.reload()}
-            style={{ 
-              padding: '12px 24px', 
-              background: 'linear-gradient(135deg, #8b5cf6, #d946ef)', 
-              border: 'none', 
-              borderRadius: '8px',
-              color: 'white',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            Reload Page
-          </button>
+        <div className="error-fallback-premium">
+          <div className="error-visual animate-pulse-purple">
+            <span className="error-code">500</span>
+          </div>
+          <h2 className="error-title">Lost in the Rhythm</h2>
+          <p className="error-desc">The frequency dropped unexpectedly. We're recalibrating the stage for you.</p>
+          
+          <div className="error-actions">
+            <button className="error-retry-btn" onClick={() => window.location.href = '/'}>
+              Return to Home
+            </button>
+            <button className="error-refresh-btn" onClick={() => window.location.reload()}>
+              Refresh Stage
+            </button>
+          </div>
+
           {import.meta.env.DEV && (
-            <pre style={{ 
-              marginTop: '2rem', 
-              padding: '1rem', 
-              background: 'rgba(0,0,0,0.3)', 
-              borderRadius: '8px',
-              textAlign: 'left',
-              maxWidth: '90%',
-              overflow: 'auto',
-              fontSize: '0.8rem',
-              color: '#ff4d4d'
-            }}>
-              {this.state.error?.toString()}
-            </pre>
+            <div className="debug-console glass-panel">
+              <span className="debug-label">Debug Trace</span>
+              <pre className="debug-stack">{this.state.error?.toString()}</pre>
+            </div>
           )}
         </div>
       );

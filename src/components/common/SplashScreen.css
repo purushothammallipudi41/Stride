@@ -1,0 +1,97 @@
+.stride-splash-container {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: opacity 0.8s ease-out;
+}
+
+.stride-splash-container.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-content {
+    text-align: center;
+}
+
+.splash-logo-pulse {
+    width: 120px;
+    height: 120px;
+    background: rgba(139, 92, 246, 0.05);
+    border: 2px solid var(--theme-primary, #8b5cf6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+}
+
+.splash-s {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--theme-primary, #8b5cf6);
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.splash-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #fff, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.splash-tagline {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    text-transform: uppercase;
+}
+
+.splash-footer {
+    position: absolute;
+    bottom: 60px;
+    width: 200px;
+}
+
+.loading-bar-container {
+    height: 3px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.loading-bar-progress {
+    height: 100%;
+    background: var(--theme-primary, #8b5cf6);
+    width: 0;
+    animation: load-progress 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    box-shadow: 0 0 10px var(--theme-primary, #8b5cf6);
+}
+
+@keyframes load-progress {
+    0% { width: 0; }
+    30% { width: 40%; }
+    60% { width: 45%; }
+    100% { width: 100%; }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}

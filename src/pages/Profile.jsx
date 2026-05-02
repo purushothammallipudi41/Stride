@@ -8,6 +8,7 @@ import Avatar from '../components/common/Avatar';
 import SubscribeButton from '../components/profile/SubscribeButton';
 import socket from '../services/socket';
 import VerificationBadge from '../components/common/VerificationBadge';
+import SEO from '../components/common/SEO';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
 import './Profile.css';
@@ -356,6 +357,12 @@ const Profile = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
+            <SEO 
+                title={`${user.name || user.username} (@${user.username})`}
+                description={user.bio || `Discover ${user.username}'s rhythm on Stride.`}
+                image={user.avatar}
+                type="profile"
+            />
             {/* Top Header */}
             <PageHeader title={user.username} hideBack={true} />
 

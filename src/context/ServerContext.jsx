@@ -30,8 +30,6 @@ export const ServerProvider = ({ children }) => {
         fetch(`${BASE_URL}/api/communities`)
             .then(res => res.json())
             .then(data => {
-                console.log("[ServerContext] Fetched servers:", data.length);
-                
                 // Synchronize initial membership for logged-in user (especially for E2E mocks)
                 const loggedInUser = getStoredUser();
 
@@ -117,7 +115,6 @@ export const ServerProvider = ({ children }) => {
 
     const joinCommunity = async (communityId, userId) => {
         try {
-            console.log("[ServerContext] Joining community (API Request):", communityId, "for user:", userId);
             const response = await fetch(`${BASE_URL}/api/communities/${communityId}/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

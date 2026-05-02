@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Lock, ChevronLeft, CreditCard as CardIcon } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
+import { hapticNotification } from '../utils/haptics';
+import { NotificationType } from '@capacitor/haptics';
 import PageHeader from '../components/layout/PageHeader';
 import SEO from '../components/common/SEO';
 import './Checkout.css';
@@ -42,15 +44,18 @@ const Checkout = () => {
                 const data = await res.json();
                 if (data.success) {
                     setIsSuccess(true);
+                    hapticNotification(NotificationType.Success);
                     setTimeout(() => {
                         navigate('/profile', { state: { purchaseSuccess: true } });
                     }, 3000);
                 } else {
                     setError(data.message || 'Payment declined by bank.');
+                    hapticNotification(NotificationType.Error);
                     setIsProcessing(false);
                 }
             } catch (err) {
                 setError('Payment gateway timeout. Please try again.');
+                hapticNotification(NotificationType.Error);
                 setIsProcessing(false);
             }
         }, 2500);

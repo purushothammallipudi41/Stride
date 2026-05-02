@@ -206,7 +206,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             // Premium capture quality
             const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
             setPreviewImage(dataUrl);
-            console.log('SocialAction: Photo captured (Base64 length):', dataUrl.length);
         }
     };
 
@@ -239,7 +238,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             reader.onload = (event) => {
                 const base64Data = event.target.result;
                 onSendMessage(base64Data, 'image');
-                console.log('SocialAction: Image sent from gallery');
             };
             reader.readAsDataURL(file);
         }
@@ -264,7 +262,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
     };
 
     const handleMicClick = () => {
-        console.log('SocialAction: Mic clicked - Opening recorder');
         setShowVoiceRecorder(true);
     };
 
@@ -290,7 +287,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             
             setIsRecording(true);
             drawWave();
-            console.log('SocialAction: Recording & Visualizer started');
         } catch (err) {
             console.error("Mic access denied:", err);
         }
@@ -311,7 +307,6 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
         }
         setShowVoiceRecorder(false);
         setAudioData(new Uint8Array(0));
-        console.log(`SocialAction: Recording stopped. Sent: ${shouldSend}`);
     };
 
     const handleMessageVibe = async (messageId, emoji) => {
@@ -716,16 +711,15 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="action-sheet-grid">
                                 {[
-                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => { console.log('SocialAction: GIF clicked'); setIsGifMode(true); } },
-                                    { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: () => { console.log('SocialAction: Gallery clicked'); handleGalleryClick(); } },
-                                    { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: () => { console.log('SocialAction: Camera clicked'); handleCameraClick(); } },
+                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => { setIsGifMode(true); } },
+                                    { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: () => { handleGalleryClick(); } },
+                                    { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: () => { handleCameraClick(); } },
                                     { id: 'action-tip', label: 'Send Tip', icon: <Zap size={20} />, color: 'rgba(245, 158, 11, 0.2)', textColor: '#f59e0b', action: () => { onSendMessage(`⚡ Sent a Vibe Tip of 50 Tokens`, 'text'); setShowGifs(false); } },
-                                    { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => { console.log('SocialAction: Location clicked'); handleLocationClick(); } }
+                                    { id: 'action-location', label: 'Location', icon: <Plus size={20} />, color: 'rgba(249, 115, 22, 0.2)', textColor: '#f97316', action: () => { handleLocationClick(); } }
                                 ].map((item) => (
                                     <div key={item.id} className="action-sheet-item" onClick={(e) => { 
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        console.log(`SocialAction: Click captured for ${item.id}`);
                                         if (item.id !== 'action-gif') setShowGifs(false); 
                                         item.action(); 
                                     }}>
