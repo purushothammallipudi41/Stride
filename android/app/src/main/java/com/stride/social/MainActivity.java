@@ -9,5 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        // Nuclear fix for white bar: force native window background to midnight dark
+        getWindow().getDecorView().setBackgroundColor(android.graphics.Color.parseColor("#030014"));
     }
 }

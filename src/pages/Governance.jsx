@@ -115,8 +115,23 @@ const Governance = () => {
             <nav className="gov-tabs">
                 <button className={`gov-tab ${activeTab === 'active' ? 'active' : ''}`} onClick={() => setActiveTab('active')}>Active Shifts</button>
                 <button className={`gov-tab ${activeTab === 'passed' ? 'active' : ''}`} onClick={() => setActiveTab('passed')}>Legacy Shifts</button>
-                <button className="create-proposal-btn" onClick={() => setIsModalOpen(true)}>
-                    <Plus size={16} /> New Proposal
+                <button 
+                    className={`create-proposal-btn ${(user.isPremium || user.isVerified) ? '' : 'locked'}`} 
+                    onClick={() => {
+                        if (user.isPremium || user.isVerified) {
+                            setIsModalOpen(true);
+                        } else {
+                            addNotification({ 
+                                title: 'Stride Pro Required', 
+                                message: 'Only Premium or Verified members can initiate new platform proposals.', 
+                                type: 'info' 
+                            });
+                            // Optional: Trigger checkout modal here if accessible via global state/context
+                        }
+                    }}
+                >
+                    {(user.isPremium || user.isVerified) ? <Plus size={16} /> : <Info size={16} />}
+                    {(user.isPremium || user.isVerified) ? 'New Proposal' : 'Upgrade to Pro to Shift'}
                 </button>
             </nav>
 

@@ -1,5 +1,4 @@
-const User = require('../models/User.cjs');
-const Post = require('../models/Post.cjs');
+const { User, Post } = require('./DatabasePulse.cjs');
 
 // Weighted signals for high-fidelity discovery
 const SIGNAL_WEIGHTS = {
@@ -21,13 +20,13 @@ const VibeService = {
             const user = await User.findOne({ username });
             if (!user) return;
 
-            if (!user.vibeScores) user.vibeScores = new Map();
+            if (!user.vibeScores) user.vibeScores = {};
             const weight = SIGNAL_WEIGHTS[signalType] || 1;
 
             tags.forEach(tag => {
                 const cleanTag = tag.toLowerCase().replace('#', '');
-                const currentScore = user.vibeScores.get(cleanTag) || 0;
-                user.vibeScores.set(cleanTag, currentScore + weight);
+                const currentScore = user.vibeScores[cleanTag] || 0;
+                user.vibeScores[cleanTag] = currentScore + weight;
             });
 
             await user.save();
@@ -56,7 +55,7 @@ const VibeService = {
                 if (post.tags && post.tags.length > 0) {
                     post.tags.forEach(tag => {
                         const cleanTag = tag.toLowerCase().replace('#', '');
-                        score += (currentUser.vibeScores.get(cleanTag) || 0) * 0.7;
+                        score += (currentUser.vibeScores[cleanTag] || 0) * 0.7;
                     });
                 }
 
@@ -86,18 +85,15 @@ const VibeService = {
             if (!currentUser || !currentUser.vibeScores || currentUser.vibeScores.size === 0) return [];
 
             // Get top 3 vibes for current user
-            const myVibes = Array.from(currentUser.vibeScores.entries())
+            const myVibes = Object.entries(currentUser.vibeScores || {})
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 3)
                 .map(v => v[0]);
 
-            const potentialMatches = await User.find({ 
-                username: { $ne: username },
-                vibeScores: { $exists: true }
-            }).limit(20);
+            const potentialMatches = await User.find({}); // find with empty query
 
             const scoredMatches = potentialMatches.map(u => {
-                const userVibes = Array.from(u.vibeScores.entries())
+                const userVibes = Object.entries(u.vibeScores || {})
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5) 
                     .map(v => v[0]);

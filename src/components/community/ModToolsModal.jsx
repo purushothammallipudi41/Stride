@@ -36,7 +36,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
     ]);
 
     const user = getStoredUser();
-    const { addNotification } = useUI();
+    const { addNotification, openCreateModal } = useUI();
 
     // Reset state only when the modal opens for the first time
     useEffect(() => {

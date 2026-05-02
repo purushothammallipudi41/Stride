@@ -156,8 +156,6 @@ const Explore = () => {
         setIsSearching(false);
     };
 
-    if (isLoading) return <div className="loading-screen">{t('common.loading')}</div>;
-
     return (
         <div className="explore-container">
             <SEO 
@@ -219,139 +217,9 @@ const Explore = () => {
 
             {isSearchFocused && <div className="search-spotlight-overlay animate-fade-in" />}
 
-            {searchQuery === 'vibing' ? (
-                <div className="vibing-activity-container animate-fade-in">
-                    <div className="section-header-row">
-                        <Music size={24} className="pulse-icon-small" />
-                        <h2>STREAMS LIVE NOW</h2>
-                    </div>
-                    <p className="section-subtitle">Jump into the vibe with other users across the Stride network.</p>
-                    
-                    <div className="vibing-grid">
-                        {/* This would normally be fetched from a global activity API */}
-                        {userResults.length > 0 ? (
-                            userResults.filter(user => isUserListening(user.username)).map(user => (
-                                <div key={user._id} className="vibe-card glass-panel" onClick={() => navigate(`/profile/${user.username}`)}>
-                                    <div className="vibe-card-top">
-                                        <Avatar 
-                                            src={user.avatar} 
-                                            alt="" 
-                                            size={50} 
-                                            frame={user.avatarFrame || 'none'}
-                                            isListening={true}
-                                        />
-                                        <div className="vibe-user-info">
-                                            <span className="v-username">{user.username}</span>
-                                            <span className="v-detail">Listening to</span>
-                                        </div>
-                                    </div>
-                                    <div className="vibe-track-info">
-                                        <div className="v-track-name">{getUserTrack(user.username)?.title || 'Vibing...'}</div>
-                                        <div className="v-track-artist">{getUserTrack(user.username)?.artist || 'Audius'}</div>
-                                    </div>
-                                    <button className="join-vibe-btn">View Profile</button>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="empty-vibe-state">
-                                <h3>Silence is rare here...</h3>
-                                <p>Start listening to music to show up on the map!</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            ) : isSearching || searchQuery ? (
-                <div className="search-results-area animate-fade-in">
-                    {userResults.length > 0 && (
-                        <div className="search-category-section">
-                            <h3 className="category-title">{t('explore.people')}</h3>
-                            <div className="user-results-list">
-                                {userResults.map(user => (
-                                    <div key={user._id} className="user-result-card">
-                                        <Avatar 
-                                            src={user.avatar} 
-                                            alt={user.username} 
-                                            size={40} 
-                                            frame={user.avatarFrame || 'none'}
-                                            isListening={isUserListening(user.username)}
-                                        />
-                                        <div className="user-meta">
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <span className="user-name">{user.name}</span>
-                                                {user.isVerified && <VerificationBadge size={14} />}
-                                            </div>
-                                            <span className="user-handle">@{user.username}</span>
-                                            {isUserListening(user.username) && (
-                                                <span className="user-listening-status">Listening to {getUserTrack(user.username)?.title}</span>
-                                            )}
-                                        </div>
-                                        <button className="view-profile-btn" onClick={() => navigate(`/profile/${user.username}`)}>
-                                            View
-                                        </button>
-
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {tagResults.playlists.length > 0 && (
-                        <div className="search-category-section">
-                            <h3 className="category-title">{t('explore.playlists')}</h3>
-                            <div className="user-results-list">
-                                {tagResults.playlists.map(p => (
-                                    <div key={p._id} className="user-result-card" onClick={() => navigate(`/playlist/${p._id}`)}>
-                                        <div className="playlist-icon-box">
-                                            <Layers size={20} />
-                                        </div>
-                                        <div className="user-meta">
-                                            <span className="user-name">{p.name}</span>
-                                            <span className="user-handle">by {p.owner?.username}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {tagResults.communities.length > 0 && (
-                        <div className="search-category-section">
-                            <h3 className="category-title">{t('explore.communities')}</h3>
-                            <div className="user-results-list">
-                                {tagResults.communities.map(c => (
-                                    <div key={c._id} className="user-result-card" onClick={() => navigate(`/community/${c._id}`)}>
-                                        <div className="community-avatar mini">
-                                            {c.avatar?.length <= 2 ? c.avatar : <img src={c.avatar} alt={c.name} loading="lazy" />}
-                                        </div>
-                                        <div className="user-meta">
-                                            <span className="user-name">{c.name}</span>
-                                            <span className="user-handle">{c.members?.length || 0} members</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    
-                    {(!searchQuery.startsWith('#') || tagResults.posts.length > 0) && (
-                        <div className="search-category-section">
-                            <h3 className="category-title">Media</h3>
-                            <div className="instagram-explore-grid">
-                                {tagResults.posts?.length > 0 ? (
-                                    tagResults.posts.map((post, i) => (
-                                        <div key={i} className="explore-post-item size-small" onClick={() => navigate(`/profile/${post.username}`)}>
-                                            <img src={post.contentUrl || post.imageUrl} alt="" loading="lazy" />
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="loading-state">Matching posts and reels...</div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                </div>
-            ) : (
-                <div className="discovery-area">
+            <div className="explore-content-layers">
+                {/* Layer 1: Background Discovery Area (Always present) */}
+                <div className={`discovery-area ${searchQuery || isSearchFocused ? 'content-dimmed' : ''}`}>
                     {vibeLeaderboard?.length > 0 && (
                         <div className="discovery-section vibe-leaderboard-section animate-fade-in">
                             <div className="section-header-row">
@@ -428,7 +296,6 @@ const Explore = () => {
                     </div>
 
                     <div className="instagram-explore-grid">
-
                         {discoverPosts.map(post => (
                             <div key={post.id} className={`explore-post-item size-${post.size}`}>
                                 <img src={post.url} alt="Discover Content" loading="lazy" />
@@ -446,7 +313,92 @@ const Explore = () => {
                         ))}
                     </div>
                 </div>
-            )}
+
+                {/* Layer 2: Search & Vibing Results (Floating Overlay) */}
+                {(searchQuery || isSearching || isLoading) && (
+                    <div className="explore-results-overlay animate-fade-in">
+                        {isLoading ? (
+                            <div className="explore-loading-results glass-panel animate-pulse" style={{ margin: '20px', padding: '40px', textAlign: 'center', borderRadius: '24px' }}>
+                                <div className="pulse-circle" style={{ width: 40, height: 40, background: 'var(--theme-primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
+                                <p style={{ color: 'rgba(255,255,255,0.6)', fontWeight: '600' }}>Syncing vibes...</p>
+                            </div>
+                        ) : searchQuery === 'vibing' ? (
+                            <div className="vibing-activity-container animate-fade-in">
+                                <div className="section-header-row">
+                                    <Music size={24} className="pulse-icon-small" />
+                                    <h2>STREAMS LIVE NOW</h2>
+                                </div>
+                                <div className="vibing-grid">
+                                    {userResults.length > 0 ? (
+                                        userResults.filter(user => isUserListening(user.username)).map(user => (
+                                            <div key={user._id} className="vibe-card glass-panel" onClick={() => navigate(`/profile/${user.username}`)}>
+                                                <div className="vibe-card-top">
+                                                    <Avatar src={user.avatar} size={50} frame={user.avatarFrame || 'none'} isListening={true} />
+                                                    <div className="vibe-user-info">
+                                                        <span className="v-username">{user.username}</span>
+                                                        <span className="v-detail">Listening to</span>
+                                                    </div>
+                                                </div>
+                                                <div className="vibe-track-info">
+                                                    <div className="v-track-name">{getUserTrack(user.username)?.title || 'Vibing...'}</div>
+                                                    <div className="v-track-artist">{getUserTrack(user.username)?.artist || 'Audius'}</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-vibe-state">
+                                            <h3>Silence is rare here...</h3>
+                                            <p>Start listening to music to show up on the map!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="search-results-area animate-fade-in">
+                                {userResults.length === 0 && tagResults.playlists.length === 0 && tagResults.communities.length === 0 && (!tagResults.posts || tagResults.posts.length === 0) ? (
+                                    <div className="no-results-state" style={{ padding: '80px 20px', textAlign: 'center' }}>
+                                        <Search size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
+                                        <h3>No matches found</h3>
+                                        <p style={{ opacity: 0.6 }}>We couldn't find anything for "{searchQuery}".</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {userResults.length > 0 && (
+                                            <div className="search-category-section">
+                                                <h3 className="category-title">{t('explore.people')}</h3>
+                                                <div className="user-results-list">
+                                                    {userResults.map(user => (
+                                                        <div key={user._id} className="user-result-card">
+                                                            <Avatar src={user.avatar} size={40} frame={user.avatarFrame || 'none'} isListening={isUserListening(user.username)} />
+                                                            <div className="user-meta">
+                                                                <span className="user-name">{user.name}</span>
+                                                                <span className="user-handle">@{user.username}</span>
+                                                            </div>
+                                                            <button className="view-profile-btn" onClick={() => navigate(`/profile/${user.username}`)}>View</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {tagResults.posts?.length > 0 && (
+                                            <div className="search-category-section">
+                                                <h3 className="category-title">Media</h3>
+                                                <div className="instagram-explore-grid">
+                                                    {tagResults.posts.map((post, i) => (
+                                                        <div key={i} className="explore-post-item size-small" onClick={() => navigate(`/profile/${post.username}`)}>
+                                                            <img src={post.contentUrl || post.imageUrl} alt="" loading="lazy" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

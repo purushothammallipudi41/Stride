@@ -26,7 +26,7 @@ const Reels = () => {
                             likes: 1200, 
                             caption: 'Welcome to the Rhythm. #stride #social', 
                             contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-man-dancing-under-neon-lights-23101-large.mp4',
-                            avatar: 'https://i.pravatar.cc/150?u=stride',
+                            avatar: '',
                             type: 'video',
                             isVerified: true,
                             music: 'Stride Theme - Original'
@@ -37,7 +37,7 @@ const Reels = () => {
                             likes: 850, 
                             caption: 'Late night lo-fi sessions. 🎹', 
                             contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-recording-studio-with-dj-mixing-music-23097-large.mp4',
-                            avatar: 'https://i.pravatar.cc/150?u=aura',
+                            avatar: '',
                             type: 'video',
                             music: 'Lofi Nights - Aura'
                         }

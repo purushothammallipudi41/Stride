@@ -96,7 +96,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                             <div key={notif._id} className={`notification-item-v2 ${notif.readStatus ? 'read' : 'unread'}`}>
                                 <div className="notif-avatar-v2">
                                     <Avatar 
-                                        src={notif.avatar || `https://i.pravatar.cc/150?u=${mainActor}`} 
+                                        src={notif.avatar || ""} 
                                         size={44} 
                                         frame={notif.senderFrame || 'none'} 
                                     />

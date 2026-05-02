@@ -43,8 +43,8 @@ test('Playlist creation flow', async ({ page }) => {
   await page.locator('.create-playlist-btn').click();
 
   // Modal should appear
-  const modal = page.locator('.playlist-modal');
-  await expect(modal).toBeVisible();
+  const modal = page.locator('.playlist-modal-glass, .playlist-modal');
+  await expect(modal.first()).toBeVisible();
 
   // Fill in playlist name
   const nameInput = modal.locator('input[placeholder*="Vibe Name"]');

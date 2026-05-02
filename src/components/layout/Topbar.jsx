@@ -19,6 +19,8 @@ const Topbar = () => {
                 <span className="topbar-logo-text">Stride</span>
             </div>
 
+
+
             <div className="topbar-spacer" />
 
             <div className="topbar-actions">

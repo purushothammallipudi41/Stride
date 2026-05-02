@@ -10,6 +10,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top));
     font-family: var(--font-body);
 }
 
@@ -46,19 +47,21 @@
 
 .verify-card {
     width: 100%;
-    max-width: 480px;
-    padding: 48px 40px;
+    height: 100%;
+    max-width: 100%;
+    padding: 60px 40px;
     position: relative;
     z-index: 10;
-    border-radius: 32px;
-    background: rgba(15, 15, 25, 0.6);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.05);
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .back-btn {

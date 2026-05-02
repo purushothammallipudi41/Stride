@@ -1,4 +1,4 @@
-const Message = require('../models/Message.cjs');
+const { Message } = require('./DatabasePulse.cjs');
 
 class SocialAIService {
     /**

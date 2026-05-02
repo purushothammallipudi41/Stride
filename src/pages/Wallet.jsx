@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DollarSign, Wallet as WalletIcon, Plus, ArrowDownLeft, ArrowUpRight, History } from 'lucide-react';
+import { DollarSign, Wallet as WalletIcon, Plus, ArrowDownLeft, ArrowUpRight, History, ShoppingBag } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
 import SEO from '../components/common/SEO';
 import PageHeader from '../components/layout/PageHeader';
 import { getStoredUser } from '../utils/storage';
 import GlobalModal from '../components/common/GlobalModal';
-import './Wallet.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import socket from '../services/socket';
-import { ShoppingBag } from 'lucide-react';
+import MonetizationService from '../services/MonetizationService';
+import './Wallet.css';
 
 const Wallet = () => {
     const { addNotification } = useUI();
@@ -28,6 +28,7 @@ const Wallet = () => {
 
     const userProfile = getStoredUser();
     const username = userProfile?.username || 'guest';
+    const userId = userProfile?.id || userProfile?._id;
 
     const fetchBalance = useCallback(async () => {
         try {
@@ -59,74 +60,56 @@ const Wallet = () => {
         };
     }, [fetchBalance]);
 
-    const loadRazorpay = () => {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
-            document.body.appendChild(script);
-        });
-    };
-
     const handleTopUp = async () => {
         setIsProcessing(true);
-        const resScript = await loadRazorpay();
-
-        if (!resScript) {
-            addNotification({ title: 'Payment Error', message: 'Razorpay SDK failed to load. Are you online?', type: 'error' });
-            setIsProcessing(false);
-            return;
-        }
 
         try {
-            // 1. Create order on backend
-            const orderRes = await fetch(`${BASE_URL}/api/payments/order`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: parseInt(topUpAmount), username })
-            });
-            const { order } = await orderRes.json();
+            const productID = `vibe_points_${topUpAmount}`;
+            
+            // 1. Get offerings
+            const offerings = await MonetizationService.getOfferings();
+            const pkg = offerings?.availablePackages.find(p => p.product.identifier === productID);
 
-            // 2. Open Razorpay Checkout
-            const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-                amount: order.amount,
-                currency: order.currency,
-                name: 'Stride Credits',
-                description: `Top up ${topUpAmount} VP`,
-                order_id: order.id,
-                handler: async (response) => {
-                    // 3. Verify on backend
-                    const verifyRes = await fetch(`${BASE_URL}/api/payments/verify`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            ...response,
-                            username,
-                            amount: topUpAmount
-                        })
-                    });
-                    const data = await verifyRes.json();
-                    if (data.success) {
-                        setBalance(data.balance);
-                        setTransactions([data.transaction, ...transactions]);
-                        setShowTopUp(false);
-                        addNotification({ title: 'Top-up Successful', message: `Added ${topUpAmount} credits to your wallet.`, type: 'success' });
-                    }
-                },
-                prefill: {
-                    name: username,
-                    email: `${username}@stride.social`
-                },
-                theme: { color: '#8b5cf6' }
-            };
+            if (!pkg) {
+                console.warn(`💎 Monetization: Product ${productID} not found in offerings.`);
+                addNotification({ title: 'Store Error', message: 'This credit package is currently unavailable.', type: 'error' });
+                setIsProcessing(false);
+                return;
+            }
 
-            const paymentObject = new window.Razorpay(options);
-            paymentObject.open();
+            // 2. Trigger Purchase
+            const purchaseResult = await MonetizationService.purchasePackage(pkg);
+            
+            if (purchaseResult.success) {
+                const { customerInfo } = purchaseResult;
+                
+                // 3. Verify on Backend
+                const verifyRes = await fetch(`${BASE_URL}/api/payments/google/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        purchaseToken: customerInfo.originalAppUserId,
+                        productId: productID,
+                        userId
+                    })
+                });
+                
+                const data = await verifyRes.json();
+                
+                if (data.success) {
+                    setBalance(data.balance);
+                    setShowTopUp(false);
+                    addNotification({ title: 'Top-up Successful', message: `Added ${topUpAmount} credits via Google Play.`, type: 'success' });
+                    fetchBalance(); // Refresh transactions
+                } else {
+                    addNotification({ title: 'Sync Failed', message: data.error || 'Unable to verify credits.', type: 'error' });
+                }
+            } else {
+                addNotification({ title: 'Purchase Failed', message: purchaseResult.error || 'Payment cancelled.', type: 'error' });
+            }
         } catch (err) {
-            console.error('Payment Error:', err);
-            addNotification({ title: 'Top-up Failed', message: 'Unable to initiate payment.', type: 'error' });
+            console.error('💎 Wallet Payment Error:', err);
+            addNotification({ title: 'Store Error', message: 'Unable to communicate with Google Play.', type: 'error' });
         } finally {
             setIsProcessing(false);
         }

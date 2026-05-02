@@ -18,20 +18,18 @@ const Post = ({ post }) => {
     const [newComment, setNewComment] = useState('');
     const [mediaError, setMediaError] = useState(false);
     const [hasViewed, setHasViewed] = useState(false);
-    
-    const postId = post._id || post.id;
-    const user = getStoredUser();
-    
-    // Safety Guard: if post is malformed, don't crash
-    if (!postId) return null;
-
     const postRef = useRef(null);
     const optionsRef = useRef(null);
     const [showOptions, setShowOptions] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [tempCaption, setTempCaption] = useState(post.caption || post.content || "");
+    const [shareStatus, setShareStatus] = useState('Share');
+    
+    const postId = post._id || post.id;
+    const user = getStoredUser();
 
     const fetchComments = useCallback(async () => {
+        if (!postId) return;
         try {
             const res = await fetch(`${BASE_URL}/api/posts/${postId}/comments`);
             const data = await res.json();
@@ -42,7 +40,7 @@ const Post = ({ post }) => {
     }, [postId]);
 
     const trackView = useCallback(async () => {
-        if (hasViewed) return;
+        if (!postId || hasViewed) return;
         try {
             await fetch(`${BASE_URL}/api/posts/${postId}/view`, {
                 method: 'POST'
@@ -54,13 +52,13 @@ const Post = ({ post }) => {
     }, [postId, hasViewed]);
 
     useEffect(() => {
+        if (!postId) return;
         const handleUpdate = (event) => {
             if (event.postId === postId) {
                 if (event.type === 'like') setLikes(event.likes);
                 if (event.type === 'view') setViewCount(event.viewCount);
                 if (event.type === 'comment') {
                     setCommentCount(event.commentCount);
-                    // Optionally fetch if comments are showing
                     if (showComments) fetchComments();
                 }
             }
@@ -97,6 +95,9 @@ const Post = ({ post }) => {
         return () => observer.disconnect();
     }, [trackView]);
 
+    // Safety Guard: if post is malformed or lacks media, don't render
+    if (!postId) return null;
+    if (!post.imageUrl && !post.contentUrl && !post.url) return null;
 
     const handleToggleComments = () => {
         if (!showComments) fetchComments();
@@ -133,14 +134,14 @@ const Post = ({ post }) => {
             });
             const data = await res.json();
             if (data.success) {
-                if (navigator.vibrate) navigator.vibrate(10); setLikes(data.likes);
+                if (navigator.vibrate) navigator.vibrate(10);
+                setLikes(data.likes);
             }
         } catch (err) {
             console.error("Failed to like post:", err);
         }
     };
 
-    const [shareStatus, setShareStatus] = useState('Share');
     const handleShare = () => {
         const postUrl = `${window.location.origin}/post/${postId}`;
         navigator.clipboard.writeText(postUrl);
@@ -168,8 +169,6 @@ const Post = ({ post }) => {
             });
 
             if (res.ok) {
-                const updatedPost = await res.json();
-                // Optionally update local state if needed, but the socket will likely handle it
                 setIsEditing(false);
             }
         } catch (err) {
@@ -197,7 +196,8 @@ const Post = ({ post }) => {
             <div className="post-header">
                 <Link to={`/profile/${post.username}`} className="post-user-linked">
                     <Avatar 
-                        src={post.avatar || `https://i.pravatar.cc/150?u=${post.username}`} 
+                        src={post.avatar || ""} 
+                        alt={post.username}
                         size={36} 
                         isVerified={post.isVerified}
                     />

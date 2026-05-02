@@ -28,7 +28,8 @@ const VaultModal = () => {
 
     useEffect(() => {
         if (isVaultOpen) {
-            fetchVaultStats();
+            const timer = setTimeout(() => fetchVaultStats(), 0);
+            return () => clearTimeout(timer);
         }
     }, [isVaultOpen, fetchVaultStats]);
 
@@ -96,7 +97,8 @@ const VaultModal = () => {
                             <div className="tippers-row">
                                 {stats.topTippers.map((tipper, idx) => (
                                     <div key={tipper.username} className="tipper-chip">
-                                        <Avatar src={`https://i.pravatar.cc/150?u=${tipper.username}`} size={32} />
+                                        <Avatar src={tipper.avatar || ""} size={32} />
+
                                         <div className="tipper-info">
                                             <span className="tipper-name">{tipper.username}</span>
                                             <span className="tipper-total">{tipper.total} VP</span>

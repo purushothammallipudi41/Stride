@@ -64,6 +64,11 @@
     object-fit: cover;
 }
 
+.placeholder-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(10, 10, 11, 0) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .ig-bio-top-row {
 
     display: flex;
@@ -158,21 +163,34 @@
     display: flex;
     gap: 8px;
     margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    padding: 4px 16px;
+    margin: 0 -16px 24px; /* Bleed to edges */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ig-action-buttons::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }
 
 .ig-action-btn-main {
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 100px;
     background: var(--color-surface);
     border: var(--glass-border);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     color: white;
-    padding: 10px 16px;
+    padding: 10px 20px;
     border-radius: var(--radius-md);
     font-weight: 700;
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    scroll-snap-align: start;
 }
 
 .ig-action-btn-main:hover {
@@ -745,9 +763,38 @@
 }
 
 .frame-select-option span {
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    opacity: 0.6;
     text-transform: capitalize;
+}
+
+.frame-select-option.locked {
+    cursor: pointer;
+}
+
+.frame-lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.frame-price-tag {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--theme-primary, #8b5cf6);
+    color: white;
+    font-size: 0.6rem !important;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 6px;
+    opacity: 1 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* Avatar Frames */

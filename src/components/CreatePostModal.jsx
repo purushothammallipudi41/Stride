@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Image, Hash, Music, Send, Loader2, Camera, FolderOpen, X, ChevronRight, Zap, Plus, Play } from 'lucide-react';
 import { useUI } from '../hooks/useUI';
 import { getStoredUser } from '../utils/storage';
@@ -8,6 +9,7 @@ import MediaStudio from './studio/MediaStudio';
 import './CreatePostModal.css';
 
 const CreatePostModal = () => {
+    const navigate = useNavigate();
     const { isCreateModalOpen, closeCreateModal, createType } = useUI();
     const user = getStoredUser();
     const [caption, setCaption] = useState('');
@@ -151,7 +153,13 @@ const CreatePostModal = () => {
     };
 
     const handleCameraClick = () => {
-        cameraInputRef.current?.click();
+        closeCreateModal();
+        navigate('/studio');
+    };
+
+    const handleMusicClick = () => {
+        closeCreateModal();
+        navigate('/music');
     };
 
     return (
@@ -247,7 +255,7 @@ const CreatePostModal = () => {
                                         <div className="tile-icon reels-bg" style={{ background: 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}><Play size={20} /></div>
                                         <span>Reel</span>
                                     </button>
-                                    <button type="button" className="attachment-tile">
+                                    <button type="button" className="attachment-tile" onClick={handleMusicClick}>
                                         <div className="tile-icon music-bg"><Music size={20} /></div>
                                         <span>Music</span>
                                     </button>

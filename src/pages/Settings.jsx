@@ -25,7 +25,7 @@ const Settings = () => {
                 return {
                     name: parsed.name || parsed.username || 'User',
                     email: parsed.email || 'No email provided',
-                    avatar: parsed.avatar || 'https://www.gravatar.com/avatar/0?d=mp',
+                    avatar: parsed.avatar || "",
                     avatarFrame: parsed.avatarFrame || 'none',
                     username: parsed.username || ''
                 };
@@ -36,7 +36,7 @@ const Settings = () => {
         return {
             name: 'Purushotham Mallipudi',
             email: 'purushothammallipudi41@gmail.com',
-            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+            avatar: "",
             avatarFrame: 'none',
             username: ''
         };
@@ -123,19 +123,30 @@ const Settings = () => {
                                 <Circle size={22} className="ps-icon-purple" />
                                 <div className="ps-item-text">
                                     <span className="ps-item-title">Avatar Frame</span>
-                                    <span className="ps-item-subtitle">Gold Frame</span>
+                                    <span className="ps-item-subtitle">{user.avatarFrame === 'none' ? 'Standard Border' : user.avatarFrame.toUpperCase() + ' Frame'}</span>
                                 </div>
                             </div>
                             <select 
                                 className="ps-dropdown" 
                                 value={user.avatarFrame} 
-                                onChange={handleFrameSwitch}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if ((val === 'neon' || val === 'holographic') && !user.isPremium) {
+                                        addNotification({ 
+                                            title: 'Stride Pro Required', 
+                                            message: 'Neon and Holographic frames are exclusive to Stride Pro members.', 
+                                            type: 'info' 
+                                        });
+                                        return;
+                                    }
+                                    handleFrameSwitch(e);
+                                }}
                                 style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
                             >
                                 <option value="none" style={{ background: '#111' }}>No Frame</option>
-                                <option value="gold" style={{ background: '#111' }}>Golden Frame</option>
-                                <option value="neon" style={{ background: '#111' }}>Neon Pulse</option>
-                                <option value="holographic" style={{ background: '#111' }}>Holographic</option>
+                                <option value="gold" style={{ background: '#111' }}>Golden Frame (Legacy)</option>
+                                <option value="neon" style={{ background: '#111' }}>{user.isPremium ? 'Neon Pulse' : '💎 Neon Pulse (Pro)'}</option>
+                                <option value="holographic" style={{ background: '#111' }}>{user.isPremium ? 'Holographic' : '💎 Holographic (Pro)'}</option>
                             </select>
                         </div>
 

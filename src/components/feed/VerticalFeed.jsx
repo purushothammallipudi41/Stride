@@ -10,8 +10,12 @@ const VerticalFeed = ({ posts, onClose }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const containerRef = useRef(null);
 
-    // Filter only video posts or simulate them
-    const videoPosts = posts.filter(p => p.type === 'video' || p.contentUrl?.endsWith('.mp4'));
+    // Filter only valid video posts
+    const videoPosts = (posts || []).filter(p => 
+        (p.type === 'video' || p.contentUrl?.endsWith('.mp4')) && 
+        p.contentUrl && 
+        p.contentUrl.trim() !== ""
+    );
 
     const handleScroll = () => {
         if (!containerRef.current) return;
@@ -117,7 +121,12 @@ const VideoClip = ({ post, isActive, muted }) => {
                     </div>
 
                     <div className="music-disc-record animate-spin-slow">
-                        <img src={post.avatar || "U"} alt="record" className="record-center" />
+                        <Avatar 
+                            src={post.avatar} 
+                            alt={post.username} 
+                            size={40} 
+                            className="record-center" 
+                        />
                     </div>
                 </div>
             </div>

@@ -25,8 +25,8 @@ const ArtistDashboard = () => {
 
     useEffect(() => {
         if (!username || username === 'guest') {
-            setIsLoading(false);
-            return;
+            const timer = setTimeout(() => setIsLoading(false), 0);
+            return () => clearTimeout(timer);
         }
 
         fetch(`${BASE_URL}/api/artist/stats/${username}`)

@@ -28,7 +28,12 @@ const StoriesRail = () => {
         fetch(`${BASE_URL}/api/stories`)
             .then(res => res.json())
             .then(data => {
-                setFriendStories(data);
+                if (Array.isArray(data)) {
+                    setFriendStories(data);
+                } else {
+                    console.error("Stories API returned non-array:", data);
+                    setFriendStories([]);
+                }
             })
             .catch(err => console.error("Failed to fetch stories:", err));
     };
@@ -36,7 +41,14 @@ const StoriesRail = () => {
     const loadLive = () => {
         fetch(`${BASE_URL}/api/feed/live`)
             .then(res => res.json())
-            .then(data => setLiveStreams(data))
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setLiveStreams(data);
+                } else {
+                    console.error("Live streams API returned non-array:", data);
+                    setLiveStreams([]);
+                }
+            })
             .catch(err => console.error("Failed to fetch live streams:", err));
     };
 

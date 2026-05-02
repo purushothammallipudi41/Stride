@@ -104,10 +104,37 @@
 .search-spotlight-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(3, 0, 20, 0.85);
-    backdrop-filter: blur(10px);
-    z-index: 10000;
+    background: rgba(3, 0, 20, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
     pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.explore-content-layers {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 100px);
+}
+
+.discovery-area {
+    transition: filter 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+}
+
+.discovery-area.content-dimmed {
+    filter: blur(12px) brightness(0.4);
+    opacity: 0.5;
+    transform: scale(0.98);
+    pointer-events: none;
+}
+
+.explore-results-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10001;
+    min-height: 100%;
 }
 
 .clear-search-btn {

@@ -15,8 +15,8 @@ try {
         console.log("Firebase Admin Pulse: Initialized with service account.");
     } else {
         // Fallback for local development or if using Default Credentials on GCP
-        admin.initializeApp();
-        console.log("Firebase Admin Pulse: Initialized with default credentials.");
+        admin.initializeApp({ projectId: 'stride-v2-4123b' });
+        console.log("Firebase Admin Pulse: Initialized with default credentials and explicit projectId.");
     }
 } catch (error) {
     console.warn("Firebase Admin Pulse: Initialized without credentials (standard mode).", error.message);

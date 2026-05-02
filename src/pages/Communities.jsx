@@ -21,49 +21,11 @@ const Communities = () => {
         { id: 'tech', label: 'Tech' },
     ];
 
-    const communities = [
-        {
-            id: 'stride-official',
-            name: 'Stride Official',
-            description: 'The heartbeat of Stride. News, drops, and community vibes.',
-            members: '12.5k',
-            category: 'Social',
-            verified: true,
-            status: 'LIVE',
-            image: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800'
-        },
-        {
-            id: 'lofi-lounge',
-            name: 'Lo-Fi Lounge',
-            description: '24/7 chilled beats to study, relax, or code to.',
-            members: '8.2k',
-            category: 'Music',
-            verified: true,
-            image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800'
-        },
-        {
-            id: 'neon-gaming',
-            name: 'Neon Gaming',
-            description: 'Competitive social hub for the next gen of gamers.',
-            members: '5.1k',
-            category: 'Gaming',
-            verified: false,
-            image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800'
-        },
-        {
-            id: 'crypto-beat',
-            name: 'Crypto Beat',
-            description: 'Web3, NFTs, and the future of creative decentralized economies.',
-            members: '2.4k',
-            category: 'Tech',
-            verified: false,
-            image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800'
-        }
-    ];
 
-    const filteredCommunities = communities.filter(c => {
+
+    const filteredCommunities = (servers || []).filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTab = activeTab === 'for-you' || c.category.toLowerCase() === activeTab.toLowerCase();
+        const matchesTab = activeTab === 'for-you' || (c.category && c.category.toLowerCase() === activeTab.toLowerCase());
         return matchesSearch && matchesTab;
     });
 
@@ -144,32 +106,45 @@ const Communities = () => {
 
             <main className="discover-content">
                 <div className="communities-grid">
-                    {filteredCommunities.map(c => (
-                        <div key={c.id} className="featured-community-card glass-panel animate-scale-in" onClick={() => navigate(`/community/${c.id}`)}>
-                            <div className="community-banner" style={{ backgroundImage: `url(${c.image})` }}>
-                                <div className="banner-overlay">
-                                    {c.status === 'LIVE' && <div className="live-badge">LIVE</div>}
-                                </div>
-                            </div>
-                            <div className="community-card-info">
-                                <div className="community-details">
-                                    <div className="name-row">
-                                        <h3>{c.name}</h3>
-                                        {c.verified && <ShieldCheck size={16} className="verified-icon" />}
+                    {filteredCommunities.map(c => {
+                        const hasBanner = c.bannerUrl || c.imageUrl || c.image;
+                        const bannerStyle = hasBanner 
+                            ? { backgroundImage: `url(${hasBanner})` }
+                            : { background: `linear-gradient(135deg, #1a1a2e 0%, ${c.primaryColor || '#0f0f1a'} 100%)` };
+
+                        return (
+                            <div key={c._id || c.id} className="featured-community-card glass-panel animate-scale-in" onClick={() => navigate(`/community/${c._id || c.id}`)}>
+                                <div className="community-banner" style={bannerStyle}>
+                                    <div className="banner-overlay">
+                                        {c.status === 'LIVE' && <div className="live-badge">LIVE</div>}
                                     </div>
-                                    <p>{c.description}</p>
-                                    <div className="community-meta">
-                                        <div className="meta-item">
-                                            <Users size={14} />
-                                            <span>{c.members}</span>
+                                </div>
+                                <div className="community-card-info">
+                                    <div className="community-details">
+                                        <div className="name-row">
+                                            <h3>{c.name}</h3>
+                                            {c.isVerified && <ShieldCheck size={16} className="verified-icon" />}
                                         </div>
-                                        <span className="category-label">{c.category}</span>
+                                        <p>{c.description || 'No description provided.'}</p>
+                                        <div className="community-meta">
+                                            <div className="meta-item">
+                                                <Users size={14} />
+                                                <span>{c.memberCount || c.members?.length || 0}</span>
+                                            </div>
+                                            <span className="category-label">{c.category || 'Vibe'}</span>
+                                        </div>
                                     </div>
+                                    <button className="open-community-btn">Explore</button>
                                 </div>
-                                <button className="open-community-btn">Explore</button>
                             </div>
+                        );
+                    })}
+                    {filteredCommunities.length === 0 && (
+                        <div className="empty-communities-state">
+                            <Users size={48} />
+                            <p>No matching communities found.</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </main>
         </div>

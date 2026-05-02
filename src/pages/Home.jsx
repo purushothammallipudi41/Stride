@@ -6,7 +6,7 @@ import SEO from '../components/common/SEO';
 import './Home.css';
 
 const Home = () => {
-    const [feedType, setFeedType] = useState('foryou');
+    const [feedType] = useState('foryou');
     const [headerVisible, setHeaderVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 

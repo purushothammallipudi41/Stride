@@ -4,5 +4,15 @@
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "LIGHT"
+    },
+    "Keyboard": {
+      "resize": "native",
+      "style": "DARK"
+    }
   }
 }

@@ -42,7 +42,8 @@ const Sidebar = () => {
                             return (
                                 <div className={`nav-avatar-wrapper ${isActive ? 'active-avatar' : ''}`}>
                                     <Avatar 
-                                        src={user.avatar || `https://ui-avatars.com/api/?name=${user.username || '?'}&background=random&color=fff`} 
+                                        src={user?.avatar || ""} 
+                                        alt={user?.username || "User"}
                                         size={28} 
                                     />
                                 </div>

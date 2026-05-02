@@ -32,7 +32,7 @@ const voiceService = new VoiceService(socket);
 const CommunityView = () => {
     const { communityId, channelId } = useParams();
     const navigate = useNavigate();
-    const { servers, updateMemberRole, kickMember } = useServer();
+    const { servers, setServers, updateMemberRole, kickMember } = useServer();
     const user = getStoredUser();
     const { addNotification, liveInfo, setLiveInfo, isCreateModalOpen, openCreateModal, closeCreateModal } = useUI();
     const { isUserListening } = useActivity();

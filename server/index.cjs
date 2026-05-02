@@ -8,69 +8,39 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { Resend } = require('resend');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret'
-});
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
-// Models
-const User = require('./models/User.cjs');
-const Post = require('./models/Post.cjs');
-const Community = require('./models/Community.cjs');
+// Centralized Database Switcher (GCP Firestore / Local Mongo)
+const { 
+    User, Post, Community, Playlist, Transaction, Notification, 
+    Thread, Message, Comment, Event, VibePass, Stake, 
+    VibeAnalytics, Analytics, Proposal 
+} = require('./services/DatabasePulse.cjs');
+
 const DiscoveryService = require('./services/DiscoveryService.cjs');
-const Playlist = require('./models/Playlist.cjs');
-const Transaction = require('./models/Transaction.cjs');
-
-
-const Notification = require('./models/Notification.cjs');
-const Thread = require('./models/Thread.cjs');
 const VibeService = require('./services/VibeService.cjs');
 const SocialAIService = require('./services/SocialAIService.cjs');
 const MonetizationService = require('./services/MonetizationService.cjs');
 const PushService = require('./services/PushService.cjs');
-const Event = require('./models/Event.cjs');
-const VibePass = require('./models/VibePass.cjs');
-const Stake = require('./models/Stake.cjs');
-const VibeAnalytics = require('./models/VibeAnalytics.cjs');
-const Message = require('./models/Message.cjs');
-const Comment = require('./models/Comment.cjs');
-const Analytics = require('./models/Analytics.cjs');
-const Proposal = require('./models/Proposal.cjs');
+
+
 
 
 // Database Connection
 const findCommunity = async (id) => {
-    return await Community.findOne({
-        $or: [
-            { _id: mongoose.isValidObjectId(id) ? id : null },
-            { id: String(id) }
-        ]
-    });
+    return await Community.findOne({ id: String(id) });
 };
 
 const logVibeEvent = async (communityId, userId, eventType, metadata = {}) => {
     try {
         if (!communityId || !userId) return;
         
-        // Ensure communityId is an ObjectId
-        const cid = mongoose.isValidObjectId(communityId) ? communityId : null;
-        const uid = mongoose.isValidObjectId(userId) ? userId : null;
-        
-        if (!cid || !uid) {
-            // If they are IDs but not ObjectId type, we might need to find them or just skip
-            // For now, let's assume valid IDs are passed or we skip
-        }
-
         await VibeAnalytics.create({
-            communityId,
-            userId,
+            communityId: String(communityId),
+            userId: String(userId),
             eventType,
             metadata,
             timestamp: new Date()
@@ -79,79 +49,36 @@ const logVibeEvent = async (communityId, userId, eventType, metadata = {}) => {
         console.error('Analytics Logging Error:', err);
     }
 };
-const connectDB = async () => {
-    try {
-        if (process.env.USE_FIREBASE === 'true') {
-            console.log('🔥 USE_FIREBASE is true. Routing database pulse to Cloud Firestore.');
-            // Initializing FirestoreModels will automatically set up the Firebase Admin SDK connection
-            require('./services/FirestoreModels.cjs');
-            console.log('🔥 Cloud Firestore connection established via Admin SDK.');
-            return;
-        }
 
-        let uri = process.env.MONGODB_URI;
-        if (!uri) {
-            if (process.env.NODE_ENV === 'production') {
-                throw new Error('MONGODB_URI environment variable is required in production.');
-            }
-            console.log('INFO: No MONGODB_URI found. Starting MongoMemoryServer for local development...');
-            const { MongoMemoryServer } = await import('mongodb-memory-server');
-            const mongoServer = await MongoMemoryServer.create();
-            uri = mongoServer.getUri();
-        }
-        
-        await mongoose.connect(uri);
-        console.log('MongoDB Connected successfully.');
-        
-        // Startup patches and Self-Healing
+// Database Connection (GCP Cloud Native)
+const connectDB = async () => {
+    console.log('⚡ FIREBASE_PULSE: Initializing GCP Cloud Infrastructure...');
+    // Initializing FirestoreModels will automatically set up the Firebase Admin SDK connection
+    require('./services/FirestoreModels.cjs');
+    console.log('🔥 GCP CLOUD FIRESTORE: Connection established via Admin SDK.');
+    
+    try {
+        // Startup patches (Platform Optimized)
         const runPatches = async () => {
             try {
-                // Self-Healing Phase: Wipe broken local/test paths from production DB
-                const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
-                const wipeResult = await Post.deleteMany({
-                    $or: [
-                        { contentUrl: localPathRegex },
-                        { imageUrl: localPathRegex },
-                        { content: localPathRegex },
-                        { contentUrl: { $regex: '1518609886364', $options: 'i' } },
-                        { imageUrl: { $regex: '1518609886364', $options: 'i' } }
-                    ]
-                });
-                if (wipeResult.deletedCount > 0) {
-                    console.log(`Self-healing: Cleared ${wipeResult.deletedCount} broken mock posts with local file paths.`);
-                }
-
-                // Patch: ensure verified accounts always have isVerified set
-                const verifiedUsernames = ['stride_official', 'apple_user', 'purushotham_m', 'admin'];
-                await User.updateMany(
-                    { username: { $in: verifiedUsernames } },
-                    { $set: { isVerified: true } }
-                );
-                // Migrate: delete old puru account if it still exists
-                await User.deleteOne({ username: 'puru' });
-
-                // Maintenance: Prune non-official stride accounts
-                const pruneResult = await User.deleteMany({
-                    username: { $regex: /stride/i },
-                    username: { $ne: 'stride_official' }
-                });
-                if (pruneResult.deletedCount > 0) {
-                    console.log(`Self-healing: Pruned ${pruneResult.deletedCount} non-official 'stride' accounts.`);
-                }
-
-                console.log('Startup patch: Verified official accounts and cleaned legacy data.');
+                // MASTER PURGE: Total Database Reset for Production
+                // console.log('🧹 MASTER_PURGE: Wiping all user records for Day Zero launch...');
+                // await User.deleteMany({});
+                // console.log('✅ MASTER_PURGE: Database is now empty and ready for production.');
             } catch (e) {
-                console.error('Startup patches failed:', e);
+                console.error('Platform Startup patches failed:', e);
             }
         };
 
         await runPatches();
-        // Hydrate from data.json if empty
-        await hydrateFromJSON();
     } catch (err) {
-        console.error('CRITICAL: MongoDB connection failed:', err.message);
+        console.error('CRITICAL: Database connection failed:', err.message);
     }
 };
+
+(async () => {
+    await connectDB();
+})();
 
 const parseKiloMega = (val) => {
     if (typeof val === 'number') return val;
@@ -299,8 +226,6 @@ const hydrateFromJSON = async () => {
         console.error('ERROR: Data hydration failed:', err.message);
     }
 };
-
-connectDB();
 
 // Email Configuration
 let transporter;
@@ -543,43 +468,35 @@ app.get('/api/artist/stats/:username', async (req, res) => {
         
         let statsResponse;
 
-        if (process.env.USE_FIREBASE === 'true') {
-            const { FirestoreUser, FirestorePost, FirestoreTransaction } = require('./services/FirestoreModels.cjs');
-            const userRef = await FirestoreUser.findOne({ username });
-            if (!userRef) return res.status(404).json({ error: 'User not found' });
-            
-            // Pulse denormalized stats
-            statsResponse = {
-                summary: {
-                    totalPlays: await FirestorePost.countDocuments({ username }), // Impressions
-                    monthlyListeners: 0,
-                    followers: userRef.followerCount || 0,
-                    totalTips: userRef.balance || 0,
-                    trend: '+12% this week'
-                },
-                stats: [] // Placeholder for track breakdown
-            };
-        } else {
-            // Legacy MongoDB Pulse
             const userRef = await User.findOne({ username });
             if (!userRef) return res.status(404).json({ error: 'User not found' });
             
-            const postCount = await Post.countDocuments({ username });
+            // Fetch all posts by this user to calculate reach/views
+            const userPosts = await Post.find({ username }).exec();
+            const totalViews = userPosts.reduce((acc, p) => acc + (p.viewCount || 0), 0);
+            const totalReach = userPosts.reduce((acc, p) => acc + (p.uniqueViews?.length || 0), 0);
+            
+            // Get recent transactions (tips)
+            const transactions = await Transaction.find({ 
+                user: username, 
+                type: 'tip' 
+            }, { sort: { timestamp: -1 }, limit: 5 }).exec();
+
             statsResponse = {
                 summary: {
-                    totalPlays: postCount * 250, // Mock impression multiplier
-                    monthlyListeners: Math.floor((userRef.followerCount || 0) * 1.5),
-                    followers: userRef.followerCount || 0,
+                    totalPlays: totalViews,
+                    monthlyListeners: totalReach,
+                    followers: userRef.followersCount || userRef.followerCount || 0,
                     totalTips: userRef.balance || 0,
-                    trend: '+12% this week'
+                    trend: totalViews > 0 ? '+14% this month' : 'Steady'
                 },
-                stats: [
-                    { trackId: 'Rhythm_01', listens: 450 },
-                    { trackId: 'Rhythm_02', listens: 890 },
-                    { trackId: 'Rhythm_03', listens: 320 }
-                ]
+                stats: userPosts.slice(0, 5).map(p => ({
+                    trackId: p.title || p.id,
+                    listens: p.viewCount || 0
+                })),
+                recentTransactions: transactions
             };
-        }
+
 
         res.json(statsResponse);
     } catch (err) {
@@ -686,21 +603,11 @@ app.get('/api/music/genres', async (req, res) => {
 });
 
 app.get('/api/music/artists', async (req, res) => {
-    // Mock artists based on trending data or static list
-    const artists = [
-        { id: "a1", name: "Stride Official", avatar: "https://ui-avatars.com/api/?name=Stride+Official&background=random" },
-        { id: "a2", name: "Melody Maker", avatar: "https://ui-avatars.com/api/?name=Melody+Maker&background=random" },
-        { id: "a3", name: "Vibe Master", avatar: "https://ui-avatars.com/api/?name=Vibe+Master&background=random" }
-    ];
-    res.json(artists);
+    res.json([]);
 });
 
 app.get('/api/music/albums', async (req, res) => {
-    const albums = [
-        { id: "ab1", title: "Midnight Echoes", artist: "Stride Official", cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80" },
-        { id: "ab2", title: "Neon Dreams", artist: "Melody Maker", cover: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&q=80" }
-    ];
-    res.json(albums);
+    res.json([]);
 });
 
 app.get('/api/music/languages', async (req, res) => {
@@ -718,30 +625,11 @@ app.get('/api/profile/:username', async (req, res) => {
     const { username } = req.params;
     const { viewer } = req.query; // logged-in user's username
     try {
-        if (process.env.USE_FIREBASE === 'true') {
-             const { FirestoreUser } = require('./services/FirestoreModels.cjs');
-             const userRef = await FirestoreUser.findOne({ username });
-             if (userRef) {
-                 const userObj = { ...userRef };
-                 userObj.followerCount = userRef.followerCount || 0;
-                 userObj.followingCount = userRef.followingCount || 0;
-                 userObj.favoritesCount = (userRef.favorites || []).length; // Required for 'Music Maven' badge
-                 userObj.achievements = userRef.achievements || []; // Required for 'Hall of Fame'
 
-                 if (viewer) {
-                     const viewerRef = await FirestoreUser.findOne({ username: viewer });
-                     if (viewerRef) {
-                         userObj.isFollowing = (viewerRef.following || []).includes(userObj.id);
-                         userObj.viewerFollowingCount = viewerRef.followingCount || 0;
-                     }
-                 }
-                 return res.json(userObj);
-             }
-        }
 
         const user = await User.findOne({ username }).populate('posts');
         if (user) {
-            const userObj = user.toObject();
+            const userObj = { ...user };
             // Derive real counts from arrays
             userObj.followerCount = user.followers?.length || 0;
             userObj.followingCount = user.following?.length || 0;
@@ -777,7 +665,7 @@ app.get('/api/profile/:username', async (req, res) => {
 
             // Server-side isFollowing check for the viewer
             if (viewerUser) {
-                userObj.isFollowing = user.followers.some(
+                userObj.isFollowing = Array.isArray(user.followers) && user.followers.some(
                     id => id.toString() === viewerUser._id.toString()
                 );
                 // Also send viewer's real followingCount
@@ -792,7 +680,7 @@ app.get('/api/profile/:username', async (req, res) => {
                 name: username, // Default to handle instead of "Stride User"
                 bio: "Just a music lover on Stride 🎵",
                 isVerified: false,
-                avatar: `https://i.pravatar.cc/150?u=${username}`,
+                avatar: "",
                 posts: [], topTracks: [], followers: [], following: [],
                 followerCount: 0, followingCount: 0, favorites: []
             });
@@ -838,7 +726,7 @@ app.get('/api/feed', async (req, res) => {
             return {
                 ...post,
                 user: author ? author.username : (post.username || 'Stride User'),
-                avatar: author ? author.avatar : `https://i.pravatar.cc/150?u=${post.username || 'stride'}`,
+                avatar: author ? author.avatar : "",
                 avatarFrame: author ? author.avatarFrame : 'none',
                 isVerified: author ? author.isVerified : false,
                 comments: post.comments?.length || 0,
@@ -857,9 +745,9 @@ app.get('/api/feed', async (req, res) => {
                     _id: "seed1",
                     username: "Stride Artist",
                     user: "Stride Artist",
-                    avatar: "https://i.pravatar.cc/150?u=artist",
+                    avatar: "",
                     content: "Excited for the new drop! 🎵 #StrideVibes",
-                    imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800",
+                    imageUrl: "",
                     comments: 5,
                     likes: 124,
                     shares: 12,
@@ -869,9 +757,9 @@ app.get('/api/feed', async (req, res) => {
                     _id: "seed2",
                     username: "Stride Pro",
                     user: "Stride Pro",
-                    avatar: "https://i.pravatar.cc/150?u=pro",
+                    avatar: "",
                     content: "Late night jamming in the studio. 🎧",
-                    imageUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800",
+                    imageUrl: "",
                     comments: 2,
                     likes: 89,
                     shares: 5,
@@ -903,8 +791,10 @@ app.post('/api/stories', async (req, res) => {
         const newStory = {
             id: Date.now().toString(),
             username,
-            avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${username}`,
-            contentUrl: contentUrl || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80",
+            avatar: user ? user.avatar : "",
+
+            contentUrl: contentUrl || "",
+
             metadata: metadata || null,
             createdAt: new Date()
         };
@@ -954,7 +844,7 @@ app.post('/api/feed', async (req, res) => {
             userObj = await User.create({
                 username: req.body.username,
                 name: req.body.name || req.body.username,
-                avatar: req.body.avatar || `https://i.pravatar.cc/150?u=${req.body.username}`,
+                avatar: req.body.avatar || "",
                 bio: 'Joined Stride via post sync 🚀',
                 email: `${req.body.username}@thestrideapp.in`,
                 password: 'placeholder_sync_pwd'
@@ -966,11 +856,12 @@ app.post('/api/feed', async (req, res) => {
         const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
         
         if (contentUrl && localPathRegex.test(contentUrl)) {
-            contentUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80";
+            contentUrl = "";
         }
         if (imageUrl && localPathRegex.test(imageUrl)) {
-            imageUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80";
+            imageUrl = "";
         }
+
 
         const newPost = await Post.create({
             ...req.body,
@@ -1158,9 +1049,12 @@ app.post('/api/creator/subscribe/:username', async (req, res) => {
 
 app.get('/api/feed/live', async (req, res) => {
     try {
-        const liveUsers = await User.find({ isLive: true })
-            .select('username avatar liveStreamId')
-            .limit(20);
+        let liveUsers = await User.find({ isLive: true });
+        liveUsers = liveUsers.slice(0, 20).map(u => ({
+            username: u.username,
+            avatar: u.avatar,
+            liveStreamId: u.liveStreamId
+        }));
         res.json(liveUsers);
     } catch (err) {
         console.error('Live feed error:', err);
@@ -1538,6 +1432,48 @@ app.post('/api/marketplace/purchase', async (req, res) => {
     }
 });
 
+app.post('/api/wallet/purchase-frame', async (req, res) => {
+    const { username, frame, paymentMethod } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const framePrice = 5000; // Mock price: $50.00
+        const balance = user.balance || 0;
+
+        // Bypass balance check if paid via real payment gateway (card)
+        if (paymentMethod !== 'card' && balance < framePrice) {
+            return res.status(400).json({ success: false, message: 'Insufficient Vibe Credits. Top up required.' });
+        }
+
+        if (user.ownedFrames && user.ownedFrames.includes(frame)) {
+            return res.status(400).json({ success: false, message: 'Frame already owned.' });
+        }
+
+        // Deduct balance ONLY if not paid via card (credits flow)
+        const finalBalance = paymentMethod === 'card' ? balance : balance - framePrice;
+
+        await User.findOneAndUpdate(
+            { username },
+            { 
+                $set: { balance: finalBalance },
+                $addToSet: { ownedFrames: frame }
+            }
+        );
+
+        // Notify user about purchase
+        PushService.sendToUserByName(username, {
+            title: 'Frame Unlocked! ✨',
+            body: `You've successfully unlocked the ${frame} frame.`,
+            data: { type: 'PURCHASE', frame }
+        });
+
+        res.json({ success: true, message: `Successfully purchased ${frame} frame!` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/wallet/tip', async (req, res) => {
     const senderUsername = req.headers['x-user-username'];
     const { targetUsername, amount, postId } = req.body;
@@ -1590,6 +1526,13 @@ app.post('/api/wallet/tip', async (req, res) => {
             type: 'tip',
             from: senderUsername,
             content: `tipped you ${amount} credits!`
+        });
+
+        // Trigger Native Push Notification
+        PushService.sendToUserByName(targetUsername, {
+            title: 'Vibe Credits Received! ⚡',
+            body: `${senderUsername} tipped you ${amount} credits.`,
+            data: { type: 'TIP', sender: senderUsername, amount }
         });
 
         res.json({ success: true, balance: sender.balance });
@@ -2028,7 +1971,7 @@ app.post('/api/communities/:id/join', async (req, res) => {
                 name: `User ${userId.toString().slice(-4)}`,
                 email: `user_${userId}@example.com`,
                 password: 'password123',
-                avatar: `https://i.pravatar.cc/150?u=${userId}`
+                avatar: ""
             });
         }
         
@@ -2093,7 +2036,7 @@ app.get('/api/notifications/:username', async (req, res) => {
             }
 
             // If not groupable or new type, push as a single item with initialized actors
-            const notifObj = current.toObject();
+            const notifObj = { ...current };
             if (!notifObj.actors || notifObj.actors.length === 0) {
                 notifObj.actors = [current.from];
             }
@@ -2266,7 +2209,7 @@ app.get('/api/explore', async (req, res) => {
             id: `f-${p._id}`,
             type: i % 3 === 0 ? 'reel' : 'image',
             size: i % 4 === 0 ? 'large' : (i % 5 === 0 ? 'tall' : 'normal'),
-            url: p.contentUrl || `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80`
+            url: p.contentUrl || ""
         }));
         res.json(exploreItems);
     } catch (err) {
@@ -2310,7 +2253,7 @@ app.get('/api/messages', async (req, res) => {
             const chat = chatsMap.get(chatId);
             // Convert to frontend-friendly message object
             chat.messages.push({
-                ...msg.toObject(),
+                ...msg,
                 id: msg._id,
                 username: msg.sender,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -2324,7 +2267,7 @@ app.get('/api/messages', async (req, res) => {
             const user = await User.findOne({ username: chat.username });
             return {
                 ...chat,
-                avatar: user ? user.avatar : `https://i.pravatar.cc/150?u=${chat.username}`,
+                avatar: user ? user.avatar : "",
                 isVerified: user ? user.isVerified : false,
                 avatarFrame: user ? user.avatarFrame : 'none'
             };
@@ -2421,8 +2364,12 @@ app.post('/api/signup', async (req, res) => {
             email,
             password, 
             name: username, // default name
-            avatar: `https://i.pravatar.cc/150?u=${username}`,
-            favorites: []
+            avatar: "",
+            isVerified: false,
+            favorites: [],
+            followers: [],
+            following: [],
+            ownedFrames: ['none']
         });
 
         // Auto-follow official accounts for all new users
@@ -2498,11 +2445,107 @@ app.post('/api/verify-code', async (req, res) => {
 
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
-    console.log(`[AUTH] Simulated password reset link sent to: ${email}`);
-    // Simulate high-fidelity backend delay
-    setTimeout(() => {
-        res.json({ success: true, message: 'Reset pulse dispatched.' });
-    }, 800);
+    try {
+        console.log(`[AUTH] Generating synchronization link for: ${email}`);
+        const syncLink = `http://localhost:5173/login?reset=true&email=${encodeURIComponent(email)}`;
+        
+        // Premium High-Fidelity HTML Email Template
+        const resetHtml = `
+            <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid rgba(139, 92, 246, 0.2);">
+                <div style="padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
+                    <img src="https://thestrideapp.in/stride-logo.png" alt="Stride" style="width: 60px; height: 60px; margin-bottom: 20px;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; background: linear-gradient(to right, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Stride Auth Nexus</h1>
+                </div>
+                <div style="padding: 40px 30px;">
+                    <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 30px;">
+                        A synchronization pulse has been requested for your Stride account. Use the button below to verify your identity and restore access to the rhythm.
+                    </p>
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <a href="${syncLink}" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);">
+                            Synchronize Account
+                        </a>
+                    </div>
+                    <p style="font-size: 14px; color: #64748b; text-align: center;">
+                        If you didn't request this sync, please ignore this email. This link will expire shortly for your security.
+                    </p>
+                </div>
+                <div style="padding: 20px 30px; background-color: #1e293b; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                    <p style="font-size: 12px; color: #475569; margin: 0;">&copy; 2026 Stride Social. Powered by Vibe Engine.</p>
+                </div>
+            </div>
+        `;
+
+        const sent = await sendEmail(email, "Stride | Synchronization Link", resetHtml);
+        
+        if (sent) {
+            res.json({ success: true, message: 'Reset pulse dispatched successfully.' });
+        } else {
+            console.error("[AUTH] Pulse failed to dispatch to transport layer.");
+            res.status(500).json({ success: false, message: 'Delivery system failure. Check server logs.' });
+        }
+    } catch (err) {
+        console.error('[AUTH] ForgotPassword Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/social-login', async (req, res) => {
+    const { email, username, avatar, provider, uid } = req.body;
+    try {
+        const normalizedEmail = String(email).toLowerCase();
+        let foundUser = await User.findOne({ email: normalizedEmail });
+
+        if (!foundUser) {
+            console.log(`AUTH: Creating new social user for ${normalizedEmail} via ${provider}`);
+            foundUser = await User.create({
+                username: username || normalizedEmail.split('@')[0],
+                email: normalizedEmail,
+                password: 'social-auth-bypass-' + uid, 
+                name: username || normalizedEmail.split('@')[0],
+                avatar: avatar || "",
+                isVerified: false,
+                favorites: [],
+                followers: [],
+                following: [],
+                ownedFrames: ['none']
+            });
+
+            // Auto-follow official accounts for all new social users
+            const autoFollowUsernames = ['stride_official', 'purushotham_m'];
+            for (const targetUsername of autoFollowUsernames) {
+                try {
+                    const targetUser = await User.findOne({ username: targetUsername });
+                    if (targetUser) {
+                        await User.updateOne({ _id: targetUser._id }, { $addToSet: { followers: foundUser._id } });
+                        await User.updateOne({ _id: foundUser._id }, { $addToSet: { following: targetUser._id } });
+                    }
+                } catch (e) {
+                    console.error(`Auto-follow ${targetUsername} failed:`, e.message);
+                }
+            }
+        }
+
+        console.log(`AUTH: Social login success for ${foundUser.username}`);
+        res.json({
+            success: true,
+            user: {
+                username: foundUser.username,
+                name: foundUser.name,
+                email: foundUser.email,
+                avatar: foundUser.avatar,
+                banner: foundUser.banner,
+                bio: foundUser.bio,
+                avatarFrame: foundUser.avatarFrame,
+                accentColor: foundUser.accentColor,
+                isVerified: foundUser.isVerified,
+                _id: foundUser._id
+            },
+            token: 'mock-jwt-token-social-' + Date.now()
+        });
+    } catch (err) {
+        console.error('SOCIAL_AUTH_ERROR:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -2526,8 +2569,13 @@ app.post('/api/login', async (req, res) => {
                 success: true,
                 user: {
                     username: foundUser.username,
+                    name: foundUser.name,
                     email: foundUser.email,
                     avatar: foundUser.avatar,
+                    banner: foundUser.banner,
+                    bio: foundUser.bio,
+                    avatarFrame: foundUser.avatarFrame,
+                    accentColor: foundUser.accentColor,
                     isVerified: foundUser.isVerified,
                     _id: foundUser._id
                 },
@@ -2546,6 +2594,15 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/profile/update', async (req, res) => {
     const { username, name, bio, avatar, avatarFrame, banner, accentColor } = req.body;
     try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // Hardened check for frame ownership
+        const safeOwnedFrames = Array.isArray(user.ownedFrames) ? user.ownedFrames : ['none'];
+        if (avatarFrame && avatarFrame !== 'none' && !safeOwnedFrames.includes(avatarFrame)) {
+             return res.status(403).json({ success: false, message: 'Premium Frame not owned. Purchase required.' });
+        }
+
         const updatedUser = await User.findOneAndUpdate(
             { username },
             { name, bio, avatar, avatarFrame, banner, accentColor },
@@ -2843,57 +2900,18 @@ app.post('/api/monetization/gift-frame', async (req, res) => {
     }
 });
 
-// Razorpay Payment Endpoints
-app.post('/api/payments/order', async (req, res) => {
-    const { amount, currency = 'INR', username } = req.body;
+// Google Play Billing Verification Endpoint
+app.post('/api/payments/google/verify', async (req, res) => {
+    const { purchaseToken, productId, userId } = req.body;
     try {
-        const options = {
-            amount: amount * 100, // amount in smallest currency unit (paise)
-            currency,
-            receipt: `receipt_${Date.now()}`,
-            notes: { username }
-        };
-        const order = await razorpay.orders.create(options);
-        res.json({ success: true, order });
-    } catch (err) {
-        console.error('Razorpay Order Error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/api/payments/verify', async (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, username, amount } = req.body;
-    try {
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret')
-            .update(body.toString())
-            .digest('hex');
-
-        if (expectedSignature === razorpay_signature) {
-            // Payment verified, update user balance
-            const user = await User.findOneAndUpdate(
-                { username },
-                { $inc: { balance: parseInt(amount) } },
-                { returnDocument: 'after' }
-            );
-
-            // Record transaction
-            const tx = new Transaction({
-                user: user._id,
-                amount: parseInt(amount),
-                type: 'topup',
-                description: `Razorpay Top-up (${razorpay_payment_id})`,
-                timestamp: new Date()
-            });
-            await tx.save();
-
-            res.json({ success: true, balance: user.balance, transaction: tx });
+        const result = await MonetizationService.verifyGooglePurchase(purchaseToken, productId, userId);
+        if (result.success) {
+            res.json(result);
         } else {
-            res.status(400).json({ error: 'Invalid signature' });
+            res.status(400).json(result);
         }
     } catch (err) {
-        console.error('Razorpay Verification Error:', err);
+        console.error('Google Play Verification Error:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -3212,7 +3230,7 @@ io.on('connection', (socket) => {
 
             // Broadcast to room - MANDATORY for UI reflection
             io.to(roomId).emit('new_private_message', {
-                ...fullMessage.toObject(),
+                ...fullMessage,
                 username: fullMessage.sender, // Ensure frontend consistency
                 id: fullMessage._id
             });

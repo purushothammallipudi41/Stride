@@ -4,6 +4,7 @@ import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as Smil
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
+import { BASE_URL } from '../../utils/api';
 import './Chat.css';
 
 const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers, communityStats }) => {

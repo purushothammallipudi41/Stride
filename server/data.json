@@ -4,18 +4,34 @@
       "id": 1,
       "name": "Lo-Fi Lounge",
       "icon": "🎧",
-      "channels": ["general", "music-sharing", "voice-chat"],
+      "channels": [
+        "general",
+        "music-sharing",
+        "voice-chat"
+      ],
       "members": 120,
-      "tags": ["music", "lo-fi", "chill"]
+      "tags": [
+        "music",
+        "lo-fi",
+        "chill"
+      ]
     },
     {
       "id": "stride-official",
       "name": "Stride Official",
       "icon": "🚀",
       "description": "The official Stride community. Join the rhythm.",
-      "channels": ["announcements", "general", "jukebox-live"],
+      "channels": [
+        "announcements",
+        "general",
+        "jukebox-live"
+      ],
       "members": 50000,
-      "tags": ["music", "official", "community"]
+      "tags": [
+        "music",
+        "official",
+        "community"
+      ]
     },
     {
       "id": 2,
@@ -27,7 +43,11 @@
         "feedback"
       ],
       "members": 85,
-      "tags": ["music", "production", "beats"]
+      "tags": [
+        "music",
+        "production",
+        "beats"
+      ]
     },
     {
       "id": 1773818061620,
@@ -37,16 +57,25 @@
         "general"
       ],
       "members": 1,
-      "tags": ["sync", "social"]
+      "tags": [
+        "sync",
+        "social"
+      ]
     },
     {
       "id": "techno-tribe",
       "name": "Techno Tribe",
-      "icon": "https://images.unsplash.com/photo-1574433230641-591574cd66ac?w=800&q=80",
+      "icon": "",
       "description": "The ultimate hub for techno enthusiasts.",
-      "channels": ["general"],
+      "channels": [
+        "general"
+      ],
       "members": 12400,
-      "tags": ["music", "techno", "vibe"]
+      "tags": [
+        "music",
+        "techno",
+        "vibe"
+      ]
     }
   ],
   "users": {
@@ -56,7 +85,7 @@
       "name": "Test User",
       "email": "test@example.com",
       "password": "password123",
-      "avatar": "https://i.pravatar.cc/150?u=testuser",
+      "avatar": "",
       "bio": "Just a music lover on Stride 🎵",
       "onboardingCompleted": true,
       "accentColor": "#8b5cf6",
@@ -69,19 +98,19 @@
       "username": "alex_walker",
       "name": "Alexander Walker",
       "bio": "Music explorer, beat maker, and stride chaser. Always looking for the next sound.",
-      "avatar": "https://i.pravatar.cc/150?u=alex_walker",
+      "avatar": "",
       "posts": [
         {
           "id": "p1",
           "content": "Just found this amazing lo-fi track!",
-          "contentUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200",
+          "contentUrl": "",
           "likes": 12,
           "comments": 2,
           "timestamp": "2h ago"
         },
         {
           "content": "Stride is fire 🔥",
-          "contentUrl": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1200",
+          "contentUrl": "",
           "likes": 45,
           "comments": 8,
           "timestamp": "1d ago"
@@ -95,7 +124,7 @@
       "username": "stride_official",
       "name": "Stride Official",
       "bio": "The future of music social networking. Join the rhythm.",
-      "avatar": "https://ui-avatars.com/api/?name=Stride+Official&background=8b5cf6&color=fff",
+      "avatar": "",
       "followers": 50000,
       "following": 120,
       "isVerified": true,
@@ -105,7 +134,7 @@
       "username": "apple_user",
       "name": "Apple User",
       "bio": "Enthusiastic music listener and stride explorer.",
-      "avatar": "https://i.pravatar.cc/150?u=apple_user",
+      "avatar": "",
       "followers": 151,
       "following": 85,
       "isVerified": true,
@@ -119,7 +148,7 @@
       "email": "purushothammallipudi41@gmail.com",
       "password": "password123",
       "bio": "Stride Creator & Enthusiast.",
-      "avatar": "https://i.pravatar.cc/150?u=purushotham_m",
+      "avatar": "",
       "followers": 0,
       "following": 0,
       "isVerified": true,
@@ -129,7 +158,7 @@
       "username": "admin",
       "name": "Stride Admin",
       "bio": "Building the future of sound.",
-      "avatar": "https://i.pravatar.cc/150?u=stride_admin",
+      "avatar": "",
       "followers": 999,
       "following": 1,
       "isVerified": true,
@@ -146,41 +175,7 @@
       "hasUnreadMessages": true
     }
   },
-  "feed": [
-    {
-      "id": 1,
-      "username": "stride_official",
-      "type": "image",
-      "imageUrl": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
-      "caption": "Welcome to Stride! 🎵 Discover the rhythm of social music. Follow artists, join spaces, and find your sound.",
-      "likes": 5000,
-      "comments": 151,
-      "timestamp": "Just now",
-      "isVerified": true
-    },
-    {
-      "id": 2,
-      "username": "stride_official",
-      "type": "image",
-      "imageUrl": "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=80",
-      "caption": "The Jukebox is live! 📻 Share audio with your community. Everyone listens together, in real-time. Join a space to start vibing.",
-      "likes": 3200,
-      "comments": 84,
-      "timestamp": "2h ago",
-      "isVerified": true
-    },
-    {
-      "id": 3,
-      "username": "stride_official",
-      "type": "image",
-      "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
-      "caption": "Master your craft with the Artist Dashboard. 📈 Track your growth, manage subscriptions, and connect with your true fans.",
-      "likes": 4100,
-      "comments": 92,
-      "timestamp": "5h ago",
-      "isVerified": true
-    }
-  ],
+  "feed": [],
   "stories": [],
   "genres": [
     {
@@ -266,31 +261,31 @@
     {
       "id": "a1",
       "name": "Alex Stride",
-      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=60",
+      "image": "",
       "isVerified": false
     },
     {
       "id": "a2",
       "name": "Marcus Vibe",
-      "image": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&q=60",
+      "image": "",
       "isVerified": true
     },
     {
       "id": "a3",
       "name": "Maya Moon",
-      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=60",
+      "image": "",
       "isVerified": true
     },
     {
       "id": "a4",
       "name": "Bass Drop",
-      "image": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&auto=format&fit=crop&q=60",
+      "image": "",
       "isVerified": false
     },
     {
       "id": "a5",
       "name": "Acoustic Soul",
-      "image": "https://images.unsplash.com/photo-1520333789090-1afc82db536a?w=400&auto=format&fit=crop&q=60",
+      "image": "",
       "isVerified": false
     }
   ],
@@ -299,7 +294,7 @@
       "id": "al1",
       "title": "Midnight Horizons",
       "artist": "Alex Stride",
-      "cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=60",
+      "cover": "",
       "songs": [
         {
           "id": "s1",
@@ -319,7 +314,7 @@
       "id": "al2",
       "title": "Electric Soul",
       "artist": "Marcus Vibe",
-      "cover": "https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=400&q=60",
+      "cover": "",
       "songs": [
         {
           "id": "s4",
@@ -336,37 +331,22 @@
       "name": "Techno Tribe",
       "members": "12.4k",
       "category": "Music",
-      "image": "https://images.unsplash.com/photo-1574433230641-591574cd66ac?w=800&q=80",
+      "image": "",
       "description": "The ultimate hub for techno enthusiasts.",
-      "tags": ["music", "techno", "vibe"]
+      "tags": [
+        "music",
+        "techno",
+        "vibe"
+      ]
     }
   ],
-  "reels": [
-    {
-      "id": 1,
-      "username": "stride_official",
-      "url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200",
-      "description": "Create the next viral beat! 🚀 Remix, share, and rise with Stride Reels.",
-      "likes": "1.2M",
-      "music": "Stride Anthem - Original",
-      "isVerified": true
-    },
-    {
-      "id": 2,
-      "username": "stride_official",
-      "url": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1200",
-      "description": "Join the rhythm. 🎵",
-      "likes": "850K",
-      "music": "Electronic Soul",
-      "isVerified": true
-    }
-  ],
+  "reels": [],
   "chat_threads": [
     {
       "id": 1,
       "username": "sarah_beats",
       "name": "Sarah Jenkins",
-      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&q=80",
+      "avatar": "",
       "lastMessage": "Hi Sarah!",
       "time": "Just now",
       "messages": [
@@ -400,17 +380,5 @@
       ]
     }
   ],
-  "articles": [
-    {
-      "id": 1,
-      "title": "The Future of Spatial Audio in 2024",
-      "excerpt": "How multi-dimensional sound is changing the way we consume music.",
-      "author": "Marcus Vibe",
-      "date": "March 15, 2024",
-      "category": "Tech",
-      "image": "https://images.unsplash.com/photo-1558403135-c5a401897d74?w=800&q=80",
-      "reads": "5.2k",
-      "shares": "1.1k"
-    }
-  ]
+  "articles": []
 }

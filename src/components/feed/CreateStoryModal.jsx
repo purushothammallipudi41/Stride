@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { X, Send, Camera, Music, Image as ImageIcon, Type, BarChart2, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../utils/api';
+import socket from '../../services/socket';
 import './CreateStoryModal.css';
 
 const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, error }) => {
@@ -33,10 +34,11 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
 
     // Mock tracks from data.json context
     const mockTracks = [
-        { id: 's1', title: 'Start Again', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&q=80' },
-        { id: 's2', title: 'City Lights', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&q=80' },
-        { id: 's4', title: 'Voltage', artist: 'Marcus Vibe', cover: 'https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=100&q=80' },
-        { id: 's3', title: 'Midnight Horizons', artist: 'Alex Stride', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=60' }
+        { id: 's1', title: 'Start Again', artist: 'Alex Stride', cover: '' },
+        { id: 's2', title: 'City Lights', artist: 'Alex Stride', cover: '' },
+        { id: 's4', title: 'Voltage', artist: 'Marcus Vibe', cover: '' },
+        { id: 's3', title: 'Midnight Horizons', artist: 'Alex Stride', cover: '' }
+
     ];
 
     const startCamera = async () => {

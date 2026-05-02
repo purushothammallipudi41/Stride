@@ -7,25 +7,23 @@ import PageHeader from '../components/layout/PageHeader';
 import './Insights.css';
 
 const Insights = () => {
-    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('performance');
     const [statsData, setStatsData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     const userProfile = getStoredUser();
     const username = userProfile?.username || 'guest';
 
     useEffect(() => {
-        fetch(`${BASE_URL}/api/artist/stats/${username}`)
-            .then(res => res.json())
-            .then(data => {
-                setStatsData(data);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                console.error("Failed to fetch stats:", err);
-                setIsLoading(false);
-            });
+        if (username && username !== 'guest') {
+            fetch(`${BASE_URL}/api/artist/stats/${username}`)
+                .then(res => res.json())
+                .then(data => {
+                    setStatsData(data);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch stats:", err);
+                });
+        }
     }, [username]);
 
     const stats = [
@@ -94,7 +92,7 @@ const Insights = () => {
 
             <main className="insights-content">
                 <div className="stats-grid">
-                    {stats.map((stat, idx) => (
+                    {activeTab === 'performance' && stats.map((stat, idx) => (
                         <div key={idx} className="stat-card glass-panel">
                             <div className="stat-header">
                                 <span className="stat-label">{stat.label}</span>
@@ -112,48 +110,71 @@ const Insights = () => {
                             </div>
                         </div>
                     ))}
-                </div>
 
-                <div className="chart-section glass-panel">
-                    <div className="chart-header">
-                        <div className="header-info">
-                            <h3>Engagement History</h3>
-                            <p>Activity across your latest content</p>
-                        </div>
-                        <BarChart3 className="header-icon" size={24} />
-                    </div>
-                    {statsData?.stats?.length > 0 ? (
-                        <div className="chart-container-v2">
-                            <div className="bar-chart-v2">
-                                {statsData.stats.slice(0, 7).map((track, i) => {
-                                    const maxVal = Math.max(...statsData.stats.map(s => s.listens || 1));
-                                    const height = ((track.listens || 0) / maxVal) * 100;
-                                    return (
-                                        <div key={i} className="bar-wrapper" style={{ animationDelay: `${i * 0.1}s` }}>
-                                            <div className="bar-value">{(track.listens || 0)}</div>
-                                            <div className="bar-pill" style={{ height: `${Math.max(height, 8)}%` }}>
-                                                <div className="bar-glow" />
-                                                <div className="bar-shimmer" />
+                    {activeTab === 'wallet' && (
+                        <div className="wallet-insights-wrapper glass-panel animate-fade-in" style={{gridColumn: '1 / -1', padding: '24px'}}>
+                            <h3>Recent Income Transactions</h3>
+                            <div className="tx-list" style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                                {statsData?.recentTransactions?.length > 0 ? (
+                                    statsData.recentTransactions.map((tx, i) => (
+                                        <div key={i} className="tx-item" style={{display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px'}}>
+                                            <div style={{display: 'flex', flexDirection: 'column'}}>
+                                                <span style={{fontWeight: 600}}>{tx.description}</span>
+                                                <span style={{fontSize: '0.8rem', opacity: 0.5}}>{new Date(tx.timestamp).toLocaleDateString()}</span>
                                             </div>
-                                            <div className="bar-label">{track.trackId?.substring(0, 6)}</div>
+                                            <span style={{color: '#10b981', fontWeight: 700}}>+{tx.amount}¢</span>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="chart-placeholder">
-                            <div className="chart-lines">
-                                {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
-                            </div>
-                            <div className="empty-chart-msg">
-                                <BarChart3 size={48} className="empty-icon-pulse" />
-                                <p>Scanning for frequencies...</p>
-                                <span className="empty-subtext">Content interaction data will appear here.</span>
+                                    ))
+                                ) : (
+                                    <div style={{textAlign: 'center', opacity: 0.5, padding: '40px'}}>No recent earnings found.</div>
+                                )}
                             </div>
                         </div>
                     )}
                 </div>
+
+                {activeTab === 'performance' && (
+                    <div className="chart-section glass-panel">
+                        <div className="chart-header">
+                            <div className="header-info">
+                                <h3>Engagement History</h3>
+                                <p>Activity across your latest content</p>
+                            </div>
+                            <BarChart3 className="header-icon" size={24} />
+                        </div>
+                        {statsData?.stats?.length > 0 ? (
+                            <div className="chart-container-v2">
+                                <div className="bar-chart-v2">
+                                    {statsData.stats.slice(0, 7).map((track, i) => {
+                                        const maxVal = Math.max(...statsData.stats.map(s => s.listens || 1));
+                                        const height = ((track.listens || 0) / maxVal) * 100;
+                                        return (
+                                            <div key={i} className="bar-wrapper" style={{ animationDelay: `${i * 0.1}s` }}>
+                                                <div className="bar-value">{(track.listens || 0)}</div>
+                                                <div className="bar-pill" style={{ height: `${Math.max(height, 8)}%` }}>
+                                                    <div className="bar-glow" />
+                                                    <div className="bar-shimmer" />
+                                                </div>
+                                                <div className="bar-label">{track.trackId?.substring(0, 10)}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="chart-placeholder">
+                                <div className="chart-lines">
+                                    {[...Array(5)].map((_, i) => <div key={i} className="chart-line" />)}
+                                </div>
+                                <div className="empty-chart-msg">
+                                    <BarChart3 size={48} className="empty-icon-pulse" />
+                                    <p>Scanning for frequencies...</p>
+                                    <span className="empty-subtext">Content interaction data will appear here.</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
         </div>
     );

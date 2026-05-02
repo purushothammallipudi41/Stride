@@ -23,11 +23,6 @@ const queryClient = new QueryClient();
 
 export const Web3Provider = ({ children }) => {
   const projectId = 'YOUR_PROJECT_ID_PLACEHOLDER';
-
-  // Silent E2E mode or Production Fail-Safe to avoid 403 Config errors stalling the app
-  const isE2E = typeof window !== 'undefined' && 
-    (window.location.hostname === '127.0.0.1' || 
-     projectId === 'YOUR_PROJECT_ID_PLACEHOLDER');
   
   // Safe config initialization inside component scope
   const config = useMemo(() => {
@@ -54,8 +49,6 @@ export const Web3Provider = ({ children }) => {
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
   ], []);
-
-  console.log('[Web3Provider] Initializing...');
 
   if (!config) {
     return (

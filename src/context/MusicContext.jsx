@@ -17,9 +17,10 @@ export const MusicProvider = ({ children }) => {
 
 
     const FALLBACK_TRACKS = [
-        { id: 'f1', title: "Midnight City", artist: "M83", duration: 243, cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=480&q=80" },
-        { id: 'f2', title: "Blinding Lights", artist: "The Weeknd", duration: 200, cover: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=480&q=80" },
-        { id: 'f3', title: "Lofi Study", artist: "Stride Beats", duration: 180, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=480&q=80" }
+        { id: 'f1', title: "Midnight City", artist: "M83", duration: 243, cover: "" },
+
+        { id: 'f2', title: "Blinding Lights", artist: "The Weeknd", duration: 200, cover: "" },
+        { id: 'f3', title: "Lofi Study", artist: "Stride Beats", duration: 180, cover: "" }
     ];
 
     const [allSongs, setAllSongs] = useState(FALLBACK_TRACKS);
@@ -295,7 +296,7 @@ export const MusicProvider = ({ children }) => {
                 artist: currentTrack.artist,
                 album: 'Stride Music',
                 artwork: [
-                    { src: currentTrack.cover || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=512&q=80', sizes: '512x512', type: 'image/png' }
+                    { src: currentTrack.cover || "", sizes: '512x512', type: 'image/png' }
                 ]
             });
 

@@ -6,6 +6,16 @@ export const getStoredUser = () => {
     }
     const userObj = JSON.parse(userStr);
     
+    // High-Fidelity Identity Sanitizer: Self-Healing Mock Eradication
+    // Automatically scrub legacy mock URLs from cached identity to ensure professional identity
+    const mockPattern = /(pravatar|unsplash|placeholder|i\.pravatar\.cc|ui-avatars|picsum)/i;
+    if (userObj.avatar && mockPattern.test(userObj.avatar)) {
+        userObj.avatar = ""; 
+    }
+    if (userObj.banner && mockPattern.test(userObj.banner)) {
+        userObj.banner = "";
+    }
+
     // High-Fidelity Firebase Auth Synchronization
     // Ensure raw Firebase tokens with 'uid' seamlessly map to Stride's legacy '_id' 
     if (userObj && !userObj._id && userObj.uid) {

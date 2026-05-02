@@ -59,7 +59,8 @@ const Messages = () => {
                             id: getChatId(userProfile.username, openUsername),
                             username: openUsername,
                             name: openUsername,
-                            avatar: `https://i.pravatar.cc/150?u=${openUsername}`,
+                            avatar: "",
+
                             messages: [],
                             lastMessage: '',
                             time: ''

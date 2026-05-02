@@ -35,7 +35,8 @@ const Feed = ({ type: initialType = 'foryou' }) => {
         fetch(url)
             .then(res => res.json())
             .then(data => {
-                setPosts(Array.isArray(data) ? data : []);
+                const validPosts = Array.isArray(data) ? data.filter(p => p.imageUrl || p.contentUrl || p.url) : [];
+                setPosts(validPosts);
                 setIsLoading(false);
             })
             .catch(err => {

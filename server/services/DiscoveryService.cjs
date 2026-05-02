@@ -1,5 +1,4 @@
-const User = require('../models/User.cjs');
-const Community = require('../models/Community.cjs');
+const { User, Community } = require('./DatabasePulse.cjs');
 
 /**
  * DiscoveryService: Adaptive Recommendation Engine
@@ -30,11 +29,15 @@ class DiscoveryService {
             // 3. Weighting: Mix of trending posts and reels
             const trendingPosts = await Post.find({ 
                 type: { $ne: 'reel' },
-                imageUrl: { $ne: "" } 
+                $or: [
+                    { imageUrl: { $ne: "" } },
+                    { contentUrl: { $ne: "" } }
+                ]
             }).sort({ likes: -1 }).limit(10).lean();
 
             const trendingReels = await Post.find({ 
-                type: 'reel' 
+                type: 'reel',
+                contentUrl: { $ne: "" }
             }).sort({ likes: -1 }).limit(10).lean();
 
             // Interleave and randomize slightly

@@ -1,5 +1,5 @@
 const webpush = require('web-push');
-const User = require('../models/User.cjs');
+const { User } = require('./DatabasePulse.cjs');
 
 const vapidKeys = {
     publicKey: process.env.VAPID_PUBLIC_KEY || 'BLYw4hzos3fJvyOZR33U_zu7rMf6QCxvdlgvwgRAnLWfKx8UP1W3UeM0Yeh4TFxT5-4nSUHza25tHhE5cviByvI',
@@ -52,6 +52,17 @@ class PushService {
             await Promise.all(notifications);
         } catch (err) {
             console.error('PushService Error:', err);
+        }
+    }
+
+    static async sendToUserByName(username, payload) {
+        try {
+            const user = await User.findOne({ username });
+            if (user) {
+                return this.sendNotification(user.id || user._id, payload);
+            }
+        } catch (err) {
+            console.error('PushService sendToUserByName Error:', err);
         }
     }
 }

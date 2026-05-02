@@ -3,15 +3,9 @@ const Post = require('../models/Post.cjs');
 const User = require('../models/User.cjs');
 require('dotenv').config();
 
-const UNSPLASH_PLACEHOLDERS = [
-    "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
-    "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=800&q=80",
-    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
-    "https://images.unsplash.com/photo-1459749411177-042180ce673c?w=800&q=80",
-    "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80"
-];
+const UNSPLASH_PLACEHOLDERS = [];
 
-const getRandomPlaceholder = () => UNSPLASH_PLACEHOLDERS[Math.floor(Math.random() * UNSPLASH_PLACEHOLDERS.length)];
+const getRandomPlaceholder = () => "";
 
 async function sanitize() {
     const uri = process.env.MONGODB_URI;
@@ -27,44 +21,53 @@ async function sanitize() {
 
         // 1. Sanitize Posts
         const localPathRegex = /^(\/Users\/|C:\\|D:\\)/i;
+        const mockRegex = /(pravatar|unsplash|placeholder|i\.pravatar\.cc)/i;
         
         const postsToSanitize = await Post.find({
             $or: [
                 { contentUrl: localPathRegex },
-                { imageUrl: localPathRegex }
+                { imageUrl: localPathRegex },
+                { contentUrl: mockRegex },
+                { imageUrl: mockRegex }
             ]
         });
 
-        console.log(`Found ${postsToSanitize.length} posts with local file paths.`);
+        console.log(`Found ${postsToSanitize.length} posts with local paths or mock URLs.`);
 
         for (const post of postsToSanitize) {
             const oldValue = post.contentUrl || post.imageUrl;
-            post.contentUrl = getRandomPlaceholder();
-            // Also ensure imageUrl is updated if it exists
-            if (post.imageUrl) post.imageUrl = post.contentUrl;
+            post.contentUrl = "";
+            if (post.imageUrl) post.imageUrl = "";
             await post.save();
-            console.log(`Sanitized post ${post._id}: ${oldValue} -> ${post.contentUrl}`);
+            console.log(`Sanitized post ${post._id}: ${oldValue} erased.`);
         }
 
         // 2. Sanitize User Avatars/Banners
         const usersToSanitize = await User.find({
             $or: [
                 { avatar: localPathRegex },
-                { banner: localPathRegex }
+                { banner: localPathRegex },
+                { avatar: mockRegex },
+                { banner: mockRegex }
             ]
         });
 
-        console.log(`Found ${usersToSanitize.length} users with local file paths.`);
+        console.log(`Found ${usersToSanitize.length} users with local paths or mock URLs.`);
 
         for (const user of usersToSanitize) {
-            if (localPathRegex.test(user.avatar)) {
-                user.avatar = `https://i.pravatar.cc/150?u=${user.username}`;
+            let sanitized = false;
+            if (localPathRegex.test(user.avatar) || mockRegex.test(user.avatar)) {
+                user.avatar = "";
+                sanitized = true;
             }
-            if (localPathRegex.test(user.banner)) {
-                user.banner = getRandomPlaceholder();
+            if (localPathRegex.test(user.banner) || mockRegex.test(user.banner)) {
+                user.banner = "";
+                sanitized = true;
             }
-            await user.save();
-            console.log(`Sanitized user ${user.username}: paths replaced with web URLs.`);
+            if (sanitized) {
+                await user.save();
+                console.log(`Sanitized user ${user.username}: mock paths/URLs erased.`);
+            }
         }
 
         console.log("Sanitization complete.");

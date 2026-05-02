@@ -18,27 +18,27 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
+      },
+      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png'],
       manifest: {
-        name: 'Stride Social',
+        name: 'Stride: Find Your Rhythm',
         short_name: 'Stride',
-        description: 'Find your rhythm. Immerse in the social music ecosystem.',
+        description: 'Discover, connect, and vibe in the premier social ecosystem for music lovers and creators.',
         theme_color: '#8b5cf6',
-        background_color: '#000000',
+        background_color: '#0a0a0b',
         display: 'standalone',
+        orientation: 'portrait',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'logo192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
+            src: 'logo512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

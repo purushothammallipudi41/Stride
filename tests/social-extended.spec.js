@@ -16,7 +16,7 @@ test.describe('Social Interactions Extended (DMs & Calls)', () => {
             id: 'test-chat-1',
             username: 'StrideOfficial',
             name: 'Stride Official',
-            avatar: 'https://ui-avatars.com/api/?name=Stride+Official',
+            avatar: '',
             isVerified: true,
             messages: [
               { id: 1, text: 'Welcome to Stride!', username: 'StrideOfficial', time: '10:00 AM' }

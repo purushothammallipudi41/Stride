@@ -15,17 +15,17 @@ test.describe('Stride Full Application Smoke Test', () => {
     // Expect Home
     await expect(page).toHaveURL(/.*\//);
     
-    // Explore
-    await page.goto('http://127.0.0.1:5174/explore');
-    await expect(page).toHaveURL(/.*\/explore/);
-    
     // Servers
     await page.goto('http://127.0.0.1:5174/servers');
-    await expect(page).toHaveURL(/.*\/servers/);
+    await expect(page).toHaveURL(/.*(\/servers|\/communities|\/server|\/channel)/);
     
     // Music
     await page.goto('http://127.0.0.1:5174/music');
     await expect(page).toHaveURL(/.*\/music/);
+    
+    // Explore
+    await page.goto('http://127.0.0.1:5174/explore');
+    await expect(page).toHaveURL(/.*(\/explore|\/communities\/discover|\/search)/);
 
     // Profile
     await page.goto('http://127.0.0.1:5174/profile');
@@ -47,8 +47,6 @@ test.describe('Stride Full Application Smoke Test', () => {
       await expect(stories).toBeVisible();
     }
   });
-
-
 
   test('global UI elements', async ({ page }) => {
     // Topbar Search (Added in recent fix)

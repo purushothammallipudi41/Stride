@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, Heart, UserPlus, Bell, X, ChevronLeft } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/common/Avatar';
 import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
@@ -11,6 +11,7 @@ import { requestPushPermission } from '../components/notifications/PushManager';
 import './Notifications.css';
 
 const Notifications = () => {
+    const navigate = useNavigate();
     const userProfile = getStoredUser();
     const username = userProfile.username || 'guest';
     const { resetNotifications } = useUI();
@@ -25,18 +26,17 @@ const Notifications = () => {
         if (!username) return;
         resetNotifications();
 
-        const fetchNotifications = () => {
-            fetch(`${BASE_URL}/api/notifications/${username}`)
-                .then(res => res.json())
-                .then(data => {
-                    const fetchedNotifs = Array.isArray(data?.notifications) ? data.notifications : [];
-                    setNotifications(fetchedNotifs);
-                    setIsLoading(false);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch notifications:", err);
-                    setIsLoading(false);
-                });
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch(`${BASE_URL}/api/notifications/${username}`);
+                const data = await res.json();
+                const fetchedNotifs = Array.isArray(data?.notifications) ? data.notifications : [];
+                setNotifications(fetchedNotifs);
+            } catch (err) {
+                console.error("Failed to fetch notifications:", err);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         fetchNotifications();
@@ -52,7 +52,8 @@ const Notifications = () => {
 
         // Check for push permission
         if ('Notification' in window && Notification.permission === 'default') {
-            setShowPushInvite(true);
+            const timer = setTimeout(() => setShowPushInvite(true), 0);
+            return () => clearTimeout(timer);
         }
 
         return () => {
@@ -198,7 +199,7 @@ const Notifications = () => {
                                 <div className="notification-item-v2 glass-card">
                                     <div className="notif-v2-avatar-group">
                                         <Avatar 
-                                            src={notif.fromAvatar || `https://ui-avatars.com/api/?name=${notif.from}&background=random&color=fff`} 
+                                            src={notif.fromAvatar || ""} 
                                             size={48} 
                                             frame={notif.senderFrame} 
                                         />
@@ -215,7 +216,7 @@ const Notifications = () => {
                                     </div>
                                     {notif.type === 'like' || notif.type === 'comment' ? (
                                         <div className="notif-v2-media-preview">
-                                            <img src={notif.postImage || 'https://picsum.photos/100'} alt="post preview" />
+                                            <img src={notif.postImage || ""} alt="post preview" />
                                         </div>
                                     ) : (
                                         <button className="notif-v2-action-btn">Follow</button>

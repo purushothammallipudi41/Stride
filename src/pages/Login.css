@@ -1,13 +1,13 @@
 .login-page {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
   width: 100%;
   display: flex;
-  background-color: #030014;
+  flex-direction: column;
+  background-color: transparent; /* Let app-layout handle bg */
   position: relative;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
   font-family: var(--font-body);
 }
 
@@ -77,21 +77,20 @@
 /* Glass Card 2.0 */
 .login-card {
   width: 100%;
-  max-width: 440px;
-  padding: 48px 40px;
+  min-height: 100%;
+  flex: 1;
+  padding: 80px 40px 40px; /* Increased top padding for logo safety */
   position: relative;
-  margin: auto;
+  margin: 0;
   z-index: 10;
-  border-radius: 32px;
-  background: rgba(15, 15, 25, 0.6);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 0 80px rgba(255, 255, 255, 0.02);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 0;
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Switch to top-aligned to prevent clipping */
+  overflow: visible !important;
 }
 
 .login-card:hover {
@@ -195,7 +194,7 @@
   display: flex;
   align-items: center;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   border-radius: 20px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -227,31 +226,34 @@
   pointer-events: none;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  border: none !important; 
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.input-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-}
+/* Removed input-divider to clean up border look */
 
 .input-with-icon input {
   flex: 1;
   width: 100%;
-  padding: 20px 20px 20px 16px;
-  background: transparent;
-  border: none;
+  padding: 20px 20px 20px 0; /* Reduced left padding since icon area is handled */
+  background: transparent !important;
+  border: none !important;
   color: #fff;
   font-size: 1rem;
   transition: all 0.3s ease;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
 }
 
 .input-with-icon input:focus {
   outline: none;
+  background: transparent !important;
 }
 
-/* Autofill Overrides - Eliminating the "White Box" glitch */
+/* Hardened Autofill Overrides - Eliminating the "White Box" and "Light Blue" glitches */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
@@ -380,19 +382,7 @@ input:-webkit-autofill:active {
 
 /* Social Buttons */
 .divider {
-  margin: 32px 0;
-  position: relative;
-  text-align: center;
-}
-
-.divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  display: none;
 }
 
 .divider span {
@@ -418,7 +408,7 @@ input:-webkit-autofill:active {
   gap: 10px;
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   background: rgba(255, 255, 255, 0.03);
   color: #fff;
   font-weight: 600;

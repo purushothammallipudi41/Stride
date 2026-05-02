@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles, Music, Users, Zap } from 'lucide-react';
+import { Grid, Film, User, Plus, Settings, DollarSign, Camera, Upload, Image, Sparkles, Music, Users, Zap, Lock, CreditCard } from 'lucide-react';
 
 import { useMusic } from '../hooks/useMusic';
 import PageHeader from '../components/layout/PageHeader';
@@ -21,6 +21,7 @@ const Profile = () => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
+    const [purchaseTarget, setPurchaseTarget] = useState(null);
 
     const currentUser = getStoredUser();
     const isOwnProfile = !routeUsername || routeUsername === currentUser.username;
@@ -32,21 +33,6 @@ const Profile = () => {
         fetch(`${BASE_URL}/api/profile/${targetUser}${viewerParam}`)
             .then(res => res.json())
             .then(data => {
-                // Identity Restoration Logic: If this is the logged-in user's profile and 
-                // the server is returning a fallback avatar (pravatar), sync local storage to DB.
-                if (isOwnProfile && currentUser.username && data.avatar?.includes('pravatar.cc')) {
-                    console.warn("[Profile] Detected identity desync. Auto-restoring profile to database...");
-                    fetch(`${BASE_URL}/api/profile/update`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: currentUser.username,
-                            name: currentUser.name,
-                            avatar: currentUser.avatar,
-                            bio: currentUser.bio || "Just a music lover on Stride 🎵"
-                        })
-                    }).catch(e => console.error("Identity restoration failed:", e));
-                }
 
                 setUser(data);
                 setIsLoading(false);
@@ -201,6 +187,33 @@ const Profile = () => {
         setIsEditModalOpen(true);
     }, [user, setIsEditModalOpen]);
 
+    const handlePurchaseFrame = async (frame) => {
+        if (isUpdating) return;
+        setIsUpdating(true);
+        setError('');
+        try {
+            const res = await fetch(`${BASE_URL}/api/wallet/purchase-frame`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user.username, frame })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Refresh profile to get updated ownedFrames
+                loadProfile();
+                setIsSuccess(true);
+                setPurchaseTarget(null);
+                setTimeout(() => setIsSuccess(false), 2000);
+            } else {
+                setError(data.message || 'Purchase failed');
+            }
+        } catch (err) {
+            setError('Connection error');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     const closeEditModal = () => {
         setIsEditModalOpen(false);
         if (location.search.includes('edit=true')) {
@@ -240,9 +253,8 @@ const Profile = () => {
             const data = await res.json();
             if (data.success) {
                 setIsSuccess(true);
-                console.log("[Profile] Identity restored or updated successfully:", data.user.username);
-                // Update local storage and DOM immediately for instant feedback and E2E stability
-                localStorage.removeItem('user'); // Clear old potentially corrupted session
+                console.log("[Profile] Profile updated successfully:", data.user.username);
+                // Force sync local storage and DOM for zero-latency feedback
                 localStorage.setItem('user', JSON.stringify(data.user));
                 if (data.user.accentColor) {
                     localStorage.setItem('stride_theme_color', data.user.accentColor);
@@ -315,7 +327,17 @@ const Profile = () => {
 
 
     if (isLoading) return <div className="loading-screen">Resonating...</div>;
-    if (!user) return <div className="error-screen">User not found</div>;
+    if (!user) return (
+        <div className="error-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+            <div>User not found</div>
+            <button 
+                onClick={() => { localStorage.clear(); window.location.href='/login'; }} 
+                style={{ padding: '8px 16px', background: 'var(--color-primary)', border: 'none', borderRadius: '8px', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+                Return to Login
+            </button>
+        </div>
+    );
 
     // Last-ditch safety for nested properties
     const safeUser = {
@@ -350,9 +372,14 @@ const Profile = () => {
 
             {/* Profile Info */}
             <div className="ig-profile-bio-block">
-                <div className="profile-banner-container">
-                    <img src={user.banner || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2070'} alt="" className="profile-banner" />
+                <div className={`profile-banner-container ${!user.banner ? 'empty-banner' : ''}`}>
+                    {user.banner ? (
+                        <img src={user.banner} alt="" className="profile-banner" />
+                    ) : (
+                        <div className="profile-banner placeholder-banner"></div>
+                    )}
                 </div>
+
                 
                 <div className="ig-bio-top-row">
                     <Avatar 
@@ -490,7 +517,8 @@ const Profile = () => {
             <div className="ig-profile-grid">
                 {user.posts?.map((post, i) => (
                     <div key={i} className={`ig-grid-item ${post.isLocked ? 'locked-item' : ''}`}>
-                        <img src={post.isLocked ? 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=10&w=200&blur=100' : (post.contentUrl || post.image)} alt="Post" loading="lazy" />
+                        <img src={post.isLocked ? '' : (post.contentUrl || post.image)} alt="Post" loading="lazy" />
+
                         {post.isMemberOnly && (
                             <div className="grid-member-badge">
                                 <Crown size={14} />
@@ -548,19 +576,33 @@ const Profile = () => {
                             <div className="ig-edit-field">
                                 <label>Profile Frame</label>
                                 <div className="frame-selection-row">
-                                    {['none', 'gold', 'neon', 'holographic'].map(frame => (
-                                        <div 
-                                            key={frame} 
-                                            className={`frame-select-option ${editData.avatarFrame === frame ? 'active' : ''}`}
-                                            data-testid={`frame-option-${frame}`}
-                                            onClick={() => setEditData({...editData, avatarFrame: frame})}
-                                        >
-                                            <div className={`frame-preview avatar-frame-${frame}`}>
-                                                <div className="inner-preview" />
+                                    {['none', 'gold', 'neon', 'holographic'].map(frame => {
+                                        const isOwned = (user.ownedFrames || ['none']).includes(frame);
+                                        return (
+                                            <div 
+                                                key={frame} 
+                                                className={`frame-select-option ${editData.avatarFrame === frame ? 'active' : ''} ${!isOwned ? 'locked' : ''}`}
+                                                onClick={() => {
+                                                    if (isOwned) {
+                                                        setEditData({...editData, avatarFrame: frame});
+                                                    } else {
+                                                        setPurchaseTarget(frame);
+                                                    }
+                                                }}
+                                            >
+                                                <div className={`frame-preview avatar-frame-${frame}`}>
+                                                    <div className="inner-preview" />
+                                                    {!isOwned && (
+                                                        <div className="frame-lock-overlay">
+                                                            <Lock size={12} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span>{frame}</span>
+                                                {!isOwned && <span className="frame-price-tag">$50</span>}
                                             </div>
-                                            <span>{frame}</span>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -697,6 +739,79 @@ const Profile = () => {
                             <button className="ig-btn-save gift-confirm-btn" onClick={handleSendTip} disabled={tipStatus === 'sending'}>
                                 {tipStatus === 'sending' ? 'Sending...' : `Send ${tipAmount}¢`}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Purchase Confirmation Modal */}
+            {purchaseTarget && (
+                <div className="ig-modal-overlay">
+                    <div className="ig-modal-glass purchase-confirm-modal">
+                        <div className="ig-modal-header">
+                            <h2>Confirm Purchase</h2>
+                            <button className="ig-modal-close" onClick={() => setPurchaseTarget(null)}>✕</button>
+                        </div>
+                        <div className="ig-modal-body">
+                            <div className="purchase-preview-card" style={{display:'flex', flexDirection:'column', alignItems:'center', padding: '20px 0'}}>
+                                <div className={`frame-preview-circle avatar-frame-${purchaseTarget}`}>
+                                    <div className="inner-circle" />
+                                </div>
+                                <h3 style={{marginTop: 12, fontSize: '1.2rem', color: 'white'}}>{purchaseTarget.charAt(0).toUpperCase() + purchaseTarget.slice(1)} Frame</h3>
+                                <p className="purchase-price" style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--theme-primary, #8b5cf6)', marginTop: 8}}>$50.00</p>
+                            </div>
+                            
+                            <div className="payment-options-group" style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
+                                <button 
+                                    className="pay-option-btn vibe-credits"
+                                    onClick={() => handlePurchaseFrame(purchaseTarget)}
+                                    style={{
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        alignItems: 'center',
+                                        padding: '14px 20px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{display:'flex', alignItems: 'center', gap: 10}}>
+                                        <Zap size={18} className="text-yellow-400" />
+                                        <span>Use Vibe Credits</span>
+                                    </div>
+                                    <span style={{fontWeight: 700}}>5000¢</span>
+                                </button>
+
+                                <button 
+                                    className="pay-option-btn real-money"
+                                    onClick={() => {
+                                        navigate(`/checkout?item=Avatar+Frame&name=${purchaseTarget.charAt(0).toUpperCase() + purchaseTarget.slice(1)}+Frame&price=50.00`);
+                                        setPurchaseTarget(null);
+                                    }}
+                                    style={{
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        alignItems: 'center',
+                                        padding: '14px 20px',
+                                        background: 'var(--theme-primary, #8b5cf6)',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{display:'flex', alignItems: 'center', gap: 10}}>
+                                        <CreditCard size={18} />
+                                        <span>Pay with Real Money</span>
+                                    </div>
+                                    <span style={{fontWeight: 700}}>$50.00</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="ig-modal-footer">
+                            <button className="ig-btn-cancel" style={{width: '100%'}} onClick={() => setPurchaseTarget(null)}>Cancel</button>
                         </div>
                     </div>
                 </div>

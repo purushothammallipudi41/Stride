@@ -101,7 +101,7 @@ const LiveStage = () => {
             socket.off('stage_viewers_updated', handleViewerChange);
             socket.off('room_members_updated', handleMembersUpdate);
         };
-    }, [username, navigate, user.username]);
+    }, [username, navigate, user.username, streamData]); // Added streamData dependency
 
     useEffect(() => {
         let activeStream = null;

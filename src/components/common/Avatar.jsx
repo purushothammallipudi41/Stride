@@ -23,13 +23,14 @@ const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListeni
 
     const renderContent = () => {
         if (isTextAvatar) {
+            const fallbackChar = (alt && alt.length > 0) ? alt.charAt(0).toUpperCase() : '?';
             return (
                 <div 
                     className={`smart-avatar-text ${className}`} 
                     style={style}
                     aria-label={alt}
                 >
-                    {src || (alt ? alt.charAt(0).toUpperCase() : '?')}
+                    {src || fallbackChar}
                 </div>
             );
         }
@@ -43,7 +44,7 @@ const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListeni
                 loading="lazy"
                 onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                    e.target.src = "";
                 }}
             />
         );

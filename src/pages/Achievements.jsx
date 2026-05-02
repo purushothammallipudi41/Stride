@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Music, Users, Zap, Star, ShieldCheck, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
 import PageHeader from '../components/layout/PageHeader';
 import './Achievements.css';
 
-const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked, requirement, progress = 0, total = 5 }) => (
+const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked, progress = 0, total = 5 }) => (
   <div className={`achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`} style={{ '--accent-color': color }}>
     <div className="card-glass" />
     <div className="card-shimmer" />
@@ -15,7 +16,7 @@ const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked, re
           <Icon size={28} className="icon" />
           {isUnlocked ? (
             <div className="status-badge unlocked">
-              <ShieldCheck size={14} /> Legandary
+              <ShieldCheck size={14} /> Legendary
             </div>
           ) : (
             <div className="status-badge locked">
@@ -46,6 +47,7 @@ const AchievementCard = ({ title, description, icon: Icon, color, isUnlocked, re
 );
 
 const Achievements = () => {
+    const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -53,8 +55,8 @@ const Achievements = () => {
 
     useEffect(() => {
         if (!currentUser?.username) {
-            setIsLoading(false);
-            return;
+            const timer = setTimeout(() => setIsLoading(false), 0);
+            return () => clearTimeout(timer);
         }
         fetch(`${BASE_URL}/api/profile/${currentUser.username}`)
             .then(res => res.json())

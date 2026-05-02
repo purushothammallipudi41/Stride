@@ -194,6 +194,7 @@ export const ServerProvider = ({ children }) => {
 
     const value = {
         servers,
+        setServers,
         realTimeActivity,
         addCommunity,
         joinCommunity,

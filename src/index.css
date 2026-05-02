@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
+/* Global CSS Reset & Optimization */
+
 :root {
   /* Premium Palette - Midnight Sunset */
   --color-bg: #030014;
@@ -55,6 +57,23 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Global Input Hardening */
+input, select, textarea, button {
+  font-family: inherit;
+  outline: none;
+}
+
+input {
+  background-color: transparent;
+  border: none;
+}
+
+/* Prevent mobile browser highlight and background injections */
+input:focus, input:active {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -226,16 +245,18 @@ h1, h2, h3, h4, .font-header {
 .app-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  background: var(--color-bg);
+  background: #030014; /* Solid dark background */
   overflow: hidden;
+  padding-top: 0 !important; /* Force no padding at layout level */
 }
 
 .layout-primary {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   background: var(--color-bg);
 }
@@ -281,11 +302,9 @@ h1, h2, h3, h4, .font-header {
 }
 
 .mobile-view-container {
-  max-width: 480px;
-  margin: 0 auto;
+  width: 100%;
   min-height: 100%;
   background: var(--color-bg);
-  box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -321,6 +340,7 @@ h1, h2, h3, h4, .font-header {
     position: relative;
     flex-direction: column;
     height: 100dvh;
+    padding-top: 0; /* Force no padding on mobile layout shell */
   }
   
   .mobile-view-container {
@@ -333,6 +353,11 @@ h1, h2, h3, h4, .font-header {
     padding-bottom: var(--bottom-nav-height);
     height: 100%;
     min-height: 0;
+  }
+
+  /* Remove padding when on auth screens to prevent gap at bottom */
+  .main-content:has(.login-page) {
+    padding-bottom: 0;
   }
 }
 
