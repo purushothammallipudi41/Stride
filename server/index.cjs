@@ -2746,11 +2746,11 @@ app.post('/api/forgot-password', async (req, res) => {
                 </div>
                 <div style="padding: 40px 30px;">
                     <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 30px;">
-                        A synchronization pulse has been requested for your Vyx account. Use the button below to verify your identity and restore access to the frequency.
+                        A password reset has been requested for your Vyx account. Use the button below to verify your identity and securely reset your password.
                     </p>
                     <div style="text-align: center; margin-bottom: 40px;">
                         <a href="${syncLink}" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);">
-                            Synchronize Account
+                            Reset Password
                         </a>
                     </div>
                     <p style="font-size: 14px; color: #64748b; text-align: center;">
@@ -2763,7 +2763,7 @@ app.post('/api/forgot-password', async (req, res) => {
             </div>
         `;
 
-        const sent = await sendEmail(email, "Vyx | Synchronization Link", resetHtml);
+        const sent = await sendEmail(email, "Vyx | Password Reset Request", resetHtml);
         
         if (sent) {
             res.json({ success: true, message: 'Reset link dispatched successfully.' });
