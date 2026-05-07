@@ -362,6 +362,7 @@ const app = express();
 app.set('trust proxy', 1); // Required for express-rate-limit on Render
 app.use(helmet({
     contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(compression());
 app.use(cors({
