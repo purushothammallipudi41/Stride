@@ -8,7 +8,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
 
     const steps = [
         {
-            title: "Welcome to Stride",
+            title: "Welcome to Vyx",
             description: "The next generation of music social networking. Discover, connect, and vibe in 4K.",
             icon: <div className="onboarding-icon-main">🚀</div>,
             color: "var(--theme-primary)"
@@ -17,7 +17,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
             title: "Discover Your Sound",
             description: "Explore high-definition Reels and community-led music jukeboxes.",
             icon: <Music size={48} className="text-purple-500" />,
-            color: "#a855f7"
+            color: "#00f2ff"
         },
         {
             title: "Join the Community",

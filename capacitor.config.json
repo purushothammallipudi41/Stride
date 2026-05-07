@@ -1,14 +1,15 @@
 {
-  "appId": "com.stride.social",
-  "appName": "Stride",
+  "appId": "com.vyx.social",
+  "appName": "Vyx",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
   },
+  "backgroundColor": "#030014",
   "plugins": {
     "StatusBar": {
       "overlaysWebView": true,
-      "style": "LIGHT"
+      "style": "DARK"
     },
     "Keyboard": {
       "resize": "native",

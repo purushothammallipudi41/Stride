@@ -514,8 +514,8 @@ const CommunityView = () => {
     const isGatedChannel = activeChannelObj?.isGated;
 
     const brandStyle = {
-        '--color-primary': currentAccent || community?.accentColor || '#8b5cf6',
-        '--color-primary-glow': (currentAccent || community?.accentColor || '#8b5cf6') + '44',
+        '--color-primary': currentAccent || community?.accentColor || '#0066ff',
+        '--color-primary-glow': (currentAccent || community?.accentColor || '#0066ff') + '44',
         '--color-accent': currentAccent || community?.accentColor || '#d946ef',
     };
 
@@ -523,7 +523,7 @@ const CommunityView = () => {
         <div className="discord-layout animate-fade-in" style={brandStyle}>
             <SEO 
                 title={community?.name || 'Community'} 
-                description={`Join the ${community?.name} community on Stride. Connect with fellow listeners and vibers.`} 
+                description={`Join the ${community?.name} community on Vyx. Connect with fellow listeners and vibers.`} 
             />
             {/* Mobile Interaction Shroud */}
             {(isChannelSidebarOpen || (showMemberSidebar && window.innerWidth < 1100)) && (
@@ -937,7 +937,7 @@ const CommunityView = () => {
                                     {sidebarTab === 'media' ? <Camera size={24} /> : sidebarTab === 'threads' ? <MessageSquare size={24} /> : <Hash size={24} />}
                                 </div>
                                 <h3 style={{ fontSize: '1rem', marginBottom: '8px' }}>No {sidebarTab} yet</h3>
-                                <p style={{ fontSize: '0.8rem' }}>Be the first to share something with the rhythm.</p>
+                                <p style={{ fontSize: '0.8rem' }}>Be the first to share something with the frequency.</p>
                             </div>
                         )}
                     </div>
@@ -1089,7 +1089,7 @@ const CommunityView = () => {
                     <div className="glass-panel mint-pass-modal" onClick={e => e.stopPropagation()}>
                         <div className="mint-pass-hero">
                             <div className="pass-visual-card animate-float">
-                                <div className="logo-mini">STRIDE</div>
+                                <div className="logo-mini">VYX</div>
                                 <div className="pass-type">VIBE PASS</div>
                                 <div className="pass-id">#{Math.floor(Math.random() * 9999)}</div>
                             </div>
@@ -1132,16 +1132,16 @@ const CommunityView = () => {
                 <div className="modal-overlay">
                     <div className="modal-content glass-card animate-scale-in" style={{ maxWidth: '400px', padding: '30px', textAlign: 'center' }}>
                         <div className="title-with-icon" style={{ justifyContent: 'center', marginBottom: '15px' }}>
-                            <Trophy className="text-stride-primary" size={24} />
+                            <Trophy className="text-vyx-primary" size={24} />
                             <h2 style={{ margin: 0 }}>Gift for {targetMember.username}</h2>
                         </div>
-                        <p style={{ opacity: 0.7, marginBottom: '25px', fontSize: '0.9rem' }}>Select a balance amount to gift from your Stride wallet.</p>
+                        <p style={{ opacity: 0.7, marginBottom: '25px', fontSize: '0.9rem' }}>Select a balance amount to gift from your Vyx wallet.</p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                            <button className="stride-gift-select-premium" onClick={() => handleSendGift('tip', 100)}>
+                            <button className="vyx-gift-select-premium" onClick={() => handleSendGift('tip', 100)}>
                                 <span className="amt">100</span>
                                 <span className="currency">STRD</span>
                             </button>
-                            <button className="stride-gift-select-premium gold" onClick={() => handleSendGift('tip', 500)}>
+                            <button className="vyx-gift-select-premium gold" onClick={() => handleSendGift('tip', 500)}>
                                 <span className="amt">500</span>
                                 <span className="currency">STRD</span>
                             </button>

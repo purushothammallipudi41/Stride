@@ -42,7 +42,7 @@ const LiveOverlay = ({ streamId, streamerName, communityName, onClose }) => {
                 <div className="live-header-left">
                     <div className="live-indicator-badge pulse">LIVE</div>
                     <div className="live-meta">
-                        <h2 className="stream-title">{streamerName}'s Rhythm Lounge</h2>
+                        <h2 className="stream-title">{streamerName}'s Frequency Lounge</h2>
                         <p className="stream-community">Broadcasting in {communityName}</p>
                     </div>
                 </div>
@@ -63,7 +63,7 @@ const LiveOverlay = ({ streamId, streamerName, communityName, onClose }) => {
                     <div className="live-chat-preview animate-slide-up">
                         <div className="chat-msg"><b>vibe_master:</b> This drop is insane! 🔥</div>
                         <div className="chat-msg"><b>neo_rythm:</b> Love the lo-fi vibes here. 🎹</div>
-                        <div className="chat-msg"><b>stride_fan:</b> How do I get that serum patch?</div>
+                        <div className="chat-msg"><b>vyx_fan:</b> How do I get that serum patch?</div>
                     </div>
                 )}
 
@@ -81,7 +81,7 @@ const LiveOverlay = ({ streamId, streamerName, communityName, onClose }) => {
                     <div className="action-center">
                         <div className="now-playing-pill glass-panel">
                             <Music size={14} className="spin-icon" />
-                            <span>System Drop - Rhythmic Mix</span>
+                            <span>System Drop - Frequencyic Mix</span>
                         </div>
                     </div>
 

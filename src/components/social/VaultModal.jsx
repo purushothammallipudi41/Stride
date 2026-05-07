@@ -48,7 +48,7 @@ const VaultModal = () => {
                 </button>
                 <div className="header-info">
                     <h1 className="vault-title">Creator <span className="text-gradient">Vault</span></h1>
-                    <p>Manage your rhythm economy</p>
+                    <p>Manage your frequency economy</p>
                 </div>
                 <ShieldCheck size={28} className="vault-secure-icon" />
             </div>

@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// Stride v2.0 - Firestore Denormalization Functions 🛡️🏗️✨🚀⚡
+// Vyx v2.0 - Firestore Denormalization Functions 🛡️🏗️✨🚀⚡
 
 /**
  * Increment Post 'likeCount' when a new like document is created

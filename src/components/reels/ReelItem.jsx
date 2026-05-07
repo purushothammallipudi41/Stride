@@ -167,7 +167,7 @@ const ReelItem = ({ video, isActive }) => {
                     </div>
                     
                     <div className="sidebar-action sparkles-action" onClick={(e) => e.stopPropagation()}>
-                        <Sparkles size={32} color="#a855f7" strokeWidth={2.5} />
+                        <Sparkles size={32} color="#00f2ff" strokeWidth={2.5} />
                     </div>
                 </div>
 

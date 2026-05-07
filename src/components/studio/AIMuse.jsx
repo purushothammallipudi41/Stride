@@ -42,7 +42,7 @@ const AIMuse = ({ filterId, mode, onClose }) => {
                     <Sparkles size={40} className="muse-core-icon" />
                 </div>
                 <h3>Consulting the Muse...</h3>
-                <p>Analyzing rhythmic intent and platform pulses.</p>
+                <p>Analyzing frequencyic intent and platform pulses.</p>
             </div>
         );
     }

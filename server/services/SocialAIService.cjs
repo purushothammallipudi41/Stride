@@ -2,7 +2,7 @@ const { Message } = require('./DatabasePulse.cjs');
 
 class SocialAIService {
     /**
-     * Generates a rhythmic summary (Vibe Pulse) of recent community activity.
+     * Generates a frequencyic summary (Vibe Pulse) of recent community activity.
      * Simulation of high-fidelity LLM summarization.
      */
     static async generateCommunityPulse(communityId) {
@@ -14,13 +14,13 @@ class SocialAIService {
 
             if (!messages || messages.length === 0) {
                 return {
-                    summary: "The rhythm is quiet right now. No recent major pulses detected.",
+                    summary: "The frequency is quiet right now. No recent major pulses detected.",
                     highlights: ["Be the first to start the vibe!"],
                     vibeLevel: "Chill"
                 };
             }
 
-            // Extract keywords for rhythmic simulation
+            // Extract keywords for frequencyic simulation
             const textContent = messages.map(m => m.content).join(' ');
             const highlights = [];
             
@@ -37,7 +37,7 @@ class SocialAIService {
                 highlights.push("Platform evolution and vibe-checking 🧬");
             }
 
-            // High-fidelity rhythmic summary generation (Simulated AI)
+            // High-fidelity frequencyic summary generation (Simulated AI)
             const topicCount = highlights.length;
             let summary = "";
             let vibeLevel = "Steady";
@@ -46,7 +46,7 @@ class SocialAIService {
                 summary = "The community is reaching a fever pitch with multiple high-fidelity discussions about new drops and potential collaborations.";
                 vibeLevel = "Electric";
             } else if (topicCount >= 1) {
-                summary = "Social rhythm is focused on core creative updates. Engagement is consistent around recent drops.";
+                summary = "Social frequency is focused on core creative updates. Engagement is consistent around recent drops.";
                 vibeLevel = "Focused";
             } else {
                 summary = "The pulse is steady. General social interaction is maintaining a collaborative atmosphere.";
@@ -63,7 +63,7 @@ class SocialAIService {
         } catch (err) {
             console.error('SocialAIService Error:', err);
             return {
-                summary: "Intelligence pulse interrupted. Stride is recalibrating.",
+                summary: "Intelligence pulse interrupted. Vyx is recalibrating.",
                 highlights: ["Sync Error"],
                 vibeLevel: "Offline"
             };

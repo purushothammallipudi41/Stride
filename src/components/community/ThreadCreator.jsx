@@ -43,7 +43,7 @@ const ThreadCreator = ({ communityId, user, onClose, onCreated }) => {
         <div className="modal-overlay" onClick={onClose}>
             <div className="thread-creator-modal glass-panel animate-scale-in" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Start Rhythmic Discussion</h3>
+                    <h3>Start Frequencyic Discussion</h3>
                     <button className="close-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 

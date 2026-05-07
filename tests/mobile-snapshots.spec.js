@@ -19,7 +19,7 @@ test('capture mobile screenshots', async ({ page }) => {
   await verifyAuthState(page);
   
   // Wait for the feed to load
-  await expect(page.locator('.topbar-logo-text')).toContainText('Stride');
+  await expect(page.locator('.topbar-logo-text')).toContainText('Vyx');
   await page.waitForTimeout(3000); 
   await page.screenshot({ path: '/Users/purushothammallipudi/.gemini/antigravity/brain/66163597-1741-4b0d-8a02-eba86e15a151/mobile_home.png', fullPage: false });
 

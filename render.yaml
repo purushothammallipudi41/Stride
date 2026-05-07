@@ -1,7 +1,7 @@
 services:
   # Backend Service
   - type: web
-    name: stride-backend
+    name: vyx-backend
     env: node
     plan: free
     buildCommand: npm ci --legacy-peer-deps
@@ -22,18 +22,18 @@ services:
 
   # Frontend Static Site
   - type: static_site
-    name: stride-frontend
+    name: vyx-frontend
     buildCommand: npm ci --legacy-peer-deps && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         fromService:
-          name: stride-backend
+          name: vyx-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_SOCKET_URL
         fromService:
-          name: stride-backend
+          name: vyx-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: NODE_VERSION

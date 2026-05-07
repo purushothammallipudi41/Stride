@@ -79,7 +79,7 @@ const VibeService = {
         }
     },
 
-    getRhythmicMatches: async (username) => {
+    getFrequencyicMatches: async (username) => {
         try {
             const currentUser = await User.findOne({ username });
             if (!currentUser || !currentUser.vibeScores || currentUser.vibeScores.size === 0) return [];

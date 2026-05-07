@@ -1,7 +1,7 @@
 .create-article-standardized {
-    --primary-glow: rgba(139, 92, 246, 0.4);
+    --primary-glow: rgba(0, 102, 255, 0.4);
     --bg-dark: #09090b;
-    --acc-purple: #8b5cf6;
+    --acc-purple: #0066ff;
     --acc-blue: #3b82f6;
 }
 

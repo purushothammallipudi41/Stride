@@ -173,7 +173,7 @@ const Studio = () => {
             recorder.start();
             setIsRecording(true);
             
-            // Auto-stop after 15 seconds max (Instagram Story rhythm)
+            // Auto-stop after 15 seconds max (Instagram Story frequency)
             setTimeout(() => {
                 if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
                     stopRecording();
@@ -194,7 +194,7 @@ const Studio = () => {
     };
 
     const exportVideo = () => {
-        // In a real Stride app, you would upload this blob to Firebase Storage.
+        // In a real Vyx app, you would upload this blob to Firebase Storage.
         // For local Studio testing, we emulate a browser download.
         if (recordedChunks.length) {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
@@ -202,7 +202,7 @@ const Studio = () => {
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = `stride_studio_${Date.now()}.webm`;
+            a.download = `vyx_studio_${Date.now()}.webm`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -229,12 +229,12 @@ const Studio = () => {
                 </button>
                 <h1 className="studio-title">
                     {studioMode === 'stage' ? <Tv size={24} /> : <Camera size={24} />} 
-                    {studioMode === 'stage' ? 'VibeCast Stage' : 'Stride Studio'} 
+                    {studioMode === 'stage' ? 'VibeCast Stage' : 'Vyx Studio'} 
                     {isRecording && <span className="studio-live-badge">REC</span>}
                     {isLive && <span className="stage-live-badge pulse">ON AIR</span>}
                 </h1>
                 <button className="studio-icon-btn glow" onClick={() => setShowMuse(!showMuse)}>
-                    <Sparkles size={20} color={showMuse ? "#a855f7" : "#fff"} />
+                    <Sparkles size={20} color={showMuse ? "#00f2ff" : "#fff"} />
                 </button>
                 <div className="studio-version">v2.9.0-AI MUSE</div>
             </div>

@@ -1,4 +1,4 @@
-/* Premium Explore Styles - Stride Redesign */
+/* Premium Explore Styles - Vyx Redesign */
 
 .explore-container {
     height: 100%;
@@ -42,10 +42,10 @@
 }
 
 .explore-tab.active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+    background: linear-gradient(135deg, #0066ff 0%, #d946ef 100%);
     color: white;
     border-color: transparent;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.4);
 }
 
 .explore-header-section {
@@ -92,8 +92,8 @@
     outline: none;
     background: rgba(255, 255, 255, 0.08);
     border-color: var(--color-primary);
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2),
-                inset 0 0 10px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 30px rgba(0, 102, 255, 0.2),
+                inset 0 0 10px rgba(0, 102, 255, 0.1);
 }
 
 .search-icon-abs.focused {
@@ -268,7 +268,7 @@
 
 .comm-join-btn {
     margin: 0 10px 10px;
-    background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+    background: linear-gradient(135deg, #0066ff 0%, #d946ef 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -341,12 +341,12 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(0, 102, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    color: #a855f7;
+    color: #00f2ff;
 }
 
 .vibe-comm-info {
@@ -404,7 +404,7 @@
 
 .hashtag-chip:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: #a855f7;
+    border-color: #00f2ff;
     transform: translateY(-2px);
 }
 
@@ -414,8 +414,8 @@
 }
 
 .hashtag-count {
-    background: rgba(139, 92, 246, 0.2);
-    color: #a855f7;
+    background: rgba(0, 102, 255, 0.2);
+    color: #00f2ff;
     font-size: 0.75rem;
     font-weight: 800;
     padding: 2px 8px;

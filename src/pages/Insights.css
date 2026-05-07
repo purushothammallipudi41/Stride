@@ -64,10 +64,10 @@
 }
 
 .insight-tab-btn.active {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(0, 102, 255, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
     color: white;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(0, 102, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.15);
 }
 
 .stats-grid {
@@ -208,7 +208,7 @@
 .bar-pill {
     width: 100%;
     max-width: 48px;
-    background: linear-gradient(to top, rgba(139, 92, 246, 0.2), #8b5cf6);
+    background: linear-gradient(to top, rgba(0, 102, 255, 0.2), #0066ff);
     border-radius: 12px 12px 4px 4px;
     position: relative;
     overflow: hidden;
@@ -222,9 +222,9 @@
 }
 
 .bar-pill:hover {
-    background: linear-gradient(to top, #8b5cf6, #ec4899);
+    background: linear-gradient(to top, #0066ff, #ec4899);
     transform: scaleX(1.1) translateY(-4px);
-    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 102, 255, 0.4);
 }
 
 .bar-shimmer {

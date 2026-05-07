@@ -296,7 +296,7 @@
 }
 
 .confirm-yes:hover {
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(0, 102, 255, 0.2);
 }
 
 .confirm-no:hover {
@@ -325,7 +325,7 @@
     position: relative;
     padding: 3px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #a855f7, #ec4899);
+    background: linear-gradient(45deg, #00f2ff, #ec4899);
 }
 
 .live-avatar-ring.pulse {

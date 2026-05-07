@@ -45,7 +45,7 @@ const CommunityBoard = ({ communityId, user, isMember }) => {
             <div className="board-header">
                 <div className="board-title-group">
                     <h2>Community Boards</h2>
-                    <p>Persistent discussions and rhythmic topics</p>
+                    <p>Persistent discussions and frequencyic topics</p>
                 </div>
                 {isMember && (
                     <button className="create-thread-btn" onClick={() => setShowCreator(true)}>
@@ -88,7 +88,7 @@ const CommunityBoard = ({ communityId, user, isMember }) => {
                 {threads.length === 0 && !loading && (
                     <div className="empty-board">
                         <MessageSquare size={48} opacity={0.2} />
-                        <p>No discussions yet. Start the rhythm!</p>
+                        <p>No discussions yet. Start the frequency!</p>
                     </div>
                 )}
             </div>

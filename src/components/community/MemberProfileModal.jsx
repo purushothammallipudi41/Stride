@@ -7,7 +7,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, isMod, onModAction, commu
     if (!member) return null;
 
     const mUsername = member.username || member.name || 'Spectral Member';
-    const accentColor = communityAccent || '#8b5cf6';
+    const accentColor = communityAccent || '#0066ff';
     const joinDate = member.joinedAt ? new Date(member.joinedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'year' }) : 'Nov 26, 2025';
 
     return (
@@ -37,7 +37,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, isMod, onModAction, commu
                 </div>
                 <div className="biocard-info">
                     <h2>{mUsername}</h2>
-                    <span className="u-tag">{member.username ? `@${member.username}` : 'The Silent Rhythmist'}</span>
+                    <span className="u-tag">{member.username ? `@${member.username}` : 'The Silent Frequencyist'}</span>
                 </div>
             </div>
 
@@ -45,7 +45,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, isMod, onModAction, commu
                 <div className="biocard-section">
                     <label>Bio</label>
                     <p className="biocard-text">
-                        {member.bio || "Just another vibe in the Stride nexus. Catch me in the lounge synced to the latest drops."}
+                        {member.bio || "Just another vibe in the Vyx nexus. Catch me in the lounge synced to the latest drops."}
                     </p>
                 </div>
 
@@ -82,7 +82,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, isMod, onModAction, commu
                     <div className="biocard-section">
                         <div className="mod-action-toolbox">
                             <button className="mod-toolbox-item" onClick={() => onModAction('gift', member)}>
-                                <Trophy size={16} className="text-stride-primary" />
+                                <Trophy size={16} className="text-vyx-primary" />
                                 <span>Send Virtual Gift</span>
                             </button>
                         </div>

@@ -73,13 +73,13 @@
 
 .welcome-editor {
     text-align: center;
-    padding: 40px 0;
+    padding: 24px 0 20px;
 }
 
 .welcome-editor h3 {
     font-size: 22px;
     margin-bottom: 12px;
-    background: linear-gradient(90deg, #fff, #8b5cf6);
+    background: linear-gradient(90deg, #fff, #0066ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -142,12 +142,12 @@
 
 .media-preview.edit-preview {
     cursor: pointer;
-    border: 2px solid rgba(139, 92, 246, 0.3);
+    border: 2px solid rgba(0, 102, 255, 0.3);
     transition: all 0.3s ease;
 }
 
 .media-preview.edit-preview:hover {
-    border-color: #8b5cf6;
+    border-color: #0066ff;
     transform: scale(1.02);
 }
 
@@ -171,7 +171,7 @@
 
 .edit-badge {
     height: 20px;
-    background: #8b5cf6;
+    background: #0066ff;
     color: #fff;
     font-size: 9px;
     font-weight: 800;
@@ -269,8 +269,8 @@
 
 .attachment-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
 }
 
 .attachment-tile {
@@ -306,7 +306,7 @@
 
 .gallery-bg { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
 .camera-bg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.music-bg { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.music-bg { background: linear-gradient(135deg, #0066ff 0%, #0066ff 100%); }
 
 .attachment-tile span {
     font-size: 0.8rem;
@@ -333,7 +333,7 @@
 }
 
 .attach-btn:hover {
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
 }
 
 .submit-post-btn {
@@ -412,7 +412,7 @@
 .check-icon {
     width: 60px;
     height: 60px;
-    background: var(--accent-color, #a855f7);
+    background: var(--accent-color, #00f2ff);
     color: white;
     border-radius: 50%;
     display: flex;

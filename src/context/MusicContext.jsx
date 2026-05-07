@@ -20,7 +20,7 @@ export const MusicProvider = ({ children }) => {
         { id: 'f1', title: "Midnight City", artist: "M83", duration: 243, cover: "" },
 
         { id: 'f2', title: "Blinding Lights", artist: "The Weeknd", duration: 200, cover: "" },
-        { id: 'f3', title: "Lofi Study", artist: "Stride Beats", duration: 180, cover: "" }
+        { id: 'f3', title: "Lofi Study", artist: "Vyx Beats", duration: 180, cover: "" }
     ];
 
     const [allSongs, setAllSongs] = useState(FALLBACK_TRACKS);
@@ -47,7 +47,7 @@ export const MusicProvider = ({ children }) => {
 
     
     const [recentTracks, setRecentTracks] = useState(() => {
-        const saved = localStorage.getItem('stride_recent');
+        const saved = localStorage.getItem('vyx_recent');
         return saved ? JSON.parse(saved) : [];
     });
     
@@ -60,13 +60,22 @@ export const MusicProvider = ({ children }) => {
 
     const [username, setUsername] = useState(getLoggedUsername());
 
-    
-    // Update username when localStorage changes (simple sync)
-    useEffect(() => {
-        const handleStorage = () => setUsername(getLoggedUsername());
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
+    const refreshUser = useCallback(() => {
+        const newUsername = getLoggedUsername();
+        setUsername(newUsername);
     }, []);
+
+    useEffect(() => {
+        const handleStorage = (e) => {
+            if (!e.key || e.key === 'user') refreshUser();
+        };
+        window.addEventListener('storage', handleStorage);
+        window.addEventListener('vyx_auth_update', refreshUser);
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+            window.removeEventListener('vyx_auth_update', refreshUser);
+        };
+    }, [refreshUser]);
 
     // Fetch metadata and favorites from backend on mount/login
     useEffect(() => {
@@ -147,7 +156,7 @@ export const MusicProvider = ({ children }) => {
 
     // Sync recent to localStorage (keeping local for now as per plan focus on favorites/servers)
     useEffect(() => {
-        localStorage.setItem('stride_recent', JSON.stringify(recentTracks));
+        localStorage.setItem('vyx_recent', JSON.stringify(recentTracks));
     }, [recentTracks]);
 
     // Fetch trending tracks on mount
@@ -293,7 +302,7 @@ export const MusicProvider = ({ children }) => {
             navigator.mediaSession.metadata = new window.MediaMetadata({
                 title: currentTrack.title,
                 artist: currentTrack.artist,
-                album: 'Stride Music',
+                album: 'Vyx Music',
                 artwork: [
                     { src: currentTrack.cover || "", sizes: '512x512', type: 'image/png' }
                 ]

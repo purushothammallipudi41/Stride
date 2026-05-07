@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "mem_1778056666751_1",
+    "id": "mem_1778056666751_1",
+    "owner": "507f1f77bcf86cd799439011",
+    "members": [
+      "507f1f77bcf86cd799439011"
+    ],
+    "jukeboxQueue": [],
+    "memberCount": 120,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  },
+  {
+    "_id": "mem_1778056666751_2",
+    "id": "mem_1778056666751_2",
+    "owner": "507f1f77bcf86cd799439011",
+    "members": [
+      "507f1f77bcf86cd799439011"
+    ],
+    "jukeboxQueue": [],
+    "memberCount": 50000,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  },
+  {
+    "_id": "mem_1778056666751_3",
+    "id": "mem_1778056666751_3",
+    "owner": "507f1f77bcf86cd799439011",
+    "members": [
+      "507f1f77bcf86cd799439011"
+    ],
+    "jukeboxQueue": [],
+    "memberCount": 85,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  },
+  {
+    "_id": "mem_1778056666751_4",
+    "id": "mem_1778056666751_4",
+    "owner": "507f1f77bcf86cd799439011",
+    "members": [
+      "507f1f77bcf86cd799439011"
+    ],
+    "jukeboxQueue": [],
+    "memberCount": 1,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  },
+  {
+    "_id": "mem_1778056666751_5",
+    "id": "mem_1778056666751_5",
+    "owner": "507f1f77bcf86cd799439011",
+    "members": [
+      "507f1f77bcf86cd799439011"
+    ],
+    "jukeboxQueue": [],
+    "memberCount": 12400,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  }
+]

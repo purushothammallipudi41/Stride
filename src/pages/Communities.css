@@ -45,7 +45,7 @@
 
 .discover-search-wrapper input:focus {
     background: rgba(255, 255, 255, 0.06);
-    border-color: #a855f7;
+    border-color: #00f2ff;
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
     outline: none;
 }
@@ -82,7 +82,7 @@
 }
 
 .discover-tab-btn.active {
-    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #00f2ff 0%, #0066ff 100%);
     color: white;
     border: none;
     box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
@@ -174,7 +174,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #a855f7;
+    color: #00f2ff;
     box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     transition: transform 0.3s;
 }

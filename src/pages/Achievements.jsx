@@ -76,7 +76,7 @@ const Achievements = () => {
             title: 'Music Maven',
             description: 'Favorite 5 or more tracks to earn this badge.',
             icon: Music,
-            color: '#8b5cf6',
+            color: '#0066ff',
             requirement: '5 Favorites'
         },
         {
@@ -98,7 +98,7 @@ const Achievements = () => {
         {
             id: 'Content Creator',
             title: 'Content Creator',
-            description: 'Publish your first high-fidelity clip using Stride Studio.',
+            description: 'Publish your first high-fidelity clip using Vyx Studio.',
             icon: Star,
             color: '#10b981',
             requirement: '1 Studio Post'
@@ -106,7 +106,7 @@ const Achievements = () => {
         {
             id: 'Market Maverick',
             title: 'Market Maverick',
-            description: 'Acquire a premium digital asset from the Stride Marketplace.',
+            description: 'Acquire a premium digital asset from the Vyx Marketplace.',
             icon: Trophy,
             color: '#f59e0b',
             requirement: '1 Purchase'
@@ -119,7 +119,7 @@ const Achievements = () => {
 
     return (
         <div className="achievements-page animate-fade-in">
-            <div className="stride-mesh-bg" />
+            <div className="vyx-mesh-bg" />
             <PageHeader title="Hall of Fame" />
             
             <main className="achievements-content">

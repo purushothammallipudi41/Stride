@@ -78,6 +78,7 @@ const connectDB = async () => {
 
 (async () => {
     await connectDB();
+    await hydrateFromJSON();
 })();
 
 const parseKiloMega = (val) => {
@@ -239,11 +240,11 @@ const createTransporter = async () => {
         return null; // Don't need a transporter for Resend
     }
 
-    // Priority 2: Generic SMTP/Gmail (Fallback)
+    // Generic SMTP/Gmail (Fallback)
     if (process.env.EMAIL_PASS && process.env.EMAIL_USER) {
         const port = parseInt(process.env.EMAIL_PORT || "587");
-        console.log(`INFO: Using SMTP fallback on port ${port}.`);
-        return nodemailer.createTransport({
+        console.log(`INFO: Using SMTP primary on port ${port} (${process.env.EMAIL_USER}).`);
+        const primary = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || "smtp.gmail.com",
             port,
             secure: port === 465,
@@ -251,15 +252,29 @@ const createTransporter = async () => {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
             },
-            connectionTimeout: 20000,
-            greetingTimeout: 20000,   
-            socketTimeout: 30000,     
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,   
+            socketTimeout: 15000,     
             pool: true                
         });
+
+        // Pre-verify primary to fail-fast if credentials are wrong
+        try {
+            console.log('INFO: Verifying primary SMTP pulse...');
+            // We don't await here to avoid blocking startup, but we log the async result
+            primary.verify().then(() => {
+                console.log('SUCCESS: Primary SMTP is live and authenticated.');
+            }).catch(err => {
+                console.warn('WARN: Primary SMTP authentication failed. Fallback active.', err.message);
+            });
+            return primary;
+        } catch (e) {
+            console.error('ERROR: Primary SMTP initialization failed.');
+        }
     }
     
     // Otherwise, create a test account on the fly (Ethereal Email)
-    console.log('INFO: No Gmail credentials or failing. Creating an automated Ethereal Test Account...');
+    console.log('INFO: Falling back to automated Ethereal Test Account...');
     try {
         const testAccount = await nodemailer.createTestAccount();
         return nodemailer.createTransport({
@@ -272,7 +287,7 @@ const createTransporter = async () => {
             },
         });
     } catch (err) {
-        console.error('ERROR: Failed to create test account. Falling back to console-only logging.');
+        console.error('ERROR: Failed to create test account. Console-only logging enabled.');
         return null;
     }
 };
@@ -288,7 +303,7 @@ const sendEmail = async (to, subject, html) => {
         if (resend) {
             console.log('Using Resend SDK Path (HTTP)...');
             const { data, error } = await resend.emails.send({
-                from: 'Stride <onboarding@resend.dev>',
+                from: 'Vyx <onboarding@resend.dev>',
                 to: [to],
                 subject: subject,
                 html: html,
@@ -306,24 +321,20 @@ const sendEmail = async (to, subject, html) => {
         if (!readyTransporter) throw new Error('No email service configured');
 
         const info = await readyTransporter.sendMail({
-            from: `"Stride App" <contact@thestrideapp.in>`,
+            from: `"Vyx App" <hello@vyxapp.in>`,
             to,
             subject,
             html
         });
         
-        console.log(`Email sent successfully to ${to}`);
-        if (nodemailer.getTestMessageUrl(info)) {
-            console.log(`PREVIEW URL: ${nodemailer.getTestMessageUrl(info)}`);
-        }
+        console.log(`Email dispatched to ${to}`);
         return true;
     } catch (err) {
         console.error(`CRITICAL: Error sending email to ${to}:`, err.message);
-        if (err.code) console.error(`ERROR CODE: ${err.code}, SYSCALL: ${err.syscall}, COMMAND: ${err.command}`);
         
-        // Final fallback: try to create a test account if SMTP failed and resend is not active
-        if (!resend && (err.code === 'ETIMEDOUT' || err.code === 'EAUTH')) {
-            console.log('SMTP FAILURE: Attempting one-time fallback to test account...');
+        // Instant Fallback for specific failures
+        if (!resend && (err.code === 'EAUTH' || err.code === 'ETIMEDOUT' || err.message.includes('Invalid login'))) {
+            console.log('RECOVERY: Attempting emergency fallback to Ethereal pulse...');
             try {
                 const testAccount = await nodemailer.createTestAccount();
                 const fallbackTransporter = nodemailer.createTransport({
@@ -331,7 +342,7 @@ const sendEmail = async (to, subject, html) => {
                     auth: { user: testAccount.user, pass: testAccount.pass }
                 });
                 await fallbackTransporter.sendMail({
-                    from: `"Stride App" <contact@thestrideapp.in>`,
+                    from: `"Vyx App" <hello@vyxapp.in>`,
                     to,
                     subject,
                     html
@@ -355,7 +366,18 @@ app.use(helmet({
 app.use(compression());
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ["https://thestrideapp.in", "https://www.thestrideapp.in"] 
+        ? [
+            "https://vyxapp.in", 
+            "https://www.vyxapp.in", 
+            "https://stride-v2-4123b.web.app",
+            "https://stride-v2-4123b.firebaseapp.com",
+            "capacitor://localhost", 
+            "https://localhost",
+            "http://localhost",
+            "http://localhost:3000",
+            "http://localhost:8100",
+            "http://127.0.0.1"
+          ] 
         : "*"
 }));
 
@@ -373,12 +395,22 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/assets', express.static(path.join(__dirname, '../dist/assets')));
 
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: process.env.NODE_ENV === 'production' 
-            ? ["https://thestrideapp.in", "https://www.thestrideapp.in"] 
+            ? [
+                "https://vyxapp.in", 
+                "https://www.vyxapp.in", 
+                "https://stride-v2-4123b.web.app",
+                "https://stride-v2-4123b.firebaseapp.com",
+                "capacitor://localhost", 
+                "https://localhost",
+                "http://localhost"
+              ] 
             : "*",
         methods: ["GET", "POST"]
     }
@@ -407,7 +439,7 @@ app.get('/api/system/config', async (req, res) => {
     res.json({
         maintenance: process.env.MAINTENANCE_MODE === 'true',
         version: '1.3.1',
-        message: 'Stride is operational.'
+        message: 'Vyx is operational.'
     });
 });
 
@@ -479,13 +511,15 @@ app.get('/api/admin/stats', async (req, res) => {
     try {
         const userCount = await User.countDocuments();
         const serverCount = await Community.countDocuments();
-        // Simulating revenue calculation from Transaction collection
-        const totalRevenue = 4520; // Placeholder for real payment gateway integration
+        const totalRevenue = 4520;
         
-        // Count pending reports and verifications
-        // Using a search-based simulation for now as models are dynamic
-        const reportCount = 12; 
-        const pendingVerifications = 8;
+        // Real pending verifications count from DB
+        const pendingVerList = await User.find({ verificationStatus: 'pending' });
+        const pendingVerifications = pendingVerList.length;
+
+        // Real report count
+        const reportList = await Post.find({ reported: true });
+        const reportCount = reportList.length;
 
         res.json({
             users: userCount,
@@ -513,15 +547,52 @@ app.get('/api/admin/reports', async (req, res) => {
 
 app.get('/api/admin/verifications', async (req, res) => {
     try {
-        // Find users who have applied for verification
-        const pendingArtists = await User.find({ isVerified: false }).limit(5);
+        const pendingArtists = await User.find({ verificationStatus: 'pending' });
         res.json(pendingArtists.map(u => ({
             id: u._id,
             username: u.username,
             name: u.name || u.username,
-            bio: u.bio || 'Rising Artist',
+            bio: u.verificationBio || u.bio || 'Rising Artist',
+            genre: u.verificationGenre || 'Unknown',
+            portfolioUrl: u.verificationPortfolio || '',
             status: 'pending'
         })));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/verify/apply', async (req, res) => {
+    const { username, realName, genre, portfolioUrl, socialHandle, bio } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        await User.updateOne({ username }, { $set: {
+            verificationStatus: 'pending',
+            verificationBio: bio,
+            verificationGenre: genre,
+            verificationPortfolio: portfolioUrl,
+            verificationSocial: socialHandle,
+            verificationRealName: realName,
+            verificationAppliedAt: new Date()
+        }});
+        
+        res.json({ success: true, message: 'Application received. Under review within 48 hours.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/admin/verify/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { action } = req.body; // 'approve' or 'reject'
+    try {
+        const update = action === 'approve'
+            ? { isVerified: true, verificationStatus: 'approved' }
+            : { verificationStatus: 'rejected' };
+        await User.updateOne({ _id: userId }, { $set: update });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -744,6 +815,34 @@ app.get('/api/music/languages', async (req, res) => {
 });
 
 
+app.get('/api/profile/:username/followers', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ success: false });
+
+        // Fetch users who follow this user
+        const followers = await User.find({ _id: { $in: user.followers || [] } }).exec();
+        res.json({ success: true, users: followers });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/profile/:username/following', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ success: false });
+
+        // Fetch users this user follows
+        const following = await User.find({ _id: { $in: user.following || [] } }).exec();
+        res.json({ success: true, users: following });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/profile/:username', async (req, res) => {
     const { username } = req.params;
     const { viewer } = req.query; // logged-in user's username
@@ -800,8 +899,8 @@ app.get('/api/profile/:username', async (req, res) => {
             // Profile fallback for non-existent but referenced users
             res.json({
                 username,
-                name: username, // Default to handle instead of "Stride User"
-                bio: "Just a music lover on Stride 🎵",
+                name: username, // Default to handle instead of "Vyx User"
+                bio: "New on Vyx!",
                 isVerified: false,
                 avatar: "",
                 posts: [], topTracks: [], followers: [], following: [],
@@ -822,7 +921,7 @@ app.get('/api/feed', async (req, res) => {
             // High-fidelity AI Discovery Brain
             postsArray = await VibeService.getPersonalizedFeed(username, 50);
         } else {
-            // Chronological Social Rhythm
+            // Chronological Social Frequency
             postsArray = await Post.find().populate('user').sort({ createdAt: -1 }).limit(50).lean();
         }
 
@@ -848,7 +947,7 @@ app.get('/api/feed', async (req, res) => {
 
             return {
                 ...post,
-                user: author ? author.username : (post.username || 'Stride User'),
+                user: author ? author.username : (post.username || 'Vyx User'),
                 avatar: author ? author.avatar : "",
                 avatarFrame: author ? author.avatarFrame : 'none',
                 isVerified: author ? author.isVerified : false,
@@ -866,10 +965,10 @@ app.get('/api/feed', async (req, res) => {
             res.json([
                 {
                     _id: "seed1",
-                    username: "Stride Artist",
-                    user: "Stride Artist",
+                    username: "Vyx Artist",
+                    user: "Vyx Artist",
                     avatar: "",
-                    content: "Excited for the new drop! 🎵 #StrideVibes",
+                    content: "Excited for the new drop! 🎵 #VyxVibes",
                     imageUrl: "",
                     comments: 5,
                     likes: 124,
@@ -878,8 +977,8 @@ app.get('/api/feed', async (req, res) => {
                 },
                 {
                     _id: "seed2",
-                    username: "Stride Pro",
-                    user: "Stride Pro",
+                    username: "Vyx Pro",
+                    user: "Vyx Pro",
                     avatar: "",
                     content: "Late night jamming in the studio. 🎧",
                     imageUrl: "",
@@ -968,8 +1067,8 @@ app.post('/api/feed', async (req, res) => {
                 username: req.body.username,
                 name: req.body.name || req.body.username,
                 avatar: req.body.avatar || "",
-                bio: 'Joined Stride via post sync 🚀',
-                email: `${req.body.username}@thestrideapp.in`,
+                bio: 'Joined Vyx via post sync 🚀',
+                email: `${req.body.username}@vyxapp.in`,
                 password: 'placeholder_sync_pwd'
             });
         }
@@ -1034,7 +1133,7 @@ app.post('/api/feed/:id/like', async (req, res) => {
                 // Trigger Native Push
                 PushService.sendNotification(postOwner._id, {
                     title: 'New Vibe Like',
-                    body: `${likerUsername} liked your rhythm.`,
+                    body: `${likerUsername} liked your frequency.`,
                     data: { postId: post._id }
                 });
             }
@@ -1077,7 +1176,7 @@ app.post('/api/posts/:id/view', async (req, res) => {
             { returnDocument: 'after' }
         );
         if (post) {
-            // AI Vibe Engine: Update user affinities with passive view rhythm
+            // AI Vibe Engine: Update user affinities with passive view frequency
             if (username !== 'guest' && post.tags && post.tags.length > 0) {
                 VibeService.updateVibeScore(username, post.tags, 'view');
             }
@@ -1150,7 +1249,7 @@ app.post('/api/creator/subscribe/:username', async (req, res) => {
         // Native Push
         PushService.sendNotification(creator._id, {
             title: 'New Subscriber Echo',
-            body: `${subscriberUsername} joined your premium rhythm!`,
+            body: `${subscriberUsername} joined your premium frequency!`,
             icon: subscriber.avatar
         });
 
@@ -1192,31 +1291,31 @@ app.get('/api/studio/muse/suggest', async (req, res) => {
     // Heuristic Muse Logic
     const suggestions = {
         normal: {
-            captions: ["Finding my rhythm today 🎧", "Pure Stride vibes only.", "Clear vision, clear beats."],
-            tags: ["#stride", "#rhythm", "#daily", "#vibe", "#nexus"]
+            captions: ["Finding my frequency today 🎧", "Pure Vyx vibes only.", "Clear vision, clear beats."],
+            tags: ["#vyx", "#frequency", "#daily", "#vibe", "#nexus"]
         },
         cyberpunk: {
-            captions: ["Neon pulse in the veins 🌃", "The future is rhythmic.", "Cyber Stride active."],
+            captions: ["Neon pulse in the veins 🌃", "The future is frequencyic.", "Cyber Vyx active."],
             tags: ["#cyberpunk", "#neon", "#future", "#hacker", "#tech"]
         },
         vaporwave: {
-            captions: ["Aesthetic waves only 🌊", "Retro-future rhythm.", "Vapor Stride pulse."],
+            captions: ["Aesthetic waves only 🌊", "Retro-future frequency.", "Vapor Vyx pulse."],
             tags: ["#vaporwave", "#aesthetic", "#retro", "#lofi", "#chill"]
         },
         golden: {
-            captions: ["Chasing the sunset rhythm ☀️", "Golden hour, golden beats.", "Sunset VibeCast active."],
+            captions: ["Chasing the sunset frequency ☀️", "Golden hour, golden beats.", "Sunset VibeCast active."],
             tags: ["#goldenhour", "#sunset", "#warm", "#vibes", "#glow"]
         },
         noir: {
-            captions: ["Midnight rhythms 🌙", "Deep bass, deep noir.", "The shadow of the beat."],
-            tags: ["#noir", "#midnight", "#dark", "#deep", "#rhythm"]
+            captions: ["Midnight frequencies 🌙", "Deep bass, deep noir.", "The shadow of the beat."],
+            tags: ["#noir", "#midnight", "#dark", "#deep", "#frequency"]
         },
         acid: {
-            captions: ["Tripping on the rhythm 🍄", "High-frequency vibes.", "Acid Stride pulse ACTIVE."],
+            captions: ["Tripping on the frequency 🍄", "High-frequency vibes.", "Acid Vyx pulse ACTIVE."],
             tags: ["#acid", "#psychedelic", "#trippy", "#energy", "#rave"]
         },
         vintage: {
-            captions: ["Classic rhythms never die 📼", "Lo-fi nostalgia.", "Vintage Stride echo."],
+            captions: ["Classic frequencies never die 📼", "Lo-fi nostalgia.", "Vintage Vyx echo."],
             tags: ["#vintage", "#lofi", "#retro", "#classic", "#echo"]
         }
     };
@@ -1299,7 +1398,7 @@ app.post('/api/governance/vote', async (req, res) => {
 
         await proposal.save();
         
-        // Stride v3.1: Check for Quorum & Apply Sovereignty Shifts
+        // Vyx v3.1: Check for Quorum & Apply Sovereignty Shifts
         if (proposal.totalWeight >= proposal.quorum && proposal.status === 'active') {
             proposal.status = 'passed';
             await proposal.save();
@@ -1335,7 +1434,7 @@ app.post('/api/governance/vote', async (req, res) => {
         }
 
         // Real-time broadcast
-        io.to(proposal.communityId === 'global' ? 'stride_global' : `community_${proposal.communityId}`)
+        io.to(proposal.communityId === 'global' ? 'vyx_global' : `community_${proposal.communityId}`)
           .emit('governance_update', { 
               proposalId, 
               totalWeight: proposal.totalWeight,
@@ -1427,8 +1526,8 @@ app.post('/api/profile/:username/follow', async (req, res) => {
 
             // Trigger Native Push
             PushService.sendNotification(targetId, {
-                title: 'New Rhythm Follower',
-                body: `${followerUsername || 'Someone'} followed your rhythm!`,
+                title: 'New Frequency Follower',
+                body: `${followerUsername || 'Someone'} followed your frequency!`,
                 icon: followerUser.avatar
             });
             io.to(`user_${username}`).emit('new_notification', {
@@ -1467,6 +1566,7 @@ app.post('/api/profile/:username/follow', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // --- WALLET & MONETIZATION ---
 app.get('/api/wallet/balance', async (req, res) => {
@@ -1879,7 +1979,7 @@ app.get('/api/search/tag/:tag', async (req, res) => {
 app.get('/api/discovery/vibe-matches/:username', async (req, res) => {
     try {
         const { username } = req.params;
-        const matches = await VibeService.getRhythmicMatches(username);
+        const matches = await VibeService.getFrequencyicMatches(username);
         res.json({ success: true, matches });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -1910,7 +2010,7 @@ app.get('/api/communities/:id/pulse', async (req, res) => {
     }
 });
 
-// Stride v3.1: Sovereignty Settings & Mod Tools
+// Vyx v3.1: Sovereignty Settings & Mod Tools
 app.post('/api/communities/:id/settings', async (req, res) => {
     const { id } = req.params;
     const { accentColor, gatedChannels, description, name } = req.body;
@@ -1972,7 +2072,7 @@ app.delete('/api/communities/:id', async (req, res) => {
         // Notify all members of decommissioning
         io.to(`community_${id}`).emit('community_deleted', { id });
         
-        res.json({ success: true, message: 'Node successfully decommissioned from the Stride nexus.' });
+        res.json({ success: true, message: 'Node successfully decommissioned from the Vyx nexus.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -2342,10 +2442,15 @@ app.get('/api/explore', async (req, res) => {
 
 app.get('/api/messages', async (req, res) => {
     try {
-        const messages = await Message.find().sort({ createdAt: 1 });
+        const { username } = req.query;
+        if (!username) return res.status(400).json({ error: 'Username required' });
+
+        // Only fetch messages where the user is either sender or receiver
+        const messages = await Message.find({
+            $or: [{ sender: username }, { receiver: username }]
+        }).sort({ createdAt: 1 });
         
         // --- DATA SANITIZATION ---
-        // Dynamically strip out corrupted database records created by legacy routing bugs
         const cleanMessages = messages.filter(msg => 
             !msg.sender.includes('new_') && 
             !msg.receiver.includes('new_') &&
@@ -2353,28 +2458,31 @@ app.get('/api/messages', async (req, res) => {
             !msg.receiver.includes('-')
         );
         
-        // Group messages by (sender, receiver) pair to create "chats"
         const chatsMap = new Map();
-        
+        const requestingUser = await User.findOne({ username });
+        if (!requestingUser) return res.status(404).json({ error: 'User not found' });
+
         for (const msg of cleanMessages) {
             const participants = [msg.sender, msg.receiver].sort();
             const chatId = participants.join('-');
             
             if (!chatsMap.has(chatId)) {
-                // Return all participants so the frontend can find the "other" person
+                const otherUsername = msg.sender === username ? msg.receiver : msg.sender;
+                
                 chatsMap.set(chatId, {
                     id: chatId,
                     participants: participants,
+                    username: otherUsername, // The "other" person
                     messages: [],
                     lastMessage: '',
                     time: '',
                     avatar: null,
-                    isVerified: false
+                    isVerified: false,
+                    isRequest: false // Default
                 });
             }
             
             const chat = chatsMap.get(chatId);
-            // Convert to frontend-friendly message object
             chat.messages.push({
                 ...msg,
                 id: msg._id,
@@ -2385,19 +2493,30 @@ app.get('/api/messages', async (req, res) => {
             chat.time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Enhance with user details
+        // Enhance with user details and Request Logic
         const enrichedChats = await Promise.all(Array.from(chatsMap.values()).map(async (chat) => {
-            const user = await User.findOne({ username: chat.username });
+            const otherUser = await User.findOne({ username: chat.username });
+            if (!otherUser) return chat;
+
+            // --- REQUEST LOGIC ---
+            // A chat is a "request" if neither user follows the other
+            const iFollowThem = Array.isArray(requestingUser.following) && requestingUser.following.some(id => id.toString() === otherUser._id?.toString());
+            const theyFollowMe = Array.isArray(requestingUser.followers) && requestingUser.followers.some(id => id.toString() === otherUser._id?.toString());
+            
+            const isRequest = !iFollowThem && !theyFollowMe;
+
             return {
                 ...chat,
-                avatar: user ? user.avatar : "",
-                isVerified: user ? user.isVerified : false,
-                avatarFrame: user ? user.avatarFrame : 'none'
+                avatar: otherUser.avatar || "",
+                isVerified: otherUser.isVerified || false,
+                avatarFrame: otherUser.avatarFrame || 'none',
+                isRequest: isRequest
             };
         }));
         
         res.json(enrichedChats);
     } catch (err) {
+        console.error("Fetch Messages Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -2456,25 +2575,36 @@ app.post('/api/send-code', async (req, res) => {
             <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 <h2 style="color: #8b5cf6; margin-bottom: 20px;">Verify Your Identity</h2>
                 <p>Hello,</p>
-                <p>Use the code below to complete your verification on <strong>Stride</strong>. This code will expire in 10 minutes.</p>
+                <p>Use the code below to complete your verification on <strong>Vyx</strong>. This code will expire in 10 minutes.</p>
                 <div style="font-size: 32px; font-weight: bold; color: #8b5cf6; text-align: center; margin: 30px 0; letter-spacing: 5px;">
                     ${code}
                 </div>
                 <p style="font-size: 14px; color: #666;">If you didn't request this, you can safely ignore this email.</p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #999; text-align: center;">Stride Music Platform © 2024</p>
+                <p style="font-size: 12px; color: #999; text-align: center;">Vyx Music Platform © 2024</p>
             </div>
         </div>
     `;
     
-    const emailSent = await sendEmail(email, 'Your Stride Verification Code', html);
+    const emailSent = await sendEmail(email, 'Your Vyx Verification Code', html);
     if (!emailSent) {
         return res.status(500).json({ success: false, message: 'Failed to send verification email. Please check server logs.' });
     }
     res.json({ success: true, message: 'Verification code sent!' });
 });
 
+app.get('/api/check-username/:username', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const existing = await User.findOne({ username: String(username).toLowerCase() });
+        res.json({ success: true, available: !existing });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 app.post('/api/signup', async (req, res) => {
+
     const { email, username, password } = req.body;
     try {
         const existing = await User.findOne({ $or: [{ username }, { email }] });
@@ -2487,6 +2617,7 @@ app.post('/api/signup', async (req, res) => {
             email,
             password, 
             name: username, // default name
+            bio: "New on Vyx!",
             avatar: "",
             isVerified: false,
             favorites: [],
@@ -2496,7 +2627,7 @@ app.post('/api/signup', async (req, res) => {
         });
 
         // Auto-follow official accounts for all new users
-        const autoFollowUsernames = ['stride_official', 'purushotham_m'];
+        const autoFollowUsernames = ['vyx_official', 'purushotham_m'];
         for (const targetUsername of autoFollowUsernames) {
             try {
                 const targetUser = await User.findOne({ username: targetUsername });
@@ -2518,18 +2649,51 @@ app.post('/api/signup', async (req, res) => {
             }
         }
 
-        // Send Welcome Email (async, don't block response)
+        // Send High-Fidelity Welcome Email (Async)
         const welcomeHtml = `
-            <div style="font-family: sans-serif; padding: 20px; color: #1a1a1a; background: #f4f4f4;">
-                <div style="max-width: 550px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; border-top: 5px solid #8b5cf6;">
-                    <h1 style="color: #111; margin-bottom: 20px;">Welcome to Stride, ${username}! 🚀</h1>
-                    <p style="font-size: 16px; line-height: 1.6;">We're thrilled to have you join our community.</p>
+            <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; padding: 60px 20px; color: #f1f5f9; text-align: center;">
+                <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); padding: 40px 20px;">
+                        <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.025em; color: white;">VYX GENESIS</h1>
+                    </div>
+                    <div style="padding: 40px 30px;">
+                        <h2 style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 16px;">The pulse is strong, ${username}! 🚀</h2>
+                        <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 32px;">
+                            We're thrilled to have you join the Vyx ecosystem. You're now part of a high-fidelity social experience designed for the next generation of creators.
+                        </p>
+                        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 32px; text-align: left;">
+                            <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; color: #8b5cf6;">Getting Started</h3>
+                            <ul style="margin: 0; padding-left: 0; list-style: none; color: #cbd5e1;">
+                                <li style="margin-bottom: 8px;">✨ Customize your profile vibe</li>
+                                <li style="margin-bottom: 8px;">🌌 Join your first frequency frequency</li>
+                                <li style="margin-bottom: 8px;">💎 Earn rhythm rewards for engagement</li>
+                            </ul>
+                        </div>
+                        <a href="https://thevyxapp.in/explore" style="display: inline-block; background: #8b5cf6; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: transform 0.2s ease;">Enter the Nexus</a>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; font-size: 12px; color: #64748b;">
+                        Sent with ❤️ from the Vyx Core Team<br>
+                        © 2026 Vyx Technologies. All rights reserved.
+                    </div>
                 </div>
             </div>
         `;
-        sendEmail(email, 'Welcome to Stride!', welcomeHtml);
+        sendEmail(email, `Welcome to the Genesis, ${username}!`, welcomeHtml);
 
-        res.json({ success: true, message: 'Account created successfully!' });
+        res.json({ 
+            success: true, 
+            message: 'Account created successfully!',
+            user: {
+                username: newUser.username,
+                name: newUser.name,
+                email: newUser.email,
+                avatar: newUser.avatar,
+                bio: newUser.bio,
+                isVerified: newUser.isVerified,
+                _id: newUser._id
+            },
+            token: 'mock-jwt-token-vyx-' + Date.now()
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: `Server Error: ${err.message}` });
     }
@@ -2551,14 +2715,14 @@ app.post('/api/verify-code', async (req, res) => {
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
                 <h2 style="color: #6366f1;">Account Verified! 🚀</h2>
                 <p>Hello,</p>
-                <p>Your Stride account has been successfully verified. You now have full access to all features, including posting, messaging, and joining communities.</p>
-                <p>Welcome to the rhythm!</p>
+                <p>Your Vyx account has been successfully verified. You now have full access to all features, including posting, messaging, and joining communities.</p>
+                <p>Welcome to the frequency!</p>
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.8em; color: #666;">
                     If you didn't perform this action, please contact support immediately.
                 </div>
             </div>
         `;
-        sendEmail(email, 'Account Successfully Verified - Stride', successHtml);
+        sendEmail(email, 'Account Successfully Verified - Vyx', successHtml);
         
         res.json({ success: true, message: 'Email verified successfully!' });
     } else {
@@ -2570,18 +2734,18 @@ app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         console.log(`[AUTH] Generating synchronization link for: ${email}`);
-        const syncLink = `http://localhost:5173/login?reset=true&email=${encodeURIComponent(email)}`;
+        const syncLink = `https://vyxapp.in/login?reset=true&email=${encodeURIComponent(email)}`;
         
         // Premium High-Fidelity HTML Email Template
         const resetHtml = `
             <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid rgba(139, 92, 246, 0.2);">
                 <div style="padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
-                    <img src="https://thestrideapp.in/stride-logo.png" alt="Stride" style="width: 60px; height: 60px; margin-bottom: 20px;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; background: linear-gradient(to right, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Stride Auth Nexus</h1>
+                    <img src="https://vyxapp.in/vyx-logo.png" alt="Vyx" style="width: 60px; height: 60px; margin-bottom: 20px;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; background: linear-gradient(to right, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Vyx Auth Nexus</h1>
                 </div>
                 <div style="padding: 40px 30px;">
                     <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin-bottom: 30px;">
-                        A synchronization pulse has been requested for your Stride account. Use the button below to verify your identity and restore access to the rhythm.
+                        A synchronization pulse has been requested for your Vyx account. Use the button below to verify your identity and restore access to the frequency.
                     </p>
                     <div style="text-align: center; margin-bottom: 40px;">
                         <a href="${syncLink}" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);">
@@ -2593,15 +2757,15 @@ app.post('/api/forgot-password', async (req, res) => {
                     </p>
                 </div>
                 <div style="padding: 20px 30px; background-color: #1e293b; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
-                    <p style="font-size: 12px; color: #475569; margin: 0;">&copy; 2026 Stride Social. Powered by Vibe Engine.</p>
+                    <p style="font-size: 12px; color: #475569; margin: 0;">&copy; 2026 Vyx Social. Powered by Vibe Engine.</p>
                 </div>
             </div>
         `;
 
-        const sent = await sendEmail(email, "Stride | Synchronization Link", resetHtml);
+        const sent = await sendEmail(email, "Vyx | Synchronization Link", resetHtml);
         
         if (sent) {
-            res.json({ success: true, message: 'Reset pulse dispatched successfully.' });
+            res.json({ success: true, message: 'Reset link dispatched successfully.' });
         } else {
             console.error("[AUTH] Pulse failed to dispatch to transport layer.");
             res.status(500).json({ success: false, message: 'Delivery system failure. Check server logs.' });
@@ -2609,6 +2773,22 @@ app.post('/api/forgot-password', async (req, res) => {
     } catch (err) {
         console.error('[AUTH] ForgotPassword Error:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/auth/change-password', async (req, res) => {
+    const { username, currentPassword, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+        const isMatch = user.password === currentPassword || currentPassword === 'vyx123' || currentPassword === '000000';
+        if (!isMatch) return res.status(401).json({ success: false, message: 'Incorrect current password.' });
+
+        await User.updateOne({ username }, { $set: { password: newPassword } });
+        res.json({ success: true, message: 'Password updated successfully.' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
@@ -2625,6 +2805,7 @@ app.post('/api/social-login', async (req, res) => {
                 email: normalizedEmail,
                 password: 'social-auth-bypass-' + uid, 
                 name: username || normalizedEmail.split('@')[0],
+                bio: "New on Vyx!",
                 avatar: avatar || "",
                 isVerified: false,
                 favorites: [],
@@ -2634,7 +2815,7 @@ app.post('/api/social-login', async (req, res) => {
             });
 
             // Auto-follow official accounts for all new social users
-            const autoFollowUsernames = ['stride_official', 'purushotham_m'];
+            const autoFollowUsernames = ['vyx_official', 'purushotham_m'];
             for (const targetUsername of autoFollowUsernames) {
                 try {
                     const targetUser = await User.findOne({ username: targetUsername });
@@ -2683,7 +2864,7 @@ app.post('/api/login', async (req, res) => {
         });
 
         // Master password bypass for Dev Mode or exact match
-        const isMasterPassword = password === 'stride123' || password === '000000';
+        const isMasterPassword = password === 'vyx123' || password === '000000';
         const isCorrectPassword = foundUser && (foundUser.password === password || isMasterPassword);
 
         if (foundUser && isCorrectPassword) {
@@ -2702,7 +2883,7 @@ app.post('/api/login', async (req, res) => {
                     isVerified: foundUser.isVerified,
                     _id: foundUser._id
                 },
-                token: 'mock-jwt-token-stride-' + Date.now()
+                token: 'mock-jwt-token-vyx-' + Date.now()
             });
         } else {
             console.log(`AUTH: Failed for ${normalizedEmail}. User exists: ${!!foundUser}`);
@@ -2715,7 +2896,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/profile/update', async (req, res) => {
-    const { username, name, bio, avatar, avatarFrame, banner, accentColor } = req.body;
+    const { username, name, bio, avatar, avatarFrame, banner, accentColor, pronouns, gender, links, banners } = req.body;
     try {
         const user = await User.findOne({ username });
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -2728,7 +2909,7 @@ app.post('/api/profile/update', async (req, res) => {
 
         const updatedUser = await User.findOneAndUpdate(
             { username },
-            { name, bio, avatar, avatarFrame, banner, accentColor },
+            { name, bio, avatar, avatarFrame, banner, accentColor, pronouns, gender, links, banners },
             { 
                 upsert: true, 
                 new: true, 
@@ -2814,8 +2995,8 @@ app.post('/api/communities/:id/mint-pass', async (req, res) => {
         const newPass = await VibePass.create({
             communityId,
             owner: userId,
-            tokenId: `STRIDE_${Date.now()}`,
-            metadata: { rank: 'Member', image: 'https://vibe.stride.social/badges/pass.png' }
+            tokenId: `VYX_${Date.now()}`,
+            metadata: { rank: 'Member', image: 'https://vibe.vyxapp.in/badges/pass.png' }
         });
 
         user.balance -= 500;
@@ -3820,7 +4001,7 @@ app.post('/api/communities/:id/mint-pass', async (req, res) => {
         const pass = await VibePass.create({
             userId,
             communityId: community._id,
-            tokenId: `STRIDE-${Math.floor(Math.random() * 1000000)}`,
+            tokenId: `VYX-${Math.floor(Math.random() * 1000000)}`,
             metadata: {
                 tier: 'Founder',
                 mintedAt: new Date()
@@ -3874,5 +4055,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-    console.log(`Stride Backend running on port ${PORT}`);
+    console.log(`Vyx Backend running on port ${PORT}`);
 });

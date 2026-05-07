@@ -24,7 +24,7 @@
     font-size: 1.5rem;
     font-weight: 800;
     margin-bottom: 10px;
-    background: linear-gradient(to right, #fff, #8b5cf6);
+    background: linear-gradient(to right, #fff, #0066ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -41,12 +41,12 @@
 
 .benefit-item:hover {
     transform: translateX(10px);
-    background: rgba(139, 92, 246, 0.1);
-    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(0, 102, 255, 0.1);
+    border-color: rgba(0, 102, 255, 0.3);
 }
 
 .benefit-icon {
-    color: var(--theme-primary, #8b5cf6);
+    color: var(--theme-primary, #0066ff);
     flex-shrink: 0;
 }
 
@@ -85,8 +85,8 @@
 }
 
 .step-dot.active {
-    background: var(--theme-primary, #8b5cf6);
-    box-shadow: 0 0 10px var(--theme-primary, #8b5cf6);
+    background: var(--theme-primary, #0066ff);
+    box-shadow: 0 0 10px var(--theme-primary, #0066ff);
     transform: scale(1.2);
 }
 
@@ -132,7 +132,7 @@
 }
 
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: var(--theme-primary, #8b5cf6);
+    border-color: var(--theme-primary, #0066ff);
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -144,7 +144,7 @@
 
 .step-next-btn, .step-submit-btn {
     flex: 1;
-    background: var(--theme-primary, #8b5cf6);
+    background: var(--theme-primary, #0066ff);
     color: white;
     border: none;
     border-radius: 14px;
@@ -172,7 +172,7 @@
 
 .step-next-btn:hover, .step-submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 102, 255, 0.3);
 }
 
 /* Success Page */
@@ -203,7 +203,7 @@
     transform: translate(-50%, -50%);
     width: 150px;
     height: 150px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 102, 255, 0.4) 0%, transparent 70%);
     z-index: -1;
     animation: pulse 2s infinite;
 }
@@ -263,4 +263,37 @@
     .app-form-card {
         padding: 30px 20px;
     }
+}
+
+.doc-upload-box {
+    width: 100%;
+    padding: 40px 20px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.doc-upload-box:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--theme-primary, #0066ff);
+}
+
+.upload-icon {
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s;
+}
+
+.doc-upload-box:hover .upload-icon {
+    color: var(--theme-primary, #0066ff);
+}
+
+.file-hint {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
 }

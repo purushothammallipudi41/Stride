@@ -39,7 +39,7 @@ const Insights = () => {
             value: statsData?.summary?.monthlyListeners?.toLocaleString() || '0', 
             change: '+2.4% this week', 
             icon: Satellite, 
-            color: '#a855f7' 
+            color: '#00f2ff' 
         },
         { 
             label: 'FOLLOWERS', 
@@ -60,7 +60,7 @@ const Insights = () => {
 
     return (
         <div className="insights-container animate-fade-in">
-            <div className="stride-mesh-bg" />
+            <div className="vyx-mesh-bg" />
             <PageHeader title="Analytics & Insights" />
             
             <div className="insights-header-subtitle">

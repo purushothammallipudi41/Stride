@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--gradient-primary, linear-gradient(135deg, #8b5cf6, #ec4899));
+    background: var(--gradient-primary, linear-gradient(135deg, #0066ff, #ec4899));
     color: white;
     border-radius: 50%;
     font-weight: 700;

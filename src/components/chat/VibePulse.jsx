@@ -18,7 +18,7 @@ const VibePulse = ({ pulseData, onClose }) => {
                         <Sparkles className="pulse-sparkle-icon" size={24} />
                     </div>
                     <div className="pulse-title-group">
-                        <h2>Rhythmic Pulse</h2>
+                        <h2>Frequencyic Pulse</h2>
                         <span className="pulse-vibe-badge">Vibe: {vibeLevel}</span>
                     </div>
                 </div>
@@ -31,7 +31,7 @@ const VibePulse = ({ pulseData, onClose }) => {
                     <div className="pulse-highlights-section">
                         <div className="section-label">
                             <TrendingUp size={14} />
-                            <span>Rhythms Detected</span>
+                            <span>Frequencys Detected</span>
                         </div>
                         <div className="highlights-list">
                             {highlights.map((h, i) => (

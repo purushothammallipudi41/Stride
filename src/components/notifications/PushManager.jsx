@@ -48,7 +48,7 @@ const PushManager = () => {
                             subscription
                         })
                     });
-                    console.log('[Push] Subscription synced with rhythm backend.');
+                    console.log('[Push] Subscription synced with frequency backend.');
                 }
             } catch (err) {
                 console.error('[Push] Management error:', err);

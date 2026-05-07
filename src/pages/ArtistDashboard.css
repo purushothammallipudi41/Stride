@@ -28,7 +28,7 @@
     justify-content: center;
 }
 
-.stats-icon.plays { background: rgba(139, 92, 246, 0.1); color: var(--color-primary); }
+.stats-icon.plays { background: rgba(0, 102, 255, 0.1); color: var(--color-primary); }
 .stats-icon.revenue { background: rgba(16, 185, 129, 0.1); color: var(--color-success); }
 .stats-icon.listeners { background: rgba(236, 72, 153, 0.1); color: var(--color-accent); }
 .stats-icon.subscribers { background: rgba(255, 215, 0, 0.1); color: #ffd700; }

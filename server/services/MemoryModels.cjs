@@ -1,8 +1,34 @@
+const fs = require('fs');
+const path = require('path');
+
+const PERSIST_DIR = path.join(__dirname, '../.data');
+if (!fs.existsSync(PERSIST_DIR)) fs.mkdirSync(PERSIST_DIR, { recursive: true });
+
 class MemoryModel {
     constructor(collectionName) {
         this.collectionName = collectionName;
-        this.data = [];
-        this.idCounter = 1;
+        this.persistFile = path.join(PERSIST_DIR, `${collectionName}.json`);
+        this.data = this._load();
+        this.idCounter = this.data.length + 1;
+    }
+
+    _load() {
+        try {
+            if (fs.existsSync(this.persistFile)) {
+                return JSON.parse(fs.readFileSync(this.persistFile, 'utf8'));
+            }
+        } catch (e) {
+            console.warn(`[MemoryModel] Could not load ${this.collectionName}:`, e.message);
+        }
+        return [];
+    }
+
+    _save() {
+        try {
+            fs.writeFileSync(this.persistFile, JSON.stringify(this.data, null, 2));
+        } catch (e) {
+            console.warn(`[MemoryModel] Could not persist ${this.collectionName}:`, e.message);
+        }
     }
 
     // Helper to wrap result in a chainable thenable (Mongoose-style)
@@ -51,6 +77,9 @@ class MemoryModel {
                 for (const [key, value] of Object.entries(query)) {
                     if (key === '$or') {
                         if (!value.some(cond => Object.entries(cond).every(([k, v]) => d[k] === v))) return false;
+                    } else if (value && typeof value === 'object' && value.$in) {
+                        // Handle $in operator
+                        if (!value.$in.includes(d[key]) && !value.$in.includes(d._id)) return false;
                     } else if (d[key] !== value) return false;
                 }
                 return true;
@@ -65,6 +94,7 @@ class MemoryModel {
         const id = 'mem_' + Date.now() + '_' + (this.idCounter++);
         const doc = { _id: id, id: id, ...data, createdAt: new Date(), updatedAt: new Date() };
         this.data.push(doc);
+        this._save();
         return { ...doc, toObject: () => doc };
     }
 
@@ -79,26 +109,35 @@ class MemoryModel {
             return null;
         }
         
+        // Find and mutate the actual stored reference
+        const stored = this.data.find(d => d._id === doc._id);
+        if (!stored) return null;
+
         const updateData = update.$set || update;
         const addData = update.$addToSet || {};
         const pushData = update.$push || {};
+        const pullData = update.$pull || {};
         
         for (const [k, v] of Object.entries(updateData)) {
-            if (k !== '$set' && k !== '$addToSet' && k !== '$push' && k !== '$setOnInsert') {
-               doc[k] = v;
+            if (k !== '$set' && k !== '$addToSet' && k !== '$push' && k !== '$pull' && k !== '$setOnInsert') {
+               stored[k] = v;
             }
         }
         
         for (const [k, v] of Object.entries(addData)) {
-            if (!doc[k]) doc[k] = [];
-            if (!doc[k].includes(v)) doc[k].push(v);
+            if (!stored[k]) stored[k] = [];
+            if (!stored[k].includes(v)) stored[k].push(v);
         }
         for (const [k, v] of Object.entries(pushData)) {
-            if (!doc[k]) doc[k] = [];
-            doc[k].push(v);
+            if (!stored[k]) stored[k] = [];
+            stored[k].push(v);
         }
-        doc.updatedAt = new Date();
-        return { ...doc, toObject: () => doc };
+        for (const [k, v] of Object.entries(pullData)) {
+            if (stored[k]) stored[k] = stored[k].filter(item => item !== v);
+        }
+        stored.updatedAt = new Date();
+        this._save();
+        return { ...stored, toObject: () => stored };
     }
 
     async updateOne(query, update) { return this.findOneAndUpdate(query, update); }
@@ -112,6 +151,7 @@ class MemoryModel {
         if (Object.keys(query).length === 0) {
             const count = this.data.length;
             this.data = [];
+            this._save();
             return { deletedCount: count };
         }
         const initialLen = this.data.length;
@@ -121,11 +161,12 @@ class MemoryModel {
             }
             return false; // remove if match
         });
+        this._save();
         return { deletedCount: initialLen - this.data.length };
     }
 }
 
-// Stride social pulse collections
+// Vyx social pulse collections
 const FirestoreUser = new MemoryModel('users');
 const FirestorePost = new MemoryModel('posts');
 const FirestoreCommunity = new MemoryModel('communities');

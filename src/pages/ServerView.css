@@ -138,7 +138,7 @@
 }
 
 .channel-btn.active {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(0, 102, 255, 0.15);
     color: var(--color-primary);
     font-weight: 600;
 }
@@ -304,8 +304,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(0, 102, 255, 0.1);
+    border: 1px solid rgba(0, 102, 255, 0.3);
     color: var(--color-primary);
     padding: 6px 14px;
     border-radius: 20px;
@@ -368,7 +368,7 @@
     position: relative;
     overflow: hidden;
     padding: 0;
-    background: radial-gradient(circle at 50% -20%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+    background: radial-gradient(circle at 50% -20%, rgba(0, 102, 255, 0.08) 0%, transparent 60%);
 }
 
 .chat-content::before {
@@ -678,9 +678,9 @@
 }
 
 .mod-btn.promote {
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     color: var(--color-primary);
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(0, 102, 255, 0.2);
 }
 
 .mod-btn.promote:hover {
@@ -720,8 +720,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(139, 92, 246, 0.2);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(0, 102, 255, 0.2);
+    border: 1px solid rgba(0, 102, 255, 0.3);
     color: var(--color-primary);
     display: flex;
     align-items: center;
@@ -744,9 +744,9 @@
 }
 
 @keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 102, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 102, 255, 0); }
 }
 
 .jukebox-sync-indicator {
@@ -815,7 +815,7 @@
 }
 
 .listener-pill:hover {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(0, 102, 255, 0.15);
     border-color: var(--color-primary);
     transform: translateY(-2px);
 }
@@ -972,7 +972,7 @@
     color: var(--color-text-muted);
 }
 
-/* Stride v3.1: Node Sovereignty Hub Styles */
+/* Vyx v3.1: Node Sovereignty Hub Styles */
 .node-gov-header {
     display: flex;
     justify-content: space-between;
@@ -997,7 +997,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 20px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     border: 1px solid var(--color-primary);
     border-radius: 12px;
     color: var(--color-primary);
@@ -1047,7 +1047,7 @@
     padding: 2px 8px;
     border-radius: 6px;
     letter-spacing: 0.05em;
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(0, 102, 255, 0.2);
     color: var(--color-primary);
 }
 
@@ -1183,7 +1183,7 @@
     padding: 40px;
     height: 100%;
     overflow-y: auto;
-    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05), transparent);
+    background: radial-gradient(circle at top right, rgba(0, 102, 255, 0.05), transparent);
 }
 
 .calendar-header {
@@ -1261,7 +1261,7 @@
 }
 
 .event-type-tag.voice { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-.event-type-tag.jukebox { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+.event-type-tag.jukebox { background: rgba(0, 102, 255, 0.2); color: #0066ff; }
 
 .event-content h3 {
     font-size: 1.25rem;
@@ -1516,7 +1516,7 @@
 
 .gift-select-btn.gold { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
 .gift-select-btn.neon { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
-.gift-select-btn.holo { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+.gift-select-btn.holo { border-color: #0066ff; background: rgba(0, 102, 255, 0.1); }
 
 /* Gift Broadcast Overlay */
 .gift-broadcast-overlay {
@@ -1675,7 +1675,7 @@
 .benefit-item .icon-circle {
     width: 24px;
     height: 24px;
-    background: rgba(139, 92, 246, 0.2);
+    background: rgba(0, 102, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1826,7 +1826,7 @@
 .invite-icon-box {
     width: 36px;
     height: 36px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     color: var(--color-primary);
     border-radius: 10px;
     display: flex;
@@ -1847,7 +1847,7 @@
 .biocard-banner {
     height: 100px;
     width: 100%;
-    background: linear-gradient(135deg, var(--token-accent, #8b5cf6), #ec4899);
+    background: linear-gradient(135deg, var(--token-accent, #0066ff), #ec4899);
     position: relative;
 }
 
@@ -1963,7 +1963,7 @@
 
 .settings-category-card:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: var(--token-accent, #8b5cf6);
+    border-color: var(--token-accent, #0066ff);
 }
 
 .settings-card-label {
@@ -2100,7 +2100,7 @@
 }
 
 /* Toggle Switch Styling */
-.stride-toggle {
+.vyx-toggle {
     width: 44px;
     height: 24px;
     background: #2b2d31;
@@ -2110,11 +2110,11 @@
     transition: all 0.3s;
 }
 
-.stride-toggle.on {
+.vyx-toggle.on {
     background: var(--token-accent, #5865f2);
 }
 
-.stride-toggle-handle {
+.vyx-toggle-handle {
     width: 18px;
     height: 18px;
     background: #fff;
@@ -2126,11 +2126,11 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.stride-toggle.on .stride-toggle-handle {
+.vyx-toggle.on .vyx-toggle-handle {
     transform: translateX(20px);
 }
 
-.stride-toggle.on .toggle-check-icon {
+.vyx-toggle.on .toggle-check-icon {
     opacity: 1;
     color: var(--token-accent, #5865f2);
 }

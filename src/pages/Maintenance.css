@@ -20,7 +20,7 @@
     position: absolute;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+    background: radial-gradient(circle at center, rgba(0, 102, 255, 0.1) 0%, transparent 60%);
     animation: rotate 20s linear infinite;
 }
 
@@ -47,7 +47,7 @@
 .maintenance-pulse {
     position: absolute;
     inset: 0;
-    border: 2px solid var(--theme-primary, #8b5cf6);
+    border: 2px solid var(--theme-primary, #0066ff);
     border-radius: 50%;
     animation: m-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -89,7 +89,7 @@
 }
 
 .status-icon {
-    color: var(--theme-primary, #8b5cf6);
+    color: var(--theme-primary, #0066ff);
 }
 
 .maintenance-footer {

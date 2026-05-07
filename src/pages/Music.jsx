@@ -100,7 +100,7 @@ const MusicPage = () => {
             try {
                 await navigator.share({
                     title: song.title,
-                    text: `Check out ${song.title} by ${song.artist} on Stride!`,
+                    text: `Check out ${song.title} by ${song.artist} on Vyx!`,
                     url: window.location.href,
                 });
             } catch (err) {
@@ -142,10 +142,10 @@ const MusicPage = () => {
 
     return (
         <div className="music-page animate-fade-in" style={{ paddingBottom: '140px' }}>
-            <div className="stride-mesh-bg" />
+            <div className="vyx-mesh-bg" />
             <SEO 
                 title="Music & Playlists" 
-                description="Stream high-quality music from Audius, create collaborative playlists, and vibe with the Stride community." 
+                description="Stream high-quality music from Audius, create collaborative playlists, and vibe with the Vyx community." 
             />
             <PageHeader title="Music" hideBack={true} />
             
@@ -303,7 +303,7 @@ const MusicPage = () => {
                     </div>
                     <button 
                         className="jukebox-nav-btn glass-card" 
-                        onClick={() => navigate('/community/stride-official/jukebox')}
+                        onClick={() => navigate('/community/vyx-official/jukebox')}
                     >
                         <Music size={16} /> Jukebox
                     </button>

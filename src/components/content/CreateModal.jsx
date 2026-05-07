@@ -46,7 +46,7 @@ const CreateModal = () => {
         <div className="modal-overlay" onClick={closeCreateModal}>
             <div className="create-modal glass-panel" onClick={e => e.stopPropagation()}>
                 <header className="modal-header">
-                    <h2>Share a new <span className="text-gradient">Stride</span></h2>
+                    <h2>Share a new <span className="text-gradient">Vyx</span></h2>
                     <button className="close-btn" onClick={closeCreateModal}>
                         <X size={24} />
                     </button>
@@ -100,7 +100,7 @@ const CreateModal = () => {
 
                     <textarea 
                         className="caption-input"
-                        placeholder="What's on your mind? #strides #stride"
+                        placeholder="What's on your mind? #vyxs #vyx"
                         value={caption}
                         onChange={e => setCaption(e.target.value)}
                     />

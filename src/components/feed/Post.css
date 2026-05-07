@@ -306,7 +306,7 @@
 }
 
 .action-btn .icon-gradient {
-    stroke: url(#stride-gradient);
+    stroke: url(#vyx-gradient);
 }
 
 .post-engagement-stats {
@@ -446,7 +446,7 @@
 .post-edit-input:focus {
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: var(--color-accent) !important;
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
 }
 
 .post-edit-actions {
@@ -477,12 +477,12 @@
 .edit-btn.save {
     background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
 }
 
 .edit-btn.save:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
 }
 
 .edit-btn.save:active {

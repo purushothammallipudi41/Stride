@@ -63,15 +63,15 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: #a855f7; /* Matching the purple theme */
+    color: #00f2ff; /* Matching the purple theme */
     margin: 0 0 4px 0;
     padding-left: 4px;
 }
 
 /* Account Card Structure */
 .ps-account-card {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: linear-gradient(180deg, rgba(0, 102, 255, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(0, 102, 255, 0.3);
     border-radius: 16px;
     overflow: hidden;
 }
@@ -88,7 +88,7 @@
     height: 48px;
     border-radius: 50%;
     padding: 2px;
-    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #00f2ff 0%, #3b82f6 100%);
     margin-right: 16px;
 }
 
@@ -120,7 +120,7 @@
 }
 
 .ps-check-icon {
-    color: #a855f7;
+    color: #00f2ff;
 }
 
 .ps-account-divider {
@@ -147,7 +147,7 @@
 }
 
 .ps-add-account-btn svg {
-    color: #a855f7;
+    color: #00f2ff;
 }
 
 .ps-add-account-btn:hover {
@@ -186,7 +186,7 @@
 }
 
 .ps-icon-purple {
-    color: #a855f7;
+    color: #00f2ff;
 }
 
 .ps-icon-muted {
@@ -216,7 +216,7 @@
 
 /* Upload Button */
 .ps-upload-btn {
-    background: #8b5cf6;
+    background: #0066ff;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -281,7 +281,7 @@
 }
 
 input:checked + .ps-slider {
-    background-color: #a855f7;
+    background-color: #00f2ff;
 }
 
 input:checked + .ps-slider:before {
@@ -294,4 +294,172 @@ input:checked + .ps-slider:before {
 
 .ps-slider.round:before {
     border-radius: 50%;
+}
+
+.ps-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pro-crown-v2 {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5));
+    animation: crown-pulse 2s infinite ease-in-out;
+}
+
+@keyframes crown-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+.clickable-item {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.clickable-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.ps-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 14px;
+    color: #f87171;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ps-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+/* --- CHANGE PASSWORD FORM --- */
+.ps-password-section {
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    background: rgba(168, 85, 247, 0.05);
+    margin-bottom: 8px;
+}
+
+.ps-password-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.ps-password-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.ps-pw-close {
+    background: rgba(255,255,255,0.07);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.ps-pw-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ps-pw-field {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 0 14px;
+    transition: border-color 0.2s;
+}
+
+.ps-pw-field:focus-within {
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.ps-pw-field input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 0.9rem;
+    padding: 14px 0;
+}
+
+.ps-pw-field input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
+
+.ps-pw-eye {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.ps-pw-error {
+    color: #ef4444;
+    font-size: 0.82rem;
+    margin: 0;
+    padding-left: 4px;
+}
+
+.ps-pw-submit {
+    margin-top: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00f2ff 0%, #ec4899 100%);
+    border: none;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.ps-pw-submit:hover {
+    opacity: 0.9;
+}
+
+.ps-pw-success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #22c55e;
+    font-weight: 600;
+    padding: 12px 0;
+}
+.ps-version-info {
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 20px;
+    letter-spacing: 1px;
 }

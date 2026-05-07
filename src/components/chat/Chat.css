@@ -1,12 +1,21 @@
-/* Modern Messaging UI Styles - Stride Premium Redesign */
+/* Modern Messaging UI Styles - Vyx Premium Redesign */
+
+.messages-page-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
 
 .messages-full-view {
     display: flex;
     flex-direction: row;
-    height: 100%;
+    flex: 1; /* Fills remaining space below Topbar */
     width: 100%;
     background: var(--color-bg);
     overflow: hidden;
+    position: relative;
 }
 
 .chat-list-wrapper {
@@ -32,8 +41,9 @@
 }
 
 .chat-list-header-v2 {
-    padding: 24px 20px 16px;
-    background: rgba(255, 255, 255, 0.02);
+    padding: 16px 20px 12px;
+    background: rgba(255, 255, 255, 0.01);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .chat-header-top {
@@ -55,17 +65,29 @@
     color: var(--color-text-primary);
 }
 
-.chat-action-icon {
-    color: var(--color-text-secondary);
+.chat-compose-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-primary);
     cursor: pointer;
-    padding: 6px;
-    border-radius: var(--radius-md);
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.chat-action-icon:hover {
-    background: var(--color-surface-hover);
-    color: var(--color-text-primary);
+.chat-compose-btn:hover {
+    background: var(--theme-primary);
+    border-color: var(--theme-primary);
+    box-shadow: var(--glow-primary);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.chat-action-icon {
+    display: none; /* Replaced by .chat-compose-btn */
 }
 
 .chat-list-tabs {
@@ -245,9 +267,9 @@
 }
 
 .chat-item-v2.active {
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.05);
+    background: rgba(0, 102, 255, 0.08);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    box-shadow: inset 0 0 20px rgba(0, 102, 255, 0.05);
 }
 
 .chat-item-info {
@@ -389,7 +411,7 @@
 .chat-messages-container {
     flex: 1;
     overflow-y: auto;
-    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+    background: radial-gradient(circle at top right, rgba(0, 102, 255, 0.05) 0%, transparent 60%);
     position: relative;
 }
 
@@ -420,7 +442,7 @@
     background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-accent) 100%);
     color: #fff;
     border-radius: 20px 20px 4px 20px;
-    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25),
+    box-shadow: 0 10px 25px rgba(0, 102, 255, 0.25),
                 inset 0 0 10px rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -459,7 +481,7 @@
 .typing-indicator-v4 span {
     width: 6px;
     height: 6px;
-    background: rgba(139, 92, 246, 0.6);
+    background: rgba(0, 102, 255, 0.6);
     border-radius: 50%;
     animation: typing-dots 1.4s infinite ease-in-out;
 }
@@ -648,10 +670,68 @@
     animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+/* Empty List State */
+.empty-chat-list-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.empty-chat-icon-pulse {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 102, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.3); }
+    70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(0, 102, 255, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 102, 255, 0); }
+}
+
+.empty-chat-list-placeholder h3 {
+    font-family: var(--font-header);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--color-text-primary);
+    margin-bottom: 12px;
+}
+
+.empty-chat-list-placeholder p {
+    font-size: 0.95rem;
+    max-width: 280px;
+    line-height: 1.5;
+    opacity: 0.8;
+    margin-bottom: 32px;
+}
+
+.start-chat-btn {
+    background: var(--theme-primary);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: var(--glow-primary);
+    transition: all 0.3s ease;
+}
+
+.start-chat-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
 .messages-full-view {
@@ -782,11 +862,11 @@
     justify-content: space-between;
     align-items: center;
     padding: 18px 24px;
-    background: rgba(139, 92, 246, 0.08); /* Stride purple tint */
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    background: rgba(0, 102, 255, 0.08); /* Vyx purple tint */
+    border: 1px solid rgba(0, 102, 255, 0.2);
     border-radius: var(--radius-lg);
     gap: 20px;
-    box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.05);
+    box-shadow: inset 0 0 20px rgba(0, 102, 255, 0.05);
 }
 
 .nexus-stats {
@@ -937,48 +1017,48 @@
 .animate-sheet-up {
     animation: slideUpSheet 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-/* Stride Map Engine Styles */
-.stride-map-container {
+/* Vyx Map Engine Styles */
+.vyx-map-container {
     width: 100%;
     max-width: 280px;
     background: rgba(18, 18, 26, 0.95);
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(0, 102, 255, 0.3);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     margin-top: 8px;
 }
 
-.stride-map-header {
+.vyx-map-header {
     padding: 8px 12px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.stride-map-badge {
+.vyx-map-badge {
     font-size: 0.6rem;
     font-weight: 800;
     color: var(--color-primary);
     letter-spacing: 0.05em;
 }
 
-.stride-map-iframe {
+.vyx-map-iframe {
     width: 100%;
     height: 180px;
-    /* Stride 'Midnight Purple' Engine Filter */
+    /* Vyx 'Midnight Purple' Engine Filter */
     filter: invert(100%) hue-rotate(240deg) brightness(0.9) saturate(1.2);
     opacity: 0.85;
     transition: opacity 0.3s ease;
 }
 
-.stride-map-iframe:hover {
+.vyx-map-iframe:hover {
     opacity: 1;
 }
 
-.stride-map-info {
+.vyx-map-info {
     padding: 8px 12px;
     font-size: 0.75rem;
     color: var(--color-text-secondary);
@@ -1067,7 +1147,7 @@
 /* Legacy phantom bubbles (background logic) removed. Media elements are now perfectly standalone. */
 
 /* Final Map Engine Polish */
-.stride-map-placeholder-pre {
+.vyx-map-placeholder-pre {
     width: 280px;
     background: transparent;
     border-radius: 20px;
@@ -1077,20 +1157,20 @@
     clip-path: inset(0 0 0 0 round 20px);
 }
 
-.stride-map-placeholder-pre:active {
+.vyx-map-placeholder-pre:active {
     transform: scale(0.98);
 }
 
-.stride-map-preview-static {
+.vyx-map-preview-static {
     width: 100%;
     height: 180px;
     position: relative;
     background: #0a0a0f;
 }
 
-.stride-map-footer {
+.vyx-map-footer {
     padding: 10px 14px;
-    background: rgba(139, 92, 246, 0.08);
+    background: rgba(0, 102, 255, 0.08);
     color: var(--color-text-secondary);
     font-size: 0.72rem;
     font-weight: 600;
@@ -1109,16 +1189,16 @@
 
 /* Media Stabilization Pulse */
 @keyframes mediaPulse {
-    0% { background-color: rgba(139, 92, 246, 0.05); }
-    50% { background-color: rgba(139, 92, 246, 0.15); }
-    100% { background-color: rgba(139, 92, 246, 0.05); }
+    0% { background-color: rgba(0, 102, 255, 0.05); }
+    50% { background-color: rgba(0, 102, 255, 0.15); }
+    100% { background-color: rgba(0, 102, 255, 0.05); }
 }
 
 .gif-picker-item-wrapper {
     width: 100%;
     height: 100px;
     border-radius: 12px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     animation: mediaPulse 1.5s infinite ease-in-out;
     overflow: hidden;
 }
@@ -1127,16 +1207,16 @@
     min-width: 200px;
     min-height: 150px;
     border-radius: 12px;
-    background: rgba(139, 92, 246, 0.05);
+    background: rgba(0, 102, 255, 0.05);
     animation: mediaPulse 2s infinite ease-in-out;
     overflow: hidden;
 }
 
-.stride-map-preview-static iframe {
+.vyx-map-preview-static iframe {
     background: #0a0a0f !important;
 }
 
-.stride-map-badge {
+.vyx-map-badge {
     animation: fadeIn 1s ease-out;
 }
 
@@ -1168,7 +1248,7 @@
 .gif-picker-item-wrapper {
     position: relative;
     border-radius: 14px;
-    background: rgba(139, 92, 246, 0.05);
+    background: rgba(0, 102, 255, 0.05);
     overflow: hidden;
     height: 120px;
 }
@@ -1210,11 +1290,11 @@
     font-size: 0.6rem;
     font-weight: 800;
     color: var(--color-primary);
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     padding: 2px 8px;
     border-radius: 4px;
     letter-spacing: 1px;
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(0, 102, 255, 0.2);
     text-transform: uppercase;
 }
 
@@ -1321,7 +1401,7 @@
     background: var(--color-primary);
     color: white;
     border-color: var(--color-primary);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
 }
 
 .gif-loading-state, .gif-empty-state {
@@ -1519,7 +1599,7 @@
 
 .recorder-primary-btn {
     flex: 2;
-    background: linear-gradient(135deg, #a855f7, #6366f1);
+    background: linear-gradient(135deg, #00f2ff, #6366f1);
     color: #fff;
     border: none;
     padding: 16px;
@@ -1546,7 +1626,7 @@
     border-color: #ff4757;
 }
 
-/* Stride Story Mode: Immersive Camera UI */
+/* Vyx Story Mode: Immersive Camera UI */
 .story-camera-overlay {
     position: fixed;
     top: 0;
@@ -1656,8 +1736,8 @@
 }
 
 @keyframes glow-pulse {
-    from { box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
-    to { box-shadow: 0 0 25px rgba(139, 92, 246, 0.3); }
+    from { box-shadow: 0 0 10px rgba(0, 102, 255, 0.1); }
+    to { box-shadow: 0 0 25px rgba(0, 102, 255, 0.3); }
 }
 
 .story-camera-footer {

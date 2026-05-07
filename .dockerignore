@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+dist
+.git
+.env
+android
+ios
+assets
+src
+public
+*.md

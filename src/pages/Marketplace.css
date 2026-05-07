@@ -80,8 +80,8 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: #a855f7;
-    box-shadow: 0 0 10px #a855f7;
+    background: #00f2ff;
+    box-shadow: 0 0 10px #00f2ff;
 }
 
 .market-section {
@@ -139,7 +139,7 @@
     position: absolute;
     top: 0px;
     right: 0px;
-    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #00f2ff 0%, #0066ff 100%);
     color: white;
     font-size: 10px;
     font-weight: 800;

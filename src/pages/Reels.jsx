@@ -22,18 +22,18 @@ const Reels = () => {
                     setReelsData([
                         { 
                             _id: 'v1', 
-                            username: 'stride_official', 
+                            username: 'vyx_official', 
                             likes: 1200, 
-                            caption: 'Welcome to the Rhythm. #stride #social', 
+                            caption: 'Welcome to the Frequency. #vyx #social', 
                             contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-man-dancing-under-neon-lights-23101-large.mp4',
                             avatar: '',
                             type: 'video',
                             isVerified: true,
-                            music: 'Stride Theme - Original'
+                            music: 'Vyx Theme - Original'
                         },
                         { 
                             _id: 'v2', 
-                            username: 'rhythmic_aura', 
+                            username: 'frequencyic_aura', 
                             likes: 850, 
                             caption: 'Late night lo-fi sessions. 🎹', 
                             contentUrl: 'https://assets.mixkit.co/videos/preview/mixkit-recording-studio-with-dj-mixing-music-23097-large.mp4',
@@ -51,13 +51,13 @@ const Reels = () => {
             });
     }, []);
 
-    if (isLoading) return <div className="loading-v2">Synthesizing rhythm clips...</div>;
+    if (isLoading) return <div className="loading-v2">Synthesizing frequency clips...</div>;
 
     return (
         <div className="reels-page-wrapper">
             <SEO 
-                title="Rhythmic Clips" 
-                description="Experience full-screen immersive video rhythm on Stride." 
+                title="Frequencyic Clips" 
+                description="Experience full-screen immersive video frequency on Vyx." 
             />
             <VerticalFeed 
                 posts={reelsData} 

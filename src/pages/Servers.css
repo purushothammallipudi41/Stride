@@ -130,10 +130,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     padding: 6px 12px;
     border-radius: var(--radius-full);
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(0, 102, 255, 0.2);
     width: fit-content;
 }
 
@@ -171,7 +171,7 @@
 
 .join-stream-mini-btn {
     margin-left: auto;
-    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #00f2ff 0%, #0066ff 100%);
     color: white;
     border: none;
     padding: 8px 16px;

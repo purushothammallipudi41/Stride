@@ -139,7 +139,7 @@
 }
 
 .studio-filter-btn.active {
-    border-color: #a855f7;
+    border-color: #00f2ff;
     background: rgba(168, 85, 247, 0.2);
     box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
 }
@@ -165,7 +165,7 @@
 
 .studio-icon-btn.glow:hover {
     background: rgba(168, 85, 247, 0.1);
-    border-color: #a855f7;
+    border-color: #00f2ff;
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
     transform: translateY(-2px);
 }
@@ -175,7 +175,7 @@
     position: absolute;
     inset: -2px;
     border-radius: 14px;
-    background: linear-gradient(45deg, transparent, #a855f7, transparent);
+    background: linear-gradient(45deg, transparent, #00f2ff, transparent);
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -313,12 +313,12 @@
 }
 
 .studio-record-btn.stage-mode .inner-circle {
-    background: #a855f7;
+    background: #00f2ff;
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
 }
 
 .studio-record-btn.stage-mode.recording {
-    border-color: #a855f7;
+    border-color: #00f2ff;
 }
 
 .stage-live-label {

@@ -26,7 +26,7 @@ const MonetizationService = {
             // Payout Logic: Award VP to the creator with Pro Multiplier
             const creator = await User.findOne({ username: post.username });
             if (creator) {
-                // Apply 2x Multiplier for Stride Pro members
+                // Apply 2x Multiplier for Vyx Pro members
                 const multiplier = creator.isPremium ? 2 : 1;
                 const finalPayout = PAYOUT_RATE * multiplier;
 
@@ -41,7 +41,11 @@ const MonetizationService = {
                     type: 'ad_revenue',
                     trackId: postId,
                     status: 'completed',
-                    metadata: { multiplier, isPremium: creator.isPremium }
+                    metadata: { 
+                        multiplier: multiplier, 
+                        isPremium: creator.isPremium,
+                        note: creator.isPremium ? 'Vyx Pro 2x Boost applied' : 'Standard rate'
+                    }
                 });
 
                 return { success: true, newBalance: creator.balance };
@@ -69,7 +73,7 @@ const MonetizationService = {
     /**
      * Verifies a purchase receipt via RevenueCat or direct Store API.
      * @param {string} purchaseToken - The token provided by the mobile app.
-     * @param {string} productId - The product ID (e.g. 'stride_pro_membership').
+     * @param {string} productId - The product ID (e.g. 'vyx_pro_membership').
      * @param {string} userId - Database ID of the user.
      */
     verifyGooglePurchase: async (purchaseToken, productId, userId) => {
@@ -92,7 +96,7 @@ const MonetizationService = {
                 if (!user) throw new Error('User not found');
 
                 // 1. Memberships
-                if (productId === 'stride_pro_membership' || productId === 'stride_pro_lifetime') {
+                if (productId === 'vyx_pro_membership' || productId === 'vyx_pro_lifetime') {
                     user.isPremium = true;
                     if (!user.ownedFrames) user.ownedFrames = [];
                     if (!user.ownedFrames.includes('gold')) user.ownedFrames.push('gold');
@@ -100,8 +104,8 @@ const MonetizationService = {
                     await user.save();
                 } 
                 // 2. Avatar Frames
-                else if (productId.startsWith('stride_frame_')) {
-                    const frame = productId.replace('stride_frame_', '');
+                else if (productId.startsWith('vyx_frame_')) {
+                    const frame = productId.replace('vyx_frame_', '');
                     if (!user.ownedFrames) user.ownedFrames = [];
                     if (!user.ownedFrames.includes(frame)) {
                         user.ownedFrames.push(frame);

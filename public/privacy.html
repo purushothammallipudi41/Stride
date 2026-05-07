@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Nexus | Vyx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #030014;
+            --color-primary: #0066ff;
+            --color-accent: #ec4899;
+            --color-text: #ffffff;
+            --color-text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(15, 15, 25, 0.6);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 3.5rem; letter-spacing: -0.04em; }
+        h2 { font-size: 2rem; margin-top: 40px; }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        p {
+            color: var(--color-text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-bottom: 40px;
+            border-top: var(--glass-border);
+            padding-top: 40px;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .container { padding-top: 40px; }
+            .glass-panel { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Privacy Nexus</h1>
+            <p>Vyx v1.0.0 | Effective May 2026</p>
+        </div>
+
+        <div class="glass-panel">
+            <h2>Our Manifesto</h2>
+            <p>At <span class="highlight">Vyx</span>, we believe your data pulse is yours and yours alone. Our Privacy Nexus is designed to ensure that while you sync your rhythm with the world, your personal frequency remains protected.</p>
+        </div>
+
+        <div class="glass-panel">
+            <h2>Data Collection</h2>
+            <p>We collect minimal information required to maintain the global vibe-sync:</p>
+            <ul>
+                <li><span class="highlight">Account Info:</span> Username and encrypted credentials.</li>
+                <li><span class="highlight">Engagement Pulse:</span> Tracks you've liked or communities you've joined to personalize your feed.</li>
+                <li><span class="highlight">Technical Metrics:</span> Device type and app performance logs to ensure stability.</li>
+            </ul>
+        </div>
+
+        <div class="glass-panel">
+            <h2>Encryption & Security</h2>
+            <p>All direct messages and calls within the Vyx Nexus are <span class="highlight">encrypted in transit</span>. We use industry-standard protocols to ensure that your private frequencies are never intercepted.</p>
+        </div>
+
+        <div class="glass-panel">
+            <h2>Third-Party Rhythms</h2>
+            <p>Vyx does not sell your personal data to third-party entities. We may use verified providers (like Firebase or Audius) to facilitate specific platform features, subject to their own high-fidelity privacy standards.</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 VYX INC. ALL RIGHTS RESERVED.</p>
+            <p>hello@vyxapp.in | Bangalore, India</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -59,7 +59,7 @@ const fetchWithRetry = async (urlSuffix) => {
  */
 export const getTrendingTracks = async () => {
     try {
-        const data = await fetchWithRetry(`/v1/tracks/trending?app_name=STRIDE`);
+        const data = await fetchWithRetry(`/v1/tracks/trending?app_name=VYX`);
         return data?.data || [];
     } catch (error) {
         console.error("Failed to fetch trending tracks", error);
@@ -72,7 +72,7 @@ export const getTrendingTracks = async () => {
  */
 export const searchTracks = async (query) => {
     try {
-        const data = await fetchWithRetry(`/v1/tracks/search?query=${encodeURIComponent(query)}&app_name=STRIDE`);
+        const data = await fetchWithRetry(`/v1/tracks/search?query=${encodeURIComponent(query)}&app_name=VYX`);
         return data?.data || [];
     } catch (error) {
         console.error("Failed to search tracks", error);
@@ -85,7 +85,7 @@ export const searchTracks = async (query) => {
  */
 export const searchUsers = async (query) => {
     try {
-        const data = await fetchWithRetry(`/v1/users/search?query=${encodeURIComponent(query)}&app_name=STRIDE`);
+        const data = await fetchWithRetry(`/v1/users/search?query=${encodeURIComponent(query)}&app_name=VYX`);
         return data?.data || [];
     } catch (error) {
         console.error("Failed to search users", error);
@@ -99,5 +99,5 @@ export const searchUsers = async (query) => {
 export const getStreamUrl = async (trackId) => {
     const host = await selectHost();
     if (!host) return null;
-    return `${host}/v1/tracks/${trackId}/stream?app_name=STRIDE`;
+    return `${host}/v1/tracks/${trackId}/stream?app_name=VYX`;
 };

@@ -1,7 +1,10 @@
-.stride-splash-container {
+.vyx-splash-container {
     position: fixed;
-    inset: 0;
-    background: #000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #030014;
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -11,7 +14,7 @@
     transition: opacity 0.8s ease-out;
 }
 
-.stride-splash-container.fade-out {
+.vyx-splash-container.fade-out {
     opacity: 0;
     pointer-events: none;
 }
@@ -21,31 +24,28 @@
 }
 
 .splash-logo-pulse {
-    width: 120px;
-    height: 120px;
-    background: rgba(139, 92, 246, 0.05);
-    border: 2px solid var(--theme-primary, #8b5cf6);
-    border-radius: 50%;
+    width: 140px;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 30px;
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
 }
 
-.splash-s {
-    font-size: 4rem;
-    font-weight: 900;
-    color: var(--theme-primary, #8b5cf6);
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+.splash-logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(0, 102, 255, 0.4));
 }
+
 
 .splash-title {
     font-size: 2.5rem;
     font-weight: 900;
     letter-spacing: 0.3em;
     margin-bottom: 10px;
-    background: linear-gradient(to right, #fff, #8b5cf6);
+    background: linear-gradient(to right, #fff, #0066ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -74,10 +74,10 @@
 
 .loading-bar-progress {
     height: 100%;
-    background: var(--theme-primary, #8b5cf6);
+    background: var(--theme-primary, #0066ff);
     width: 0;
     animation: load-progress 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-    box-shadow: 0 0 10px var(--theme-primary, #8b5cf6);
+    box-shadow: 0 0 10px var(--theme-primary, #0066ff);
 }
 
 @keyframes load-progress {

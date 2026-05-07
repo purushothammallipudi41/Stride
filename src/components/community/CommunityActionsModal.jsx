@@ -112,7 +112,7 @@ const CommunityActionsModal = ({ isOpen, onClose, community, onOpenSettings, onC
                 />
                 <button 
                     onClick={() => handleQuickCreate(type)}
-                    style={{ background: 'var(--token-accent, #8b5cf6)', border: 'none', color: 'white', padding: '16px', borderRadius: '12px', fontWeight: '800', marginTop: '12px' }}
+                    style={{ background: 'var(--token-accent, #0066ff)', border: 'none', color: 'white', padding: '16px', borderRadius: '12px', fontWeight: '800', marginTop: '12px' }}
                 >
                     Create {type}
                 </button>
@@ -178,8 +178,8 @@ const ActionItem = ({ icon: Icon, label, sub, toggle, isOn, onToggle, onClick, l
                 </div>
             </div>
             {toggle ? (
-                <div className={`stride-toggle ${isOn ? 'on' : ''}`}>
-                    <div className="stride-toggle-handle">
+                <div className={`vyx-toggle ${isOn ? 'on' : ''}`}>
+                    <div className="vyx-toggle-handle">
                         {isOn && <Check size={12} className="toggle-check-icon" />}
                     </div>
                 </div>

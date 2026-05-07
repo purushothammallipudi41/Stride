@@ -1,6 +1,6 @@
 {
-  "short_name": "Stride",
-  "name": "Stride: Find Your Rhythm",
+  "short_name": "Vyx",
+  "name": "Vyx: Experience the Frequency",
   "description": "Discover, connect, and vibe in the premier social ecosystem for music lovers and creators.",
   "icons": [
     {
@@ -24,6 +24,6 @@
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#8b5cf6",
-  "background_color": "#0a0a0b"
+  "theme_color": "#0066ff",
+  "background_color": "#030014"
 }

@@ -10,7 +10,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
     const [currentView, setCurrentView] = useState('main');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [accentColor, setAccentColor] = useState('#8b5cf6');
+    const [accentColor, setAccentColor] = useState('#0066ff');
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -25,7 +25,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
     });
 
     const [invites, setInvites] = useState([
-        { code: 'stride-vibe', uses: 124, expires: 'Never' },
+        { code: 'vyx-vibe', uses: 124, expires: 'Never' },
         { code: 'genesis-drop', uses: 42, expires: '24h' },
         { code: 'mod-private', uses: 3, expires: '1h' }
     ]);
@@ -44,7 +44,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
             console.log("[SETTINGS] Node Config Active:", community?.name);
             setName(community?.name || '');
             setDescription(community?.description || '');
-            setAccentColor(community?.accentColor || '#8b5cf6');
+            setAccentColor(community?.accentColor || '#0066ff');
             setCurrentView('main');
         }
     }, [isOpen]); 
@@ -125,12 +125,12 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
         console.log(`[SETTINGS] ${label} placeholder triggered.`);
         addNotification({ 
             title: 'Sub-module Offline', 
-            message: `The ${label} interface is scheduled for the Stride 3.2 release.`, 
+            message: `The ${label} interface is scheduled for the Vyx 3.2 release.`, 
             type: 'info' 
         });
     };
 
-    const colors = ['#8b5cf6', '#ec4899', '#ef4444', '#10b981', '#3b82f6', '#f59e0b'];
+    const colors = ['#0066ff', '#ec4899', '#ef4444', '#10b981', '#3b82f6', '#f59e0b'];
 
     // --- Dynamic Title Resolver ---
     const getTitle = () => {
@@ -398,8 +398,8 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
                                             style={{ 
                                                 padding: '16px', 
                                                 borderRadius: '12px', 
-                                                background: settings.verificationLevel === level.toLowerCase() ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255,255,255,0.03)',
-                                                border: `1px solid ${settings.verificationLevel === level.toLowerCase() ? '#8b5cf6' : 'rgba(255,255,255,0.05)'}`,
+                                                background: settings.verificationLevel === level.toLowerCase() ? 'rgba(0, 102, 255, 0.1)' : 'rgba(255,255,255,0.03)',
+                                                border: `1px solid ${settings.verificationLevel === level.toLowerCase() ? '#0066ff' : 'rgba(255,255,255,0.05)'}`,
                                                 cursor: 'pointer'
                                             }}
                                         >
@@ -422,7 +422,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
                                         { action: 'Role Updated', target: 'Vibe King', mod: 'puru', time: '12m ago' },
                                         { action: 'Channel Created', target: '#backstage', mod: 'puru', time: '1h ago' },
                                         { action: 'Member Kicked', target: 'SpamBot', mod: 'AutoMod', time: '3h ago' },
-                                        { action: 'Node Profile Changed', target: 'Stride Official', mod: 'puru', time: '5h ago' }
+                                        { action: 'Node Profile Changed', target: 'Vyx Official', mod: 'puru', time: '5h ago' }
                                     ].map((log, i) => (
                                         <div key={i} className="settings-item" style={{ cursor: 'default', padding: '16px' }}>
                                             <div className="settings-item-left">
@@ -570,7 +570,7 @@ const ModToolsModal = ({ isOpen, onClose, community, onUpdate }) => {
                                 <label style={{ display: 'block', fontSize: '0.7rem', opacity: 0.5, marginBottom: '8px', fontWeight: '800' }}>IFRAME EMBED CODE</label>
                                 <textarea 
                                     readOnly 
-                                    value={`<iframe src="https://stride.live/widget/${community._id}" width="350" height="500"></iframe>`}
+                                    value={`<iframe src="https://vyx.live/widget/${community._id}" width="350" height="500"></iframe>`}
                                     style={{ width: '100%', background: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#10b981', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '16px', resize: 'none' }}
                                 />
                                 <button 
@@ -612,8 +612,8 @@ const SettingsItem = ({ icon: Icon, label, sub, toggle, isOn, onToggle, onClick,
             </div>
             
             {toggle ? (
-                <div className={`stride-toggle ${isOn ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); onToggle(); }}>
-                    <div className="stride-toggle-handle">
+                <div className={`vyx-toggle ${isOn ? 'on' : ''}`} onClick={(e) => { e.stopPropagation(); onToggle(); }}>
+                    <div className="vyx-toggle-handle">
                         {isOn && <Check size={12} className="toggle-check-icon" />}
                     </div>
                 </div>

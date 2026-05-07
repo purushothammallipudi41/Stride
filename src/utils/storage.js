@@ -17,7 +17,7 @@ export const getStoredUser = () => {
     }
 
     // High-Fidelity Firebase Auth Synchronization
-    // Ensure raw Firebase tokens with 'uid' seamlessly map to Stride's legacy '_id' 
+    // Ensure raw Firebase tokens with 'uid' seamlessly map to Vyx's legacy '_id' 
     if (userObj && !userObj._id && userObj.uid) {
         userObj._id = userObj.uid;
     }

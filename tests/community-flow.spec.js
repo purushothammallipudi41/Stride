@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('App loads and user can navigate to explore', async ({ page }) => {
-  await expect(page.locator('.topbar-logo-text')).toContainText('Stride');
+  await expect(page.locator('.topbar-logo-text')).toContainText('Vyx');
   
   await page.goto('/explore');
   await expect(page.locator('.explore-container, .category-title').first()).toBeVisible({ timeout: 15000 });
@@ -28,7 +28,7 @@ test('Community interaction flow', async ({ page }) => {
       await communityCard.click();
   } else {
       // Try searching for a known tag
-      await page.fill('.search-input', '#stride');
+      await page.fill('.search-input', '#vyx');
       await page.keyboard.press('Enter');
       
       // Wait for results

@@ -136,7 +136,7 @@ const AnalyticsDashboard = ({ communityId }) => {
                 }
                 .activity-bar {
                     width: 6%;
-                    background: linear-gradient(to top, #8b5cf6, #d946ef);
+                    background: linear-gradient(to top, #0066ff, #d946ef);
                     border-radius: 4px;
                     transition: height 0.5s ease;
                     animation: pulse 2s infinite alternate ease-in-out;

@@ -70,8 +70,8 @@ const Governance = () => {
     if (isLoading) {
         return (
             <div className="governance-page flex-center">
-                <div className="nexus-loading-spinner animate-pulse-purple">
-                    <Gavel size={48} color="#8b5cf6" />
+                <div className="nexus-loading-spinner animate-pulse-cobalt">
+                    <Gavel size={48} color="#0066ff" />
                 </div>
                 <h3>Synchronizing Sovereignty...</h3>
             </div>
@@ -83,7 +83,7 @@ const Governance = () => {
             <header className="gov-header">
                 <div className="gov-title-area">
                     <h1 className="gov-title">Governance Nexus</h1>
-                    <p className="gov-subtitle">The pulse of Stride is in your hands.</p>
+                    <p className="gov-subtitle">The pulse of Vyx is in your hands.</p>
                 </div>
                 <div className="user-weight-card glass-card">
                     <div className="weight-meta">
@@ -122,7 +122,7 @@ const Governance = () => {
                             setIsModalOpen(true);
                         } else {
                             addNotification({ 
-                                title: 'Stride Pro Required', 
+                                title: 'Vyx Pro Required', 
                                 message: 'Only Premium or Verified members can initiate new platform proposals.', 
                                 type: 'info' 
                             });

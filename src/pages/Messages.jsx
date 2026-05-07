@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import socket from '../services/socket';
 import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
-import PageHeader from '../components/layout/PageHeader';
 import { useUI } from '../hooks/useUI';
 import { BASE_URL } from '../utils/api';
 import { getStoredUser } from '../utils/storage';
@@ -27,7 +26,9 @@ const Messages = () => {
     }, [resetMessages]);
 
     useEffect(() => {
-        fetch(`${BASE_URL}/api/messages`)
+        if (!userProfile.username) return;
+
+        fetch(`${BASE_URL}/api/messages?username=${userProfile.username}`)
             .then(res => res.json())
             .then(data => {
                 // Determine the "other" person for each chat thread relative to current user

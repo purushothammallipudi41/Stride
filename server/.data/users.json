@@ -1,0 +1,81 @@
+[
+  {
+    "_id": "507f1f77bcf86cd799439011",
+    "id": "mem_1778056666751_1",
+    "username": "testuser",
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "password123",
+    "avatar": "",
+    "bio": "Just a music lover on Vyx 🎵",
+    "onboardingCompleted": true,
+    "accentColor": "#8b5cf6",
+    "posts": [],
+    "favorites": [],
+    "followers": [],
+    "following": [],
+    "followerCount": 0,
+    "followingCount": 0,
+    "createdAt": "2026-05-06T08:37:46.751Z",
+    "updatedAt": "2026-05-06T08:37:46.751Z"
+  },
+  {
+    "_id": "mem_1778056666752_2",
+    "id": "mem_1778056666752_2",
+    "username": "alex_walker",
+    "name": "Alexander Walker",
+    "bio": "Music explorer, beat maker, and vyx chaser. Always looking for the next sound.",
+    "avatar": "",
+    "posts": [
+      {
+        "id": "p1",
+        "content": "Just found this amazing lo-fi track!",
+        "contentUrl": "",
+        "likes": 12,
+        "comments": 2,
+        "timestamp": "2h ago"
+      },
+      {
+        "content": "Vyx is fire 🔥",
+        "contentUrl": "",
+        "likes": 45,
+        "comments": 8,
+        "timestamp": "1d ago"
+      }
+    ],
+    "favorites": [],
+    "following": [],
+    "isVerified": false,
+    "email": "undefined",
+    "password": "password123",
+    "followingCount": 890,
+    "createdAt": "2026-05-06T08:37:46.752Z",
+    "updatedAt": "2026-05-06T08:37:46.752Z"
+  },
+  {
+    "_id": "mem_1778056666752_3",
+    "id": "mem_1778056666752_3",
+    "username": "purushotham_m",
+    "name": "Purushotham Mallipudi",
+    "email": "purushothammallipudi41@gmail.com",
+    "password": "password123",
+    "bio": "Vyx Creator & Enthusiast.",
+    "avatar": "",
+    "followers": [],
+    "following": [],
+    "isVerified": false,
+    "pronouns": "",
+    "gender": "Male",
+    "links": [],
+    "banners": [],
+    "posts": [],
+    "followerCount": 0,
+    "followingCount": 0,
+    "createdAt": "2026-05-06T08:37:46.752Z",
+    "updatedAt": "2026-05-06T19:51:45.077Z",
+    "avatarFrame": "none",
+    "banner": "",
+    "accentColor": "#8b5cf6",
+    "hasUnreadNotifications": false
+  }
+]

@@ -19,10 +19,10 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="error-fallback-premium">
-          <div className="error-visual animate-pulse-purple">
+          <div className="error-visual animate-pulse-cobalt">
             <span className="error-code">500</span>
           </div>
-          <h2 className="error-title">Lost in the Rhythm</h2>
+          <h2 className="error-title">Lost in the Frequency</h2>
           <p className="error-desc">The frequency dropped unexpectedly. We're recalibrating the stage for you.</p>
           
           <div className="error-actions">

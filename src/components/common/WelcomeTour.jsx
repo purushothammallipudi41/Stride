@@ -7,7 +7,7 @@ const WelcomeTour = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const hasSeenTour = localStorage.getItem('stride_seen_tour');
+        const hasSeenTour = localStorage.getItem('vyx_seen_tour');
         if (!hasSeenTour) {
             const timer = setTimeout(() => setIsVisible(true), 1500);
             return () => clearTimeout(timer);
@@ -24,15 +24,15 @@ const WelcomeTour = () => {
 
     const handleComplete = () => {
         setIsVisible(false);
-        localStorage.setItem('stride_seen_tour', 'true');
+        localStorage.setItem('vyx_seen_tour', 'true');
     };
 
     if (!isVisible) return null;
 
     const tourSteps = [
         {
-            icon: <Music size={40} color="var(--theme-primary, #8b5cf6)" />,
-            title: "Your Daily Rhythm",
+            icon: <Music size={40} color="var(--theme-primary, #0066ff)" />,
+            title: "Your Daily Frequency",
             desc: "Discover fresh beats and follow your favorite artists in real-time."
         },
         {
@@ -43,7 +43,7 @@ const WelcomeTour = () => {
         {
             icon: <Sparkles size={40} color="#ec4899" />,
             title: "Pro Creator Tools",
-            desc: "Unlock analytics, exclusive frames, and start your journey as a Stride Artist."
+            desc: "Unlock analytics, exclusive frames, and start your journey as a Vyx Artist."
         }
     ];
 

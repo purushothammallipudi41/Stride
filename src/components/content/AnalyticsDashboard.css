@@ -67,7 +67,7 @@
   color: #fff;
 }
 
-.stat-card.vibe .stat-value { color: #8b5cf6; }
+.stat-card.vibe .stat-value { color: #0066ff; }
 .stat-card.play .stat-value { color: #10b981; }
 .stat-card.message .stat-value { color: #3b82f6; }
 .stat-card.join .stat-value { color: #f59e0b; }
@@ -149,7 +149,7 @@
   width: 48px;
   height: 48px;
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #8b5cf6;
+  border-top-color: #0066ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

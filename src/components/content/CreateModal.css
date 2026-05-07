@@ -69,7 +69,7 @@
 }
 
 .type-btn.active {
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 102, 255, 0.1);
     border-color: var(--color-primary);
 }
 

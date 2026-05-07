@@ -14,12 +14,12 @@ test.describe('Social Interactions Extended (DMs & Calls)', () => {
         body: JSON.stringify([
           {
             id: 'test-chat-1',
-            username: 'StrideOfficial',
-            name: 'Stride Official',
+            username: 'VyxOfficial',
+            name: 'Vyx Official',
             avatar: '',
             isVerified: true,
             messages: [
-              { id: 1, text: 'Welcome to Stride!', username: 'StrideOfficial', time: '10:00 AM' }
+              { id: 1, text: 'Welcome to Vyx!', username: 'VyxOfficial', time: '10:00 AM' }
             ]
           }
         ])

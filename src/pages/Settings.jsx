@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
     X, UserPlus, Music, Circle, BadgeCheck, Shield, Bell, 
-    Activity, Globe, Moon, Check 
+    Activity, Globe, Moon, Check, HelpCircle, Crown, LogOut,
+    Trophy, BarChart3, Layout, Key, Eye, EyeOff
 } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
 import Avatar from '../components/common/Avatar';
+import SupportModal from '../components/social/SupportModal';
 import { useUI } from '../hooks/useUI';
 import './Settings.css';
 
@@ -16,6 +18,12 @@ const Settings = () => {
     const [theme, setTheme] = useState('dark');
     const [notifications, setNotifications] = useState(true);
     const [privateAccount, setPrivateAccount] = useState(false);
+    const [isSupportOpen, setIsSupportOpen] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
+    const [showPw, setShowPw] = useState(false);
+    const [pwError, setPwError] = useState('');
+    const [pwSuccess, setPwSuccess] = useState('');
     
     const [user, setUser] = useState(() => {
         try {
@@ -23,11 +31,13 @@ const Settings = () => {
             if (stored) {
                 const parsed = JSON.parse(stored);
                 return {
+                    ...parsed,
                     name: parsed.name || parsed.username || 'User',
                     email: parsed.email || 'No email provided',
                     avatar: parsed.avatar || "",
                     avatarFrame: parsed.avatarFrame || 'none',
-                    username: parsed.username || ''
+                    username: parsed.username || '',
+                    isPremium: parsed.isPremium || false
                 };
             }
         } catch {
@@ -38,9 +48,16 @@ const Settings = () => {
             email: 'purushothammallipudi41@gmail.com',
             avatar: "",
             avatarFrame: 'none',
-            username: ''
+            username: '',
+            isPremium: false
         };
     });
+
+    const handleSignOut = () => {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/login';
+    };
 
     const handleFrameSwitch = async (e) => {
         const newFrame = e.target.value;
@@ -89,10 +106,12 @@ const Settings = () => {
                                 frame={user.avatarFrame || 'none'}
                             />
                             <div className="ps-account-details">
-                                <h4>{user.name}</h4>
+                                <div className="ps-name-row">
+                                    <h4>{user.name || `@${user.username}`}</h4>
+                                    {user.isPremium && <Crown size={14} className="pro-crown-v2" />}
+                                </div>
                                 <p>{user.email}</p>
                             </div>
-                            <Check size={20} className="ps-check-icon" />
                         </div>
                         <div className="ps-account-divider"></div>
                         <button className="ps-add-account-btn" onClick={() => addNotification({ title: "Multi-Account", message: "Switching accounts will be supported in v3.", type: "info" })}>
@@ -133,8 +152,8 @@ const Settings = () => {
                                     const val = e.target.value;
                                     if ((val === 'neon' || val === 'holographic') && !user.isPremium) {
                                         addNotification({ 
-                                            title: 'Stride Pro Required', 
-                                            message: 'Neon and Holographic frames are exclusive to Stride Pro members.', 
+                                            title: 'Vyx Pro Required', 
+                                            message: 'Neon and Holographic frames are exclusive to Vyx Pro members.', 
                                             type: 'info' 
                                         });
                                         return;
@@ -152,20 +171,59 @@ const Settings = () => {
 
                     </div>
                 </div>
+                
+                {/* CREATOR TOOLS & PROGRESS */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Creator Tools & Progress</h3>
+                    <div className="ps-list-group">
+                        
+                        <div className="ps-list-item clickable-item" onClick={() => navigate('/achievements')}>
+                            <div className="ps-item-left">
+                                <Trophy size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Achievements</span>
+                                    <span className="ps-item-subtitle">View your earned badges and milestones</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="ps-list-item clickable-item" onClick={() => navigate('/insights')}>
+                            <div className="ps-item-left">
+                                <BarChart3 size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Insights</span>
+                                    <span className="ps-item-subtitle">Performance analytics and trends</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="ps-list-item clickable-item" onClick={() => navigate('/artist-dashboard')}>
+                            <div className="ps-item-left">
+                                <Layout size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Artist Dashboard</span>
+                                    <span className="ps-item-subtitle">Manage your content and earnings</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
 
                 {/* ACCOUNT SECURITY SECTION */}
                 <div className="ps-section">
                     <h3 className="ps-section-title">Account Security</h3>
                     <div className="ps-list-group">
                         
-                        <div className="ps-list-item">
+                        <div className="ps-list-item clickable-item" onClick={() => !user.isVerified && navigate('/verify/apply')}>
                             <div className="ps-item-left">
-                                <BadgeCheck size={22} className="ps-icon-purple" />
+                                <BadgeCheck size={22} className={user.isVerified ? "ps-icon-purple" : "ps-icon-muted"} />
                                 <div className="ps-item-text">
-                                    <span className="ps-item-title">Get Verified (Official)</span>
+                                    <span className="ps-item-title">{user.isVerified ? 'Verified Account (Official)' : 'Get Verified (Official)'}</span>
+                                    {!user.isVerified && <span className="ps-item-subtitle">Request official verification</span>}
                                 </div>
                             </div>
-                            <Check size={20} className="ps-check-icon" />
+                            {user.isVerified && <Check size={20} className="ps-check-icon" />}
                         </div>
 
                         <div className="ps-list-item toggle-row">
@@ -194,8 +252,83 @@ const Settings = () => {
                             </label>
                         </div>
 
+                        <div className="ps-list-item clickable-item" onClick={() => setShowPasswordModal(!showPasswordModal)}>
+                            <div className="ps-item-left">
+                                <Key size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Change Password</span>
+                                    <span className="ps-item-subtitle">Update your login credentials</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
+                {/* CHANGE PASSWORD INLINE FORM */}
+                {showPasswordModal && (
+                    <div className="ps-section ps-password-section">
+                        <div className="ps-password-header">
+                            <h4>Change Password</h4>
+                            <button className="ps-pw-close" onClick={() => { setShowPasswordModal(false); setPwError(''); setPwSuccess(''); }}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        {pwSuccess ? (
+                            <div className="ps-pw-success">
+                                <Check size={20} />
+                                <span>{pwSuccess}</span>
+                            </div>
+                        ) : (
+                            <div className="ps-pw-form">
+                                <div className="ps-pw-field">
+                                    <input
+                                        type={showPw ? 'text' : 'password'}
+                                        placeholder="Current password"
+                                        value={passwordForm.current}
+                                        onChange={e => setPasswordForm(p => ({ ...p, current: e.target.value }))}
+                                    />
+                                    <button onClick={() => setShowPw(!showPw)} className="ps-pw-eye">
+                                        {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                                <div className="ps-pw-field">
+                                    <input
+                                        type={showPw ? 'text' : 'password'}
+                                        placeholder="New password"
+                                        value={passwordForm.newPass}
+                                        onChange={e => setPasswordForm(p => ({ ...p, newPass: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="ps-pw-field">
+                                    <input
+                                        type={showPw ? 'text' : 'password'}
+                                        placeholder="Confirm new password"
+                                        value={passwordForm.confirm}
+                                        onChange={e => setPasswordForm(p => ({ ...p, confirm: e.target.value }))}
+                                    />
+                                </div>
+                                {pwError && <p className="ps-pw-error">{pwError}</p>}
+                                <button className="ps-pw-submit" onClick={async () => {
+                                    setPwError('');
+                                    if (!passwordForm.current || !passwordForm.newPass || !passwordForm.confirm) { setPwError('Please fill in all fields.'); return; }
+                                    if (passwordForm.newPass !== passwordForm.confirm) { setPwError('Passwords do not match.'); return; }
+                                    if (passwordForm.newPass.length < 6) { setPwError('Password must be at least 6 characters.'); return; }
+                                    try {
+                                        const res = await fetch(`${BASE_URL}/api/auth/change-password`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ username: user.username, currentPassword: passwordForm.current, newPassword: passwordForm.newPass })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) { setPwSuccess('Password updated successfully!'); setPasswordForm({ current: '', newPass: '', confirm: '' }); }
+                                        else { setPwError(data.message || 'Incorrect current password.'); }
+                                    } catch { setPwError('Network error. Please try again.'); }
+                                }}>Update Password</button>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* PROMOTIONS SECTION */}
                 <div className="ps-section">
@@ -244,11 +377,27 @@ const Settings = () => {
                     </div>
                 </div>
 
+                {/* HELP & SUPPORT SECTION */}
+                <div className="ps-section">
+                    <h3 className="ps-section-title">Help & Support</h3>
+                    <div className="ps-list-group">
+                        <div className="ps-list-item clickable-item" onClick={() => setIsSupportOpen(true)}>
+                            <div className="ps-item-left">
+                                <HelpCircle size={22} className="ps-icon-purple" />
+                                <div className="ps-item-text">
+                                    <span className="ps-item-title">Support Hub</span>
+                                    <span className="ps-item-subtitle">Report bugs or give feedback</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* ABOUT & LEGAL SECTION */}
                 <div className="ps-section">
                     <h3 className="ps-section-title">About & Legal</h3>
                     <div className="ps-list-group">
-                        <div className="ps-list-item">
+                        <div className="ps-list-item clickable-item" onClick={() => navigate('/legal?tab=tos')}>
                             <div className="ps-item-left">
                                 <Shield size={22} className="ps-icon-muted" />
                                 <div className="ps-item-text">
@@ -256,7 +405,7 @@ const Settings = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="ps-list-item">
+                        <div className="ps-list-item clickable-item" onClick={() => navigate('/legal?tab=privacy')}>
                             <div className="ps-item-left">
                                 <Shield size={22} className="ps-icon-muted" />
                                 <div className="ps-item-text">
@@ -268,6 +417,7 @@ const Settings = () => {
                 </div>
 
             </div>
+            <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
         </div>
     );
 };

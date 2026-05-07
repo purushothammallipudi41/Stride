@@ -95,7 +95,7 @@ const CreateArticleModal = () => {
         <GlobalModal 
             isOpen={isArticleModalOpen} 
             onClose={closeArticleModal}
-            title="Compose Stride Article"
+            title="Compose Vyx Article"
             maxWidth="700px"
             className="create-article-standardized"
         >
@@ -190,8 +190,8 @@ const CreateArticleModal = () => {
                 {/* Overlays */}
                 {isSubmitting && (
                     <div className="article-status-overlay syncing">
-                        <Loader2 className="animate-spin" size={48} color="#8b5cf6" />
-                        <p>Syncing nodes across Stride...</p>
+                        <Loader2 className="animate-spin" size={48} color="#0066ff" />
+                        <p>Syncing nodes across Vyx...</p>
                     </div>
                 )}
 

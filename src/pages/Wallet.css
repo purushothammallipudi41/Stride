@@ -25,7 +25,7 @@
     flex-direction: column;
     justify-content: space-between;
     height: 200px;
-    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 102, 255, 0.3);
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -171,7 +171,7 @@
 }
 
 .tx-icon.topup { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.tx-icon.tip { background: rgba(139, 92, 246, 0.1); color: var(--color-primary); }
+.tx-icon.tip { background: rgba(0, 102, 255, 0.1); color: var(--color-primary); }
 
 .tx-info {
     flex: 1;
@@ -271,7 +271,7 @@
 .custom-amount input:focus {
     border-color: var(--color-primary);
     background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 20px rgba(0, 102, 255, 0.1);
 }
 
 .confirm-topup-btn {

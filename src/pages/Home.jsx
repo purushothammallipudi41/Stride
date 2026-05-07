@@ -93,7 +93,7 @@ const Home = () => {
             </div>
             <SEO 
                 title="Home" 
-                description="Experience the rhythm of Stride. Follow your favorite artists and discover new music in your social feed." 
+                description="Experience the frequency of Vyx. Follow your favorite artists and discover new music in your social feed." 
             />
             
             <div className="home-layout">

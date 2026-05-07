@@ -25,7 +25,7 @@ const CreatePostModal = () => {
     const [creationType, setCreationType] = useState('POST'); // POST, COMMUNITY
     const [communityName, setCommunityName] = useState('');
     const [communityDesc, setCommunityDesc] = useState('');
-    const [communityAccent, setCommunityAccent] = useState('#8b5cf6');
+    const [communityAccent, setCommunityAccent] = useState('#0066ff');
 
     // Ensure state is fresh on mount
     useEffect(() => {
@@ -214,7 +214,7 @@ const CreatePostModal = () => {
                             <div className="branding-section">
                                 <label style={{ fontSize: '0.7rem', opacity: 0.6, textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Branding Accent</label>
                                 <div className="accent-picker" style={{ display: 'flex', gap: '10px' }}>
-                                    {['#8b5cf6', '#ec4899', '#f43f5e', '#10b981', '#3b82f6'].map(color => (
+                                    {['#0066ff', '#ec4899', '#f43f5e', '#10b981', '#3b82f6'].map(color => (
                                         <button 
                                             key={color}
                                             type="button" 
@@ -265,7 +265,7 @@ const CreatePostModal = () => {
                     ) : (
                         <div className="post-stage animate-fade-in">
                             <textarea 
-                                placeholder={creationType === 'REEL' ? "Write a caption for your reel..." : "What's the rhythm today?"} 
+                                placeholder={creationType === 'REEL' ? "Write a caption for your reel..." : "What's the frequency today?"} 
                                 value={caption}
                                 onChange={(e) => setCaption(e.target.value)}
                                 autoFocus

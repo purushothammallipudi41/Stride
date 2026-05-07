@@ -18,10 +18,10 @@ const Servers = () => {
         const activity = realTimeActivity.find(a => String(a.communityId) === String(server._id));
         if (activity) return activity;
         
-        // Mock activity for "Stride Official" to showcase the feature if no real activity exists
-        if (server.name === 'Stride Official') {
+        // Mock activity for "Vyx Official" to showcase the feature if no real activity exists
+        if (server.name === 'Vyx Official') {
             return {
-                username: 'StrideBot',
+                username: 'VyxBot',
                 track: { title: 'Social Nexus Launch Event' }
             };
         }

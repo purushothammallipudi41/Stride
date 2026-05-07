@@ -137,7 +137,7 @@ const Wallet = () => {
 
     return (
         <div className="wallet-page">
-            <SEO title="My Wallet" description="Manage your Stride credits and support your favorite creators." />
+            <SEO title="My Wallet" description="Manage your Vyx credits and support your favorite creators." />
             <PageHeader title="Wallet" />
 
             <div className="wallet-content">
@@ -223,7 +223,7 @@ const Wallet = () => {
                 className="wallet-topup-standardized"
             >
                 <div className="wallet-modal-content">
-                    <p className="modal-description">Purchase Stride credits to tip creators and unlock premium features.</p>
+                    <p className="modal-description">Purchase Vyx credits to tip creators and unlock premium features.</p>
                     
                     <div className="amount-options">
                         {[100, 500, 1000, 5000].map(amt => (

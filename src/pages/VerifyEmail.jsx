@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
-import logo from '../assets/stride-logo.png';
+import logo from '../assets/vyx-logo.png';
 import './VerifyEmail.css';
 
 const VerifyEmail = () => {
@@ -71,7 +71,6 @@ const VerifyEmail = () => {
 
             if (data.success) {
                 const user = safeGetUser();
-                user.isVerified = true;
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('isAuthenticated', 'true');
                 navigate('/');
@@ -84,7 +83,6 @@ const VerifyEmail = () => {
             // Force bypass if the local network fetch is failing
             setTimeout(() => {
                 const user = safeGetUser();
-                user.isVerified = true;
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('isAuthenticated', 'true');
                 navigate('/');
@@ -123,8 +121,8 @@ const VerifyEmail = () => {
 
                 <div className="verify-header">
                     <div className="logo-section">
-                        <img src={logo} alt="Stride" className="logo-image" />
-                        <h1 className="logo-text">Stride</h1>
+                        <img src={logo} alt="Vyx" className="logo-image" />
+                        <h1 className="logo-text">Vyx</h1>
                     </div>
                     <p>We've sent a 6-digit code to <strong>{email}</strong>. Enter it below to secure your account.</p>
                     

@@ -1,0 +1,213 @@
+.connections-full-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.connections-full-modal.open {
+    transform: translateX(0);
+}
+
+.cm-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    height: 60px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cm-back-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 8px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.cm-title {
+    flex: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cm-header-right {
+    padding: 8px;
+    color: white;
+}
+
+.cm-tabs {
+    display: flex;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cm-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 16px 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.cm-tab.active {
+    color: white;
+}
+
+.cm-tab-indicator {
+    position: absolute;
+    bottom: 0;
+    width: 33.3%;
+    height: 2px;
+    background: white;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cm-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #000;
+}
+
+.cm-section-title {
+    padding: 20px 16px 12px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.cm-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.cm-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 14px;
+}
+
+.cm-avatar-ring {
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cm-avatar-ring.has-story {
+    background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+}
+
+.cm-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cm-name-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cm-username {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.cm-verify-badge {
+    width: 14px;
+    height: 14px;
+    background: #0095f6;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-position: center;
+}
+
+.cm-full-name {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cm-status {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cm-status-dot {
+    width: 6px;
+    height: 6px;
+    background: #0095f6;
+    border-radius: 50%;
+}
+
+.cm-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cm-action-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.cm-action-btn.primary {
+    background: #0095f6;
+    color: white;
+}
+
+.cm-action-btn.secondary {
+    background: #262626;
+    color: white;
+}
+
+.cm-action-btn:active {
+    opacity: 0.7;
+}
+
+.cm-more-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.cm-loading, .cm-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.4);
+}

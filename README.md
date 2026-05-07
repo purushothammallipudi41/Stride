@@ -1,6 +1,6 @@
-# Stride
+# Vyx
 
-Stride is a modern, high-performance music and social streaming platform.
+Vyx is a modern, high-performance music and social streaming platform.
 
 ## Features
 

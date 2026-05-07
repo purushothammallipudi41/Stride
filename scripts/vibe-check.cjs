@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log("\n🚀 INITIALIZING STRIDE VIBE-CHECK v1.0\n");
+console.log("\n🚀 INITIALIZING VYX VIBE-CHECK v1.0\n");
 
 const CRITICAL_ASSETS = [
     'src/pages/Login.jsx',

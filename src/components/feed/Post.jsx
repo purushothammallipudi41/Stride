@@ -186,8 +186,8 @@ const Post = ({ post }) => {
             {/* SVG Gradient Definition for icons to use if needed */}
             <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
-                    <linearGradient id="stride-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+                    <linearGradient id="vyx-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: '#0066ff', stopOpacity: 1 }} />
                         <stop offset="100%" style={{ stopColor: '#ec4899', stopOpacity: 1 }} />
                     </linearGradient>
                 </defs>

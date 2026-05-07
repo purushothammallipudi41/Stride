@@ -34,10 +34,10 @@ const CreateStoryModal = ({ isOpen, onClose, onConfirm, isUploading, isSuccess, 
 
     // Mock tracks from data.json context
     const mockTracks = [
-        { id: 's1', title: 'Start Again', artist: 'Alex Stride', cover: '' },
-        { id: 's2', title: 'City Lights', artist: 'Alex Stride', cover: '' },
+        { id: 's1', title: 'Start Again', artist: 'Alex Vyx', cover: '' },
+        { id: 's2', title: 'City Lights', artist: 'Alex Vyx', cover: '' },
         { id: 's4', title: 'Voltage', artist: 'Marcus Vibe', cover: '' },
-        { id: 's3', title: 'Midnight Horizons', artist: 'Alex Stride', cover: '' }
+        { id: 's3', title: 'Midnight Horizons', artist: 'Alex Vyx', cover: '' }
 
     ];
 

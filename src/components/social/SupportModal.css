@@ -35,7 +35,7 @@
 }
 
 .support-main-icon {
-    color: var(--theme-primary, #8b5cf6);
+    color: var(--theme-primary, #0066ff);
 }
 
 .support-header h3 {
@@ -88,9 +88,9 @@
 }
 
 .type-btn.active {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: var(--theme-primary, #8b5cf6);
-    color: var(--theme-primary, #8b5cf6);
+    background: rgba(0, 102, 255, 0.15);
+    border-color: var(--theme-primary, #0066ff);
+    color: var(--theme-primary, #0066ff);
 }
 
 .support-group {
@@ -117,12 +117,12 @@
 }
 
 .support-group textarea:focus, .support-group input:focus {
-    border-color: var(--theme-primary, #8b5cf6);
+    border-color: var(--theme-primary, #0066ff);
 }
 
 .support-submit-btn {
     width: 100%;
-    background: var(--theme-primary, #8b5cf6);
+    background: var(--theme-primary, #0066ff);
     color: white;
     border: none;
     border-radius: 14px;
@@ -138,7 +138,7 @@
 
 .support-submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 102, 255, 0.3);
 }
 
 /* Success State */

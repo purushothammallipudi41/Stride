@@ -3,7 +3,7 @@ import { Music } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
 import './Avatar.css';
 
-const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListening = false, isPremium = false }) => {
+const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListening = false, isPremium = false, hideInitial = false }) => {
     // Check if src is an emoji or single/double character
     const isTextAvatar = !src || (typeof src === 'string' && !src.startsWith('http') && src.length <= 4);
 
@@ -23,6 +23,7 @@ const Avatar = ({ src, alt, size = 40, className = '', frame = 'none', isListeni
 
     const renderContent = () => {
         if (isTextAvatar) {
+            if (hideInitial && !src) return null;
             const fallbackChar = (alt && alt.length > 0) ? alt.charAt(0).toUpperCase() : '?';
             return (
                 <div 

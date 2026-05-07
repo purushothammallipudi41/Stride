@@ -105,7 +105,7 @@ const Marketplace = () => {
     return (
         <div className="marketplace-container-outer">
             <PageHeader 
-                title="Stride Marketplace" 
+                title="Vyx Marketplace" 
                 rightElement={
                     <div className="vibe-tokens-badge-v2" onClick={() => navigate('/wallet')} style={{ cursor: 'pointer' }}>
                         <Coins size={16} className="token-icon" />

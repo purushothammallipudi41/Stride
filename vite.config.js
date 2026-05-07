@@ -23,10 +23,10 @@ export default defineConfig({
       },
       includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png'],
       manifest: {
-        name: 'Stride: Find Your Rhythm',
-        short_name: 'Stride',
+        name: 'Vyx: Find Your Rhythm',
+        short_name: 'Vyx',
         description: 'Discover, connect, and vibe in the premier social ecosystem for music lovers and creators.',
-        theme_color: '#8b5cf6',
+        theme_color: '#0066ff',
         background_color: '#0a0a0b',
         display: 'standalone',
         orientation: 'portrait',

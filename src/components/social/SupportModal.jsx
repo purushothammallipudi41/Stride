@@ -112,7 +112,7 @@ const SupportModal = ({ isOpen, onClose }) => {
 
                         <button type="submit" className="support-submit-btn" disabled={isSubmitting}>
                             {isSubmitting ? <div className="spinner" /> : (
-                                <>Send to Stride Team <Send size={18} /></>
+                                <>Send to Vyx Team <Send size={18} /></>
                             )}
                         </button>
                     </form>

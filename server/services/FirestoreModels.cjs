@@ -1,7 +1,7 @@
 const { admin, db } = require('./FirebaseAdmin.cjs');
 
 /**
- * Stride v2.0 Firestore Bridge
+ * Vyx v2.0 Firestore Bridge
  * Provides a Mongoose-like API for Firestore collections
  */
 class FirestoreModel {
@@ -10,7 +10,26 @@ class FirestoreModel {
         this.collection = db.collection(collectionName);
     }
 
-    // Helper to wrap result in a chainable thenable (Mongoose-style)
+    _wrap(data, id) {
+        if (!data) return null;
+        const self = this;
+        const result = { 
+            id: id || data.id, 
+            _id: id || data._id || data.id, 
+            ...data,
+            toObject: () => result,
+            save: async function() {
+                const { id, _id, toObject, save, ...cleanData } = this;
+                await self.collection.doc(String(id)).update({
+                    ...cleanData,
+                    updatedAt: new Date()
+                });
+                return this;
+            }
+        };
+        return result;
+    }
+
     _chain(dataPromise) {
         const query = {
             populate: () => query,
@@ -28,8 +47,8 @@ class FirestoreModel {
         const promise = (async () => {
             if (!id) return null;
             const doc = await this.collection.doc(String(id)).get();
-            const result = doc.exists ? { id: doc.id, _id: doc.id, ...doc.data() } : null;
-            return result ? { ...result, toObject: () => result } : null;
+            if (!doc.exists) return null;
+            return this._wrap(doc.data(), doc.id);
         })();
         return this._chain(promise);
     }
@@ -52,8 +71,7 @@ class FirestoreModel {
             const snapshot = await q.limit(1).get();
             if (snapshot.empty) return null;
             const doc = snapshot.docs[0];
-            const result = { id: doc.id, _id: doc.id, ...doc.data() };
-            return { ...result, toObject: () => result };
+            return this._wrap(doc.data(), doc.id);
         })();
         return this._chain(promise);
     }
@@ -62,8 +80,16 @@ class FirestoreModel {
         const promise = (async () => {
             let q = this.collection;
             for (const [key, value] of Object.entries(query)) {
-                if (key === '$or') continue; // Simplified
-                q = q.where(key, '==', value);
+                if (key === '$or') continue;
+                
+                // Handle complex operators like $in
+                if (value && typeof value === 'object' && value.$in) {
+                    // Firestore limit: $in supports up to 10-30 items depending on version
+                    // For now we use the native .where(key, 'in', value.$in)
+                    q = q.where(key, 'in', value.$in);
+                } else {
+                    q = q.where(key, '==', value);
+                }
             }
             
             if (options.sort) {
@@ -74,10 +100,7 @@ class FirestoreModel {
             if (options.limit) q = q.limit(options.limit);
             
             const snapshot = await q.get();
-            return snapshot.docs.map(doc => {
-                const result = { id: doc.id, _id: doc.id, ...doc.data() };
-                return { ...result, toObject: () => result };
-            });
+            return snapshot.docs.map(doc => this._wrap(doc.data(), doc.id));
         })();
         return this._chain(promise);
     }
@@ -89,8 +112,7 @@ class FirestoreModel {
             updatedAt: new Date()
         });
         const doc = await docRef.get();
-        const result = { id: doc.id, _id: doc.id, ...doc.data() };
-        return { ...result, toObject: () => result };
+        return this._wrap(doc.data(), doc.id);
     }
 
     async findOneAndUpdate(query, update, options = {}) {
@@ -126,8 +148,7 @@ class FirestoreModel {
         
         // Return updated doc (simulate returnDocument: 'after')
         const refreshed = await this.collection.doc(doc.id).get();
-        const result = { id: refreshed.id, _id: refreshed.id, ...refreshed.data() };
-        return { ...result, toObject: () => result };
+        return this._wrap(refreshed.data(), refreshed.id);
     }
 
     async updateOne(query, update) {
@@ -164,7 +185,7 @@ class FirestoreModel {
     }
 }
 
-// Stride social pulse collections
+// Vyx social pulse collections
 const FirestoreUser = new FirestoreModel('users');
 const FirestorePost = new FirestoreModel('posts');
 const FirestoreCommunity = new FirestoreModel('communities');

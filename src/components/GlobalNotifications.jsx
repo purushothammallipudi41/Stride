@@ -12,7 +12,7 @@ const GlobalNotifications = () => {
             {notifications.map(notification => (
                 <div key={notification.id} className="notification-toast animate-slide-in">
                     <div className="notification-icon">
-                        <Bell size={18} className="text-stride-primary" />
+                        <Bell size={18} className="text-vyx-primary" />
                     </div>
                     <div className="notification-content">
                         <p>{notification.message}</p>

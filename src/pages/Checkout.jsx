@@ -78,7 +78,7 @@ const Checkout = () => {
 
     return (
         <div className="checkout-page">
-            <SEO title="Secure Checkout" description="Finalize your Stride premium purchase." />
+            <SEO title="Secure Checkout" description="Finalize your Vyx premium purchase." />
             <div className="checkout-header">
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     <ChevronLeft size={24} />
@@ -177,7 +177,7 @@ const Checkout = () => {
 
                     <p className="secure-hint">
                         <ShieldCheck size={14} /> 
-                        Your payment is encrypted and secured by Stride Pay.
+                        Your payment is encrypted and secured by Vyx Pay.
                     </p>
                 </form>
             </div>

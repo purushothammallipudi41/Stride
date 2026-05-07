@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.stride.social"
+    namespace = "com.vyx.social"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.stride.social"
+        applicationId "com.vyx.social"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 119
-        versionName "1.4.1"
+        versionCode 200
+        versionName "2.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,10 +18,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('stride-release.jks')
-            storePassword 'stride123'
-            keyAlias 'stride-alias'
-            keyPassword 'stride123'
+            storeFile file('vyx-release.jks')
+            storePassword 'vyx123'
+            keyAlias 'vyx-alias'
+            keyPassword 'vyx123'
         }
     }
     buildTypes {

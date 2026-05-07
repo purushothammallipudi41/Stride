@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Shield, Users, MessageSquare, Tool, Activity, 
+    Shield, Users, MessageSquare, Wrench, Activity, 
     Check, X, AlertCircle, RefreshCw, LogOut, ChevronRight
 } from 'lucide-react';
 import { BASE_URL } from '../utils/api';
@@ -60,18 +60,38 @@ const AdminDashboard = () => {
         console.log(`[ADMIN] Maintenance toggled to: ${nextState}`);
     };
 
-    const approveVerification = (id) => {
+    const approveVerification = async (id) => {
+        try {
+            await fetch(`${BASE_URL}/api/admin/verify/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve' })
+            });
+        } catch (e) { /* best effort */ }
         setVerifications(prev => prev.filter(v => v.id !== id));
         setStats(prev => ({ ...prev, verifications: prev.verifications - 1 }));
         hapticNotification(NotificationType.Success);
     };
 
-    if (currentUser?.username !== 'puru' && currentUser?.username !== 'admin') {
+    const rejectVerification = async (id) => {
+        try {
+            await fetch(`${BASE_URL}/api/admin/verify/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject' })
+            });
+        } catch (e) { /* best effort */ }
+        setVerifications(prev => prev.filter(v => v.id !== id));
+        setStats(prev => ({ ...prev, verifications: prev.verifications - 1 }));
+    };
+
+    const ADMIN_USERS = ['admin', 'purushotham_m', 'puru'];
+    if (!ADMIN_USERS.includes(currentUser?.username)) {
         return (
             <div className="admin-restricted">
                 <Shield size={60} color="#ef4444" />
                 <h1>Access Restricted</h1>
-                <p>This command center is reserved for Stride Sovereigns.</p>
+                <p>This command center is reserved for Vyx Sovereigns.</p>
                 <button onClick={() => window.location.href='/'}>Return to Frequencies</button>
             </div>
         );
@@ -82,13 +102,13 @@ const AdminDashboard = () => {
             <aside className="admin-sidebar glass-panel">
                 <div className="admin-brand">
                     <Shield size={24} color="var(--theme-primary)" />
-                    <span>Stride Admin</span>
+                    <span>Vyx Admin</span>
                 </div>
                 <nav className="admin-nav">
                     <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}><Activity size={18}/> Overview</button>
                     <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}><Users size={18}/> Verifications ({stats.verifications})</button>
                     <button className={activeTab === 'reports' ? 'active' : ''} onClick={() => setActiveTab('reports')}><MessageSquare size={18}/> Reports ({stats.reports})</button>
-                    <button className={activeTab === 'system' ? 'active' : ''} onClick={() => setActiveTab('system')}><Tool size={18}/> System Control</button>
+                    <button className={activeTab === 'system' ? 'active' : ''} onClick={() => setActiveTab('system')}><Wrench size={18}/> System Control</button>
                 </nav>
                 <div className="admin-footer">
                     <button className="admin-logout" onClick={() => window.location.href='/'}><LogOut size={18}/> Exit Control</button>
@@ -150,10 +170,11 @@ const AdminDashboard = () => {
                                 <div key={v.id} className="table-row">
                                     <div className="row-info">
                                         <span className="row-title">@{v.username}</span>
-                                        <span className="row-subtitle">{v.name} • {v.bio}</span>
+                                        <span className="row-subtitle">{v.name} • {v.genre} • {v.bio}</span>
+                                        {v.portfolioUrl && <a className="row-link" href={v.portfolioUrl} target="_blank" rel="noreferrer">{v.portfolioUrl}</a>}
                                     </div>
                                     <div className="row-actions">
-                                        <button className="action-btn reject"><X size={16}/></button>
+                                        <button className="action-btn reject" onClick={() => rejectVerification(v.id)}><X size={16}/></button>
                                         <button className="action-btn approve" onClick={() => approveVerification(v.id)}><Check size={16}/></button>
                                     </div>
                                 </div>

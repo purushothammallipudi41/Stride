@@ -1,10 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
 const SEO = ({ title, description, image, url, type = 'website' }) => {
-    const siteName = 'Stride';
+    const siteName = 'Vyx';
     const fullTitle = title ? `${title} | ${siteName}` : siteName;
-    const defaultDescription = 'Stride is a modern, high-performance music and social streaming platform. Discover your rhythm today.';
-    const defaultImage = '/stride-logo.png'; // Replace with a specific OG image if available
+    const defaultDescription = 'Vyx is a modern, high-performance music and social streaming platform. Discover your frequency today.';
+    const defaultImage = '/vyx-logo.png'; // Replace with a specific OG image if available
 
     return (
         <Helmet>

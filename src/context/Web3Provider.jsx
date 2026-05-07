@@ -22,13 +22,14 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 const queryClient = new QueryClient();
 
 export const Web3Provider = ({ children }) => {
-  const projectId = 'YOUR_PROJECT_ID_PLACEHOLDER';
+  // IMPORTANT: Replace with a real WalletConnect Project ID from https://cloud.walletconnect.com
+  const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '00000000000000000000000000000000';
   
   // Safe config initialization inside component scope
   const config = useMemo(() => {
     try {
       return getDefaultConfig({
-        appName: 'Stride',
+        appName: 'Vyx',
         projectId: projectId === 'YOUR_PROJECT_ID_PLACEHOLDER' ? '00000000000000000000000000000000' : projectId,
         chains: [polygon, polygonAmoy],
         transports: {
@@ -66,7 +67,7 @@ export const Web3Provider = ({ children }) => {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={darkTheme({
-          accentColor: '#8b5cf6',
+          accentColor: '#0066ff',
           accentColorForeground: 'white',
           borderRadius: 'large',
         })}>

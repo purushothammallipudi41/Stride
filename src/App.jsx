@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { HelmetProvider } from 'react-helmet-async';
 import socket from './services/socket';
 import { useUI } from './hooks/useUI';
@@ -11,6 +10,7 @@ import { ServerProvider } from './context/ServerContext';
 import { UIProvider } from './context/UIContext';
 import { ActivityProvider } from './context/ActivityContext';
 import { Web3Provider } from './context/Web3Provider';
+import { BASE_URL } from './utils/api';
 
 // Pages
 import Home from './pages/Home';
@@ -61,19 +61,26 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AppContent = () => {
   const [isAppBooting, setIsAppBooting] = useState(true);
+  const [isMaintenance, setIsMaintenance] = useState(false);
   const { isCreateModalOpen, isExplorerOpen, isVaultOpen, isStoryModalOpen, callInfo, setCallInfo, liveInfo, setLiveInfo } = useUI();
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isPublicPath = ['/login', '/signup', '/verify'].includes(location.pathname);
 
     const requestEssentialPermissions = async () => {
-        if (Capacitor.isNativePlatform() && isPublicPath) {
+        if (Capacitor.isNativePlatform()) {
             try {
                 const { Camera } = await import('@capacitor/camera');
                 const { PushNotifications } = await import('@capacitor/push-notifications');
                 
                 await Camera.requestPermissions();
                 await PushNotifications.requestPermissions();
+                
+                // Screen Optimization "Permission" Mock
+                if (!localStorage.getItem('screen_optimized')) {
+                    console.log('Optimizing screen layout for your device...');
+                    localStorage.setItem('screen_optimized', 'true');
+                }
             } catch (e) {
                 console.warn('Permission request failed:', e);
             }
@@ -81,18 +88,11 @@ const AppContent = () => {
     };
 
     useEffect(() => {
-        // Configure mobile status bar
+        // Mobile platform setup
         if (Capacitor.isNativePlatform()) {
-            try {
-                StatusBar.setOverlaysWebView({ overlay: true });
-                StatusBar.setStyle({ style: Style.Light });
-            } catch (e) {
-                console.warn('StatusBar plugin not fully available:', e);
-            }
+            requestEssentialPermissions();
         }
-
-        requestEssentialPermissions();
-    const [isMaintenance, setIsMaintenance] = useState(false);
+    }, []);
 
     useEffect(() => {
         const checkMaintenance = async () => {
@@ -107,29 +107,31 @@ const AppContent = () => {
         checkMaintenance();
     }, []);
 
-    const user = getStoredUser();
+    const [user, setUser] = useState(getStoredUser());
 
-    if (isMaintenance) return <Maintenance />;
+    useEffect(() => {
+        const handleAuthUpdate = () => {
+            setUser(getStoredUser());
+        };
+        window.addEventListener('vyx_auth_update', handleAuthUpdate);
+        return () => window.removeEventListener('vyx_auth_update', handleAuthUpdate);
+    }, []);
 
-    const applyTheme = (userData = {}) => {
-      const storedColor = localStorage.getItem('stride_theme_color');
-      const userColor = userData?.accentColor;
-      const themeColor = storedColor || userColor || '#8b5cf6';
-      
-      const root = document.documentElement;
-      root.style.setProperty('--theme-primary', themeColor);
-      root.style.setProperty('--theme-accent', themeColor + '80');
-      root.style.setProperty('--theme-primary-glow', themeColor + '40');
-      document.body.style.setProperty('--theme-primary', themeColor);
-    };
+    useEffect(() => {
+        // Apply Theme
+        const storedColor = localStorage.getItem('vyx_theme_color');
+        const themeColor = storedColor || user?.accentColor || '#0066ff';
+        const root = document.documentElement;
+        root.style.setProperty('--theme-primary', themeColor);
+        root.style.setProperty('--theme-accent', themeColor + '80');
+        root.style.setProperty('--theme-primary-glow', themeColor + '40');
+        document.body.style.setProperty('--theme-primary', themeColor);
 
-    applyTheme(user);
-
-    if (isAuthenticated && user?.username) {
-        socket.emit('register_user', user);
-        socket.emit('join_user_room', user.username);
-    }
-  }, [isAuthenticated, isPublicPath]);
+        if (isAuthenticated && user?.username) {
+            socket.emit('register_user', user);
+            socket.emit('join_user_room', user.username);
+        }
+    }, [isAuthenticated, user]);
 
   useEffect(() => {
     socket.on('incoming-call', (data) => {
@@ -146,9 +148,12 @@ const AppContent = () => {
     };
   }, [setCallInfo]);
 
+  if (isMaintenance) return <Maintenance />;
+
   return (
     <>
       {isAppBooting && <SplashScreen onComplete={() => setIsAppBooting(false)} />}
+
       <div className="app-layout">
         {!isPublicPath && !isStoryModalOpen && !location.pathname.startsWith('/live/') && <Sidebar />}
       
@@ -253,7 +258,7 @@ function App() {
                   {/* Global Branding Gradients */}
                   <svg style={{ width: 0, height: 0, position: 'absolute' }} aria-hidden="true">
                     <defs>
-                      <linearGradient id="stride-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <linearGradient id="vyx-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="var(--color-primary)" />
                         <stop offset="100%" stopColor="var(--color-accent)" />
                       </linearGradient>
@@ -270,6 +275,3 @@ function App() {
 }
 
 export default App;
-
-
-

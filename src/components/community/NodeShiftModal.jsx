@@ -9,7 +9,7 @@ const NodeShiftModal = ({ isOpen, onClose, communityId, currentAccent, available
     const [description, setDescription] = useState('');
     const [shiftType, setShiftType] = useState(isGlobal ? 'policy' : 'aesthetic');
     const [options, setOptions] = useState(['Yes, apply shift', 'No, status quo']);
-    const [impactValue, setImpactValue] = useState(currentAccent || '#8b5cf6');
+    const [impactValue, setImpactValue] = useState(currentAccent || '#0066ff');
     const [selectedChannelId, setSelectedChannelId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -64,7 +64,7 @@ const NodeShiftModal = ({ isOpen, onClose, communityId, currentAccent, available
             <div className="modal-content glass-panel animate-scale-in">
                 <header className="modal-header">
                     <div className="title-with-icon">
-                        <Gavel className="text-stride-primary" size={24} />
+                        <Gavel className="text-vyx-primary" size={24} />
                         <h2>Initiate {isGlobal ? 'Platform' : 'Node'} Shift</h2>
                     </div>
                     <button className="close-btn" onClick={onClose}><X size={20} /></button>

@@ -26,7 +26,7 @@ const mongoRequest = async (action, body) => {
             headers,
             body: JSON.stringify({
                 dataSource: "Cluster0",
-                database: "stride",
+                database: "vyx",
                 ...body
             })
         });

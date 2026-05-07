@@ -11,7 +11,7 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const user = getStoredUser();
     const username = user?.username || 'guest';
-    const PRO_PRODUCT_ID = 'stride_pro_lifetime';
+    const PRO_PRODUCT_ID = 'vyx_pro_lifetime';
 
     const handlePayment = async () => {
         if (username === 'guest') {
@@ -29,8 +29,8 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
             if (!pkg) {
                 // Fallback for dev/missing config: Try direct purchase by ID if supported, 
                 // but usually we need the package object from offerings.
-                console.warn('💎 Monetization: Offering not found, ensure Stride Pro is configured in Play Console.');
-                addNotification({ title: 'Store Error', message: 'Stride Pro membership is currently unavailable in your region.', type: 'error' });
+                console.warn('💎 Monetization: Offering not found, ensure Vyx Pro is configured in Play Console.');
+                addNotification({ title: 'Store Error', message: 'Vyx Pro membership is currently unavailable in your region.', type: 'error' });
                 setIsProcessing(false);
                 return;
             }
@@ -60,7 +60,7 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
                     
                     addNotification({ 
                         title: 'Upgrade Successful!', 
-                        message: "Welcome to Stride Pro! Your premium features are now active.", 
+                        message: "Welcome to Vyx Pro! Your premium features are now active.", 
                         type: 'success' 
                     });
                     
@@ -89,7 +89,7 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
         >
             <div className="premium-modal-v2">
                 <div className="premium-hero-v2">
-                    <img src="/images/promo/stride_pro_banner.png" alt="Stride Pro" />
+                    <img src="/images/promo/vyx_pro_banner.png" alt="Vyx Pro" />
                 </div>
 
                 <div className="premium-features-list">
@@ -97,14 +97,14 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
                         <div className="feature-icon-v2"><Crown size={24} /></div>
                         <div className="feature-info">
                             <h4>Premium Identity</h4>
-                            <p>Exclusive Neon & Holographic frames to stand out in the rhythm.</p>
+                            <p>Exclusive Neon & Holographic frames to stand out in the frequency.</p>
                         </div>
                     </div>
 
                     <div className="feature-pill">
                         <div className="feature-icon-v2"><Zap size={24} /></div>
                         <div className="feature-info">
-                            <h4>2x Rhythmic Rewards</h4>
+                            <h4>2x Frequencyic Rewards</h4>
                             <p>Double your Vibe Token earnings for all engagement and content.</p>
                         </div>
                     </div>
@@ -113,14 +113,14 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
                         <div className="feature-icon-v2"><Vote size={24} /></div>
                         <div className="feature-info">
                             <h4>Governance Power</h4>
-                            <p>Draft and vote on official proposals to shape the future of Stride.</p>
+                            <p>Draft and vote on official proposals to shape the future of Vyx.</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="premium-checkout-footer">
                     <div className="premium-price-tag">
-                        Upgrade <span>/ Lifetime Stride Pro</span>
+                        Upgrade <span>/ Lifetime Vyx Pro</span>
                     </div>
 
                     <button 
@@ -131,7 +131,7 @@ const PremiumCheckoutModal = ({ isOpen, onClose }) => {
                         {isProcessing ? (
                             <><div className="loader-v2" /> Processing...</>
                         ) : (
-                            <>Upgrade to Stride Pro <ArrowRight size={20} /></>
+                            <>Upgrade to Vyx Pro <ArrowRight size={20} /></>
                         )}
                     </button>
                     

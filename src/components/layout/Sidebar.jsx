@@ -1,20 +1,27 @@
-import { Home, Search, Plus, MoreHorizontal, Play, Camera, Gavel, HelpCircle } from 'lucide-react';
+import { Home, Search, Plus, MoreHorizontal, Play, Camera, Gavel, User as UserIcon } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUI } from '../../hooks/useUI';
 import { useTranslation } from 'react-i18next';
 import { getStoredUser } from '../../utils/storage';
 import Avatar from '../common/Avatar';
-import logo from '../../assets/stride-logo.png';
-import SupportModal from '../social/SupportModal';
+import logo from '../../assets/vyx-logo.png';
 import './Sidebar.css';
 
 const Sidebar = () => {
     const { openCreateModal, openExplorer } = useUI();
     const { t } = useTranslation();
-    const user = getStoredUser();
+    const [user, setUser] = useState(getStoredUser());
     const location = useLocation();
     const [isSupportOpen, setIsSupportOpen] = useState(false);
+
+    useEffect(() => {
+        const handleAuthUpdate = () => {
+            setUser(getStoredUser());
+        };
+        window.addEventListener('vyx_auth_update', handleAuthUpdate);
+        return () => window.removeEventListener('vyx_auth_update', handleAuthUpdate);
+    }, []);
 
     const navItems = [
         { icon: Home, label: t('nav.home'), path: '/' },
@@ -27,10 +34,10 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
-                <img src={logo} alt="Stride" className="logo-image-sidebar" />
+                <img src={logo} alt="Vyx" className="logo-image-sidebar" />
                 <div className="logo-container">
-                    <h1 className="logo-text">{t('common.stride')}</h1>
-                    <span className="slogan-text">{t('common.find_your_rhythm')}</span>
+                    <h1 className="logo-text">{t('common.vyx')}</h1>
+                    <span className="slogan-text">{t('common.find_your_frequency')}</span>
                 </div>
             </div>
 
@@ -44,11 +51,16 @@ const Sidebar = () => {
                         if (isAvatar) {
                             return (
                                 <div className={`nav-avatar-wrapper ${isActive ? 'active-avatar' : ''}`}>
-                                    <Avatar 
-                                        src={user?.avatar || ""} 
-                                        alt={user?.username || "User"}
-                                        size={28} 
-                                    />
+                                    {user?.avatar ? (
+                                        <Avatar 
+                                            src={user.avatar} 
+                                            alt={user.username || "User"}
+                                            size={28} 
+                                            hideInitial={true}
+                                        />
+                                    ) : (
+                                        <UserIcon size={24} strokeWidth={isActive ? 2.8 : 2.5} />
+                                    )}
                                 </div>
                             );
                         }
@@ -103,25 +115,16 @@ const Sidebar = () => {
                         </NavLink>
                     );
                 })}
-                <button className="nav-item support-trigger" onClick={() => setIsSupportOpen(true)}>
-                    <div className="nav-icon-wrapper">
-                        <HelpCircle size={26} strokeWidth={2.5} />
-                    </div>
-                    <span className="nav-label">Help & Support</span>
-                </button>
             </nav>
-
-            <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
-
             <div className="sidebar-footer">
-                <div className="version-tag animate-pulse-purple" style={{ 
+                <div className="version-tag animate-pulse-cobalt" style={{ 
                     fontSize: '10px', 
                     padding: '10px', 
                     textAlign: 'center', 
                     fontWeight: '900',
-                    color: '#a855f7',
-                    textShadow: '0 0 10px rgba(168, 85, 247, 0.5)'
-                }}>v3.1.0-MOD-SOVEREIGNTY</div>
+                    color: '#0066ff',
+                    textShadow: '0 0 10px rgba(0, 102, 255, 0.5)'
+                }}>v2.0.0-GENESIS</div>
             </div>
         </aside>
     );

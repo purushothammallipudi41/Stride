@@ -160,7 +160,7 @@
 
 /* Custom Remix & Sparkle Badges */
 .remix-badge {
-    background: #7c3aed; /* vibrant purple */
+    background: #0066ff; /* vibrant purple */
     color: white;
     font-size: 0.65rem;
     font-weight: 800;
@@ -403,7 +403,7 @@
 }
 
 .comment-item strong {
-    color: #a855f7;
+    color: #00f2ff;
     margin-right: 8px;
 }
 

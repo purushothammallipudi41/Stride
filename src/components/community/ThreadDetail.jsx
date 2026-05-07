@@ -138,7 +138,7 @@ const ThreadDetail = ({ threadId, user, onBack }) => {
                 <form className="reply-input-wrapper-v2 glass-panel" onSubmit={handleReply}>
                     <input 
                         type="text" 
-                        placeholder="Reply to this rhythm..." 
+                        placeholder="Reply to this frequency..." 
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
                     />

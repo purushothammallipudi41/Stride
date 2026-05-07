@@ -100,9 +100,9 @@
 }
 
 .song-row.active {
-    background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.05));
-    border-color: rgba(139, 92, 246, 0.4);
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+    background: linear-gradient(90deg, rgba(0, 102, 255, 0.15), rgba(236, 72, 153, 0.05));
+    border-color: rgba(0, 102, 255, 0.4);
+    box-shadow: 0 0 30px rgba(0, 102, 255, 0.1);
 }
 
 .song-rank-area {

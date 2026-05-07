@@ -34,8 +34,8 @@ const OfflineStatus = () => {
                     <WifiOff size={20} />
                 </div>
                 <div className="offline-text">
-                    <h3>Connection Rhythm Lost</h3>
-                    <p>You're currently offline. Stride is serving cached rhythms until you're back.</p>
+                    <h3>Connection Frequency Lost</h3>
+                    <p>You're currently offline. Vyx is serving cached frequencys until you're back.</p>
                 </div>
             </div>
             

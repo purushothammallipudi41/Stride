@@ -1,5 +1,5 @@
 /**
- * Unified Authentication Helper for Stride E2E Tests
+ * Unified Authentication Helper for Vyx E2E Tests
  */
 
 export async function setupMockAuth(page, userData = {}) {
@@ -11,8 +11,8 @@ export async function setupMockAuth(page, userData = {}) {
     avatar: '',
     bio: 'Music is my life!',
     onboardingCompleted: true,
-    accentColor: '#8b5cf6',
-    communities: ['1', 'stride-official'],
+    accentColor: '#0066ff',
+    communities: ['1', 'vyx-official'],
     ...userData
   };
 
@@ -23,7 +23,7 @@ export async function setupMockAuth(page, userData = {}) {
       contentType: 'application/json',
       body: JSON.stringify({
         trendingCommunities: [
-          { _id: 'comm1', name: 'Lo-Fi Lounge', memberCount: 1337, primaryColor: '#8b5cf6', avatar: '' }
+          { _id: 'comm1', name: 'Lo-Fi Lounge', memberCount: 1337, primaryColor: '#0066ff', avatar: '' }
         ],
         discoverGrid: [
           { id: 'post1', type: 'image', contentUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17', username: 'testuser' }
@@ -38,7 +38,7 @@ export async function setupMockAuth(page, userData = {}) {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        trendingTags: [{ tag: '#stride', count: 42 }]
+        trendingTags: [{ tag: '#vyx', count: 42 }]
       })
     });
   });
@@ -68,7 +68,7 @@ export async function setupMockAuth(page, userData = {}) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([
-          { _id: 'comm1', name: 'Lo-Fi Lounge', memberCount: 1337, primaryColor: '#8b5cf6', avatar: '', owner: 'puru', members: [] }
+          { _id: 'comm1', name: 'Lo-Fi Lounge', memberCount: 1337, primaryColor: '#0066ff', avatar: '', owner: 'puru', members: [] }
         ])
       });
     }
@@ -100,7 +100,7 @@ export async function setupMockAuth(page, userData = {}) {
       body: JSON.stringify({
         username: mockUser.username,
         name: 'Test Artist',
-        bio: 'Just a music lover on Stride 🎵',
+        bio: 'Just a music lover on Vyx 🎵',
         avatar: '',
         avatarFrame: 'none',
         followerCount: 123,

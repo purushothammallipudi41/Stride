@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/stride';
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/vyx';
 
 async function runMigration() {
     try {

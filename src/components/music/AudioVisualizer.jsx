@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const AudioVisualizer = ({ audioRef, isActive, color = '#8b5cf6' }) => {
+const AudioVisualizer = ({ audioRef, isActive, color = '#0066ff' }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef();
     const analyserRef = useRef();

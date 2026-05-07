@@ -14,8 +14,8 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 
 const migrate = async () => {
     try {
-        console.log('--- STRIDE DATA MIGRATION STARTED ---');
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/stride');
+        console.log('--- VYX DATA MIGRATION STARTED ---');
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/vyx');
         console.log('Connected to MongoDB.');
 
         const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));

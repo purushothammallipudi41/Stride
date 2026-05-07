@@ -49,8 +49,8 @@ const VerticalFeed = ({ posts, onClose }) => {
             {videoPosts.length === 0 && (
                 <div className="empty-clips">
                     <Music size={48} opacity={0.2} />
-                    <h3>No rhythmic clips yet...</h3>
-                    <p>Start the rhythm by uploading a video!</p>
+                    <h3>No frequencyic clips yet...</h3>
+                    <p>Start the frequency by uploading a video!</p>
                 </div>
             )}
         </div>
@@ -93,7 +93,7 @@ const VideoClip = ({ post, isActive, muted }) => {
                     <div className="clip-music-tag">
                         <div className="music-icon-scroller">
                             <Music size={14} />
-                            <span className="music-scrolling-text">{post.music || "Original Rhythm - " + post.username}</span>
+                            <span className="music-scrolling-text">{post.music || "Original Frequency - " + post.username}</span>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search, Check, CheckCheck, Users, Gavel, Zap } from 'lucide-react';
+import { Phone, Video, Image as ImageIcon, ChevronLeft, Mic, Plus, Smile as SmileIcon, Camera, MessageSquare, Search, Check, CheckCheck, Users, Gavel, Zap, Edit } from 'lucide-react';
+import { useUI } from '../../hooks/useUI';
 import socket from '../../services/socket';
 import Avatar from '../common/Avatar';
 import VerificationBadge from '../common/VerificationBadge';
@@ -8,6 +9,7 @@ import { BASE_URL } from '../../utils/api';
 import './Chat.css';
 
 const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUser, onBack, isDisabled, hideCallButtons, typingUsers, communityStats }) => {
+    const { openExplorer } = useUI();
     const [msgText, setMsgText] = useState('');
     const [showGifs, setShowGifs] = useState(false);
     const [isGifMode, setIsGifMode] = useState(false);
@@ -217,7 +219,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
 
         navigator.geolocation.getCurrentPosition((position) => {
             const { latitude, longitude } = position.coords;
-            // Send the special token format that the Stride Map Engine expects
+            // Send the special token format that the Vyx Map Engine expects
             onSendMessage(`[LOCATION:${latitude},${longitude}]`, 'location');
             setShowGifs(false);
         }, () => {
@@ -319,7 +321,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
             const data = await res.json();
             if (data.success) {
                 // UI local update if socket doesn't loop back fast enough?
-                // For Stride, we rely on the socket event 'message_vibe_updated' 
+                // For Vyx, we rely on the socket event 'message_vibe_updated' 
                 // but we can also emit a pulse immediately for 'WOW' factor
                 socket.emit('message_vibe', { roomId, messageId, username: currentUser, emoji });
             }
@@ -338,7 +340,11 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                     </div>
                     <h3>Your Messages</h3>
                     <p>Send a private photo or message to a friend.</p>
-                    <button className="chat-tab active" style={{ marginTop: '20px', padding: '12px 30px' }}>
+                    <button 
+                        className="chat-tab active" 
+                        style={{ marginTop: '20px', padding: '12px 30px' }}
+                        onClick={() => openExplorer()}
+                    >
                         Send Message
                     </button>
                 </div>
@@ -430,10 +436,10 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                                                     const bbox = [lon - margin, lat - margin, lon + margin, lat + margin].join('%2C');
                                                     
                                                     return (
-                                                        <div className="stride-map-placeholder-pre" onClick={() => window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank')}>
-                                                            <div className="stride-map-header"><span className="stride-map-badge">STRIDE MAP ENGINE v3</span></div>
-                                                            <div className="stride-map-preview-static">
-                                                                <iframe className="stride-map-iframe" title="Stride Location" src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`} loading="lazy" />
+                                                        <div className="vyx-map-placeholder-pre" onClick={() => window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank')}>
+                                                            <div className="vyx-map-header"><span className="vyx-map-badge">VYX MAP ENGINE v3</span></div>
+                                                            <div className="vyx-map-preview-static">
+                                                                <iframe className="vyx-map-iframe" title="Vyx Location" src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`} loading="lazy" />
                                                             </div>
                                                         </div>
                                                     );
@@ -505,7 +511,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                 <div className="story-camera-overlay">
                     <canvas ref={canvasRef} style={{ display: 'none' }} />
                     <div className="story-camera-header">
-                        <div className="story-cam-logo">Stride Cam</div>
+                        <div className="story-cam-logo">Vyx Cam</div>
                         <button className="story-close-btn" onClick={stopCamera}>Cancel</button>
                     </div>
 
@@ -528,7 +534,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="story-preview-container">
                                 <img src={previewImage} alt="Preview" className="story-preview-img" />
-                                <div className="preview-branding">SHOT ON STRIDE</div>
+                                <div className="preview-branding">SHOT ON VYX</div>
                             </div>
                         )}
                     </div>
@@ -711,7 +717,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         ) : (
                             <div className="action-sheet-grid">
                                 {[
-                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#a855f7', action: () => { setIsGifMode(true); } },
+                                    { id: 'action-gif', label: 'GIFs', icon: <SmileIcon size={20} />, color: 'rgba(168, 85, 247, 0.2)', textColor: '#00f2ff', action: () => { setIsGifMode(true); } },
                                     { id: 'action-gallery', label: 'Gallery', icon: <ImageIcon size={20} />, color: 'rgba(16, 185, 129, 0.2)', textColor: '#10b981', action: () => { handleGalleryClick(); } },
                                     { id: 'action-camera', label: 'Camera', icon: <Camera size={20} />, color: 'rgba(59, 130, 246, 0.2)', textColor: '#3b82f6', action: () => { handleCameraClick(); } },
                                     { id: 'action-tip', label: 'Send Tip', icon: <Zap size={20} />, color: 'rgba(245, 158, 11, 0.2)', textColor: '#f59e0b', action: () => { onSendMessage(`⚡ Sent a Vibe Tip of 50 Tokens`, 'text'); setShowGifs(false); } },
@@ -742,7 +748,7 @@ const ChatWindow = ({ activeChat, onSendMessage, onStartCall, roomId, currentUse
                         <div className="nexus-stats">
                             <div className="nexus-stat">
                                 <Users size={14} />
-                                <span>{communityStats?.memberCount?.toLocaleString() || '0'} Striders</span>
+                                <span>{communityStats?.memberCount?.toLocaleString() || '0'} Vyxrs</span>
                             </div>
                             <div className="nexus-stat">
                                 <Gavel size={14} />

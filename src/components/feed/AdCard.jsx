@@ -9,9 +9,9 @@ const AdCard = ({ adData }) => {
     const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
 
     const defaultAd = {
-        title: "Upgrade to Stride Pro",
-        description: "Unlock exclusive vibe passes, premium avatar frames, and 2x rhythmic rewards.",
-        image: "/images/promo/stride_pro_banner.png",
+        title: "Upgrade to Vyx Pro",
+        description: "Unlock exclusive vibe passes, premium avatar frames, and 2x frequencyic rewards.",
+        image: "/images/promo/vyx_pro_banner.png",
 
         cta: "Go Premium",
         link: "/marketplace"
@@ -20,7 +20,7 @@ const AdCard = ({ adData }) => {
     const data = adData || defaultAd;
 
     const handleCtaClick = () => {
-        if (data.title === "Upgrade to Stride Pro") {
+        if (data.title === "Upgrade to Vyx Pro") {
             setIsPremiumModalOpen(true);
             return;
         }

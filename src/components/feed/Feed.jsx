@@ -17,7 +17,7 @@ const Feed = ({ type: initialType = 'foryou' }) => {
         const username = user?.username;
         const userId = user?._id || user?.id;
         
-        // Build the discovery rhythm URL
+        // Build the discovery frequency URL
         let url = `${BASE_URL}/api/feed`;
         const queryParams = new URLSearchParams();
 
@@ -105,7 +105,7 @@ const Feed = ({ type: initialType = 'foryou' }) => {
                     {posts.length === 0 && (
                         <div className="empty-feed-v2">
                             <i className="ri-pulse-line"></i>
-                            <p>No rhythms found in this channel.</p>
+                            <p>No frequencies found in this channel.</p>
                         </div>
                     )}
                 </div>
@@ -156,7 +156,7 @@ const MonetizedPost = ({ post, user }) => {
                 <div className="premium-gate glass-panel">
                     <div className="gate-content">
                         <h3>Subscriber Only Content 💎</h3>
-                        <p>Support {post.username} to unlock this rhythmic rhythm.</p>
+                        <p>Support {post.username} to unlock this exclusive frequency.</p>
                         <button className="unlock-btn">Subscribe to Unlock</button>
                     </div>
                 </div>

@@ -9,7 +9,7 @@ const vapidKeys = {
 try {
     if (vapidKeys.publicKey && vapidKeys.publicKey !== 'placeholder' && !vapidKeys.publicKey.startsWith('BF_')) {
         webpush.setVapidDetails(
-            'mailto:support@stride.social',
+            'mailto:support@vyxapp.in',
             vapidKeys.publicKey,
             vapidKeys.privateKey
         );
@@ -30,9 +30,9 @@ class PushService {
             }
 
             const pushPayload = JSON.stringify({
-                title: payload.title || 'Stride Alert',
-                body: payload.body || 'New rhythm detected.',
-                icon: payload.icon || '/stride-logo.png',
+                title: payload.title || 'Vyx Alert',
+                body: payload.body || 'New frequency detected.',
+                icon: payload.icon || '/vyx-logo.png',
                 data: payload.data || {}
             });
 

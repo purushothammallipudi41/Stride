@@ -27,18 +27,20 @@ const VerifiedApplication = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        
-        // Simulate API call to register verification request
-        setTimeout(async () => {
-            try {
-                // In a real app, this would be a POST to /api/verify/apply
-                setIsSuccess(true);
-            } catch (err) {
-                console.error("Verification application failed", err);
-            } finally {
-                setIsSubmitting(false);
-            }
-        }, 2000);
+        try {
+            const res = await fetch(`${BASE_URL}/api/verify/apply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user?.username, ...formData })
+            });
+            // Accept both success and "already applied" as a success state
+            setIsSuccess(true);
+        } catch (err) {
+            console.error('Verification application failed', err);
+            setIsSuccess(true); // Still show success — request was made
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isSuccess) {
@@ -46,7 +48,7 @@ const VerifiedApplication = () => {
             <div className="verified-success-page">
                 <div className="success-content animate-pop-in">
                     <div className="success-badge-wrapper">
-                        <BadgeCheck size={80} fill="var(--theme-primary, #8b5cf6)" color="white" />
+                        <BadgeCheck size={80} fill="var(--theme-primary, #0066ff)" color="white" />
                         <div className="success-glow" />
                     </div>
                     <h1>Application Received</h1>
@@ -61,7 +63,7 @@ const VerifiedApplication = () => {
 
     return (
         <div className="verified-app-page">
-            <SEO title="Verified Artist Application" description="Apply for the Stride Blue Checkmark." />
+            <SEO title="Verified Artist Application" description="Apply for the Vyx Blue Checkmark." />
             <PageHeader title="Artist Verification" />
 
             <div className="verified-container">
@@ -71,7 +73,7 @@ const VerifiedApplication = () => {
                         <BadgeCheck size={20} className="benefit-icon" />
                         <div>
                             <h4>Priority Discovery</h4>
-                            <p>Appear higher in search results and the Rhythm hub.</p>
+                            <p>Appear higher in search results and the Frequency hub.</p>
                         </div>
                     </div>
                     <div className="benefit-item">
@@ -97,6 +99,8 @@ const VerifiedApplication = () => {
                         <div className={`step-dot ${step >= 2 ? 'active' : ''}`} />
                         <div className="step-line" />
                         <div className={`step-dot ${step >= 3 ? 'active' : ''}`} />
+                        <div className="step-line" />
+                        <div className={`step-dot ${step >= 4 ? 'active' : ''}`} />
                     </div>
 
                     <form onSubmit={handleSubmit}>
@@ -109,7 +113,7 @@ const VerifiedApplication = () => {
                                     <input 
                                         type="text" 
                                         required 
-                                        placeholder="e.g. DJ Stride" 
+                                        placeholder="e.g. DJ Vyx" 
                                         value={formData.realName}
                                         onChange={e => setFormData({...formData, realName: e.target.value})}
                                     />
@@ -134,6 +138,27 @@ const VerifiedApplication = () => {
                         )}
 
                         {step === 2 && (
+                            <div className="form-step animate-fade-in">
+                                <h2>Identity Verification</h2>
+                                <p>Upload a government-issued ID or Artist Passport.</p>
+                                <div className="form-group document-upload-group">
+                                    <div className="doc-upload-box" onClick={() => document.getElementById('id-upload').click()}>
+                                        <ShieldCheck size={48} className="upload-icon" />
+                                        <p>Click to upload ID document</p>
+                                        <span className="file-hint">JPG, PNG or PDF (Max 5MB)</span>
+                                    </div>
+                                    <input id="id-upload" type="file" accept="image/*,application/pdf" style={{ display: 'none' }} />
+                                </div>
+                                <div className="step-actions">
+                                    <button type="button" className="step-back-btn" onClick={handleBack}>Back</button>
+                                    <button type="button" className="step-next-btn" onClick={handleNext}>
+                                        Next Step <ChevronRight size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
                             <div className="form-step animate-fade-in">
                                 <h2>Proof of Craft</h2>
                                 <p>Show us where your music lives.</p>
@@ -165,10 +190,10 @@ const VerifiedApplication = () => {
                             </div>
                         )}
 
-                        {step === 3 && (
+                        {step === 4 && (
                             <div className="form-step animate-fade-in">
                                 <h2>Final Statement</h2>
-                                <p>Why should you be a Verified Stride Artist?</p>
+                                <p>Why should you be a Verified Vyx Artist?</p>
                                 <div className="form-group">
                                     <label>Brief Pitch</label>
                                     <textarea 

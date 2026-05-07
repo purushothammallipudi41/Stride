@@ -171,7 +171,7 @@ const Notifications = () => {
                             <Bell size={24} className="pulse-icon-purple" />
                         </div>
                         <div className="push-invite-text">
-                            <h3>Never Miss a Rhythm</h3>
+                            <h3>Never Miss a Frequency</h3>
                             <p>Enable system alerts for mentions, follows, and community broadcasts.</p>
                         </div>
                         <div className="push-invite-actions">

@@ -12,7 +12,7 @@ const Articles = () => {
 
     return (
         <div className="articles-container animate-fade-in">
-            <PageHeader title="Stride Articles" hideBack={true} />
+            <PageHeader title="Vyx Articles" hideBack={true} />
             
             <div className="articles-back-action-area" style={{ padding: '0 20px', marginTop: '12px', marginBottom: '32px', display: 'flex', gap: '12px' }}>
                 <button 

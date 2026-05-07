@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { setupMockAuth, verifyAuthState } from './utils/auth-utils';
 
-test.describe('Stride Full Application Smoke Test', () => {
+test.describe('Vyx Full Application Smoke Test', () => {
   test.beforeEach(async ({ page }) => {
     // Setup mock authentication before navigation
     await setupMockAuth(page);

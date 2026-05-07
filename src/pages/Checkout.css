@@ -122,8 +122,8 @@
 }
 
 .method-tab.active {
-    border-color: var(--theme-primary, #8b5cf6);
-    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--theme-primary, #0066ff);
+    background: rgba(0, 102, 255, 0.1);
 }
 
 .form-group {
@@ -150,7 +150,7 @@
 }
 
 .form-group input:focus {
-    border-color: var(--theme-primary, #8b5cf6);
+    border-color: var(--theme-primary, #0066ff);
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -181,7 +181,7 @@
 }
 
 .pay-now-btn {
-    background: var(--theme-primary, #8b5cf6);
+    background: var(--theme-primary, #0066ff);
     color: white;
     border: none;
     border-radius: 14px;

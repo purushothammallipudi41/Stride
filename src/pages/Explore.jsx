@@ -44,7 +44,7 @@ const Explore = () => {
         };
 
         const fetchDiscovery = async () => {
-            const username = localStorage.getItem('stride_user_username') || 'puru';
+            const username = localStorage.getItem('vyx_user_username') || 'puru';
             try {
                 const res = await fetch(`${BASE_URL}/api/discovery/feed`, {
                     headers: { 'x-user-username': username }
@@ -160,7 +160,7 @@ const Explore = () => {
         <div className="explore-container">
             <SEO 
                 title={t('nav.explore')} 
-                description="Search for artists, hashtags, vibing activity, and trending social communities on Stride." 
+                description="Search for artists, hashtags, vibing activity, and trending social communities on Vyx." 
             />
             <PageHeader title={t('nav.explore')} hideBack={true} />
             
@@ -235,8 +235,7 @@ const Explore = () => {
                                     >
                                         <div className="vibe-rank">#{idx + 1}</div>
                                         <div className="vibe-card-main">
-                                            {!community.avatar || community.avatar.length <= 2 ? (
-                                                <div className="vibe-comm-init">{community.avatar || community.name[0]}</div>
+                                                <div className="vibe-comm-init">{(community.avatar && community.avatar.length > 2) ? community.avatar : (community.name?.[0] || 'V')}</div>
                                             ) : (
                                                 <img src={community.avatar} alt="" className="vibe-comm-avatar" loading="lazy" />
                                             )}
@@ -266,7 +265,7 @@ const Explore = () => {
                                         onClick={() => navigate(`/community/${community._id}`)}
                                     >
                                         <div className="comm-card-banner" style={{ background: community.primaryColor }}>
-                                            {community.avatar ? <img src={community.avatar} alt="" loading="lazy" /> : <span>{community.name[0]}</span>}
+                                            {community.avatar ? <img src={community.avatar} alt="" loading="lazy" /> : <span>{community.name?.[0] || 'V'}</span>}
                                         </div>
                                         <div className="comm-card-info">
                                             <span className="comm-card-name">{community.name}</span>

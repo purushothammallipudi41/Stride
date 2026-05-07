@@ -17,10 +17,10 @@
       ]
     },
     {
-      "id": "stride-official",
-      "name": "Stride Official",
+      "id": "vyx-official",
+      "name": "Vyx Official",
       "icon": "🚀",
-      "description": "The official Stride community. Join the rhythm.",
+      "description": "The official Vyx community. Join the rhythm.",
       "channels": [
         "announcements",
         "general",
@@ -86,7 +86,7 @@
       "email": "test@example.com",
       "password": "password123",
       "avatar": "",
-      "bio": "Just a music lover on Stride 🎵",
+      "bio": "Just a music lover on Vyx 🎵",
       "onboardingCompleted": true,
       "accentColor": "#8b5cf6",
       "posts": [],
@@ -97,7 +97,7 @@
     "default_user": {
       "username": "alex_walker",
       "name": "Alexander Walker",
-      "bio": "Music explorer, beat maker, and stride chaser. Always looking for the next sound.",
+      "bio": "Music explorer, beat maker, and vyx chaser. Always looking for the next sound.",
       "avatar": "",
       "posts": [
         {
@@ -109,7 +109,7 @@
           "timestamp": "2h ago"
         },
         {
-          "content": "Stride is fire 🔥",
+          "content": "Vyx is fire 🔥",
           "contentUrl": "",
           "likes": 45,
           "comments": 8,
@@ -120,9 +120,9 @@
       "following": 890,
       "isVerified": false
     },
-    "stride_official": {
-      "username": "stride_official",
-      "name": "Stride Official",
+    "vyx_official": {
+      "username": "vyx_official",
+      "name": "Vyx Official",
       "bio": "The future of music social networking. Join the rhythm.",
       "avatar": "",
       "followers": 50000,
@@ -133,7 +133,7 @@
     "apple_user": {
       "username": "apple_user",
       "name": "Apple User",
-      "bio": "Enthusiastic music listener and stride explorer.",
+      "bio": "Enthusiastic music listener and vyx explorer.",
       "avatar": "",
       "followers": 151,
       "following": 85,
@@ -147,16 +147,20 @@
       "name": "Purushotham M",
       "email": "purushothammallipudi41@gmail.com",
       "password": "password123",
-      "bio": "Stride Creator & Enthusiast.",
+      "bio": "Vyx Creator & Enthusiast.",
       "avatar": "",
       "followers": 0,
       "following": 0,
-      "isVerified": true,
+      "isVerified": false,
+      "pronouns": "",
+      "gender": "Male",
+      "links": [],
+      "banners": [],
       "posts": []
     },
     "admin": {
       "username": "admin",
-      "name": "Stride Admin",
+      "name": "Vyx Admin",
       "bio": "Building the future of sound.",
       "avatar": "",
       "followers": 999,
@@ -260,7 +264,7 @@
   "artists": [
     {
       "id": "a1",
-      "name": "Alex Stride",
+      "name": "Alex Vyx",
       "image": "",
       "isVerified": false
     },
@@ -293,20 +297,20 @@
     {
       "id": "al1",
       "title": "Midnight Horizons",
-      "artist": "Alex Stride",
+      "artist": "Alex Vyx",
       "cover": "",
       "songs": [
         {
           "id": "s1",
           "title": "Start Again",
           "duration": 210,
-          "artist": "Alex Stride"
+          "artist": "Alex Vyx"
         },
         {
           "id": "s2",
           "title": "City Lights",
           "duration": 195,
-          "artist": "Alex Stride"
+          "artist": "Alex Vyx"
         }
       ]
     },

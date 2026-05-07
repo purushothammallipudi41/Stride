@@ -55,7 +55,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
         switch (type) {
             case 'like': return <Heart size={16} fill="#ed4956" color="#ed4956" />;
             case 'follow': return <UserPlus size={16} color="#0095f6" />;
-            case 'message': return <MessageSquare size={16} color="#8b5cf6" />;
+            case 'message': return <MessageSquare size={16} color="#0066ff" />;
             case 'playlist_invite': return <Music size={16} color="#d946ef" />;
             case 'gift': return <Plus size={16} color="#fbbf24" />;
             default: return <Bell size={16} />;

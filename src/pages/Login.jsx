@@ -6,14 +6,14 @@ import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
 import { BASE_URL } from '../utils/api';
 import { useUI } from '../hooks/useUI';
-import logo from '../assets/stride-logo.png';
+import logo from '../assets/vyx-logo.png';
 import './Login.css';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD5YDG_tKuY8F8BRqr6G3-LwfTl0Wg2aS4",
-  authDomain: "stride-v2-4123b.firebaseapp.com",
-  projectId: "stride-v2-4123b",
-  storageBucket: "stride-v2-4123b.firebasestorage.app",
+  authDomain: "vyx-v2-4123b.firebaseapp.com",
+  projectId: "vyx-v2-4123b",
+  storageBucket: "vyx-v2-4123b.firebasestorage.app",
   messagingSenderId: "519726312796",
   appId: "1:519726312796:web:8f31d9f6dc1098f10d2599",
   measurementId: "G-GZ343V3W23"
@@ -21,8 +21,8 @@ const firebaseConfig = {
 
 // Single Named Instance Lock - Prevents collisions and ensures config persistence
 const app = !getApps().length 
-  ? initializeApp(firebaseConfig, 'stride-primary') 
-  : (getApps().find(a => a.name === 'stride-primary') || getApps()[0]);
+  ? initializeApp(firebaseConfig, 'vyx-primary') 
+  : (getApps().find(a => a.name === 'vyx-primary') || getApps()[0]);
 const auth = getAuth(app);
 
 const Login = () => {
@@ -37,25 +37,24 @@ const Login = () => {
   const navigate = useNavigate();
   const { addNotification } = useUI();
   
-  const [isIntro, setIsIntro] = useState(true);
+
   
   // High-Fidelity Master Reset Pulse
   useEffect(() => {
-    const timer = setTimeout(() => setIsIntro(false), 2000);
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('reset') === 'true') {
         localStorage.clear();
         sessionStorage.clear();
         addNotification({
             title: 'Cache Purged',
-            message: 'All local session data has been successfully cleared. Synchronizing with Stride Nexus...',
+            message: 'All local session data has been successfully cleared. Synchronizing with Vyx Nexus...',
             type: 'success'
         });
         // Clear URL params without reloading to prevent infinite loop
         window.history.replaceState({}, document.title, window.location.pathname);
     }
-    return () => clearTimeout(timer);
   }, [addNotification]);
+
 
 
   const handleSubmit = async (e) => {
@@ -70,55 +69,84 @@ const Login = () => {
     setError('');
 
     try {
-      let firebaseUser, token;
-      
       try {
         // Priority 1: High-Fidelity Firebase Auth
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        firebaseUser = userCredential.user;
-        token = await firebaseUser.getIdToken();
+        const firebaseUser = userCredential.user;
+        const token = await firebaseUser.getIdToken();
+
+        // Finalize Firebase session
+        const mockSocialUser = {
+          _id: firebaseUser.uid,
+          username: firebaseUser.email.split('@')[0],
+          email: firebaseUser.email,
+          avatar: firebaseUser.photoURL || "", // Total Mock Eradication: No more Pravatar
+          isVerified: firebaseUser.emailVerified
+        };
+
+        localStorage.setItem('user', JSON.stringify(mockSocialUser));
+        localStorage.setItem('token', token);
+        localStorage.setItem('isAuthenticated', 'true');
+        window.dispatchEvent(new Event('vyx_auth_update'));
+        navigate('/');
+        return;
+
       } catch (authErr) {
-        console.warn('Firebase Auth Pulse Halted. Falling back to Core Backend Auth:', authErr.code);
+        // If Firebase config is missing or service is down, attempt Core Backend Auth immediately
+        const isConfigError = authErr.code === 'auth/configuration-not-found';
+        const isNetworkError = authErr.code === 'auth/network-request-failed';
+
+        // If it's a standard user error (wrong password, user not found), don't fallback
+        if (!isConfigError && !isNetworkError) {
+            console.error('[Auth] Firebase Credential Error:', authErr.code);
+            let friendlyMsg = "Invalid credentials. Please try again.";
+            if (authErr.code === 'auth/wrong-password') friendlyMsg = "Incorrect password. Please try again.";
+            if (authErr.code === 'auth/user-not-found') friendlyMsg = "No account found with this email.";
+            if (authErr.code === 'auth/invalid-credential') friendlyMsg = "Invalid email or password.";
+            
+            setError(friendlyMsg);
+            return;
+        }
+
+        console.warn(`[Auth] Firebase Pulse ${isConfigError ? 'Config Missing' : 'Network Failure'}. Attempting Vyx Nexus Fallback...`);
         
-        // Priority 2: Core Stride Backend Fallback (Unblocks dev and config-error states)
-        const backRes = await fetch(`${BASE_URL}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        const backData = await backRes.json();
-        if (backData.success) {
-          localStorage.setItem('user', JSON.stringify(backData.user));
-          localStorage.setItem('token', backData.token);
-          localStorage.setItem('isAuthenticated', 'true');
-          navigate('/');
-          return;
-        } else {
-          throw authErr; // Re-throw original if fallback also fails
+        try {
+          const backRes = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          
+          const backData = await backRes.json();
+          if (backData.success) {
+            localStorage.setItem('user', JSON.stringify(backData.user));
+            localStorage.setItem('token', backData.token);
+            localStorage.setItem('isAuthenticated', 'true');
+            window.dispatchEvent(new Event('vyx_auth_update'));
+            navigate('/');
+            return;
+          } else {
+            // If fallback also fails, we show a clean, branded error
+            if (isConfigError) {
+               setError("Vyx Nexus is currently in 'Local Pulse' mode. Please ensure your credentials are correct or contact Sovereignty support.");
+               return;
+            }
+            throw authErr; // Re-throw for general handling
+          }
+        } catch (fetchErr) {
+          if (fetchErr.message === 'Failed to fetch') {
+            setError("Connection error. Vyx Nexus is currently unreachable.");
+            return;
+          } else {
+            throw authErr;
+          }
         }
       }
-
-      // Finalize Firebase session
-      const mockSocialUser = {
-        _id: firebaseUser.uid,
-        username: firebaseUser.email.split('@')[0],
-        email: firebaseUser.email,
-        avatar: firebaseUser.photoURL || "", // Total Mock Eradication: No more Pravatar
-        isVerified: firebaseUser.emailVerified
-      };
-
-
-      localStorage.setItem('user', JSON.stringify(mockSocialUser));
-      localStorage.setItem('token', token);
-      localStorage.setItem('isAuthenticated', 'true');
-
-      navigate('/');
 
     } catch (err) {
       console.error('Unified Auth error:', err);
       if (err.code === 'auth/configuration-not-found') {
-        setError('Firebase Auth Error: Please enable "Email/Password" in your Firebase Console (Authentication > Sign-in method).');
+        setError("Vyx Nexus is in 'Local Pulse' mode. Sign in with your Vyx credentials.");
       } else {
         setError(err.message || 'Connection error. Check console.');
       }
@@ -144,16 +172,16 @@ const Login = () => {
         firebaseUser = result.user;
         token = await firebaseUser.getIdToken();
       } catch (authErr) {
-        console.warn('Firebase Social Pulse Halted. Moving to Stride Social Fallback:', authErr.code);
+        console.warn('Firebase Social Pulse Halted. Moving to Vyx Social Fallback:', authErr.code);
         
-        // Priority 2: Core Stride Social Fallback (Mock data for dev/config-error states)
-        const mockEmail = `mock_${providerName.toLowerCase()}_${Date.now()}@stride.social`;
+        // Priority 2: Core Vyx Social Fallback (Mock data for dev/config-error states)
+        const mockEmail = `mock_${providerName.toLowerCase()}_${Date.now()}@vyxapp.in`;
         const res = await fetch(`${BASE_URL}/api/social-login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             email: mockEmail,
-            username: `stride_user_${Date.now().toString().slice(-4)}`,
+            username: `vyx_user_${Date.now().toString().slice(-4)}`,
             provider: providerName,
             uid: `mock-uid-${Date.now()}`
           })
@@ -164,6 +192,7 @@ const Login = () => {
           localStorage.setItem('user', JSON.stringify(data.user));
           localStorage.setItem('token', data.token);
           localStorage.setItem('isAuthenticated', 'true');
+          window.dispatchEvent(new Event('vyx_auth_update'));
           navigate('/');
           return;
         } else {
@@ -172,31 +201,49 @@ const Login = () => {
       }
 
       // If Firebase succeeded, sync the real data with our backend
-      const res = await fetch(`${BASE_URL}/api/social-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: firebaseUser.email,
-          username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          avatar: firebaseUser.photoURL || "",
-          provider: providerName,
-          uid: firebaseUser.uid
-        })
-      });
+      try {
+        const res = await fetch(`${BASE_URL}/api/social-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email: firebaseUser.email,
+            username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+            avatar: firebaseUser.photoURL || "",
+            provider: providerName,
+            uid: firebaseUser.uid
+          })
+        });
 
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('token', token);
+          localStorage.setItem('isAuthenticated', 'true');
+          window.dispatchEvent(new Event('vyx_auth_update'));
+          navigate('/');
+        } else {
+          setError('Social Sync Failed. Try standard login.');
+        }
+      } catch (syncErr) {
+        console.warn('[Sync] Backend unreachable, proceeding with Firebase local session.');
+        // Fallback: Proceed with Firebase session even if backend sync fails
+        const localUser = {
+          _id: firebaseUser.uid,
+          username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          email: firebaseUser.email,
+          avatar: firebaseUser.photoURL || "",
+          isVerified: firebaseUser.emailVerified
+        };
+        localStorage.setItem('user', JSON.stringify(localUser));
         localStorage.setItem('token', token);
         localStorage.setItem('isAuthenticated', 'true');
+        window.dispatchEvent(new Event('vyx_auth_update'));
         navigate('/');
-      } else {
-        setError('Social Sync Failed. Try standard login.');
       }
 
     } catch(err) {
         console.error('Social auth error:', err);
-        setError('Social login halted. Try standard login.');
+        setError(err.message === 'Failed to fetch' ? 'Connection error. Check your internet.' : 'Social login halted. Try standard login.');
     } finally {
         setIsLoading(false);
     }
@@ -209,14 +256,14 @@ const Login = () => {
     if (!email) {
       setForgotPulse(true);
       setTimeout(() => setForgotPulse(false), 800);
-      setError('Please enter your email to receive a reset pulse.');
+      setError('Please enter your email to receive a secure reset link.');
       return;
     }
 
     try {
       addNotification({
         title: 'Initializing Shield',
-        message: 'Synchronizing with Stride Auth Nexus...',
+        message: 'Synchronizing with Vyx Auth Nexus...',
         type: 'info'
       });
       
@@ -230,7 +277,7 @@ const Login = () => {
       });
       setError('');
     } catch (err) {
-      console.warn('Firebase Reset Pulse Halted. Moving to Stride Backend Fallback:', err.code);
+      console.warn('Firebase Reset Pulse Halted. Moving to Vyx Backend Fallback:', err.code);
       
       try {
         const res = await fetch(`${BASE_URL}/api/forgot-password`, {
@@ -251,21 +298,14 @@ const Login = () => {
           throw new Error('Fallback failed.');
         }
       } catch (backErr) {
-        setError('Account recovery is currently offline. Please contact Stride Support.');
+        setError('Account recovery is currently offline. Please contact Vyx Support.');
       }
     }
   };
 
-  return (
-    <div className="login-page">
-      {isIntro && (
-        <div className="login-intro-overlay animate-fade-out">
-          <div className="intro-content">
-            <div className="intro-spinner animate-spin" />
-            <p>Recalibrating Stage...</p>
-          </div>
-        </div>
-      )}
+    return (
+        <div className="login-page">
+
       <div className="login-bg-decoration">
         <div className="blob blob-1" />
         <div className="blob blob-2" />
@@ -275,10 +315,10 @@ const Login = () => {
       <div className="login-card glass-panel animate-fade-in">
         <div className="login-header">
           <div className="logo-section">
-            <img src={logo} alt="Stride Logo" className="logo-image" />
-            <h1 className="logo-text">Stride</h1>
+            <img src={logo} alt="Vyx Logo" className="logo-image" />
+            <h1 className="logo-text">Vyx</h1>
           </div>
-          <p className="login-subtitle">Connect, vibe, and discover the rhythm of your world.</p>
+          <p className="login-subtitle">Connect, vibe, and discover the frequency of your world.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form" noValidate>

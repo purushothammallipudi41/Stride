@@ -34,15 +34,15 @@ const Visualizer = ({ analyzer, isPlaying }) => {
 
                 // Premium Palette: Deep Indigo to Hot Pink
                 const gradient = ctx.createLinearGradient(0, height, 0, 0);
-                gradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)');
-                gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.8)');
+                gradient.addColorStop(0, 'rgba(0, 102, 255, 0.2)');
+                gradient.addColorStop(0.5, 'rgba(0, 102, 255, 0.8)');
                 gradient.addColorStop(1, 'rgba(236, 72, 153, 1)');
 
                 ctx.fillStyle = gradient;
                 
                 // Dynamic Neon Glow
                 ctx.shadowBlur = 15 * glowIntensity;
-                ctx.shadowColor = i % 2 === 0 ? '#8b5cf6' : '#ec4899';
+                ctx.shadowColor = i % 2 === 0 ? '#0066ff' : '#ec4899';
                 
                 // Mirror Spectrum Effect
                 const halfWidth = width / 2;
