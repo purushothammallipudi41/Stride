@@ -2735,13 +2735,13 @@ app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         console.log(`[AUTH] Generating synchronization link for: ${email}`);
-        const syncLink = `https://vyxapp.in/login?reset=true&email=${encodeURIComponent(email)}`;
+        const syncLink = `https://stride-v2-4123b.web.app/login?reset=true&email=${encodeURIComponent(email)}`;
         
         // Premium High-Fidelity HTML Email Template
         const resetHtml = `
             <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f172a; color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid rgba(139, 92, 246, 0.2);">
                 <div style="padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
-                    <img src="https://vyxapp.in/vyx-logo.png" alt="Vyx" style="width: 60px; height: 60px; margin-bottom: 20px;">
+                    <img src="https://stride-v2-4123b.web.app/vyx-logo.png" alt="Vyx" style="width: 60px; height: 60px; margin-bottom: 20px;">
                     <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; background: linear-gradient(to right, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Vyx Auth Nexus</h1>
                 </div>
                 <div style="padding: 40px 30px;">
