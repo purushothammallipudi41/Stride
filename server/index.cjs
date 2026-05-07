@@ -233,30 +233,34 @@ let transporter;
 let resend;
 
 const createTransporter = async () => {
-    // Priority 1: Resend SDK (Most reliable for Render/Production)
-    if (process.env.RESEND_API_KEY) {
-        console.log('INFO: Using Resend SDK for reliable HTTP-based email delivery.');
-        resend = new Resend(process.env.RESEND_API_KEY);
-        return null; // Don't need a transporter for Resend
-    }
-
-    // Generic SMTP/Gmail (Fallback)
+    // Priority 1: Generic SMTP/Titan (Professional Mailbox)
     if (process.env.EMAIL_PASS && process.env.EMAIL_USER) {
         const port = parseInt(process.env.EMAIL_PORT || "587");
-        console.log(`INFO: Using SMTP primary on port ${port} (${process.env.EMAIL_USER}).`);
+        console.log(`INFO: Initializing Professional SMTP on port ${port} (${process.env.EMAIL_USER})...`);
         const primary = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST || "smtp.gmail.com",
+            host: process.env.EMAIL_HOST || "smtp.titan.email",
             port,
             secure: port === 465,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,   
-            socketTimeout: 15000,     
-            pool: true                
+            }
         });
+
+        // Initialize Resend as a background fallback if key exists
+        if (process.env.RESEND_API_KEY) {
+            resend = new Resend(process.env.RESEND_API_KEY);
+        }
+
+        return primary;
+    }
+
+    // Priority 2: Resend SDK (Only if SMTP is missing)
+    if (process.env.RESEND_API_KEY) {
+        console.log('INFO: Using Resend SDK for primary email delivery.');
+        resend = new Resend(process.env.RESEND_API_KEY);
+        return null; 
+    }
 
         // Pre-verify primary to fail-fast if credentials are wrong
         try {
