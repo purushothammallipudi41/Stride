@@ -299,36 +299,35 @@ const sendEmail = async (to, subject, html) => {
     try {
         console.log(`Attempting to send email to ${to}...`);
         
-        // Priority 1: Resend SDK (HTTP based, avoids SMTP port blocks on Render)
+        // Priority 1: Generic SMTP Path (Titan/Hostinger)
+        let readyTransporter = await transportReady;
+        if (readyTransporter) {
+            console.log('Using Professional SMTP Path...');
+            await readyTransporter.sendMail({
+                from: `"Vyx" <hello@vyxapp.in>`,
+                to,
+                subject,
+                html
+            });
+            console.log(`Email dispatched via SMTP to ${to}`);
+            return true;
+        }
+
+        // Priority 2: Resend SDK Fallback
         if (resend) {
-            console.log('Using Resend SDK Path (HTTP)...');
+            console.log('Using Resend SDK Fallback...');
             const { data, error } = await resend.emails.send({
                 from: 'Vyx <onboarding@resend.dev>',
                 to: [to],
                 subject: subject,
                 html: html,
             });
-            if (error) {
-                console.error('Resend SDK Error:', error.message);
-                throw error;
-            }
-            console.log(`Resend Email sent successfully to ${to}: ${data.id}`);
+            if (error) throw error;
+            console.log(`Resend Email sent successfully: ${data.id}`);
             return true;
         }
 
-        // Priority 2: Generic SMTP Path
-        let readyTransporter = await transportReady;
-        if (!readyTransporter) throw new Error('No email service configured');
-
-        const info = await readyTransporter.sendMail({
-            from: `"Vyx App" <hello@vyxapp.in>`,
-            to,
-            subject,
-            html
-        });
-        
-        console.log(`Email dispatched to ${to}`);
-        return true;
+        throw new Error('No email service configured');
     } catch (err) {
         console.error(`CRITICAL: Error sending email to ${to}:`, err.message);
         
