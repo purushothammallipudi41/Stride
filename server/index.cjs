@@ -240,10 +240,13 @@ const createTransporter = async () => {
         const primary = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || "smtp.titan.email",
             port,
-            secure: port === 465,
+            secure: port === 465, // true for 465, false for 587
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
+            },
+            tls: {
+                rejectUnauthorized: false // Helps with some cloud network restrictions
             }
         });
 
@@ -307,13 +310,13 @@ const sendEmail = async (to, subject, html) => {
         let readyTransporter = await transportReady;
         if (readyTransporter) {
             console.log('Using Professional SMTP Path...');
-            await readyTransporter.sendMail({
+            const info = await readyTransporter.sendMail({
                 from: `"Vyx" <hello@vyxapp.in>`,
                 to,
                 subject,
                 html
             });
-            console.log(`Email dispatched via SMTP to ${to}`);
+            console.log(`SUCCESS: Email accepted by SMTP server for ${to}. Response:`, info.response);
             return true;
         }
 
