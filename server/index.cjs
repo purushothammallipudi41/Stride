@@ -116,7 +116,7 @@ const hydrateFromJSON = async () => {
         if (data.servers) {
             for (const s of data.servers) {
                 const firstUser = data.users ? Object.values(data.users)[0] : null;
-                const communityOwner = firstUser?._id || new mongoose.Types.ObjectId();
+                const communityOwner = firstUser?._id || `system-init-${Date.now()}`;
 
                 const communityData = {
                     name: s.name,
