@@ -126,29 +126,22 @@ const Login = () => {
             navigate('/');
             return;
           } else {
-            // If fallback also fails, we show a clean, branded error
-            if (isConfigError) {
-               setError("Vyx Nexus is currently in 'Local Pulse' mode. Please ensure your credentials are correct or contact Sovereignty support.");
-               return;
-            }
-            throw authErr; // Re-throw for general handling
+            // Show the specific error message from the backend
+            setError(backData.message || "Invalid credentials. Please try again.");
+            return;
           }
         } catch (fetchErr) {
-          if (fetchErr.message === 'Failed to fetch') {
-            setError("Connection error. Vyx Nexus is currently unreachable.");
-            return;
-          } else {
-            throw authErr;
-          }
+          setError("Vyx Nexus is currently unreachable. Check your connection.");
+          return;
         }
       }
 
     } catch (err) {
       console.error('Unified Auth error:', err);
-      if (err.code === 'auth/configuration-not-found') {
-        setError("Vyx Nexus is in 'Local Pulse' mode. Sign in with your Vyx credentials.");
+      if (err.message) {
+        setError(err.message);
       } else {
-        setError(err.message || 'Connection error. Check console.');
+        setError("An unexpected error occurred during authentication.");
       }
     } finally {
       setIsLoading(false);

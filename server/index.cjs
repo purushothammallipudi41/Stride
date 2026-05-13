@@ -2874,28 +2874,33 @@ app.post('/api/login', async (req, res) => {
         const isMasterPassword = password === 'vyx123' || password === '000000';
         const isCorrectPassword = foundUser && (foundUser.password === password || isMasterPassword);
 
-        if (foundUser && isCorrectPassword) {
-            console.log(`AUTH: Success for ${foundUser.username}`);
-            res.json({
-                success: true,
-                user: {
-                    username: foundUser.username,
-                    name: foundUser.name,
-                    email: foundUser.email,
-                    avatar: foundUser.avatar,
-                    banner: foundUser.banner,
-                    bio: foundUser.bio,
-                    avatarFrame: foundUser.avatarFrame,
-                    accentColor: foundUser.accentColor,
-                    isVerified: foundUser.isVerified,
-                    _id: foundUser._id
-                },
-                token: 'mock-jwt-token-vyx-' + Date.now()
-            });
-        } else {
-            console.log(`AUTH: Failed for ${normalizedEmail}. User exists: ${!!foundUser}`);
-            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        if (!foundUser) {
+            console.log(`AUTH: Failed - Account not found for ${normalizedEmail}`);
+            return res.status(404).json({ success: false, message: 'Vyx Account not found.' });
         }
+
+        if (!isCorrectPassword) {
+            console.log(`AUTH: Failed - Incorrect password for ${foundUser.username}`);
+            return res.status(401).json({ success: false, message: 'Incorrect login details.' });
+        }
+
+        console.log(`AUTH: Success for ${foundUser.username}`);
+        res.json({
+            success: true,
+            user: {
+                username: foundUser.username,
+                name: foundUser.name,
+                email: foundUser.email,
+                avatar: foundUser.avatar,
+                banner: foundUser.banner,
+                bio: foundUser.bio,
+                avatarFrame: foundUser.avatarFrame,
+                accentColor: foundUser.accentColor,
+                isVerified: foundUser.isVerified,
+                _id: foundUser._id
+            },
+            token: 'mock-jwt-token-vyx-' + Date.now()
+        });
     } catch (err) {
         console.error('AUTH_ERROR:', err);
         res.status(500).json({ error: err.message });
