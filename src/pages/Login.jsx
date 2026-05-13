@@ -283,15 +283,15 @@ const Login = () => {
         if (data.success) {
           addNotification({
             title: 'Reset Pulse Dispatched',
-            message: `A synchronization link has been sent to ${email} (via Backend).`,
+            message: `A reset link has been sent to your email.`,
             type: 'success'
           });
           setError('');
         } else {
-          throw new Error('Fallback failed.');
+          setError(data.message || 'Account recovery failed. Please try again.');
         }
       } catch (backErr) {
-        setError('Account recovery is currently offline. Please contact Vyx Support.');
+        setError('Vyx Nexus is currently unreachable. Please try again later.');
       }
     }
   };

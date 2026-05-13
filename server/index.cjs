@@ -2740,8 +2740,20 @@ app.post('/api/verify-code', async (req, res) => {
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        console.log(`[AUTH] Generating synchronization link for: ${email}`);
-        const syncLink = `https://stride-v2-4123b.web.app/login?reset=true&email=${encodeURIComponent(email)}`;
+        const normalizedEmail = String(email).toLowerCase();
+        
+        // Verify user exists
+        const user = await User.findOne({ 
+            $or: [{ email: normalizedEmail }, { username: normalizedEmail }]
+        });
+
+        if (!user) {
+            console.log(`[AUTH] Forgot Password failed: Account not found for ${normalizedEmail}`);
+            return res.status(404).json({ success: false, message: 'No Vyx account found with this email/username.' });
+        }
+
+        console.log(`[AUTH] Generating password reset link for: ${user.email}`);
+        const syncLink = `https://stride-v2-4123b.web.app/login?reset=true&email=${encodeURIComponent(user.email)}`;
         
         // Premium High-Fidelity HTML Email Template
         const resetHtml = `
