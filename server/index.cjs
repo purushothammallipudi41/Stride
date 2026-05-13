@@ -12,6 +12,7 @@ const helmet = require('helmet');
 const { Resend } = require('resend');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 
 // Centralized Database Switcher (GCP Firestore / Local Mongo)
 const { 
